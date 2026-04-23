@@ -90,6 +90,9 @@ export default function FamiliaAliancaApp() {
   const [novoEvento, setNovoEvento] = useState({ titulo: "", data: "", hora: "", local: "", tipo: "culto" });
   const [novaPalavra, setNovaPalavra] = useState({ titulo: "", texto: "", referencia: "", video: "" });
   const [editandoEvento, setEditandoEvento] = useState(null);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   // Splash + Firebase load
   useEffect(() => {
@@ -98,6 +101,25 @@ export default function FamiliaAliancaApp() {
       if (u) { setUser(u); setIsAdmin(u.admin || false); setScreen("app"); } // eslint-disable-line no-unused-vars
       else setScreen("login");
     }, 2200);
+
+    // Detectar iOS
+    const ios = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+    const standalone = window.navigator.standalone;
+    setIsIOS(ios);
+    if (ios && !standalone) setShowInstallBanner(true);
+
+    // Detectar Android/Chrome
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstallBanner(true);
+    });
+
+    // Esconder banner se já instalado
+    window.addEventListener("appinstalled", () => {
+      setShowInstallBanner(false);
+      setInstallPrompt(null);
+    });
 
     // Agenda — tempo real
     const unsubAgenda = onSnapshot(collection(db, "agenda"), (snap) => {
@@ -127,6 +149,14 @@ export default function FamiliaAliancaApp() {
   }, []);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
+
+  const handleInstall = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === "accepted") { setShowInstallBanner(false); setInstallPrompt(null); }
+    }
+  };
 
   // ── AUTH ──
   const handleLogin = async () => {
@@ -914,6 +944,30 @@ export default function FamiliaAliancaApp() {
           </button>
         ))}
       </nav>
+
+      {/* Banner de instalação */}
+      {showInstallBanner && (
+        <div style={{ position: "fixed", bottom: 90, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 400, background: "#1a1830", border: "1px solid rgba(201,168,76,.4)", borderRadius: 16, padding: "16px 18px", zIndex: 998, boxShadow: "0 4px 24px rgba(0,0,0,.6)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <img src="/logo-igreja.png" alt="logo" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "contain" }} />
+            <div>
+              <div style={{ fontSize: 14, fontWeight: "bold", color: "#fff" }}>Instalar o App</div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,.5)" }}>Igreja Família Aliança</div>
+            </div>
+            <button style={{ marginLeft: "auto", background: "none", border: "none", color: "rgba(255,255,255,.4)", fontSize: 20, cursor: "pointer", padding: "0 4px" }} onClick={() => setShowInstallBanner(false)}>✕</button>
+          </div>
+          {isIOS ? (
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,.65)", lineHeight: 1.7, background: "rgba(255,255,255,.05)", borderRadius: 10, padding: "10px 12px" }}>
+              Para instalar no iPhone: toque em <strong style={{ color: "#c9a84c" }}>Compartilhar</strong> (ícone de seta) e depois em <strong style={{ color: "#c9a84c" }}>"Adicionar à Tela de Início"</strong>
+            </div>
+          ) : (
+            <button style={{ width: "100%", padding: "12px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 10, color: "#080810", fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}
+              onClick={handleInstall}>
+              📲 Adicionar à tela inicial
+            </button>
+          )}
+        </div>
+      )}
 
       {toast && <div style={S.toast}>{toast}</div>}
     </div>
