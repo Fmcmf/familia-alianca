@@ -24,12 +24,6 @@ const WHATSAPP_SERVICOS = [
   { label: "Aconselhamento", icon: "💬" },
 ];
 
-// ─── DADOS INICIAIS (substituídos pelo Firebase futuramente) ────────────────
-const AGENDA_INICIAL = [
-  { id: 1, titulo: "Culto de Domingo", data: "2026-04-27", hora: "10:00", local: "Rua Armando Longatti, 45", tipo: "culto" },
-  { id: 2, titulo: "Culto de Domingo", data: "2026-04-27", hora: "19:00", local: "Rua Armando Longatti, 45", tipo: "culto" },
-  { id: 3, titulo: "Culto de Quinta-feira", data: "2026-05-01", hora: "20:00", local: "Rua Armando Longatti, 45", tipo: "culto" },
-];
 
 const MINISTERIOS = [
   { id: 1, nome: "Recepção & Acolhimento", icon: "🤝", desc: "Bem-vindos com amor e cuidado a cada visitante e membro da família.", cor: "#c9a84c" },
