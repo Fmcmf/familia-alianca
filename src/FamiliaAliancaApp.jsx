@@ -89,7 +89,7 @@ export default function FamiliaAliancaApp() {
   const [toast, setToast] = useState("");
   const [ministerioAtivo, setMinisterioAtivo] = useState(null);
   const [oracao, setOracao] = useState({ nome: "", pedido: "" });
-  const [biblia, setBiblia] = useState({ testamento: "AT", livro: "", capitulo: 1, versos: null, loading: false });
+  const [biblia, setBiblia] = useState({ testamento: "AT", livro: "", capitulo: 1, versos: null, loading: false, versiculo: null });
   const [adminTab, setAdminTab] = useState("agenda");
   const [novoEvento, setNovoEvento] = useState({ titulo: "", data: "", hora: "", local: "", tipo: "culto" });
   const [novaPalavra, setNovaPalavra] = useState({ titulo: "", texto: "", referencia: "", video: "" });
@@ -174,12 +174,12 @@ export default function FamiliaAliancaApp() {
 
   // ── BÍBLIA ──
   const buscarVersos = async (livro, cap) => {
-    setBiblia(b => ({ ...b, loading: true, versos: null }));
+    setBiblia(b => ({ ...b, loading: true, versos: null, versiculo: null }));
     try {
       const livroEnc = encodeURIComponent(livro);
       const res = await fetch(`https://bible-api.com/${livroEnc}+${cap}?translation=almeida`);
       const data = await res.json();
-      setBiblia(b => ({ ...b, versos: data.verses || [], loading: false, livro, capitulo: cap }));
+      setBiblia(b => ({ ...b, versos: data.verses || [], loading: false, livro, capitulo: cap, versiculo: null }));
     } catch {
       setBiblia(b => ({ ...b, loading: false, versos: [] }));
       showToast("Erro ao carregar. Verifique a conexão.");
@@ -476,51 +476,96 @@ export default function FamiliaAliancaApp() {
               <span style={{ fontSize: 14 }}>📖</span>
               <span style={{ fontSize: 12, color: "#c9a84c", fontStyle: "italic" }}>Nova Versão Transformadora — NVT</span>
             </div>
+
             {/* Testamento */}
             <div style={{ display: "flex", gap: 10, padding: "0 16px", marginBottom: 16 }}>
-              <button style={S.livroBtn(biblia.testamento === "AT")} onClick={() => setBiblia(b => ({ ...b, testamento: "AT", livro: "", versos: null }))}>Antigo Testamento</button>
-              <button style={S.livroBtn(biblia.testamento === "NT")} onClick={() => setBiblia(b => ({ ...b, testamento: "NT", livro: "", versos: null }))}>Novo Testamento</button>
+              <button style={S.livroBtn(biblia.testamento === "AT")} onClick={() => setBiblia(b => ({ ...b, testamento: "AT", livro: "", versos: null, versiculo: null }))}>Antigo Testamento</button>
+              <button style={S.livroBtn(biblia.testamento === "NT")} onClick={() => setBiblia(b => ({ ...b, testamento: "NT", livro: "", versos: null, versiculo: null }))}>Novo Testamento</button>
             </div>
-            {/* Livros */}
+
+            {/* ETAPA 1: Lista de Livros */}
             {!biblia.livro && (
               <div style={{ padding: "0 16px", display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {(biblia.testamento === "AT" ? LIVROS_AT : LIVROS_NT).map(l => (
                   <button key={l} style={{ padding: "7px 12px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, fontSize: 12, color: "rgba(255,255,255,.7)", cursor: "pointer", fontFamily: "Georgia,serif" }}
-                    onClick={() => buscarVersos(l, 1)}>{l}</button>
+                    onClick={() => setBiblia(b => ({ ...b, livro: l, versos: null, versiculo: null }))}>{l}</button>
                 ))}
               </div>
             )}
-            {/* Capítulos */}
+
+            {/* ETAPA 2: Capítulos */}
             {biblia.livro && !biblia.versos && !biblia.loading && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 13, color: "rgba(255,255,255,.5)", marginBottom: 12 }}>Escolha o capítulo de <strong style={{ color: "#c9a84c" }}>{biblia.livro}</strong>:</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                  <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => setBiblia(b => ({ ...b, livro: "", versos: null, versiculo: null }))}>← Livros</button>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c" }}>{biblia.livro}</div>
+                </div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 12 }}>Escolha o capítulo:</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {Array.from({ length: 50 }, (_, i) => i + 1).map(c => (
+                  {Array.from({ length: 150 }, (_, i) => i + 1).map(c => (
                     <button key={c} style={{ width: 44, height: 44, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, fontSize: 13, color: "rgba(255,255,255,.7)", cursor: "pointer", fontFamily: "Georgia,serif" }}
                       onClick={() => buscarVersos(biblia.livro, c)}>{c}</button>
                   ))}
                 </div>
               </div>
             )}
+
             {/* Loading */}
             {biblia.loading && <div style={{ textAlign: "center", padding: 40, color: "rgba(255,255,255,.4)" }}>Carregando...</div>}
-            {/* Versos */}
-            {biblia.versos && !biblia.loading && (
+
+            {/* ETAPA 3: Lista de Versículos */}
+            {biblia.versos && !biblia.loading && !biblia.versiculo && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
-                  <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => setBiblia(b => ({ ...b, livro: "", versos: null }))}>← Livros</button>
-                  <div style={{ fontSize: 15, fontWeight: "bold", color: "#c9a84c" }}>{biblia.livro} {biblia.capitulo}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+                  <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => setBiblia(b => ({ ...b, versos: null, versiculo: null }))}>← Capítulos</button>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c" }}>{biblia.livro} {biblia.capitulo}</div>
                   {biblia.capitulo > 1 && <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => buscarVersos(biblia.livro, biblia.capitulo - 1)}>‹ Ant</button>}
                   <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => buscarVersos(biblia.livro, biblia.capitulo + 1)}>Próx ›</button>
                 </div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 12 }}>Escolha o versículo:</div>
                 {biblia.versos.length === 0 ? (
                   <div style={{ color: "rgba(255,255,255,.4)", fontSize: 13 }}>Capítulo não encontrado. Tente outro.</div>
-                ) : biblia.versos.map(v => (
-                  <div key={v.verse} style={S.versoRow}>
-                    <div style={S.versoNum}>{v.verse}</div>
-                    <div style={S.versoText}>{v.text}</div>
+                ) : (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {biblia.versos.map(v => (
+                      <button key={v.verse} style={{ width: 44, height: 44, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, fontSize: 13, color: "rgba(255,255,255,.7)", cursor: "pointer", fontFamily: "Georgia,serif" }}
+                        onClick={() => setBiblia(b => ({ ...b, versiculo: v }))}>
+                        {v.verse}
+                      </button>
+                    ))}
                   </div>
-                ))}
+                )}
+              </div>
+            )}
+
+            {/* ETAPA 4: Versículo selecionado */}
+            {biblia.versiculo && !biblia.loading && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+                  <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => setBiblia(b => ({ ...b, versiculo: null }))}>← Versículos</button>
+                  <div style={{ fontSize: 13, color: "#c9a84c" }}>{biblia.livro} {biblia.capitulo}:{biblia.versiculo.verse}</div>
+                </div>
+                <div style={{ background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 16, padding: "24px 20px" }}>
+                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 16 }}>{biblia.livro} {biblia.capitulo}:{biblia.versiculo.verse}</div>
+                  <div style={{ fontSize: 18, lineHeight: 1.8, color: "#fff", fontStyle: "italic", borderLeft: "3px solid #c9a84c", paddingLeft: 16 }}>
+                    "{biblia.versiculo.text}"
+                  </div>
+                  <div style={{ marginTop: 16, fontSize: 12, color: "rgba(255,255,255,.4)", fontStyle: "italic" }}>Nova Versão Transformadora — NVT</div>
+                </div>
+                <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+                  {biblia.versiculo.verse > 1 && (
+                    <button style={{ flex: 1, padding: "11px 0", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, color: "rgba(255,255,255,.6)", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                      onClick={() => setBiblia(b => ({ ...b, versiculo: b.versos.find(v => v.verse === b.versiculo.verse - 1) }))}>
+                      ‹ Anterior
+                    </button>
+                  )}
+                  {biblia.versos && biblia.versiculo.verse < biblia.versos.length && (
+                    <button style={{ flex: 1, padding: "11px 0", background: "rgba(201,168,76,.12)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 10, color: "#c9a84c", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                      onClick={() => setBiblia(b => ({ ...b, versiculo: b.versos.find(v => v.verse === b.versiculo.verse + 1) }))}>
+                      Próximo ›
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>
