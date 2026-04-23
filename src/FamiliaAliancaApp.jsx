@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
 const YOUTUBE_CHANNEL = "familiaaliancapiracicaba";
@@ -72,7 +72,7 @@ const tipoLabel = { culto: "Culto", oracao: "Oração", kids: "Kids", music: "Mu
 export default function FamiliaAliancaApp() {
   const [screen, setScreen] = useState("splash");
   const [tab, setTab] = useState("home");
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // eslint-disable-line no-unused-vars
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Auth
@@ -94,7 +94,6 @@ export default function FamiliaAliancaApp() {
   const [novoEvento, setNovoEvento] = useState({ titulo: "", data: "", hora: "", local: "", tipo: "culto" });
   const [novaPalavra, setNovaPalavra] = useState({ titulo: "", texto: "", referencia: "", video: "" });
   const [editandoEvento, setEditandoEvento] = useState(null);
-  const [youtubeVideos, setYoutubeVideos] = useState([]);
 
   // Splash
   useEffect(() => {
@@ -288,10 +287,6 @@ export default function FamiliaAliancaApp() {
     oracaoBtn: { width: "100%", marginTop: 12, padding: "14px 0", background: "linear-gradient(90deg,#25d366,#128C7E)", border: "none", borderRadius: 12, color: "#fff", fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 },
   };
 
-  // ── LOGO SVG inline (pombinha estilizada) ──
-  const LogoImg = ({ style }) => (
-    <img src="/logo-igreja.png" alt="Família Aliança" style={style} onError={(e) => { e.target.style.display = "none"; }} />
-  );
 
   // ── SPLASH ──
   if (screen === "splash") return (
