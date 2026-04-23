@@ -93,6 +93,7 @@ export default function FamiliaAliancaApp() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [historicoPalavras, setHistoricoPalavras] = useState([]);
 
   // Splash + Firebase load
   useEffect(() => {
@@ -140,12 +141,19 @@ export default function FamiliaAliancaApp() {
       setOracoes(lista);
     });
 
+    // Histórico de palavras
+    const unsubHistorico = onSnapshot(collection(db, "palavras_historico"), (snap) => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => b.data.localeCompare(a.data));
+      setHistoricoPalavras(lista);
+    });
+
     // Membros — tempo real
     const unsubMembros = onSnapshot(collection(db, "membros"), (snap) => {
       setMembros(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
-    return () => { unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubMembros(); };
+    return () => { unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico(); unsubMembros(); };
   }, []);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
@@ -204,8 +212,12 @@ export default function FamiliaAliancaApp() {
   const salvarPalavra = async () => {
     if (!novaPalavra.titulo || !novaPalavra.texto) return;
     const p = { ...novaPalavra, data: new Date().toISOString().split("T")[0] };
+    // Salva como atual
     await setDoc(doc(db, "palavra", "atual"), p);
-    showToast("✅ Palavra salva!");
+    // Salva no histórico
+    await addDoc(collection(db, "palavras_historico"), p);
+    setNovaPalavra({ titulo: "", texto: "", referencia: "", video: "" });
+    showToast("✅ Palavra publicada!");
   };
 
   // ── ORAÇÃO ──
@@ -504,8 +516,20 @@ export default function FamiliaAliancaApp() {
             <div style={{ padding: "16px 20px 0" }}>
               <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 8 }}>Palavra Semanal • {fmtData(palavra.data)}</div>
               <div style={{ fontSize: 22, fontWeight: "bold", lineHeight: 1.3, marginBottom: 8 }}>{palavra.titulo}</div>
-              {palavra.referencia && <div style={{ fontSize: 14, color: "#c9a84c", fontStyle: "italic", marginBottom: 16 }}>{palavra.referencia}</div>}
-              <div style={{ fontSize: 15, lineHeight: 1.9, color: "rgba(255,255,255,.85)" }}>{palavra.texto}</div>
+              {palavra.referencia && <div style={{ fontSize: 14, color: "#c9a84c", fontStyle: "italic", marginBottom: 20 }}>{palavra.referencia}</div>}
+              {/* Renderiza parágrafos formatados */}
+              <div style={{ fontSize: 15, lineHeight: 1.9, color: "rgba(255,255,255,.85)" }}>
+                {palavra.texto.split("\n").map((par, i) => {
+                  if (par.trim() === "") return <br key={i} />;
+                  // **negrito**
+                  const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
+                    p.startsWith("**") && p.endsWith("**")
+                      ? <strong key={j} style={{ color: "#fff" }}>{p.slice(2, -2)}</strong>
+                      : p
+                  );
+                  return <p key={i} style={{ marginBottom: 14 }}>{parts}</p>;
+                })}
+              </div>
               {palavra.video && (
                 <button style={{ ...S.saveBtn, marginTop: 24, background: "linear-gradient(90deg,#ef4444,#dc2626)" }}
                   onClick={() => window.open(palavra.video, "_blank")}>▶️ Assistir no YouTube</button>
@@ -879,7 +903,7 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Palavra */}
             {adminTab === "palavra" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 14, color: "#c9a84c" }}>Palavra Semanal</div>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 14, color: "#c9a84c" }}>Nova Palavra Semanal</div>
                 <label style={S.label}>Título da Palavra</label>
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: A Fidelidade de Deus" value={novaPalavra.titulo}
                   onChange={e => setNovaPalavra({ ...novaPalavra, titulo: e.target.value })} />
@@ -887,19 +911,47 @@ export default function FamiliaAliancaApp() {
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Salmos 37:5" value={novaPalavra.referencia}
                   onChange={e => setNovaPalavra({ ...novaPalavra, referencia: e.target.value })} />
                 <label style={S.label}>Texto da Palavra</label>
-                <textarea style={{ ...S.textarea, minHeight: 140 }} placeholder="Escreva a mensagem da semana..." value={novaPalavra.texto}
+                {/* Dicas de formatação */}
+                <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 11, color: "rgba(255,255,255,.45)", lineHeight: 1.7 }}>
+                  💡 <strong style={{ color: "#c9a84c" }}>Formatação:</strong> Use <code style={{ color: "#e8c97a" }}>**texto**</code> para <strong>negrito</strong>. Pressione Enter para novo parágrafo.
+                </div>
+                <textarea style={{ ...S.textarea, minHeight: 200, fontFamily: "Georgia,serif", lineHeight: 1.8 }}
+                  placeholder={"Escreva a mensagem da semana...\n\nUse Enter para separar parágrafos.\n\nUse **negrito** para destacar palavras."}
+                  value={novaPalavra.texto}
                   onChange={e => setNovaPalavra({ ...novaPalavra, texto: e.target.value })} />
                 <label style={S.label}>Link do vídeo (opcional)</label>
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="https://youtube.com/..." value={novaPalavra.video}
                   onChange={e => setNovaPalavra({ ...novaPalavra, video: e.target.value })} />
                 <button style={S.saveBtn} onClick={salvarPalavra}>💾 Publicar Palavra</button>
-                {palavra && (
-                  <div style={{ ...S.card, marginLeft: 0, marginRight: 0, marginTop: 20 }}>
-                    <div style={{ fontSize: 12, color: "#c9a84c", marginBottom: 6 }}>Palavra atual:</div>
-                    <div style={{ fontSize: 14, fontWeight: "bold" }}>{palavra.titulo}</div>
-                    <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginTop: 4 }}>{fmtData(palavra.data)}</div>
+
+                {/* Histórico de palavras */}
+                <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "rgba(255,255,255,.3)", marginTop: 28, marginBottom: 12 }}>Palavras Publicadas</div>
+                {historicoPalavras.length === 0 ? (
+                  <div style={{ ...S.card, marginLeft: 0, marginRight: 0, textAlign: "center" }}>
+                    <div style={{ fontSize: 13, color: "rgba(255,255,255,.4)" }}>Nenhuma palavra publicada ainda.</div>
                   </div>
-                )}
+                ) : historicoPalavras.map(p => (
+                  <div key={p.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div style={{ flex: 1, paddingRight: 8 }}>
+                      <div style={{ fontSize: 13, fontWeight: "bold", marginBottom: 3 }}>{p.titulo}</div>
+                      <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 3 }}>{p.referencia}</div>
+                      <div style={{ fontSize: 11, color: "rgba(255,255,255,.35)" }}>{fmtData(p.data)}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, color: "#c9a84c", fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                        onClick={async () => {
+                          await setDoc(doc(db, "palavra", "atual"), p);
+                          showToast("✅ Palavra reativada!");
+                        }}>📌 Ativar</button>
+                      <button style={S.delBtn} onClick={async () => {
+                        if (window.confirm("Excluir esta palavra?")) {
+                          await deleteDoc(doc(db, "palavras_historico", p.id));
+                          showToast("🗑️ Palavra excluída!");
+                        }
+                      }}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
