@@ -884,13 +884,19 @@ export default function FamiliaAliancaApp() {
                   </div>
                 ) : membros.map(m => (
                   <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: "#c9a84c", fontWeight: "bold" }}>
+                    <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: "#c9a84c", fontWeight: "bold", flexShrink: 0 }}>
                       {m.nome.charAt(0).toUpperCase()}
                     </div>
-                    <div>
+                    <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: "bold" }}>{m.nome}</div>
                       <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)" }}>{m.email}</div>
                     </div>
+                    <button style={S.delBtn} onClick={async () => {
+                      if (window.confirm(`Excluir membro ${m.nome}?`)) {
+                        await deleteDoc(doc(db, "membros", m.email));
+                        showToast("✅ Membro removido!");
+                      }
+                    }}>🗑️</button>
                   </div>
                 ))}
               </div>
