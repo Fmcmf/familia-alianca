@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { db } from "./firebase";
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc } from "firebase/firestore";
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
 const YOUTUBE_CHANNEL = "familiaaliancapiracicaba";
@@ -95,40 +97,62 @@ export default function FamiliaAliancaApp() {
   const [novaPalavra, setNovaPalavra] = useState({ titulo: "", texto: "", referencia: "", video: "" });
   const [editandoEvento, setEditandoEvento] = useState(null);
 
-  // Splash
+  // Splash + Firebase load
   useEffect(() => {
     setTimeout(() => {
       const u = store.get(SK.user, null);
-      if (u) { setUser(u); setIsAdmin(u.admin || false); setScreen("app"); }
+      if (u) { setUser(u); setIsAdmin(u.admin || false); setScreen("app"); } // eslint-disable-line no-unused-vars
       else setScreen("login");
     }, 2200);
-    // Carregar dados
-    setAgenda(store.get(SK.agenda, AGENDA_INICIAL));
-    setPalavra(store.get(SK.palavra, null));
-    setOracoes(store.get(SK.oracoes, []));
-    setMembros(store.get(SK.membros, []));
+
+    // Agenda — tempo real
+    const unsubAgenda = onSnapshot(collection(db, "agenda"), (snap) => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => a.data.localeCompare(b.data));
+      setAgenda(lista);
+    });
+
+    // Palavra — tempo real
+    const unsubPalavra = onSnapshot(collection(db, "palavra"), (snap) => {
+      if (!snap.empty) setPalavra({ id: snap.docs[0].id, ...snap.docs[0].data() });
+    });
+
+    // Orações — tempo real
+    const unsubOracoes = onSnapshot(collection(db, "oracoes"), (snap) => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => b.data.localeCompare(a.data));
+      setOracoes(lista);
+    });
+
+    // Membros — tempo real
+    const unsubMembros = onSnapshot(collection(db, "membros"), (snap) => {
+      setMembros(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
+    return () => { unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubMembros(); };
   }, []);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
 
   // ── AUTH ──
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (loginForm.modo === "cadastro") {
       if (!loginForm.nome || !loginForm.email || !loginForm.senha) { setLoginErro("Preencha todos os campos."); return; }
-      const novos = store.get(SK.membros, []);
-      if (novos.find(m => m.email === loginForm.email)) { setLoginErro("E-mail já cadastrado."); return; }
-      const u = { id: Date.now(), nome: loginForm.nome, email: loginForm.email, senha: loginForm.senha, admin: false };
-      novos.push(u); store.set(SK.membros, novos); setMembros(novos);
-      store.set(SK.user, u); setUser(u); setScreen("app");
+      const snap = await getDoc(doc(db, "membros", loginForm.email));
+      if (snap.exists()) { setLoginErro("E-mail já cadastrado."); return; }
+      const u = { nome: loginForm.nome, email: loginForm.email, senha: loginForm.senha, admin: false };
+      await setDoc(doc(db, "membros", loginForm.email), u);
+      store.set(SK.user, { ...u, id: loginForm.email });
+      setUser({ ...u, id: loginForm.email }); setScreen("app");
     } else {
       // admin master
       if (loginForm.email === "pastor@familiaalianca.com.br" && loginForm.senha === "alianca2024") {
         const u = { id: 0, nome: "Pr Fernando Mello", email: loginForm.email, admin: true };
         store.set(SK.user, u); setUser(u); setIsAdmin(true); setScreen("app"); return;
       }
-      const ms = store.get(SK.membros, []);
-      const u = ms.find(m => m.email === loginForm.email && m.senha === loginForm.senha);
-      if (!u) { setLoginErro("E-mail ou senha incorretos."); return; }
+      const snap = await getDoc(doc(db, "membros", loginForm.email));
+      if (!snap.exists() || snap.data().senha !== loginForm.senha) { setLoginErro("E-mail ou senha incorretos."); return; }
+      const u = { id: loginForm.email, ...snap.data() };
       store.set(SK.user, u); setUser(u); setIsAdmin(u.admin || false); setScreen("app");
     }
   };
@@ -136,38 +160,36 @@ export default function FamiliaAliancaApp() {
   const handleLogout = () => { store.set(SK.user, null); setUser(null); setIsAdmin(false); setScreen("login"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
 
   // ── AGENDA ──
-  const salvarEvento = () => {
+  const salvarEvento = async () => {
     if (!novoEvento.titulo || !novoEvento.data || !novoEvento.hora) return;
-    let lista;
     if (editandoEvento) {
-      lista = agenda.map(e => e.id === editandoEvento ? { ...novoEvento, id: editandoEvento } : e);
+      await updateDoc(doc(db, "agenda", editandoEvento), novoEvento);
       setEditandoEvento(null);
     } else {
-      lista = [...agenda, { ...novoEvento, id: Date.now() }];
+      await addDoc(collection(db, "agenda"), novoEvento);
     }
-    lista.sort((a, b) => a.data.localeCompare(b.data));
-    setAgenda(lista); store.set(SK.agenda, lista);
     setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto" });
     showToast("✅ Evento salvo!");
   };
 
-  const deletarEvento = (id) => { const l = agenda.filter(e => e.id !== id); setAgenda(l); store.set(SK.agenda, l); };
+  const deletarEvento = async (id) => {
+    await deleteDoc(doc(db, "agenda", id));
+  };
 
   // ── PALAVRA ──
-  const salvarPalavra = () => {
+  const salvarPalavra = async () => {
     if (!novaPalavra.titulo || !novaPalavra.texto) return;
     const p = { ...novaPalavra, data: new Date().toISOString().split("T")[0] };
-    setPalavra(p); store.set(SK.palavra, p);
+    await setDoc(doc(db, "palavra", "atual"), p);
     showToast("✅ Palavra salva!");
   };
 
   // ── ORAÇÃO ──
-  const enviarOracao = () => {
+  const enviarOracao = async () => {
     if (!oracao.nome || !oracao.pedido) return;
     const msg = `🙏 *Pedido de Oração - Família Aliança*\n\n*Nome:* ${oracao.nome}\n\n*Pedido:* ${oracao.pedido}\n\n_Enviado pelo App Família Aliança_`;
     window.open(`https://wa.me/${WHATSAPP_PASTOR}?text=${encodeURIComponent(msg)}`, "_blank");
-    const lista = [{ ...oracao, id: Date.now(), data: new Date().toISOString() }, ...oracoes];
-    setOracoes(lista); store.set(SK.oracoes, lista);
+    await addDoc(collection(db, "oracoes"), { ...oracao, data: new Date().toISOString() });
     setOracao({ nome: "", pedido: "" });
     showToast("🙏 Pedido enviado!");
   };
