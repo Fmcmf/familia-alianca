@@ -623,7 +623,7 @@ export default function FamiliaAliancaApp() {
             <div style={S.secTitle}>Pedido de Oração</div>
             <div style={S.card}>
               <div style={{ fontSize: 14, color: "rgba(255,255,255,.6)", marginBottom: 16, lineHeight: 1.6 }}>
-                Compartilhe seu pedido com o Pastor Fernando. Vamos orar por você! 🙏
+                Compartilhe seu pedido com o nosso Ministério de Intercessão. Vamos orar por você! 🙏
               </div>
               <label style={S.label}>Seu nome</label>
               <input style={{ ...S.input, marginBottom: 0 }} placeholder="Como podemos te chamar?" value={oracao.nome}
