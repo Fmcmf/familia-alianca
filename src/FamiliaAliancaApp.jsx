@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { db } from "./firebase";
+import { db, messaging, solicitarPermissaoNotificacao, onMessage } from "./firebase";
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc } from "firebase/firestore";
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
@@ -95,6 +95,7 @@ export default function FamiliaAliancaApp() {
   const [isIOS, setIsIOS] = useState(false);
   const [historicoPalavras, setHistoricoPalavras] = useState([]);
   const [ultimoVideo, setUltimoVideo] = useState(null);
+  const [notifForm, setNotifForm] = useState({ titulo: "", mensagem: "" });
 
   // Splash + Firebase load
   useEffect(() => {
@@ -121,6 +122,18 @@ export default function FamiliaAliancaApp() {
     window.addEventListener("appinstalled", () => {
       setShowInstallBanner(false);
       setInstallPrompt(null);
+    });
+
+    // FCM — pedir permissão e salvar token
+    solicitarPermissaoNotificacao().then(token => {
+      if (token) {
+        setDoc(doc(db, "fcm_tokens", token), { token, data: new Date().toISOString() });
+      }
+    });
+
+    // FCM — notificações em primeiro plano
+    onMessage(messaging, (payload) => {
+      showToast(`🔔 ${payload.notification?.title}: ${payload.notification?.body}`);
     });
 
     // Agenda — tempo real
@@ -880,9 +893,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "video", "membros"].map(t => (
+              {["agenda", "palavra", "video", "notif", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", video: "▶️ Vídeo", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", video: "▶️ Vídeo", notif: "🔔 Notif", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
@@ -991,6 +1004,34 @@ export default function FamiliaAliancaApp() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Admin: Notificações */}
+            {adminTab === "notif" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Enviar Notificação</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 16 }}>Envie uma mensagem para todos os membros do app</div>
+                <label style={S.label}>Título</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Culto Especial hoje!" value={notifForm.titulo}
+                  onChange={e => setNotifForm({ ...notifForm, titulo: e.target.value })} />
+                <label style={S.label}>Mensagem</label>
+                <textarea style={{ ...S.textarea, minHeight: 80 }} placeholder="Ex: Não perca o culto de hoje às 19h. Te esperamos!"
+                  value={notifForm.mensagem} onChange={e => setNotifForm({ ...notifForm, mensagem: e.target.value })} />
+                <button style={S.saveBtn} onClick={async () => {
+                  if (!notifForm.titulo || !notifForm.mensagem) return;
+                  await addDoc(collection(db, "notificacoes"), {
+                    titulo: notifForm.titulo,
+                    mensagem: notifForm.mensagem,
+                    data: new Date().toISOString(),
+                    enviado: false
+                  });
+                  setNotifForm({ titulo: "", mensagem: "" });
+                  showToast("🔔 Notificação agendada!");
+                }}>🔔 Enviar para todos</button>
+                <div style={{ marginTop: 16, background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 10, padding: "12px 14px", fontSize: 12, color: "rgba(255,255,255,.5)", lineHeight: 1.7 }}>
+                  💡 A notificação será recebida por todos os membros que permitiram notificações no app.
+                </div>
               </div>
             )}
 
