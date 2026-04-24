@@ -94,6 +94,7 @@ export default function FamiliaAliancaApp() {
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [historicoPalavras, setHistoricoPalavras] = useState([]);
+  const [ultimoVideo, setUltimoVideo] = useState(null);
 
   // Splash + Firebase load
   useEffect(() => {
@@ -148,12 +149,17 @@ export default function FamiliaAliancaApp() {
       setHistoricoPalavras(lista);
     });
 
+    // Último vídeo do culto
+    const unsubVideo = onSnapshot(doc(db, "config", "ultimoVideo"), (snap) => {
+      if (snap.exists()) setUltimoVideo(snap.data());
+    });
+
     // Membros — tempo real
     const unsubMembros = onSnapshot(collection(db, "membros"), (snap) => {
       setMembros(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
-    return () => { unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico(); unsubMembros(); };
+    return () => { unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico(); unsubMembros(); unsubVideo(); };
   }, []);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
@@ -164,6 +170,12 @@ export default function FamiliaAliancaApp() {
       const { outcome } = await installPrompt.userChoice;
       if (outcome === "accepted") { setShowInstallBanner(false); setInstallPrompt(null); }
     }
+  };
+
+  const getYouTubeId = (url) => {
+    if (!url) return null;
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+    return match ? match[1] : null;
   };
 
   // ── AUTH ──
@@ -354,6 +366,7 @@ export default function FamiliaAliancaApp() {
       <div style={{ textAlign: "center", animation: "fadeIn 1.4s ease" }}>
         <div style={{ fontSize: 12, color: "rgba(255,255,255,.2)", animation: "pulse 1.5s ease infinite", marginTop: 8, letterSpacing: 3 }}>Igreja do Nazareno</div>
       </div>
+      <div style={{ position: "absolute", bottom: 32, fontSize: 11, color: "rgba(255,255,255,.15)", letterSpacing: 2 }}>v1.0</div>
     </div>
   );
 
@@ -494,6 +507,32 @@ export default function FamiliaAliancaApp() {
                 <div style={{ fontSize: 12, color: "#ef4444", marginTop: 4 }}>youtube.com/@familiaaliancapiracicaba</div>
               </div>
             </div>
+
+            {/* Último Vídeo do Culto */}
+            {ultimoVideo && getYouTubeId(ultimoVideo.url) && (
+              <>
+                <div style={S.secTitle}>Último Culto</div>
+                <div style={{ margin: "0 16px 12px" }}>
+                  {ultimoVideo.titulo && (
+                    <div style={{ fontSize: 14, fontWeight: "bold", color: "#fff", marginBottom: 10 }}>{ultimoVideo.titulo}</div>
+                  )}
+                  <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,.08)" }}>
+                    <iframe
+                      width="100%" height="200"
+                      src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`}
+                      title="Último Culto"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ display: "block" }}
+                    />
+                  </div>
+                  {ultimoVideo.data && (
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,.35)", marginTop: 8, textAlign: "right" }}>{fmtData(ultimoVideo.data)}</div>
+                  )}
+                </div>
+              </>
+            )}
 
             {/* Contribuição rápida */}
             <div style={S.secTitle}>Contribua com a Igreja</div>
@@ -841,9 +880,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "membros"].map(t => (
+              {["agenda", "palavra", "video", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", video: "▶️ Vídeo", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
@@ -952,6 +991,44 @@ export default function FamiliaAliancaApp() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Admin: Vídeo */}
+            {adminTab === "video" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Último Culto no YouTube</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 16 }}>Cole o link do vídeo para aparecer na tela inicial</div>
+                <label style={S.label}>Título do culto</label>
+                <input style={{ ...S.input, marginBottom: 0 }}
+                  placeholder="Ex: Culto de Domingo — 27/04/2026"
+                  value={ultimoVideo?.titulo || ""}
+                  onChange={e => setUltimoVideo(v => ({ ...v, titulo: e.target.value }))} />
+                <label style={S.label}>Link do YouTube</label>
+                <input style={{ ...S.input, marginBottom: 0 }}
+                  placeholder="https://youtube.com/watch?v=..."
+                  value={ultimoVideo?.url || ""}
+                  onChange={e => setUltimoVideo(v => ({ ...v, url: e.target.value }))} />
+                <label style={S.label}>Data</label>
+                <input style={{ ...S.input, marginBottom: 0 }} type="date"
+                  value={ultimoVideo?.data || ""}
+                  onChange={e => setUltimoVideo(v => ({ ...v, data: e.target.value }))} />
+                {ultimoVideo?.url && getYouTubeId(ultimoVideo.url) && (
+                  <div style={{ borderRadius: 12, overflow: "hidden", margin: "14px 0", border: "1px solid rgba(255,255,255,.08)" }}>
+                    <iframe width="100%" height="180"
+                      src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`}
+                      title="Preview" frameBorder="0" allowFullScreen style={{ display: "block" }} />
+                  </div>
+                )}
+                <button style={S.saveBtn} onClick={async () => {
+                  if (!ultimoVideo?.url) return;
+                  await setDoc(doc(db, "config", "ultimoVideo"), {
+                    url: ultimoVideo.url,
+                    titulo: ultimoVideo.titulo || "",
+                    data: ultimoVideo.data || new Date().toISOString().split("T")[0]
+                  });
+                  showToast("✅ Vídeo atualizado!");
+                }}>💾 Salvar Vídeo</button>
               </div>
             )}
 
