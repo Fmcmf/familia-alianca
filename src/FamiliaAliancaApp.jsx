@@ -97,6 +97,8 @@ export default function FamiliaAliancaApp() {
   const [historicoPalavras, setHistoricoPalavras] = useState([]);
   const [ultimoVideo, setUltimoVideo] = useState(null);
   const [notifForm, setNotifForm] = useState({ titulo: "", mensagem: "" });
+  const [voluntarioForm, setVoluntarioForm] = useState({ nome: "", email: "", telefone: "", ministerio: "", mensagem: "" });
+  const [enviandoVoluntario, setEnviandoVoluntario] = useState(false);
 
   // Splash + Firebase load
   useEffect(() => {
@@ -421,6 +423,7 @@ export default function FamiliaAliancaApp() {
     { id: "biblia", icon: "📖", label: "Bíblia" },
     { id: "oracao", icon: "🙏", label: "Oração" },
     { id: "ministerios", icon: "✨", label: "Ministérios" },
+    { id: "voluntario", icon: "🤲", label: "Servir" },
     { id: "mais", icon: "⋯", label: "Mais" },
     ...(isAdmin ? [{ id: "admin", icon: "⚙️", label: "Admin" }] : []),
   ];
@@ -758,6 +761,95 @@ export default function FamiliaAliancaApp() {
                   💬 Falar com o Pastor
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ VOLUNTARIADO ══ */}
+        {tab === "voluntario" && (
+          <div style={{ animation: "slideUp .4s ease" }}>
+            {/* Hero */}
+            <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🤲</div>
+              <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 12, lineHeight: 1.3 }}>Seja um Voluntário</div>
+              <div style={{ fontSize: 14, color: "rgba(255,255,255,.75)", lineHeight: 1.8, fontStyle: "italic", borderLeft: "2px solid #c9a84c", paddingLeft: 14, textAlign: "left" }}>
+                "O ato que mais nos assemelha a Cristo é o ato de Servir. Jesus não veio para ser servido, mas para servir e dar a sua vida em resgate de muitos."
+              </div>
+              <div style={{ fontSize: 12, color: "#c9a84c", marginTop: 8, textAlign: "right" }}>— Mateus 20:28</div>
+            </div>
+
+            {/* Texto sobre voluntariado */}
+            <div style={{ margin: "16px 16px 0", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "20px" }}>
+              <div style={{ fontSize: 15, fontWeight: "bold", color: "#c9a84c", marginBottom: 10 }}>Por que ser voluntário?</div>
+              <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.8)" }}>
+                O voluntariado na Igreja Família Aliança é muito mais do que ajudar — é uma oportunidade de crescer espiritualmente, desenvolver dons e talentos, e fazer parte de algo maior do que nós mesmos.
+              </div>
+              <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.8)", marginTop: 10 }}>
+                Cada pessoa tem um dom único dado por Deus. Quando colocamos esses dons a serviço da Igreja, somos instrumentos da graça de Deus na vida das pessoas.
+              </div>
+            </div>
+
+            {/* Ministérios */}
+            <div style={S.secTitle}>Nossos Ministérios</div>
+            {MINISTERIOS.map(m => (
+              <div key={m.id} style={{ margin: "0 16px 10px", background: "rgba(255,255,255,.04)", border: `1px solid ${m.cor}30`, borderLeft: `3px solid ${m.cor}`, borderRadius: 14, padding: "14px 16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                  <span style={{ fontSize: 22 }}>{m.icon}</span>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: m.cor }}>{m.nome}</div>
+                </div>
+                <div style={{ fontSize: 13, color: "rgba(255,255,255,.65)", lineHeight: 1.6 }}>{m.desc}</div>
+              </div>
+            ))}
+
+            {/* Formulário */}
+            <div style={S.secTitle}>Quero Servir!</div>
+            <div style={{ margin: "0 16px 24px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "20px" }}>
+              <div style={{ fontSize: 13, color: "rgba(255,255,255,.55)", marginBottom: 16, lineHeight: 1.6 }}>
+                Preencha o formulário abaixo e nossa equipe entrará em contato com você! 🙏
+              </div>
+
+              <label style={S.label}>Nome completo *</label>
+              <input style={{ ...S.input, marginBottom: 0 }} placeholder="Seu nome"
+                value={voluntarioForm.nome} onChange={e => setVoluntarioForm({ ...voluntarioForm, nome: e.target.value })} />
+
+              <label style={S.label}>E-mail *</label>
+              <input style={{ ...S.input, marginBottom: 0 }} placeholder="seu@email.com" type="email"
+                value={voluntarioForm.email} onChange={e => setVoluntarioForm({ ...voluntarioForm, email: e.target.value })} />
+
+              <label style={S.label}>WhatsApp *</label>
+              <input style={{ ...S.input, marginBottom: 0 }} placeholder="(19) 99999-9999" type="tel"
+                value={voluntarioForm.telefone} onChange={e => setVoluntarioForm({ ...voluntarioForm, telefone: e.target.value })} />
+
+              <label style={S.label}>Ministério de interesse *</label>
+              <select style={{ ...S.select, marginBottom: 0 }}
+                value={voluntarioForm.ministerio} onChange={e => setVoluntarioForm({ ...voluntarioForm, ministerio: e.target.value })}>
+                <option value="">Selecione um ministério...</option>
+                {MINISTERIOS.map(m => <option key={m.id} value={m.nome}>{m.icon} {m.nome}</option>)}
+                <option value="Sem preferência">Sem preferência — quero servir onde precisar!</option>
+              </select>
+
+              <label style={S.label}>Conte um pouco sobre você</label>
+              <textarea style={{ ...S.textarea, minHeight: 80 }}
+                placeholder="Por que você quer ser voluntário? Tem algum dom ou habilidade especial?"
+                value={voluntarioForm.mensagem} onChange={e => setVoluntarioForm({ ...voluntarioForm, mensagem: e.target.value })} />
+
+              <button style={{ ...S.saveBtn(enviandoVoluntario || !voluntarioForm.nome || !voluntarioForm.email || !voluntarioForm.telefone || !voluntarioForm.ministerio), marginTop: 16 }}
+                disabled={enviandoVoluntario || !voluntarioForm.nome || !voluntarioForm.email || !voluntarioForm.telefone || !voluntarioForm.ministerio}
+                onClick={() => {
+                  setEnviandoVoluntario(true);
+                  const assunto = encodeURIComponent(`Voluntário: ${voluntarioForm.nome} — ${voluntarioForm.ministerio}`);
+                  const corpo = encodeURIComponent(
+                    `Nome: ${voluntarioForm.nome}\nE-mail: ${voluntarioForm.email}\nWhatsApp: ${voluntarioForm.telefone}\nMinistério: ${voluntarioForm.ministerio}\n\n${voluntarioForm.mensagem}`
+                  );
+                  window.open(`mailto:voluntariado@familialiancapiracicaba.com.br?subject=${assunto}&body=${corpo}`, "_blank");
+                  setTimeout(() => {
+                    setVoluntarioForm({ nome: "", email: "", telefone: "", ministerio: "", mensagem: "" });
+                    setEnviandoVoluntario(false);
+                    showToast("🤲 Candidatura enviada! Que Deus abençoe!");
+                  }, 1000);
+                }}>
+                {enviandoVoluntario ? "Enviando..." : "🤲 Enviar candidatura"}
+              </button>
             </div>
           </div>
         )}
