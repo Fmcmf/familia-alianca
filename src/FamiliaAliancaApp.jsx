@@ -278,31 +278,32 @@ export default function FamiliaAliancaApp() {
   // ── BÍBLIA ──
   const buscarVersos = async (livro, cap) => {
     setBiblia(b => ({ ...b, loading: true, versos: null, versiculo: null }));
-    // Índice do livro na ordem bíblica (0-based)
-    const indice = {
-      "Gênesis":0,"Êxodo":1,"Levítico":2,"Números":3,"Deuteronômio":4,
-      "Josué":5,"Juízes":6,"Rute":7,"1 Samuel":8,"2 Samuel":9,
-      "1 Reis":10,"2 Reis":11,"1 Crônicas":12,"2 Crônicas":13,
-      "Esdras":14,"Neemias":15,"Ester":16,"Jó":17,"Salmos":18,
-      "Provérbios":19,"Eclesiastes":20,"Cantares":21,"Isaías":22,
-      "Jeremias":23,"Lamentações":24,"Ezequiel":25,"Daniel":26,
-      "Oséias":27,"Joel":28,"Amós":29,"Obadias":30,"Jonas":31,
-      "Miquéias":32,"Naum":33,"Habacuque":34,"Sofonias":35,
-      "Ageu":36,"Zacarias":37,"Malaquias":38,"Mateus":39,"Marcos":40,
-      "Lucas":41,"João":42,"Atos":43,"Romanos":44,"1 Coríntios":45,
-      "2 Coríntios":46,"Gálatas":47,"Efésios":48,"Filipenses":49,
-      "Colossenses":50,"1 Tessalonicenses":51,"2 Tessalonicenses":52,
-      "1 Timóteo":53,"2 Timóteo":54,"Tito":55,"Filemom":56,
-      "Hebreus":57,"Tiago":58,"1 Pedro":59,"2 Pedro":60,
-      "1 João":61,"2 João":62,"3 João":63,"Judas":64,"Apocalipse":65
+    const abrevs = {
+      "Gênesis":"gn","Êxodo":"ex","Levítico":"lv","Números":"nm","Deuteronômio":"dt",
+      "Josué":"js","Juízes":"jz","Rute":"rt","1 Samuel":"1sm","2 Samuel":"2sm",
+      "1 Reis":"1rs","2 Reis":"2rs","1 Crônicas":"1cr","2 Crônicas":"2cr",
+      "Esdras":"ed","Neemias":"ne","Ester":"et","Jó":"jo","Salmos":"sl",
+      "Provérbios":"pv","Eclesiastes":"ec","Cantares":"ct","Isaías":"is",
+      "Jeremias":"jr","Lamentações":"lm","Ezequiel":"ez","Daniel":"dn",
+      "Oséias":"os","Joel":"jl","Amós":"am","Obadias":"ob","Jonas":"jn",
+      "Miquéias":"mq","Naum":"na","Habacuque":"hc","Sofonias":"sf",
+      "Ageu":"ag","Zacarias":"zc","Malaquias":"ml","Mateus":"mt","Marcos":"mc",
+      "Lucas":"lc","João":"jo","Atos":"at","Romanos":"rm","1 Coríntios":"1co",
+      "2 Coríntios":"2co","Gálatas":"gl","Efésios":"ef","Filipenses":"fp",
+      "Colossenses":"cl","1 Tessalonicenses":"1ts","2 Tessalonicenses":"2ts",
+      "1 Timóteo":"1tm","2 Timóteo":"2tm","Tito":"tt","Filemom":"fm",
+      "Hebreus":"hb","Tiago":"tg","1 Pedro":"1pe","2 Pedro":"2pe",
+      "1 João":"1jo","2 João":"2jo","3 João":"3jo","Judas":"jd","Apocalipse":"ap"
     };
     try {
-      const idx = indice[livro];
-      const res = await fetch(`https://raw.githubusercontent.com/thiagobodruk/biblia/master/json/pt_acf.json`);
+      const abrev = abrevs[livro] || livro.toLowerCase();
+      const url = `https://raw.githubusercontent.com/thiagobodruk/biblia/master/json/${abrev}.json`;
+      const res = await fetch(url);
       const data = await res.json();
-      const capitulos = data[idx]?.chapters;
-      if (capitulos && capitulos[cap - 1]) {
-        const versos = capitulos[cap - 1].map((text, i) => ({ verse: i + 1, text }));
+      // data é um array de capítulos, cada capítulo é um array de versículos
+      const capitulo = data[cap - 1];
+      if (capitulo && capitulo.length > 0) {
+        const versos = capitulo.map((text, i) => ({ verse: i + 1, text }));
         setBiblia(prev => ({ ...prev, versos, loading: false, livro, capitulo: cap, versiculo: null }));
       } else {
         setBiblia(b => ({ ...b, loading: false, versos: [] }));
