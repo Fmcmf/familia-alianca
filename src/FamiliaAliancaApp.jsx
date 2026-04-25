@@ -44,26 +44,6 @@ const CONTATOS = {
 };
 
 // ─── BÍBLIA (livros) ────────────────────────────────────────────────────────
-// Livros com número exato de capítulos
-const LIVROS_AT = [
-  {n:"Gênesis",c:50},{n:"Êxodo",c:40},{n:"Levítico",c:27},{n:"Números",c:36},{n:"Deuteronômio",c:34},
-  {n:"Josué",c:24},{n:"Juízes",c:21},{n:"Rute",c:4},{n:"1 Samuel",c:31},{n:"2 Samuel",c:24},
-  {n:"1 Reis",c:22},{n:"2 Reis",c:25},{n:"1 Crônicas",c:29},{n:"2 Crônicas",c:36},{n:"Esdras",c:10},
-  {n:"Neemias",c:13},{n:"Ester",c:10},{n:"Jó",c:42},{n:"Salmos",c:150},{n:"Provérbios",c:31},
-  {n:"Eclesiastes",c:12},{n:"Cantares",c:8},{n:"Isaías",c:66},{n:"Jeremias",c:52},{n:"Lamentações",c:5},
-  {n:"Ezequiel",c:48},{n:"Daniel",c:12},{n:"Oséias",c:14},{n:"Joel",c:3},{n:"Amós",c:9},
-  {n:"Obadias",c:1},{n:"Jonas",c:4},{n:"Miquéias",c:7},{n:"Naum",c:3},{n:"Habacuque",c:3},
-  {n:"Sofonias",c:3},{n:"Ageu",c:2},{n:"Zacarias",c:14},{n:"Malaquias",c:4}
-];
-const LIVROS_NT = [
-  {n:"Mateus",c:28},{n:"Marcos",c:16},{n:"Lucas",c:24},{n:"João",c:21},{n:"Atos",c:28},
-  {n:"Romanos",c:16},{n:"1 Coríntios",c:16},{n:"2 Coríntios",c:13},{n:"Gálatas",c:6},
-  {n:"Efésios",c:6},{n:"Filipenses",c:4},{n:"Colossenses",c:4},{n:"1 Tessalonicenses",c:5},
-  {n:"2 Tessalonicenses",c:3},{n:"1 Timóteo",c:6},{n:"2 Timóteo",c:4},{n:"Tito",c:3},
-  {n:"Filemom",c:1},{n:"Hebreus",c:13},{n:"Tiago",c:5},{n:"1 Pedro",c:5},{n:"2 Pedro",c:3},
-  {n:"1 João",c:5},{n:"2 João",c:1},{n:"3 João",c:1},{n:"Judas",c:1},{n:"Apocalipse",c:22}
-];
-
 // ─── STORAGE ───────────────────────────────────────────────────────────────
 const SK = {
   user: "fa-user",
@@ -103,7 +83,6 @@ export default function FamiliaAliancaApp() {
   const [toast, setToast] = useState("");
   const [ministerioAtivo, setMinisterioAtivo] = useState(null);
   const [oracao, setOracao] = useState({ nome: "", pedido: "" });
-  const [biblia, setBiblia] = useState({ testamento: "AT", livro: "", capitulo: 1, capitulos: 50, versos: null, loading: false, versiculo: null });
   const [adminTab, setAdminTab] = useState("agenda");
   const [novoEvento, setNovoEvento] = useState({ titulo: "", data: "", hora: "", local: "", tipo: "culto" });
   const [novaPalavra, setNovaPalavra] = useState({ titulo: "", texto: "", referencia: "", video: "" });
@@ -275,52 +254,6 @@ export default function FamiliaAliancaApp() {
     showToast("🙏 Pedido enviado!");
   };
 
-  // ── BÍBLIA ──
-  const API_BIBLE_KEY = "hNdGto7w5XLmjLOPUyv-0";
-  const BIBLE_ID = "d63894c8d9a7a503-01"; // Biblia Livre Para Todos (PT-BR)
-
-  const buscarVersos = async (livro, cap) => {
-    setBiblia(b => ({ ...b, loading: true, versos: null, versiculo: null }));
-    const mapa = {
-      "Gênesis":"GEN","Êxodo":"EXO","Levítico":"LEV","Números":"NUM","Deuteronômio":"DEU",
-      "Josué":"JOS","Juízes":"JDG","Rute":"RUT","1 Samuel":"1SA","2 Samuel":"2SA",
-      "1 Reis":"1KI","2 Reis":"2KI","1 Crônicas":"1CH","2 Crônicas":"2CH",
-      "Esdras":"EZR","Neemias":"NEH","Ester":"EST","Jó":"JOB","Salmos":"PSA",
-      "Provérbios":"PRO","Eclesiastes":"ECC","Cantares":"SNG","Isaías":"ISA",
-      "Jeremias":"JER","Lamentações":"LAM","Ezequiel":"EZK","Daniel":"DAN",
-      "Oséias":"HOS","Joel":"JOL","Amós":"AMO","Obadias":"OBA","Jonas":"JON",
-      "Miquéias":"MIC","Naum":"NAM","Habacuque":"HAB","Sofonias":"ZEP",
-      "Ageu":"HAG","Zacarias":"ZEC","Malaquias":"MAL","Mateus":"MAT","Marcos":"MRK",
-      "Lucas":"LUK","João":"JHN","Atos":"ACT","Romanos":"ROM","1 Coríntios":"1CO",
-      "2 Coríntios":"2CO","Gálatas":"GAL","Efésios":"EPH","Filipenses":"PHP",
-      "Colossenses":"COL","1 Tessalonicenses":"1TH","2 Tessalonicenses":"2TH",
-      "1 Timóteo":"1TI","2 Timóteo":"2TI","Tito":"TIT","Filemom":"PHM",
-      "Hebreus":"HEB","Tiago":"JAS","1 Pedro":"1PE","2 Pedro":"2PE",
-      "1 João":"1JN","2 João":"2JN","3 João":"3JN","Judas":"JUD","Apocalipse":"REV"
-    };
-    try {
-      const abrev = mapa[livro];
-      const chapterId = `${abrev}.${cap}`;
-      const url = `https://rest.api.bible/v1/bibles/${BIBLE_ID}/chapters/${chapterId}/verses?content-type=text&include-notes=false&include-titles=false`;
-      const res = await fetch(url, { headers: { "api-key": API_BIBLE_KEY } });
-      const data = await res.json();
-      if (data.data && data.data.length > 0) {
-        const versos = await Promise.all(data.data.map(async (v, i) => {
-          const vRes = await fetch(`https://rest.api.bible/v1/bibles/${BIBLE_ID}/verses/${v.id}?content-type=text&include-notes=false&include-titles=false`, { headers: { "api-key": API_BIBLE_KEY } });
-          const vData = await vRes.json();
-          return { verse: i + 1, text: vData.data?.content?.trim() || "" };
-        }));
-        setBiblia(prev => ({ ...prev, versos, loading: false, livro, capitulo: cap, versiculo: null }));
-      } else {
-        setBiblia(b => ({ ...b, loading: false, versos: [] }));
-        showToast("Capítulo não encontrado.");
-      }
-    } catch {
-      setBiblia(b => ({ ...b, loading: false, versos: [] }));
-      showToast("Erro ao carregar. Verifique a conexão.");
-    }
-  };
-
   // ── STYLES ──
   const S = {
     app: { minHeight: "100vh", background: "#080810", color: "#f0eefc", fontFamily: "'Georgia', 'Times New Roman', serif", position: "relative", overflowX: "hidden" },
@@ -377,11 +310,6 @@ export default function FamiliaAliancaApp() {
     navBtn: (a) => ({ flex: 1, padding: "10px 0 14px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: a ? "#c9a84c" : "rgba(255,255,255,.65)", fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "Georgia,serif" }),
     navIcon: { fontSize: 18 },
 
-    // Bíblia
-    livroBtn: (sel) => ({ padding: "8px 14px", background: sel ? "rgba(201,168,76,.2)" : "rgba(255,255,255,.04)", border: `1px solid ${sel ? "rgba(201,168,76,.5)" : "rgba(255,255,255,.08)"}`, borderRadius: 20, fontSize: 12, color: sel ? "#c9a84c" : "rgba(255,255,255,.6)", cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }),
-    versoRow: { display: "flex", gap: 10, marginBottom: 10, alignItems: "flex-start" },
-    versoNum: { fontSize: 11, color: "#c9a84c", minWidth: 22, paddingTop: 2, fontWeight: "bold" },
-    versoText: { fontSize: 15, lineHeight: 1.75, color: "rgba(255,255,255,.88)", flex: 1 },
 
     // Contribuição
     pixCard: { margin: "0 16px 12px", background: "linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 16, padding: "20px" },
