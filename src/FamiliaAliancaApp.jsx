@@ -282,7 +282,7 @@ export default function FamiliaAliancaApp() {
       const livroEnc = encodeURIComponent(livro);
       const res = await fetch(`https://bible-api.com/${livroEnc}+${cap}?translation=acf`);
       const data = await res.json();
-      setBiblia(b => ({ ...b, versos: data.verses || [], loading: false, livro, capitulo: cap, versiculo: null }));
+      setBiblia(prev => ({ ...prev, versos: data.verses || [], loading: false, livro, capitulo: cap, versiculo: null }));
     } catch {
       setBiblia(b => ({ ...b, loading: false, versos: [] }));
       showToast("Erro ao carregar. Verifique a conexão.");
@@ -342,7 +342,7 @@ export default function FamiliaAliancaApp() {
 
     // Nav
     nav: { position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "rgba(8,8,16,.96)", borderTop: "1px solid rgba(255,255,255,.07)", display: "flex", backdropFilter: "blur(20px)", zIndex: 100 },
-    navBtn: (a) => ({ flex: 1, padding: "10px 0 14px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: a ? "#c9a84c" : "rgba(255,255,255,.28)", fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "Georgia,serif" }),
+    navBtn: (a) => ({ flex: 1, padding: "10px 0 14px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: a ? "#c9a84c" : "rgba(255,255,255,.55)", fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "Georgia,serif" }),
     navIcon: { fontSize: 18 },
 
     // Bíblia
@@ -631,7 +631,7 @@ export default function FamiliaAliancaApp() {
               <div style={{ padding: "0 16px", display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {(biblia.testamento === "AT" ? LIVROS_AT : LIVROS_NT).map(l => (
                   <button key={l.n} style={{ padding: "7px 12px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, fontSize: 12, color: "rgba(255,255,255,.7)", cursor: "pointer", fontFamily: "Georgia,serif" }}
-                    onClick={() => setBiblia(b => ({ ...b, livro: l.n, capitulos: l.c, versos: null, versiculo: null }))}>{l.n}</button>
+                    onClick={() => setBiblia(prev => ({ ...prev, livro: l.n, capitulos: l.c, versos: null, versiculo: null }))}>{l.n}</button>
                 ))}
               </div>
             )}
