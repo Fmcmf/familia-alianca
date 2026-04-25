@@ -276,32 +276,41 @@ export default function FamiliaAliancaApp() {
   };
 
   // ── BÍBLIA ──
+  const API_BIBLE_KEY = "VI3nt_eHsSumI1dDukaDd";
+  const BIBLE_ID = "a556c5305ee15c3f-01"; // João Ferreira de Almeida
+
   const buscarVersos = async (livro, cap) => {
     setBiblia(b => ({ ...b, loading: true, versos: null, versiculo: null }));
-    // Número do livro na API biblebox (1-66)
-    const numeros = {
-      "Gênesis":1,"Êxodo":2,"Levítico":3,"Números":4,"Deuteronômio":5,
-      "Josué":6,"Juízes":7,"Rute":8,"1 Samuel":9,"2 Samuel":10,
-      "1 Reis":11,"2 Reis":12,"1 Crônicas":13,"2 Crônicas":14,
-      "Esdras":15,"Neemias":16,"Ester":17,"Jó":18,"Salmos":19,
-      "Provérbios":20,"Eclesiastes":21,"Cantares":22,"Isaías":23,
-      "Jeremias":24,"Lamentações":25,"Ezequiel":26,"Daniel":27,
-      "Oséias":28,"Joel":29,"Amós":30,"Obadias":31,"Jonas":32,
-      "Miquéias":33,"Naum":34,"Habacuque":35,"Sofonias":36,
-      "Ageu":37,"Zacarias":38,"Malaquias":39,"Mateus":40,"Marcos":41,
-      "Lucas":42,"João":43,"Atos":44,"Romanos":45,"1 Coríntios":46,
-      "2 Coríntios":47,"Gálatas":48,"Efésios":49,"Filipenses":50,
-      "Colossenses":51,"1 Tessalonicenses":52,"2 Tessalonicenses":53,
-      "1 Timóteo":54,"2 Timóteo":55,"Tito":56,"Filemom":57,
-      "Hebreus":58,"Tiago":59,"1 Pedro":60,"2 Pedro":61,
-      "1 João":62,"2 João":63,"3 João":64,"Judas":65,"Apocalipse":66
+    const mapa = {
+      "Gênesis":"GEN","Êxodo":"EXO","Levítico":"LEV","Números":"NUM","Deuteronômio":"DEU",
+      "Josué":"JOS","Juízes":"JDG","Rute":"RUT","1 Samuel":"1SA","2 Samuel":"2SA",
+      "1 Reis":"1KI","2 Reis":"2KI","1 Crônicas":"1CH","2 Crônicas":"2CH",
+      "Esdras":"EZR","Neemias":"NEH","Ester":"EST","Jó":"JOB","Salmos":"PSA",
+      "Provérbios":"PRO","Eclesiastes":"ECC","Cantares":"SNG","Isaías":"ISA",
+      "Jeremias":"JER","Lamentações":"LAM","Ezequiel":"EZK","Daniel":"DAN",
+      "Oséias":"HOS","Joel":"JOL","Amós":"AMO","Obadias":"OBA","Jonas":"JON",
+      "Miquéias":"MIC","Naum":"NAM","Habacuque":"HAB","Sofonias":"ZEP",
+      "Ageu":"HAG","Zacarias":"ZEC","Malaquias":"MAL","Mateus":"MAT","Marcos":"MRK",
+      "Lucas":"LUK","João":"JHN","Atos":"ACT","Romanos":"ROM","1 Coríntios":"1CO",
+      "2 Coríntios":"2CO","Gálatas":"GAL","Efésios":"EPH","Filipenses":"PHP",
+      "Colossenses":"COL","1 Tessalonicenses":"1TH","2 Tessalonicenses":"2TH",
+      "1 Timóteo":"1TI","2 Timóteo":"2TI","Tito":"TIT","Filemom":"PHM",
+      "Hebreus":"HEB","Tiago":"JAS","1 Pedro":"1PE","2 Pedro":"2PE",
+      "1 João":"1JN","2 João":"2JN","3 João":"3JN","Judas":"JUD","Apocalipse":"REV"
     };
     try {
-      const num = numeros[livro];
-      const res = await fetch(`https://data.biblebox.com/v3/bibles/acf/${num}/${cap}.json`);
+      const abrev = mapa[livro];
+      const chapterId = `${abrev}.${cap}`;
+      const url = `https://api.scripture.api.bible/v1/bibles/${BIBLE_ID}/chapters/${chapterId}/verses?content-type=text&include-notes=false&include-titles=false`;
+      const res = await fetch(url, { headers: { "api-key": API_BIBLE_KEY } });
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        const versos = data.map((text, i) => ({ verse: i + 1, text: text.replace(/^¶\s*/, '') }));
+      if (data.data && data.data.length > 0) {
+        // Buscar texto de cada versículo
+        const versos = await Promise.all(data.data.map(async (v, i) => {
+          const vRes = await fetch(`https://api.scripture.api.bible/v1/bibles/${BIBLE_ID}/verses/${v.id}?content-type=text&include-notes=false&include-titles=false`, { headers: { "api-key": API_BIBLE_KEY } });
+          const vData = await vRes.json();
+          return { verse: i + 1, text: vData.data?.content?.trim() || "" };
+        }));
         setBiblia(prev => ({ ...prev, versos, loading: false, livro, capitulo: cap, versiculo: null }));
       } else {
         setBiblia(b => ({ ...b, loading: false, versos: [] }));
@@ -641,7 +650,7 @@ export default function FamiliaAliancaApp() {
             <div style={S.secTitle}>Bíblia Sagrada</div>
             <div style={{ margin: "0 16px 14px", background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 10, padding: "8px 14px", display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: 14 }}>📖</span>
-              <span style={{ fontSize: 12, color: "#c9a84c", fontStyle: "italic" }}>Almeida Corrigida Fiel — ACF</span>
+              <span style={{ fontSize: 12, color: "#c9a84c", fontStyle: "italic" }}>João Ferreira de Almeida</span>
             </div>
 
             {/* Testamento */}
@@ -717,7 +726,7 @@ export default function FamiliaAliancaApp() {
                   <div style={{ fontSize: 18, lineHeight: 1.8, color: "#fff", fontStyle: "italic", borderLeft: "3px solid #c9a84c", paddingLeft: 16 }}>
                     "{biblia.versiculo.text}"
                   </div>
-                  <div style={{ marginTop: 16, fontSize: 12, color: "rgba(255,255,255,.4)", fontStyle: "italic" }}>Almeida Corrigida Fiel — ACF</div>
+                  <div style={{ marginTop: 16, fontSize: 12, color: "rgba(255,255,255,.4)", fontStyle: "italic" }}>João Ferreira de Almeida</div>
                 </div>
 
                 {/* Botões de compartilhar */}
@@ -725,7 +734,7 @@ export default function FamiliaAliancaApp() {
                 <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
                   <button style={{ flex: 1, padding: "12px 0", background: "rgba(37,211,102,.12)", border: "1px solid rgba(37,211,102,.3)", borderRadius: 12, color: "#25d366", fontSize: 12, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
                     onClick={() => {
-                      const txt = `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (ACF)\n\n📖 Família Aliança Piracicaba`;
+                      const txt = `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (Almeida)\n\n📖 Família Aliança Piracicaba`;
                       window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, "_blank");
                     }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -733,7 +742,7 @@ export default function FamiliaAliancaApp() {
                   </button>
                   <button style={{ flex: 1, padding: "12px 0", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 12, color: "rgba(255,255,255,.7)", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
                     onClick={() => {
-                      const txt = `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (ACF)`;
+                      const txt = `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (Almeida)`;
                       navigator.clipboard.writeText(txt);
                       showToast("✅ Versículo copiado!");
                     }}>
@@ -744,7 +753,7 @@ export default function FamiliaAliancaApp() {
                       onClick={() => {
                         navigator.share({
                           title: `${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse}`,
-                          text: `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (ACF)`,
+                          text: `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (Almeida)`,
                         }).catch(() => {});
                       }}>
                       🔗 Mais
