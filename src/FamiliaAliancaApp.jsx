@@ -44,8 +44,25 @@ const CONTATOS = {
 };
 
 // ─── BÍBLIA (livros) ────────────────────────────────────────────────────────
-const LIVROS_AT = ["Gênesis","Êxodo","Levítico","Números","Deuteronômio","Josué","Juízes","Rute","1 Samuel","2 Samuel","1 Reis","2 Reis","1 Crônicas","2 Crônicas","Esdras","Neemias","Ester","Jó","Salmos","Provérbios","Eclesiastes","Cantares","Isaías","Jeremias","Lamentações","Ezequiel","Daniel","Oséias","Joel","Amós","Obadias","Jonas","Miquéias","Naum","Habacuque","Sofonias","Ageu","Zacarias","Malaquias"];
-const LIVROS_NT = ["Mateus","Marcos","Lucas","João","Atos","Romanos","1 Coríntios","2 Coríntios","Gálatas","Efésios","Filipenses","Colossenses","1 Tessalonicenses","2 Tessalonicenses","1 Timóteo","2 Timóteo","Tito","Filemom","Hebreus","Tiago","1 Pedro","2 Pedro","1 João","2 João","3 João","Judas","Apocalipse"];
+// Livros com número exato de capítulos
+const LIVROS_AT = [
+  {n:"Gênesis",c:50},{n:"Êxodo",c:40},{n:"Levítico",c:27},{n:"Números",c:36},{n:"Deuteronômio",c:34},
+  {n:"Josué",c:24},{n:"Juízes",c:21},{n:"Rute",c:4},{n:"1 Samuel",c:31},{n:"2 Samuel",c:24},
+  {n:"1 Reis",c:22},{n:"2 Reis",c:25},{n:"1 Crônicas",c:29},{n:"2 Crônicas",c:36},{n:"Esdras",c:10},
+  {n:"Neemias",c:13},{n:"Ester",c:10},{n:"Jó",c:42},{n:"Salmos",c:150},{n:"Provérbios",c:31},
+  {n:"Eclesiastes",c:12},{n:"Cantares",c:8},{n:"Isaías",c:66},{n:"Jeremias",c:52},{n:"Lamentações",c:5},
+  {n:"Ezequiel",c:48},{n:"Daniel",c:12},{n:"Oséias",c:14},{n:"Joel",c:3},{n:"Amós",c:9},
+  {n:"Obadias",c:1},{n:"Jonas",c:4},{n:"Miquéias",c:7},{n:"Naum",c:3},{n:"Habacuque",c:3},
+  {n:"Sofonias",c:3},{n:"Ageu",c:2},{n:"Zacarias",c:14},{n:"Malaquias",c:4}
+];
+const LIVROS_NT = [
+  {n:"Mateus",c:28},{n:"Marcos",c:16},{n:"Lucas",c:24},{n:"João",c:21},{n:"Atos",c:28},
+  {n:"Romanos",c:16},{n:"1 Coríntios",c:16},{n:"2 Coríntios",c:13},{n:"Gálatas",c:6},
+  {n:"Efésios",c:6},{n:"Filipenses",c:4},{n:"Colossenses",c:4},{n:"1 Tessalonicenses",c:5},
+  {n:"2 Tessalonicenses",c:3},{n:"1 Timóteo",c:6},{n:"2 Timóteo",c:4},{n:"Tito",c:3},
+  {n:"Filemom",c:1},{n:"Hebreus",c:13},{n:"Tiago",c:5},{n:"1 Pedro",c:5},{n:"2 Pedro",c:3},
+  {n:"1 João",c:5},{n:"2 João",c:1},{n:"3 João",c:1},{n:"Judas",c:1},{n:"Apocalipse",c:22}
+];
 
 // ─── STORAGE ───────────────────────────────────────────────────────────────
 const SK = {
@@ -86,7 +103,7 @@ export default function FamiliaAliancaApp() {
   const [toast, setToast] = useState("");
   const [ministerioAtivo, setMinisterioAtivo] = useState(null);
   const [oracao, setOracao] = useState({ nome: "", pedido: "" });
-  const [biblia, setBiblia] = useState({ testamento: "AT", livro: "", capitulo: 1, versos: null, loading: false, versiculo: null });
+  const [biblia, setBiblia] = useState({ testamento: "AT", livro: "", capitulo: 1, capitulos: 50, versos: null, loading: false, versiculo: null });
   const [adminTab, setAdminTab] = useState("agenda");
   const [novoEvento, setNovoEvento] = useState({ titulo: "", data: "", hora: "", local: "", tipo: "culto" });
   const [novaPalavra, setNovaPalavra] = useState({ titulo: "", texto: "", referencia: "", video: "" });
@@ -605,16 +622,16 @@ export default function FamiliaAliancaApp() {
 
             {/* Testamento */}
             <div style={{ display: "flex", gap: 10, padding: "0 16px", marginBottom: 16 }}>
-              <button style={S.livroBtn(biblia.testamento === "AT")} onClick={() => setBiblia(b => ({ ...b, testamento: "AT", livro: "", versos: null, versiculo: null }))}>Antigo Testamento</button>
-              <button style={S.livroBtn(biblia.testamento === "NT")} onClick={() => setBiblia(b => ({ ...b, testamento: "NT", livro: "", versos: null, versiculo: null }))}>Novo Testamento</button>
+              <button style={S.livroBtn(biblia.testamento === "AT")} onClick={() => setBiblia(b => ({ ...b, testamento: "AT", livro: "", capitulos: 50, versos: null, versiculo: null }))}>Antigo Testamento</button>
+              <button style={S.livroBtn(biblia.testamento === "NT")} onClick={() => setBiblia(b => ({ ...b, testamento: "NT", livro: "", capitulos: 50, versos: null, versiculo: null }))}>Novo Testamento</button>
             </div>
 
             {/* ETAPA 1: Lista de Livros */}
             {!biblia.livro && (
               <div style={{ padding: "0 16px", display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {(biblia.testamento === "AT" ? LIVROS_AT : LIVROS_NT).map(l => (
-                  <button key={l} style={{ padding: "7px 12px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, fontSize: 12, color: "rgba(255,255,255,.7)", cursor: "pointer", fontFamily: "Georgia,serif" }}
-                    onClick={() => setBiblia(b => ({ ...b, livro: l, versos: null, versiculo: null }))}>{l}</button>
+                  <button key={l.n} style={{ padding: "7px 12px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, fontSize: 12, color: "rgba(255,255,255,.7)", cursor: "pointer", fontFamily: "Georgia,serif" }}
+                    onClick={() => setBiblia(b => ({ ...b, livro: l.n, capitulos: l.c, versos: null, versiculo: null }))}>{l.n}</button>
                 ))}
               </div>
             )}
@@ -628,7 +645,7 @@ export default function FamiliaAliancaApp() {
                 </div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 12 }}>Escolha o capítulo:</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {Array.from({ length: 150 }, (_, i) => i + 1).map(c => (
+                  {Array.from({ length: biblia.capitulos || 50 }, (_, i) => i + 1).map(c => (
                     <button key={c} style={{ width: 44, height: 44, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, fontSize: 13, color: "rgba(255,255,255,.7)", cursor: "pointer", fontFamily: "Georgia,serif" }}
                       onClick={() => buscarVersos(biblia.livro, c)}>{c}</button>
                   ))}
@@ -646,7 +663,7 @@ export default function FamiliaAliancaApp() {
                   <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => setBiblia(b => ({ ...b, versos: null, versiculo: null }))}>← Capítulos</button>
                   <div style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c" }}>{biblia.livro} {biblia.capitulo}</div>
                   {biblia.capitulo > 1 && <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => buscarVersos(biblia.livro, biblia.capitulo - 1)}>‹ Ant</button>}
-                  <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => buscarVersos(biblia.livro, biblia.capitulo + 1)}>Próx ›</button>
+                  {biblia.capitulo < (biblia.capitulos || 50) && <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => buscarVersos(biblia.livro, biblia.capitulo + 1)}>Próx ›</button>}
                 </div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 12 }}>Escolha o versículo:</div>
                 {biblia.versos.length === 0 ? (
@@ -671,14 +688,45 @@ export default function FamiliaAliancaApp() {
                   <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => setBiblia(b => ({ ...b, versiculo: null }))}>← Versículos</button>
                   <div style={{ fontSize: 13, color: "#c9a84c" }}>{biblia.livro} {biblia.capitulo}:{biblia.versiculo.verse}</div>
                 </div>
-                <div style={{ background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 16, padding: "24px 20px" }}>
+                <div style={{ background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 16, padding: "24px 20px", marginBottom: 16 }}>
                   <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 16 }}>{biblia.livro} {biblia.capitulo}:{biblia.versiculo.verse}</div>
                   <div style={{ fontSize: 18, lineHeight: 1.8, color: "#fff", fontStyle: "italic", borderLeft: "3px solid #c9a84c", paddingLeft: 16 }}>
                     "{biblia.versiculo.text}"
                   </div>
                   <div style={{ marginTop: 16, fontSize: 12, color: "rgba(255,255,255,.4)", fontStyle: "italic" }}>Nova Versão Transformadora — NVT</div>
                 </div>
-                <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+
+                {/* Botões de compartilhar */}
+                <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "rgba(255,255,255,.3)", marginBottom: 10 }}>Compartilhar</div>
+                <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                  <button style={{ flex: 1, padding: "12px 0", background: "rgba(37,211,102,.12)", border: "1px solid rgba(37,211,102,.3)", borderRadius: 12, color: "#25d366", fontSize: 12, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+                    onClick={() => {
+                      const txt = `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (NVT)\n\n📖 Família Aliança Piracicaba`;
+                      window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, "_blank");
+                    }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    WhatsApp
+                  </button>
+                  <button style={{ flex: 1, padding: "12px 0", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 12, color: "rgba(255,255,255,.7)", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                    onClick={() => {
+                      const txt = `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (NVT)`;
+                      navigator.clipboard.writeText(txt);
+                      showToast("✅ Versículo copiado!");
+                    }}>
+                    📋 Copiar
+                  </button>
+                  {navigator.share && (
+                    <button style={{ flex: 1, padding: "12px 0", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.25)", borderRadius: 12, color: "#c9a84c", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                      onClick={() => navigator.share({
+                        title: `${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse}`,
+                        text: `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (NVT)`,
+                      })}>
+                      🔗 Mais
+                    </button>
+                  )}
+                </div>
+
+                <div style={{ display: "flex", gap: 10 }}>
                   {biblia.versiculo.verse > 1 && (
                     <button style={{ flex: 1, padding: "11px 0", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, color: "rgba(255,255,255,.6)", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}
                       onClick={() => setBiblia(b => ({ ...b, versiculo: b.versos.find(v => v.verse === b.versiculo.verse - 1) }))}>
@@ -825,7 +873,6 @@ export default function FamiliaAliancaApp() {
                 value={voluntarioForm.ministerio} onChange={e => setVoluntarioForm({ ...voluntarioForm, ministerio: e.target.value })}>
                 <option value="">Selecione um ministério...</option>
                 {MINISTERIOS.map(m => <option key={m.id} value={m.nome}>{m.icon} {m.nome}</option>)}
-                <option value="Sem preferência">Sem preferência — quero servir onde precisar!</option>
               </select>
 
               <label style={S.label}>Conte um pouco sobre você</label>
@@ -833,7 +880,7 @@ export default function FamiliaAliancaApp() {
                 placeholder="Por que você quer ser voluntário? Tem algum dom ou habilidade especial?"
                 value={voluntarioForm.mensagem} onChange={e => setVoluntarioForm({ ...voluntarioForm, mensagem: e.target.value })} />
 
-              <button style={{ ...S.saveBtn(enviandoVoluntario || !voluntarioForm.nome || !voluntarioForm.email || !voluntarioForm.telefone || !voluntarioForm.ministerio), marginTop: 16 }}
+              <button style={{ width: "100%", marginTop: 16, padding: "15px 0", background: (enviandoVoluntario || !voluntarioForm.nome || !voluntarioForm.email || !voluntarioForm.telefone || !voluntarioForm.ministerio) ? "rgba(201,168,76,.3)" : "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: (enviandoVoluntario || !voluntarioForm.nome || !voluntarioForm.email || !voluntarioForm.telefone || !voluntarioForm.ministerio) ? "not-allowed" : "pointer", fontFamily: "Georgia,serif" }}
                 disabled={enviandoVoluntario || !voluntarioForm.nome || !voluntarioForm.email || !voluntarioForm.telefone || !voluntarioForm.ministerio}
                 onClick={() => {
                   setEnviandoVoluntario(true);
@@ -986,9 +1033,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "video", "notif", "membros"].map(t => (
+              {["agenda", "palavra", "video", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", video: "▶️ Vídeo", notif: "🔔 Notif", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", video: "▶️ Vídeo", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
