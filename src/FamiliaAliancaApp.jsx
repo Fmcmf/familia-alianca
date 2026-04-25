@@ -276,8 +276,8 @@ export default function FamiliaAliancaApp() {
   };
 
   // ── BÍBLIA ──
-  const API_BIBLE_KEY = "VI3nt_eHsSumI1dDukaDd";
-  const BIBLE_ID = "a556c5305ee15c3f-01"; // João Ferreira de Almeida
+  const API_BIBLE_KEY = "hNdGto7w5XLmjLOPUyv-0";
+  const BIBLE_ID = "d63894c8d9a7a503-01"; // Biblia Livre Para Todos (PT-BR)
 
   const buscarVersos = async (livro, cap) => {
     setBiblia(b => ({ ...b, loading: true, versos: null, versiculo: null }));
@@ -301,13 +301,12 @@ export default function FamiliaAliancaApp() {
     try {
       const abrev = mapa[livro];
       const chapterId = `${abrev}.${cap}`;
-      const url = `https://api.scripture.api.bible/v1/bibles/${BIBLE_ID}/chapters/${chapterId}/verses?content-type=text&include-notes=false&include-titles=false`;
+      const url = `https://rest.api.bible/v1/bibles/${BIBLE_ID}/chapters/${chapterId}/verses?content-type=text&include-notes=false&include-titles=false`;
       const res = await fetch(url, { headers: { "api-key": API_BIBLE_KEY } });
       const data = await res.json();
       if (data.data && data.data.length > 0) {
-        // Buscar texto de cada versículo
         const versos = await Promise.all(data.data.map(async (v, i) => {
-          const vRes = await fetch(`https://api.scripture.api.bible/v1/bibles/${BIBLE_ID}/verses/${v.id}?content-type=text&include-notes=false&include-titles=false`, { headers: { "api-key": API_BIBLE_KEY } });
+          const vRes = await fetch(`https://rest.api.bible/v1/bibles/${BIBLE_ID}/verses/${v.id}?content-type=text&include-notes=false&include-titles=false`, { headers: { "api-key": API_BIBLE_KEY } });
           const vData = await vRes.json();
           return { verse: i + 1, text: vData.data?.content?.trim() || "" };
         }));
@@ -648,135 +647,42 @@ export default function FamiliaAliancaApp() {
         {tab === "biblia" && (
           <div style={{ animation: "slideUp .4s ease" }}>
             <div style={S.secTitle}>Bíblia Sagrada</div>
-            <div style={{ margin: "0 16px 14px", background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 10, padding: "8px 14px", display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 14 }}>📖</span>
-              <span style={{ fontSize: 12, color: "#c9a84c", fontStyle: "italic" }}>João Ferreira de Almeida</span>
+
+            {/* Hero */}
+            <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
+              <div style={{ fontSize: 52, marginBottom: 16 }}>📖</div>
+              <div style={{ fontSize: 18, fontWeight: "bold", color: "#fff", marginBottom: 10 }}>Leia a Bíblia Sagrada</div>
+              <div style={{ fontSize: 14, color: "rgba(255,255,255,.65)", lineHeight: 1.7, marginBottom: 20 }}>
+                Acesse a Bíblia completa em diversas versões — NVI, NVT, ARC e muito mais — pelo YouVersion, o app de Bíblia mais usado no mundo!
+              </div>
+              <button style={{ width: "100%", padding: "15px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 10 }}
+                onClick={() => window.open("https://www.bible.com/pt", "_blank")}>
+                📖 Abrir Bíblia Online
+              </button>
+              <button style={{ width: "100%", padding: "13px 0", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 12, color: "rgba(255,255,255,.7)", fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                onClick={() => window.open("https://www.bible.com/app", "_blank")}>
+                📱 Baixar App YouVersion
+              </button>
             </div>
 
-            {/* Testamento */}
-            <div style={{ display: "flex", gap: 10, padding: "0 16px", marginBottom: 16 }}>
-              <button style={S.livroBtn(biblia.testamento === "AT")} onClick={() => setBiblia(b => ({ ...b, testamento: "AT", livro: "", capitulos: 50, versos: null, versiculo: null }))}>Antigo Testamento</button>
-              <button style={S.livroBtn(biblia.testamento === "NT")} onClick={() => setBiblia(b => ({ ...b, testamento: "NT", livro: "", capitulos: 50, versos: null, versiculo: null }))}>Novo Testamento</button>
-            </div>
-
-            {/* ETAPA 1: Lista de Livros */}
-            {!biblia.livro && (
-              <div style={{ padding: "0 16px", display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {(biblia.testamento === "AT" ? LIVROS_AT : LIVROS_NT).map(l => (
-                  <button key={l.n} style={{ padding: "7px 12px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, fontSize: 12, color: "rgba(255,255,255,.7)", cursor: "pointer", fontFamily: "Georgia,serif" }}
-                    onClick={() => setBiblia(prev => ({ ...prev, livro: l.n, capitulos: l.c, versos: null, versiculo: null }))}>{l.n}</button>
-                ))}
+            {/* Versões disponíveis */}
+            <div style={S.secTitle}>Versões Disponíveis</div>
+            {[
+              { nome: "Nova Versão Internacional", sigla: "NVI", desc: "Tradução moderna e fiel ao texto original", url: "https://www.bible.com/pt/bible/129/GEN.1.NVI" },
+              { nome: "Nova Versão Transformadora", sigla: "NVT", desc: "Linguagem contemporânea e clara", url: "https://www.bible.com/pt/bible/2365/GEN.1.NVT" },
+              { nome: "Almeida Revista e Corrigida", sigla: "ARC", desc: "A versão clássica mais conhecida", url: "https://www.bible.com/pt/bible/212/GEN.1.ARC" },
+              { nome: "Nova Tradução na Linguagem de Hoje", sigla: "NTLH", desc: "Linguagem simples e acessível", url: "https://www.bible.com/pt/bible/211/GEN.1.NTLH" },
+            ].map(v => (
+              <div key={v.sigla} style={{ margin: "0 16px 10px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
+                onClick={() => window.open(v.url, "_blank")}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>{v.sigla}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: "#fff", marginBottom: 3 }}>{v.nome}</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,.45)" }}>{v.desc}</div>
+                </div>
+                <div style={{ color: "#c9a84c", fontSize: 18 }}>›</div>
               </div>
-            )}
-
-            {/* ETAPA 2: Capítulos */}
-            {biblia.livro && !biblia.versos && !biblia.loading && (
-              <div style={{ padding: "0 16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                  <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => setBiblia(b => ({ ...b, livro: "", versos: null, versiculo: null }))}>← Livros</button>
-                  <div style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c" }}>{biblia.livro}</div>
-                </div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 12 }}>Escolha o capítulo:</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {Array.from({ length: biblia.capitulos || 50 }, (_, i) => i + 1).map(c => (
-                    <button key={c} style={{ width: 44, height: 44, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, fontSize: 13, color: "rgba(255,255,255,.7)", cursor: "pointer", fontFamily: "Georgia,serif" }}
-                      onClick={() => buscarVersos(biblia.livro, c)}>{c}</button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Loading */}
-            {biblia.loading && <div style={{ textAlign: "center", padding: 40, color: "rgba(255,255,255,.4)" }}>Carregando...</div>}
-
-            {/* ETAPA 3: Lista de Versículos */}
-            {biblia.versos && !biblia.loading && !biblia.versiculo && (
-              <div style={{ padding: "0 16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
-                  <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => setBiblia(b => ({ ...b, versos: null, versiculo: null }))}>← Capítulos</button>
-                  <div style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c" }}>{biblia.livro} {biblia.capitulo}</div>
-                  {biblia.capitulo > 1 && <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => buscarVersos(biblia.livro, biblia.capitulo - 1)}>‹ Ant</button>}
-                  {biblia.capitulo < (biblia.capitulos || 50) && <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => buscarVersos(biblia.livro, biblia.capitulo + 1)}>Próx ›</button>}
-                </div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 12 }}>Escolha o versículo:</div>
-                {biblia.versos.length === 0 ? (
-                  <div style={{ color: "rgba(255,255,255,.4)", fontSize: 13 }}>Capítulo não encontrado. Tente outro.</div>
-                ) : (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {biblia.versos.map(v => (
-                      <button key={v.verse} style={{ width: 44, height: 44, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, fontSize: 13, color: "rgba(255,255,255,.7)", cursor: "pointer", fontFamily: "Georgia,serif" }}
-                        onClick={() => setBiblia(b => ({ ...b, versiculo: v }))}>
-                        {v.verse}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ETAPA 4: Versículo selecionado */}
-            {biblia.versiculo && !biblia.loading && (
-              <div style={{ padding: "0 16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-                  <button style={{ ...S.livroBtn(false), fontSize: 11 }} onClick={() => setBiblia(b => ({ ...b, versiculo: null }))}>← Versículos</button>
-                  <div style={{ fontSize: 13, color: "#c9a84c" }}>{biblia.livro} {biblia.capitulo}:{biblia.versiculo.verse}</div>
-                </div>
-                <div style={{ background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 16, padding: "24px 20px", marginBottom: 16 }}>
-                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 16 }}>{biblia.livro} {biblia.capitulo}:{biblia.versiculo.verse}</div>
-                  <div style={{ fontSize: 18, lineHeight: 1.8, color: "#fff", fontStyle: "italic", borderLeft: "3px solid #c9a84c", paddingLeft: 16 }}>
-                    "{biblia.versiculo.text}"
-                  </div>
-                  <div style={{ marginTop: 16, fontSize: 12, color: "rgba(255,255,255,.4)", fontStyle: "italic" }}>João Ferreira de Almeida</div>
-                </div>
-
-                {/* Botões de compartilhar */}
-                <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "rgba(255,255,255,.3)", marginBottom: 10 }}>Compartilhar</div>
-                <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-                  <button style={{ flex: 1, padding: "12px 0", background: "rgba(37,211,102,.12)", border: "1px solid rgba(37,211,102,.3)", borderRadius: 12, color: "#25d366", fontSize: 12, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
-                    onClick={() => {
-                      const txt = `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (Almeida)\n\n📖 Família Aliança Piracicaba`;
-                      window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, "_blank");
-                    }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    WhatsApp
-                  </button>
-                  <button style={{ flex: 1, padding: "12px 0", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 12, color: "rgba(255,255,255,.7)", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
-                    onClick={() => {
-                      const txt = `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (Almeida)`;
-                      navigator.clipboard.writeText(txt);
-                      showToast("✅ Versículo copiado!");
-                    }}>
-                    📋 Copiar
-                  </button>
-                  {navigator.share && (
-                    <button style={{ flex: 1, padding: "12px 0", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.25)", borderRadius: 12, color: "#c9a84c", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
-                      onClick={() => {
-                        navigator.share({
-                          title: `${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse}`,
-                          text: `"${biblia.versiculo.text}" — ${biblia.livro} ${biblia.capitulo}:${biblia.versiculo.verse} (Almeida)`,
-                        }).catch(() => {});
-                      }}>
-                      🔗 Mais
-                    </button>
-                  )}
-                </div>
-
-                <div style={{ display: "flex", gap: 10 }}>
-                  {biblia.versiculo.verse > 1 && (
-                    <button style={{ flex: 1, padding: "11px 0", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, color: "rgba(255,255,255,.6)", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}
-                      onClick={() => setBiblia(b => ({ ...b, versiculo: b.versos.find(v => v.verse === b.versiculo.verse - 1) }))}>
-                      ‹ Anterior
-                    </button>
-                  )}
-                  {biblia.versos && biblia.versiculo.verse < biblia.versos.length && (
-                    <button style={{ flex: 1, padding: "11px 0", background: "rgba(201,168,76,.12)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 10, color: "#c9a84c", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}
-                      onClick={() => setBiblia(b => ({ ...b, versiculo: b.versos.find(v => v.verse === b.versiculo.verse + 1) }))}>
-                      Próximo ›
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
+            ))}
           </div>
         )}
 
