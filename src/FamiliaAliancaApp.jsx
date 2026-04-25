@@ -280,24 +280,24 @@ export default function FamiliaAliancaApp() {
     setBiblia(b => ({ ...b, loading: true, versos: null, versiculo: null }));
     const mapa = {
       "Gênesis":"genesis","Êxodo":"exodus","Levítico":"leviticus","Números":"numbers","Deuteronômio":"deuteronomy",
-      "Josué":"joshua","Juízes":"judges","Rute":"ruth","1 Samuel":"1+samuel","2 Samuel":"2+samuel",
-      "1 Reis":"1+kings","2 Reis":"2+kings","1 Crônicas":"1+chronicles","2 Crônicas":"2+chronicles",
+      "Josué":"joshua","Juízes":"judges","Rute":"ruth","1 Samuel":"1%20samuel","2 Samuel":"2%20samuel",
+      "1 Reis":"1%20kings","2 Reis":"2%20kings","1 Crônicas":"1%20chronicles","2 Crônicas":"2%20chronicles",
       "Esdras":"ezra","Neemias":"nehemiah","Ester":"esther","Jó":"job","Salmos":"psalms",
-      "Provérbios":"proverbs","Eclesiastes":"ecclesiastes","Cantares":"song+of+solomon",
+      "Provérbios":"proverbs","Eclesiastes":"ecclesiastes","Cantares":"song%20of%20solomon",
       "Isaías":"isaiah","Jeremias":"jeremiah","Lamentações":"lamentations","Ezequiel":"ezekiel",
       "Daniel":"daniel","Oséias":"hosea","Joel":"joel","Amós":"amos","Obadias":"obadiah",
       "Jonas":"jonah","Miquéias":"micah","Naum":"nahum","Habacuque":"habakkuk","Sofonias":"zephaniah",
       "Ageu":"haggai","Zacarias":"zechariah","Malaquias":"malachi","Mateus":"matthew","Marcos":"mark",
-      "Lucas":"luke","João":"john","Atos":"acts","Romanos":"romans","1 Coríntios":"1+corinthians",
-      "2 Coríntios":"2+corinthians","Gálatas":"galatians","Efésios":"ephesians","Filipenses":"philippians",
-      "Colossenses":"colossians","1 Tessalonicenses":"1+thessalonians","2 Tessalonicenses":"2+thessalonians",
-      "1 Timóteo":"1+timothy","2 Timóteo":"2+timothy","Tito":"titus","Filemom":"philemon",
-      "Hebreus":"hebrews","Tiago":"james","1 Pedro":"1+peter","2 Pedro":"2+peter",
-      "1 João":"1+john","2 João":"2+john","3 João":"3+john","Judas":"jude","Apocalipse":"revelation"
+      "Lucas":"luke","João":"john","Atos":"acts","Romanos":"romans","1 Coríntios":"1%20corinthians",
+      "2 Coríntios":"2%20corinthians","Gálatas":"galatians","Efésios":"ephesians","Filipenses":"philippians",
+      "Colossenses":"colossians","1 Tessalonicenses":"1%20thessalonians","2 Tessalonicenses":"2%20thessalonians",
+      "1 Timóteo":"1%20timothy","2 Timóteo":"2%20timothy","Tito":"titus","Filemom":"philemon",
+      "Hebreus":"hebrews","Tiago":"james","1 Pedro":"1%20peter","2 Pedro":"2%20peter",
+      "1 João":"1%20john","2 João":"2%20john","3 João":"3%20john","Judas":"jude","Apocalipse":"revelation"
     };
     try {
       const livroEN = mapa[livro] || livro.toLowerCase();
-      const res = await fetch(`https://bible-api.com/${livroEN}+${cap}?translation=almeida`);
+      const res = await fetch(`https://bible-api.com/${livroEN}%20${cap}?translation=almeida`);
       const data = await res.json();
       if (data.verses && data.verses.length > 0) {
         setBiblia(prev => ({ ...prev, versos: data.verses, loading: false, livro, capitulo: cap, versiculo: null }));
