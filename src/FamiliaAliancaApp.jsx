@@ -279,31 +279,28 @@ export default function FamiliaAliancaApp() {
   const buscarVersos = async (livro, cap) => {
     setBiblia(b => ({ ...b, loading: true, versos: null, versiculo: null }));
     const mapa = {
-      "Gênesis":"GN","Êxodo":"EX","Levítico":"LV","Números":"NM","Deuteronômio":"DT",
-      "Josué":"JS","Juízes":"JZ","Rute":"RT","1 Samuel":"1SM","2 Samuel":"2SM",
-      "1 Reis":"1RS","2 Reis":"2RS","1 Crônicas":"1CR","2 Crônicas":"2CR",
-      "Esdras":"ED","Neemias":"NE","Ester":"ET","Jó":"JO","Salmos":"SL",
-      "Provérbios":"PV","Eclesiastes":"EC","Cantares":"CT","Isaías":"IS",
-      "Jeremias":"JR","Lamentações":"LM","Ezequiel":"EZ","Daniel":"DN",
-      "Oséias":"OS","Joel":"JL","Amós":"AM","Obadias":"OB","Jonas":"JN",
-      "Miquéias":"MQ","Naum":"NA","Habacuque":"HC","Sofonias":"SF",
-      "Ageu":"AG","Zacarias":"ZC","Malaquias":"ML","Mateus":"MT","Marcos":"MC",
-      "Lucas":"LC","João":"JO","Atos":"AT","Romanos":"RM","1 Coríntios":"1CO",
-      "2 Coríntios":"2CO","Gálatas":"GL","Efésios":"EF","Filipenses":"FP",
-      "Colossenses":"CL","1 Tessalonicenses":"1TS","2 Tessalonicenses":"2TS",
-      "1 Timóteo":"1TM","2 Timóteo":"2TM","Tito":"TT","Filemom":"FM",
-      "Hebreus":"HB","Tiago":"TG","1 Pedro":"1PE","2 Pedro":"2PE",
-      "1 João":"1JO","2 João":"2JO","3 João":"3JO","Judas":"JD","Apocalipse":"AP"
+      "Gênesis":"genesis","Êxodo":"exodus","Levítico":"leviticus","Números":"numbers","Deuteronômio":"deuteronomy",
+      "Josué":"joshua","Juízes":"judges","Rute":"ruth","1 Samuel":"1+samuel","2 Samuel":"2+samuel",
+      "1 Reis":"1+kings","2 Reis":"2+kings","1 Crônicas":"1+chronicles","2 Crônicas":"2+chronicles",
+      "Esdras":"ezra","Neemias":"nehemiah","Ester":"esther","Jó":"job","Salmos":"psalms",
+      "Provérbios":"proverbs","Eclesiastes":"ecclesiastes","Cantares":"song+of+solomon",
+      "Isaías":"isaiah","Jeremias":"jeremiah","Lamentações":"lamentations","Ezequiel":"ezekiel",
+      "Daniel":"daniel","Oséias":"hosea","Joel":"joel","Amós":"amos","Obadias":"obadiah",
+      "Jonas":"jonah","Miquéias":"micah","Naum":"nahum","Habacuque":"habakkuk","Sofonias":"zephaniah",
+      "Ageu":"haggai","Zacarias":"zechariah","Malaquias":"malachi","Mateus":"matthew","Marcos":"mark",
+      "Lucas":"luke","João":"john","Atos":"acts","Romanos":"romans","1 Coríntios":"1+corinthians",
+      "2 Coríntios":"2+corinthians","Gálatas":"galatians","Efésios":"ephesians","Filipenses":"philippians",
+      "Colossenses":"colossians","1 Tessalonicenses":"1+thessalonians","2 Tessalonicenses":"2+thessalonians",
+      "1 Timóteo":"1+timothy","2 Timóteo":"2+timothy","Tito":"titus","Filemom":"philemon",
+      "Hebreus":"hebrews","Tiago":"james","1 Pedro":"1+peter","2 Pedro":"2+peter",
+      "1 João":"1+john","2 João":"2+john","3 João":"3+john","Judas":"jude","Apocalipse":"revelation"
     };
     try {
-      const abrev = mapa[livro] || livro;
-      const res = await fetch(`https://www.abibliadigital.com.br/api/verses/ara/${abrev}/${cap}`, {
-        headers: { "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdHIiOiJUaHUgQXByIDI0IDIwMjYgMTE6MzY6NDkgR01UKzAwMDAuZmVybmFuZG9tZWxsb0BmYW1pbGlhYWxpYW5jYS5jb20uYnIiLCJpYXQiOjE3NDU0OTA2MDl9.Xd3HG5oKcxfEgBr4bBaUzBsV2a9hST0lQK2j8RuVpfQ" }
-      });
+      const livroEN = mapa[livro] || livro.toLowerCase();
+      const res = await fetch(`https://bible-api.com/${livroEN}+${cap}?translation=almeida`);
       const data = await res.json();
-      if (data.verses) {
-        const versos = data.verses.map(v => ({ verse: v.number, text: v.text }));
-        setBiblia(prev => ({ ...prev, versos, loading: false, livro, capitulo: cap, versiculo: null }));
+      if (data.verses && data.verses.length > 0) {
+        setBiblia(prev => ({ ...prev, versos: data.verses, loading: false, livro, capitulo: cap, versiculo: null }));
       } else {
         setBiblia(b => ({ ...b, loading: false, versos: [] }));
         showToast("Capítulo não encontrado.");
