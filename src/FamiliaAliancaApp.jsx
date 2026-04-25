@@ -278,9 +278,27 @@ export default function FamiliaAliancaApp() {
   // ── BÍBLIA ──
   const buscarVersos = async (livro, cap) => {
     setBiblia(b => ({ ...b, loading: true, versos: null, versiculo: null }));
+    // Mapeamento PT -> EN para a API
+    const mapa = {
+      "Gênesis":"genesis","Êxodo":"exodus","Levítico":"leviticus","Números":"numbers","Deuteronômio":"deuteronomy",
+      "Josué":"joshua","Juízes":"judges","Rute":"ruth","1 Samuel":"1samuel","2 Samuel":"2samuel",
+      "1 Reis":"1kings","2 Reis":"2kings","1 Crônicas":"1chronicles","2 Crônicas":"2chronicles",
+      "Esdras":"ezra","Neemias":"nehemiah","Ester":"esther","Jó":"job","Salmos":"psalms",
+      "Provérbios":"proverbs","Eclesiastes":"ecclesiastes","Cantares":"song of solomon",
+      "Isaías":"isaiah","Jeremias":"jeremiah","Lamentações":"lamentations","Ezequiel":"ezekiel",
+      "Daniel":"daniel","Oséias":"hosea","Joel":"joel","Amós":"amos","Obadias":"obadiah",
+      "Jonas":"jonah","Miquéias":"micah","Naum":"nahum","Habacuque":"habakkuk","Sofonias":"zephaniah",
+      "Ageu":"haggai","Zacarias":"zechariah","Malaquias":"malachi","Mateus":"matthew","Marcos":"mark",
+      "Lucas":"luke","João":"john","Atos":"acts","Romanos":"romans","1 Coríntios":"1corinthians",
+      "2 Coríntios":"2corinthians","Gálatas":"galatians","Efésios":"ephesians","Filipenses":"philippians",
+      "Colossenses":"colossians","1 Tessalonicenses":"1thessalonians","2 Tessalonicenses":"2thessalonians",
+      "1 Timóteo":"1timothy","2 Timóteo":"2timothy","Tito":"titus","Filemom":"philemon",
+      "Hebreus":"hebrews","Tiago":"james","1 Pedro":"1peter","2 Pedro":"2peter",
+      "1 João":"1john","2 João":"2john","3 João":"3john","Judas":"jude","Apocalipse":"revelation"
+    };
     try {
-      const livroEnc = encodeURIComponent(livro);
-      const res = await fetch(`https://bible-api.com/${livroEnc}+${cap}?translation=acf`);
+      const livroEN = mapa[livro] || livro.toLowerCase();
+      const res = await fetch(`https://bible-api.com/${encodeURIComponent(livroEN)}+${cap}?translation=acf`);
       const data = await res.json();
       setBiblia(prev => ({ ...prev, versos: data.verses || [], loading: false, livro, capitulo: cap, versiculo: null }));
     } catch {
@@ -342,7 +360,7 @@ export default function FamiliaAliancaApp() {
 
     // Nav
     nav: { position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "rgba(8,8,16,.96)", borderTop: "1px solid rgba(255,255,255,.07)", display: "flex", backdropFilter: "blur(20px)", zIndex: 100 },
-    navBtn: (a) => ({ flex: 1, padding: "10px 0 14px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: a ? "#c9a84c" : "rgba(255,255,255,.55)", fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "Georgia,serif" }),
+    navBtn: (a) => ({ flex: 1, padding: "10px 0 14px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: a ? "#c9a84c" : "rgba(255,255,255,.65)", fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "Georgia,serif" }),
     navIcon: { fontSize: 18 },
 
     // Bíblia
