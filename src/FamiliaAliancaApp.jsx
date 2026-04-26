@@ -642,11 +642,20 @@ export default function FamiliaAliancaApp() {
             </div>
             {oracoes.length > 0 && isAdmin && (
               <>
-                <div style={S.secTitle}>Pedidos Recebidos</div>
-                {oracoes.slice(0, 10).map(o => (
-                  <div key={o.id} style={S.card}>
-                    <div style={{ fontSize: 13, fontWeight: "bold", color: "#c9a84c", marginBottom: 4 }}>{o.nome}</div>
-                    <div style={{ fontSize: 13, color: "rgba(255,255,255,.7)", lineHeight: 1.6 }}>{o.pedido}</div>
+                <div style={S.secTitle}>Pedidos Recebidos ({oracoes.length})</div>
+                {oracoes.map(o => (
+                  <div key={o.id} style={{ ...S.card, display: "flex", alignItems: "flex-start", gap: 12 }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: "bold", color: "#c9a84c", marginBottom: 4 }}>{o.nome}</div>
+                      <div style={{ fontSize: 13, color: "rgba(255,255,255,.7)", lineHeight: 1.6 }}>{o.pedido}</div>
+                      {o.data && <div style={{ fontSize: 11, color: "rgba(255,255,255,.3)", marginTop: 6 }}>{fmtData(o.data)}</div>}
+                    </div>
+                    <button style={S.delBtn} onClick={async () => {
+                      if (window.confirm("Excluir este pedido de oração?")) {
+                        await deleteDoc(doc(db, "oracoes", o.id));
+                        showToast("🗑️ Pedido removido!");
+                      }
+                    }}>🗑️</button>
                   </div>
                 ))}
               </>
