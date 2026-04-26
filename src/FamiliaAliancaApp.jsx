@@ -865,7 +865,7 @@ export default function FamiliaAliancaApp() {
                   const corpo = encodeURIComponent(
                     `Nome: ${voluntarioForm.nome}\nE-mail: ${voluntarioForm.email}\nWhatsApp: ${voluntarioForm.telefone}\nMinistério: ${voluntarioForm.ministerio}\n\n${voluntarioForm.mensagem}`
                   );
-                  window.open(`mailto:voluntariado@familiaalianca.com.br?subject=${assunto}&body=${corpo}`, "_blank");
+                  window.open(`mailto:voluntariado@familiaaliancapiracicaba.com.br?subject=${assunto}&body=${corpo}`, "_blank");
                   setTimeout(() => {
                     setVoluntarioForm({ nome: "", email: "", telefone: "", ministerio: "", mensagem: "" });
                     setEnviandoVoluntario(false);
