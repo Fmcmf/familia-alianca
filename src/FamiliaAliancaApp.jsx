@@ -92,6 +92,8 @@ export default function FamiliaAliancaApp() {
   const [isIOS, setIsIOS] = useState(false);
   const [historicoPalavras, setHistoricoPalavras] = useState([]);
   const [ultimoVideo, setUltimoVideo] = useState(null);
+  const [devocional, setDevocional] = useState(null);
+  const [novoDevocional, setNovoDevocional] = useState({ versiculo: "", referencia: "", palavra: "", aplicacao: "", oracao: "" });
   const [notifForm, setNotifForm] = useState({ titulo: "", mensagem: "" });
   const [voluntarioForm, setVoluntarioForm] = useState({ nome: "", email: "", telefone: "", ministerio: "", mensagem: "" });
   const [enviandoVoluntario, setEnviandoVoluntario] = useState(false);
@@ -166,12 +168,17 @@ export default function FamiliaAliancaApp() {
       if (snap.exists()) setUltimoVideo(snap.data());
     });
 
+    // Devocional da semana
+    const unsubDevocional = onSnapshot(doc(db, "config", "devocional"), (snap) => {
+      if (snap.exists()) setDevocional(snap.data());
+    });
+
     // Membros — tempo real
     const unsubMembros = onSnapshot(collection(db, "membros"), (snap) => {
       setMembros(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
-    return () => { unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico(); unsubMembros(); unsubVideo(); };
+    return () => { unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico(); unsubMembros(); unsubVideo(); unsubDevocional(); };
   }, []);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
@@ -399,6 +406,7 @@ export default function FamiliaAliancaApp() {
     { id: "home", icon: "🏠", label: "Início" },
     { id: "biblia", icon: "📖", label: "Bíblia" },
     { id: "oracao", icon: "🙏", label: "Oração" },
+    { id: "devocional", icon: "🕊️", label: "Devocional" },
     { id: "ministerios", icon: "✨", label: "Ministérios" },
     { id: "voluntario", icon: "🤲", label: "Servir" },
     { id: "mais", icon: "⋯", label: "Mais" },
@@ -643,6 +651,95 @@ export default function FamiliaAliancaApp() {
                   </div>
                 ))}
               </>
+            )}
+          </div>
+        )}
+
+        {/* ══ DEVOCIONAL ══ */}
+        {tab === "devocional" && (
+          <div style={{ animation: "slideUp .4s ease", paddingBottom: 20 }}>
+
+            {/* Hero */}
+            <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.12))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🕊️</div>
+              <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Devocional da Semana</div>
+              <div style={{ fontSize: 14, color: "rgba(255,255,255,.7)", lineHeight: 1.8, fontStyle: "italic", borderLeft: "2px solid #c9a84c", paddingLeft: 14, textAlign: "left" }}>
+                "O devocional não é uma obrigação religiosa — é um encontro de amor com Aquele que nos criou e nos redimiu."
+              </div>
+            </div>
+
+            {/* Sobre o devocional */}
+            <div style={{ margin: "16px 16px 0", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "18px" }}>
+              <div style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c", marginBottom: 10 }}>Por que fazer o devocional?</div>
+              <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.75)" }}>
+                O devocional diário é o momento sagrado em que nos aproximamos de Deus através da Sua Palavra e da oração. É nesse tempo de intimidade que nossa fé é fortalecida, nossa mente renovada e nosso coração transformado.
+              </div>
+              <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.75)", marginTop: 10 }}>
+                Assim como o corpo precisa de alimento diário, nossa alma precisa da Palavra de Deus para crescer, viver e prosperar em todas as áreas da vida.
+              </div>
+              <div style={{ marginTop: 14, fontSize: 13, color: "#c9a84c", fontStyle: "italic", borderLeft: "2px solid rgba(201,168,76,.4)", paddingLeft: 12 }}>
+                "A tua palavra é lâmpada que ilumina os meus passos e luz que clareia o meu caminho." — Salmos 119:105
+              </div>
+            </div>
+
+            {/* Devocional da semana */}
+            {devocional ? (
+              <>
+                <div style={S.secTitle}>Esta Semana</div>
+
+                {/* Versículo */}
+                <div style={{ margin: "0 16px 12px", background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.25)", borderRadius: 16, padding: "20px" }}>
+                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 12 }}>📖 Versículo da Semana</div>
+                  <div style={{ fontSize: 17, lineHeight: 1.8, color: "#fff", fontStyle: "italic", borderLeft: "3px solid #c9a84c", paddingLeft: 16, marginBottom: 10 }}>
+                    "{devocional.versiculo}"
+                  </div>
+                  <div style={{ fontSize: 13, color: "#c9a84c", textAlign: "right" }}>— {devocional.referencia}</div>
+                </div>
+
+                {/* Palavra */}
+                <div style={{ margin: "0 16px 12px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "20px" }}>
+                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 12 }}>✝️ Palavra</div>
+                  {devocional.palavra.split("\n").map((par, i) => {
+                    if (!par.trim()) return <br key={i} />;
+                    const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
+                      p.startsWith("**") && p.endsWith("**")
+                        ? <strong key={j} style={{ color: "#fff" }}>{p.slice(2, -2)}</strong>
+                        : p
+                    );
+                    return <p key={i} style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.8)", marginBottom: 10 }}>{parts}</p>;
+                  })}
+                </div>
+
+                {/* Aplicação */}
+                <div style={{ margin: "0 16px 12px", background: "rgba(100,60,180,.08)", border: "1px solid rgba(100,60,180,.2)", borderRadius: 16, padding: "20px" }}>
+                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#a78bfa", marginBottom: 12 }}>💡 Aplicação Prática</div>
+                  {devocional.aplicacao.split("\n").map((par, i) => {
+                    if (!par.trim()) return <br key={i} />;
+                    return <p key={i} style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.8)", marginBottom: 10 }}>{par}</p>;
+                  })}
+                </div>
+
+                {/* Oração */}
+                <div style={{ margin: "0 16px 12px", background: "rgba(37,211,102,.05)", border: "1px solid rgba(37,211,102,.15)", borderRadius: 16, padding: "20px" }}>
+                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#4ade80", marginBottom: 12 }}>🙏 Oração</div>
+                  <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.8)", fontStyle: "italic" }}>
+                    {devocional.oracao}
+                  </div>
+                </div>
+
+                {/* Data */}
+                {devocional.data && (
+                  <div style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,.25)", marginTop: 8 }}>
+                    Publicado em {fmtData(devocional.data)}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ margin: "16px 16px 0", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "24px", textAlign: "center" }}>
+                <div style={{ fontSize: 32, marginBottom: 10 }}>📖</div>
+                <div style={{ fontSize: 14, color: "rgba(255,255,255,.4)" }}>Nenhum devocional publicado ainda.</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,.25)", marginTop: 6 }}>Volte em breve!</div>
+              </div>
             )}
           </div>
         )}
@@ -902,9 +999,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "video", "membros"].map(t => (
+              {["agenda", "palavra", "devocional", "video", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", video: "▶️ Vídeo", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", video: "▶️ Vídeo", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
@@ -1041,6 +1138,68 @@ export default function FamiliaAliancaApp() {
                 <div style={{ marginTop: 16, background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 10, padding: "12px 14px", fontSize: 12, color: "rgba(255,255,255,.5)", lineHeight: 1.7 }}>
                   💡 A notificação será recebida por todos os membros que permitiram notificações no app.
                 </div>
+              </div>
+            )}
+
+            {/* Admin: Devocional */}
+            {adminTab === "devocional" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Devocional da Semana</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 16 }}>Publique o devocional semanal para os membros</div>
+
+                <label style={S.label}>Versículo *</label>
+                <textarea style={{ ...S.textarea, minHeight: 80, fontStyle: "italic" }}
+                  placeholder="Ex: Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito..."
+                  value={novoDevocional.versiculo}
+                  onChange={e => setNovoDevocional({ ...novoDevocional, versiculo: e.target.value })} />
+
+                <label style={S.label}>Referência *</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: João 3:16"
+                  value={novoDevocional.referencia}
+                  onChange={e => setNovoDevocional({ ...novoDevocional, referencia: e.target.value })} />
+
+                <label style={S.label}>Palavra *</label>
+                <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 11, color: "rgba(255,255,255,.45)", lineHeight: 1.7 }}>
+                  💡 Use **negrito** e Enter para parágrafos
+                </div>
+                <textarea style={{ ...S.textarea, minHeight: 160 }}
+                  placeholder="Escreva a reflexão sobre o versículo..."
+                  value={novoDevocional.palavra}
+                  onChange={e => setNovoDevocional({ ...novoDevocional, palavra: e.target.value })} />
+
+                <label style={S.label}>Aplicação Prática *</label>
+                <textarea style={{ ...S.textarea, minHeight: 100 }}
+                  placeholder="Como aplicar essa palavra no dia a dia..."
+                  value={novoDevocional.aplicacao}
+                  onChange={e => setNovoDevocional({ ...novoDevocional, aplicacao: e.target.value })} />
+
+                <label style={S.label}>Oração *</label>
+                <textarea style={{ ...S.textarea, minHeight: 100 }}
+                  placeholder="Escreva uma oração baseada no devocional..."
+                  value={novoDevocional.oracao}
+                  onChange={e => setNovoDevocional({ ...novoDevocional, oracao: e.target.value })} />
+
+                <button style={S.saveBtn} onClick={async () => {
+                  if (!novoDevocional.versiculo || !novoDevocional.referencia || !novoDevocional.palavra || !novoDevocional.aplicacao || !novoDevocional.oracao) {
+                    showToast("⚠️ Preencha todos os campos!");
+                    return;
+                  }
+                  await setDoc(doc(db, "config", "devocional"), {
+                    ...novoDevocional,
+                    data: new Date().toISOString().split("T")[0]
+                  });
+                  setNovoDevocional({ versiculo: "", referencia: "", palavra: "", aplicacao: "", oracao: "" });
+                  showToast("✅ Devocional publicado!");
+                  setAdminTab("agenda");
+                }}>🕊️ Publicar Devocional</button>
+
+                {devocional && (
+                  <div style={{ ...S.card, marginLeft: 0, marginRight: 0, marginTop: 20 }}>
+                    <div style={{ fontSize: 12, color: "#c9a84c", marginBottom: 6 }}>Devocional atual:</div>
+                    <div style={{ fontSize: 13, fontWeight: "bold" }}>{devocional.referencia}</div>
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginTop: 4 }}>{fmtData(devocional.data)}</div>
+                  </div>
+                )}
               </div>
             )}
 
