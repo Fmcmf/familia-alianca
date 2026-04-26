@@ -93,7 +93,7 @@ export default function FamiliaAliancaApp() {
   const [historicoPalavras, setHistoricoPalavras] = useState([]);
   const [ultimoVideo, setUltimoVideo] = useState(null);
   const [devocional, setDevocional] = useState(null);
-  const [novoDevocional, setNovoDevocional] = useState({ versiculo: "", referencia: "", palavra: "", aplicacao: "", oracao: "" });
+  const [novoDevocional, setNovoDevocional] = useState({ titulo: "", versiculo: "", referencia: "", palavra: "", aplicacao: "", oracao: "" });
   const [notifForm, setNotifForm] = useState({ titulo: "", mensagem: "" });
   const [voluntarioForm, setVoluntarioForm] = useState({ nome: "", email: "", telefone: "", ministerio: "", mensagem: "" });
   const [enviandoVoluntario, setEnviandoVoluntario] = useState(false);
@@ -407,7 +407,6 @@ export default function FamiliaAliancaApp() {
     { id: "biblia", icon: "📖", label: "Bíblia" },
     { id: "oracao", icon: "🙏", label: "Oração" },
     { id: "devocional", icon: "🕊️", label: "Devocional" },
-    { id: "ministerios", icon: "✨", label: "Ministérios" },
     { id: "voluntario", icon: "🤲", label: "Servir" },
     { id: "mais", icon: "⋯", label: "Mais" },
     ...(isAdmin ? [{ id: "admin", icon: "⚙️", label: "Admin" }] : []),
@@ -689,6 +688,9 @@ export default function FamiliaAliancaApp() {
 
                 {/* Versículo */}
                 <div style={{ margin: "0 16px 12px", background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.25)", borderRadius: 16, padding: "20px" }}>
+                  {devocional.titulo && (
+                    <div style={{ fontSize: 18, fontWeight: "bold", color: "#fff", marginBottom: 14, textAlign: "center" }}>{devocional.titulo}</div>
+                  )}
                   <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 12 }}>📖 Versículo da Semana</div>
                   <div style={{ fontSize: 17, lineHeight: 1.8, color: "#fff", fontStyle: "italic", borderLeft: "3px solid #c9a84c", paddingLeft: 16, marginBottom: 10 }}>
                     "{devocional.versiculo}"
@@ -804,7 +806,7 @@ export default function FamiliaAliancaApp() {
             </div>
 
             {/* Ministérios */}
-            <div style={S.secTitle}>Nossos Ministérios</div>
+            <div style={S.secTitle}>Conheça os nossos Ministérios</div>
             {MINISTERIOS.map(m => (
               <div key={m.id} style={{ margin: "0 16px 10px", background: "rgba(255,255,255,.04)", border: `1px solid ${m.cor}30`, borderLeft: `3px solid ${m.cor}`, borderRadius: 14, padding: "14px 16px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
@@ -1147,6 +1149,11 @@ export default function FamiliaAliancaApp() {
                 <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Devocional da Semana</div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 16 }}>Publique o devocional semanal para os membros</div>
 
+                <label style={S.label}>Título do Devocional *</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: A Graça que Transforma"
+                  value={novoDevocional.titulo}
+                  onChange={e => setNovoDevocional({ ...novoDevocional, titulo: e.target.value })} />
+
                 <label style={S.label}>Versículo *</label>
                 <textarea style={{ ...S.textarea, minHeight: 80, fontStyle: "italic" }}
                   placeholder="Ex: Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito..."
@@ -1180,7 +1187,7 @@ export default function FamiliaAliancaApp() {
                   onChange={e => setNovoDevocional({ ...novoDevocional, oracao: e.target.value })} />
 
                 <button style={S.saveBtn} onClick={async () => {
-                  if (!novoDevocional.versiculo || !novoDevocional.referencia || !novoDevocional.palavra || !novoDevocional.aplicacao || !novoDevocional.oracao) {
+                  if (!novoDevocional.titulo || !novoDevocional.versiculo || !novoDevocional.referencia || !novoDevocional.palavra || !novoDevocional.aplicacao || !novoDevocional.oracao) {
                     showToast("⚠️ Preencha todos os campos!");
                     return;
                   }
@@ -1188,7 +1195,7 @@ export default function FamiliaAliancaApp() {
                     ...novoDevocional,
                     data: new Date().toISOString().split("T")[0]
                   });
-                  setNovoDevocional({ versiculo: "", referencia: "", palavra: "", aplicacao: "", oracao: "" });
+                  setNovoDevocional({ titulo: "", versiculo: "", referencia: "", palavra: "", aplicacao: "", oracao: "" });
                   showToast("✅ Devocional publicado!");
                   setAdminTab("agenda");
                 }}>🕊️ Publicar Devocional</button>
