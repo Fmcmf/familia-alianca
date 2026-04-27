@@ -349,7 +349,7 @@ export default function FamiliaAliancaApp() {
     textarea: { width: "100%", background: T.input, border: `1px solid ${T.inputBorder}`, borderRadius: 10, padding: "12px 14px", color: T.text, fontSize: 14, fontFamily: "Georgia,serif", outline: "none", resize: "vertical", minHeight: 100, boxSizing: "border-box" },
     toast: { position: "fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", background: darkMode ? "#1a1830" : "#fff", border: "1px solid rgba(201,168,76,.3)", borderRadius: 12, padding: "12px 24px", fontSize: 13, color: T.text, zIndex: 999, whiteSpace: "nowrap", boxShadow: "0 4px 24px rgba(0,0,0,.2)" },
     logoutBtn: { background: "none", border: `1px solid ${T.cardBorder}`, borderRadius: 8, color: T.textSub, fontSize: 11, padding: "5px 10px", cursor: "pointer", fontFamily: "Georgia,serif" },
-    oracaoBtn: { width: "100%", marginTop: 12, padding: "14px 0", background: "linear-gradient(90deg,#25d366,#128C7E)", border: "none", borderRadius: 12, color: "#fff", fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 },
+    oracaoBtn: { width: "100%", marginTop: 12, padding: "14px 0", background: "linear-gradient(90deg,#25d366,#128C7E)", border: "none", borderRadius: 12, color: T.text, fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 },
   };
 
 
@@ -359,7 +359,7 @@ export default function FamiliaAliancaApp() {
       <style>{`@keyframes fadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}} @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}`}</style>
       <img src="/logo-igreja.png" alt="Família Aliança" style={{ width: 180, animation: "fadeIn 1s ease" }} />
       <div style={{ textAlign: "center", animation: "fadeIn 1.4s ease" }}>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,.2)", animation: "pulse 1.5s ease infinite", marginTop: 8, letterSpacing: 3 }}>Igreja do Nazareno</div>
+        <div style={{ fontSize: 12, color: T.textFaint, animation: "pulse 1.5s ease infinite", marginTop: 8, letterSpacing: 3 }}>Igreja do Nazareno</div>
       </div>
       <div style={{ position: "absolute", bottom: 32, fontSize: 11, color: "rgba(255,255,255,.15)", letterSpacing: 2 }}>v1.0</div>
     </div>
@@ -369,7 +369,7 @@ export default function FamiliaAliancaApp() {
   if (screen === "login") return (
     <div style={S.loginWrap}>
       <img src="/logo-igreja.png" alt="Família Aliança" style={{ width: 160, marginBottom: 28 }} />
-      <div style={{ fontSize: 16, fontWeight: "bold", marginBottom: 32, textAlign: "center", color: "#fff", letterSpacing: 1 }}>
+      <div style={{ fontSize: 16, fontWeight: "bold", marginBottom: 32, textAlign: "center", color: T.text, letterSpacing: 1 }}>
         {loginForm.modo === "login" ? "Entrar na sua conta" : "Criar sua conta"}
       </div>
 
@@ -419,12 +419,12 @@ export default function FamiliaAliancaApp() {
     <div style={S.app}>
       <div style={S.bg} />
       <style>{`
-        input::placeholder,textarea::placeholder{color:rgba(255,255,255,.5)}
-        input,textarea,select{color:#ffffff !important}
+        input::placeholder,textarea::placeholder{color:${darkMode ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.35)"};}
+        input,textarea,select{color:${T.text} !important; background:${T.input} !important;}
         ::-webkit-scrollbar{width:4px;height:4px}
         ::-webkit-scrollbar-track{background:transparent}
         ::-webkit-scrollbar-thumb{background:rgba(201,168,76,.3);border-radius:2px}
-        select option{background:#1a1830}
+        select option{background:${darkMode ? "#1a1830" : "#ffffff"}; color:${T.text};}
         @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
       `}</style>
 
@@ -434,8 +434,8 @@ export default function FamiliaAliancaApp() {
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <img src="/logo-igreja.png" alt="Família Aliança" style={{ height: 48, width: 48, objectFit: "contain" }} />
             <div>
-              <div style={{ fontSize: 13, fontWeight: "bold", letterSpacing: 2, color: "#fff" }}>FAMÍLIA ALIANÇA</div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,.35)", letterSpacing: 1 }}>Igreja do Nazareno</div>
+              <div style={{ fontSize: 13, fontWeight: "bold", letterSpacing: 2, color: T.text }}>FAMÍLIA ALIANÇA</div>
+              <div style={{ fontSize: 10, color: T.textSub, letterSpacing: 1 }}>Igreja do Nazareno</div>
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -458,8 +458,8 @@ export default function FamiliaAliancaApp() {
                 <div style={S.heroCard}>
                   <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 8 }}>Pr Fernando Mello</div>
                   <div style={{ fontSize: 19, fontWeight: "bold", lineHeight: 1.3, marginBottom: 8 }}>{palavra.titulo}</div>
-                  {palavra.referencia && <div style={{ fontSize: 13, color: "rgba(255,255,255,.5)", fontStyle: "italic", marginBottom: 12 }}>{palavra.referencia}</div>}
-                  <div style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,.8)", borderLeft: "2px solid #c9a84c", paddingLeft: 12 }}>
+                  {palavra.referencia && <div style={{ fontSize: 13, color: T.textSub, fontStyle: "italic", marginBottom: 12 }}>{palavra.referencia}</div>}
+                  <div style={{ fontSize: 14, lineHeight: 1.7, color: T.textSub, borderLeft: "2px solid #c9a84c", paddingLeft: 12 }}>
                     {palavra.texto.substring(0, 180)}{palavra.texto.length > 180 ? "..." : ""}
                   </div>
                   <button style={{ marginTop: 14, padding: "10px 0", width: "100%", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 10, color: "#080810", fontSize: 13, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}
@@ -469,7 +469,7 @@ export default function FamiliaAliancaApp() {
             ) : (
               <div style={{ ...S.card, textAlign: "center", padding: "32px 20px" }}>
                 <div style={{ fontSize: 36, marginBottom: 12 }}>📜</div>
-                <div style={{ fontSize: 14, color: "rgba(255,255,255,.5)" }}>Nenhuma palavra semanal publicada ainda.</div>
+                <div style={{ fontSize: 14, color: T.textSub }}>Nenhuma palavra semanal publicada ainda.</div>
               </div>
             )}
 
@@ -477,7 +477,7 @@ export default function FamiliaAliancaApp() {
             <div style={S.secTitle}>Próximas Programações</div>
             {proximos.length === 0 ? (
               <div style={{ ...S.card, textAlign: "center", padding: "28px 20px" }}>
-                <div style={{ fontSize: 13, color: "rgba(255,255,255,.4)" }}>Nenhum evento programado.</div>
+                <div style={{ fontSize: 13, color: T.textSub }}>Nenhum evento programado.</div>
               </div>
             ) : proximos.map(ev => (
               <div key={ev.id} style={S.eventoCard}>
@@ -504,7 +504,7 @@ export default function FamiliaAliancaApp() {
               </div>
               <div>
                 <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4 }}>Família Aliança Piracicaba</div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,.45)" }}>Assista nossos cultos e pregações</div>
+                <div style={{ fontSize: 12, color: T.textSub }}>Assista nossos cultos e pregações</div>
                 <div style={{ fontSize: 12, color: "#ef4444", marginTop: 4 }}>youtube.com/@familiaaliancapiracicaba</div>
               </div>
             </div>
@@ -515,9 +515,9 @@ export default function FamiliaAliancaApp() {
                 <div style={S.secTitle}>Último Culto</div>
                 <div style={{ margin: "0 16px 12px" }}>
                   {ultimoVideo.titulo && (
-                    <div style={{ fontSize: 14, fontWeight: "bold", color: "#fff", marginBottom: 10 }}>{ultimoVideo.titulo}</div>
+                    <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 10 }}>{ultimoVideo.titulo}</div>
                   )}
-                  <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,.08)" }}>
+                  <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid " + T.cardBorder }}>
                     <iframe
                       width="100%" height="200"
                       src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`}
@@ -529,7 +529,7 @@ export default function FamiliaAliancaApp() {
                     />
                   </div>
                   {ultimoVideo.data && (
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,.35)", marginTop: 8, textAlign: "right" }}>{fmtData(ultimoVideo.data)}</div>
+                    <div style={{ fontSize: 11, color: T.textFaint, marginTop: 8, textAlign: "right" }}>{fmtData(ultimoVideo.data)}</div>
                   )}
                 </div>
               </>
@@ -540,7 +540,7 @@ export default function FamiliaAliancaApp() {
             <div style={S.pixCard}>
               <div style={S.pixTitle}>💛 Dízimos & Ofertas</div>
               <div style={S.pixSub}>Contribua via PIX e seja parte da obra de Deus</div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)", marginBottom: 6, letterSpacing: 1, textTransform: "uppercase" }}>Chave PIX</div>
+              <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6, letterSpacing: 1, textTransform: "uppercase" }}>Chave PIX</div>
               <div style={S.pixKey}>{PIX_KEY}</div>
               <button style={S.copyBtn} onClick={() => { navigator.clipboard.writeText(PIX_KEY); showToast("✅ Chave PIX copiada!"); }}>
                 📋 Copiar chave PIX
@@ -558,13 +558,13 @@ export default function FamiliaAliancaApp() {
               <div style={{ fontSize: 22, fontWeight: "bold", lineHeight: 1.3, marginBottom: 8 }}>{palavra.titulo}</div>
               {palavra.referencia && <div style={{ fontSize: 14, color: "#c9a84c", fontStyle: "italic", marginBottom: 20 }}>{palavra.referencia}</div>}
               {/* Renderiza parágrafos formatados */}
-              <div style={{ fontSize: 15, lineHeight: 1.9, color: "rgba(255,255,255,.85)" }}>
+              <div style={{ fontSize: 15, lineHeight: 1.9, color: T.textSub }}>
                 {palavra.texto.split("\n").map((par, i) => {
                   if (par.trim() === "") return <br key={i} />;
                   // **negrito**
                   const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
                     p.startsWith("**") && p.endsWith("**")
-                      ? <strong key={j} style={{ color: "#fff" }}>{p.slice(2, -2)}</strong>
+                      ? <strong key={j} style={{ color: T.text }}>{p.slice(2, -2)}</strong>
                       : p
                   );
                   return <p key={i} style={{ marginBottom: 14 }}>{parts}</p>;
@@ -586,15 +586,15 @@ export default function FamiliaAliancaApp() {
             {/* Hero */}
             <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
               <div style={{ fontSize: 52, marginBottom: 16 }}>📖</div>
-              <div style={{ fontSize: 18, fontWeight: "bold", color: "#fff", marginBottom: 10 }}>Leia a Bíblia Sagrada</div>
-              <div style={{ fontSize: 14, color: "rgba(255,255,255,.65)", lineHeight: 1.7, marginBottom: 20 }}>
+              <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 10 }}>Leia a Bíblia Sagrada</div>
+              <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.7, marginBottom: 20 }}>
                 Acesse a Bíblia completa em diversas versões — NVI, NVT, ARC e muito mais — pelo YouVersion, o app de Bíblia mais usado no mundo!
               </div>
               <button style={{ width: "100%", padding: "15px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 10 }}
                 onClick={() => window.open("https://www.bible.com/pt", "_blank")}>
                 📖 Abrir Bíblia Online
               </button>
-              <button style={{ width: "100%", padding: "13px 0", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 12, color: "rgba(255,255,255,.7)", fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif" }}
+              <button style={{ width: "100%", padding: "13px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 12, color: T.textSub, fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif" }}
                 onClick={() => window.open("https://www.bible.com/app", "_blank")}>
                 📱 Baixar App YouVersion
               </button>
@@ -608,12 +608,12 @@ export default function FamiliaAliancaApp() {
               { nome: "Almeida Revista e Corrigida", sigla: "ARC", desc: "A versão clássica mais conhecida", url: "https://www.bible.com/pt/bible/212/GEN.1.ARC" },
               { nome: "Nova Tradução na Linguagem de Hoje", sigla: "NTLH", desc: "Linguagem simples e acessível", url: "https://www.bible.com/pt/bible/211/GEN.1.NTLH" },
             ].map(v => (
-              <div key={v.sigla} style={{ margin: "0 16px 10px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
+              <div key={v.sigla} style={{ margin: "0 16px 10px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
                 onClick={() => window.open(v.url, "_blank")}>
                 <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>{v.sigla}</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: "bold", color: "#fff", marginBottom: 3 }}>{v.nome}</div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,.45)" }}>{v.desc}</div>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{v.nome}</div>
+                  <div style={{ fontSize: 12, color: T.textSub }}>{v.desc}</div>
                 </div>
                 <div style={{ color: "#c9a84c", fontSize: 18 }}>›</div>
               </div>
@@ -626,7 +626,7 @@ export default function FamiliaAliancaApp() {
           <div style={{ animation: "slideUp .4s ease" }}>
             <div style={S.secTitle}>Pedido de Oração</div>
             <div style={S.card}>
-              <div style={{ fontSize: 14, color: "rgba(255,255,255,.6)", marginBottom: 16, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 14, color: T.textSub, marginBottom: 16, lineHeight: 1.6 }}>
                 Compartilhe seu pedido com o nosso Ministério de Intercessão. Vamos orar por você! 🙏
               </div>
               <label style={S.label}>Seu nome</label>
@@ -647,8 +647,8 @@ export default function FamiliaAliancaApp() {
                   <div key={o.id} style={{ ...S.card, display: "flex", alignItems: "flex-start", gap: 12 }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: "bold", color: "#c9a84c", marginBottom: 4 }}>{o.nome}</div>
-                      <div style={{ fontSize: 13, color: "rgba(255,255,255,.7)", lineHeight: 1.6 }}>{o.pedido}</div>
-                      {o.data && <div style={{ fontSize: 11, color: "rgba(255,255,255,.3)", marginTop: 6 }}>{fmtData(o.data)}</div>}
+                      <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.6 }}>{o.pedido}</div>
+                      {o.data && <div style={{ fontSize: 11, color: T.textFaint, marginTop: 6 }}>{fmtData(o.data)}</div>}
                     </div>
                     <button style={S.delBtn} onClick={async () => {
                       if (window.confirm("Excluir este pedido de oração?")) {
@@ -671,18 +671,18 @@ export default function FamiliaAliancaApp() {
             <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.12))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🕊️</div>
               <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Devocional da Semana</div>
-              <div style={{ fontSize: 14, color: "rgba(255,255,255,.7)", lineHeight: 1.8, fontStyle: "italic", borderLeft: "2px solid #c9a84c", paddingLeft: 14, textAlign: "left" }}>
+              <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.8, fontStyle: "italic", borderLeft: "2px solid #c9a84c", paddingLeft: 14, textAlign: "left" }}>
                 "O devocional não é uma obrigação religiosa — é um encontro de amor com Aquele que nos criou e nos redimiu."
               </div>
             </div>
 
             {/* Sobre o devocional */}
-            <div style={{ margin: "16px 16px 0", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "18px" }}>
+            <div style={{ margin: "16px 16px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "18px" }}>
               <div style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c", marginBottom: 10 }}>Por que fazer o devocional?</div>
-              <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.75)" }}>
+              <div style={{ fontSize: 14, lineHeight: 1.8, color: T.textSub }}>
                 O devocional diário é o momento sagrado em que nos aproximamos de Deus através da Sua Palavra e da oração. É nesse tempo de intimidade que nossa fé é fortalecida, nossa mente renovada e nosso coração transformado.
               </div>
-              <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.75)", marginTop: 10 }}>
+              <div style={{ fontSize: 14, lineHeight: 1.8, color: T.textSub, marginTop: 10 }}>
                 Assim como o corpo precisa de alimento diário, nossa alma precisa da Palavra de Deus para crescer, viver e prosperar em todas as áreas da vida.
               </div>
               <div style={{ marginTop: 14, fontSize: 13, color: "#c9a84c", fontStyle: "italic", borderLeft: "2px solid rgba(201,168,76,.4)", paddingLeft: 12 }}>
@@ -698,26 +698,26 @@ export default function FamiliaAliancaApp() {
                 {/* Versículo */}
                 <div style={{ margin: "0 16px 12px", background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.25)", borderRadius: 16, padding: "20px" }}>
                   {devocional.titulo && (
-                    <div style={{ fontSize: 18, fontWeight: "bold", color: "#fff", marginBottom: 14, textAlign: "center" }}>{devocional.titulo}</div>
+                    <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 14, textAlign: "center" }}>{devocional.titulo}</div>
                   )}
                   <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 12 }}>📖 Versículo da Semana</div>
-                  <div style={{ fontSize: 17, lineHeight: 1.8, color: "#fff", fontStyle: "italic", borderLeft: "3px solid #c9a84c", paddingLeft: 16, marginBottom: 10 }}>
+                  <div style={{ fontSize: 17, lineHeight: 1.8, color: T.text, fontStyle: "italic", borderLeft: "3px solid #c9a84c", paddingLeft: 16, marginBottom: 10 }}>
                     "{devocional.versiculo}"
                   </div>
                   <div style={{ fontSize: 13, color: "#c9a84c", textAlign: "right" }}>— {devocional.referencia}</div>
                 </div>
 
                 {/* Palavra */}
-                <div style={{ margin: "0 16px 12px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "20px" }}>
+                <div style={{ margin: "0 16px 12px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "20px" }}>
                   <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 12 }}>✝️ Palavra</div>
                   {devocional.palavra.split("\n").map((par, i) => {
                     if (!par.trim()) return <br key={i} />;
                     const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
                       p.startsWith("**") && p.endsWith("**")
-                        ? <strong key={j} style={{ color: "#fff" }}>{p.slice(2, -2)}</strong>
+                        ? <strong key={j} style={{ color: T.text }}>{p.slice(2, -2)}</strong>
                         : p
                     );
-                    return <p key={i} style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.8)", marginBottom: 10 }}>{parts}</p>;
+                    return <p key={i} style={{ fontSize: 14, lineHeight: 1.8, color: T.textSub, marginBottom: 10 }}>{parts}</p>;
                   })}
                 </div>
 
@@ -726,30 +726,30 @@ export default function FamiliaAliancaApp() {
                   <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#a78bfa", marginBottom: 12 }}>💡 Aplicação Prática</div>
                   {devocional.aplicacao.split("\n").map((par, i) => {
                     if (!par.trim()) return <br key={i} />;
-                    return <p key={i} style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.8)", marginBottom: 10 }}>{par}</p>;
+                    return <p key={i} style={{ fontSize: 14, lineHeight: 1.8, color: T.textSub, marginBottom: 10 }}>{par}</p>;
                   })}
                 </div>
 
                 {/* Oração */}
                 <div style={{ margin: "0 16px 12px", background: "rgba(37,211,102,.05)", border: "1px solid rgba(37,211,102,.15)", borderRadius: 16, padding: "20px" }}>
                   <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#4ade80", marginBottom: 12 }}>🙏 Oração</div>
-                  <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.8)", fontStyle: "italic" }}>
+                  <div style={{ fontSize: 14, lineHeight: 1.8, color: T.textSub, fontStyle: "italic" }}>
                     {devocional.oracao}
                   </div>
                 </div>
 
                 {/* Data */}
                 {devocional.data && (
-                  <div style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,.25)", marginTop: 8 }}>
+                  <div style={{ textAlign: "center", fontSize: 11, color: T.textFaint, marginTop: 8 }}>
                     Publicado em {fmtData(devocional.data)}
                   </div>
                 )}
               </>
             ) : (
-              <div style={{ margin: "16px 16px 0", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "24px", textAlign: "center" }}>
+              <div style={{ margin: "16px 16px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "24px", textAlign: "center" }}>
                 <div style={{ fontSize: 32, marginBottom: 10 }}>📖</div>
-                <div style={{ fontSize: 14, color: "rgba(255,255,255,.4)" }}>Nenhum devocional publicado ainda.</div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,.25)", marginTop: 6 }}>Volte em breve!</div>
+                <div style={{ fontSize: 14, color: T.textSub }}>Nenhum devocional publicado ainda.</div>
+                <div style={{ fontSize: 12, color: T.textFaint, marginTop: 6 }}>Volte em breve!</div>
               </div>
             )}
           </div>
@@ -766,7 +766,7 @@ export default function FamiliaAliancaApp() {
                   <div style={{ ...S.minNome, color: m.cor }}>{m.nome}</div>
                   <div style={S.minDesc}>{m.desc}</div>
                 </div>
-                <div style={{ color: "rgba(255,255,255,.3)", fontSize: 18 }}>›</div>
+                <div style={{ color: T.textFaint, fontSize: 18 }}>›</div>
               </div>
             ))}
           </div>
@@ -778,9 +778,9 @@ export default function FamiliaAliancaApp() {
             <div style={{ padding: "20px" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>{ministerioAtivo.icon}</div>
               <div style={{ fontSize: 22, fontWeight: "bold", color: ministerioAtivo.cor, marginBottom: 12 }}>{ministerioAtivo.nome}</div>
-              <div style={{ fontSize: 15, lineHeight: 1.8, color: "rgba(255,255,255,.75)" }}>{ministerioAtivo.desc}</div>
+              <div style={{ fontSize: 15, lineHeight: 1.8, color: T.textSub }}>{ministerioAtivo.desc}</div>
               <div style={{ ...S.card, marginTop: 20, marginLeft: 0, marginRight: 0 }}>
-                <div style={{ fontSize: 13, color: "rgba(255,255,255,.5)" }}>Quer fazer parte deste ministério?</div>
+                <div style={{ fontSize: 13, color: T.textSub }}>Quer fazer parte deste ministério?</div>
                 <button style={{ ...S.oracaoBtn, marginTop: 12 }}
                   onClick={() => window.open(`https://wa.me/${WHATSAPP_PASTOR}?text=${encodeURIComponent(`Olá Pastor Fernando! Gostaria de participar do ministério ${ministerioAtivo.nome}.`)}`, "_blank")}>
                   💬 Falar com o Pastor
@@ -797,19 +797,19 @@ export default function FamiliaAliancaApp() {
             <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🤲</div>
               <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 12, lineHeight: 1.3 }}>Seja um Voluntário</div>
-              <div style={{ fontSize: 14, color: "rgba(255,255,255,.75)", lineHeight: 1.8, fontStyle: "italic", borderLeft: "2px solid #c9a84c", paddingLeft: 14, textAlign: "left" }}>
+              <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.8, fontStyle: "italic", borderLeft: "2px solid #c9a84c", paddingLeft: 14, textAlign: "left" }}>
                 "O ato que mais nos assemelha a Cristo é o ato de Servir. Jesus não veio para ser servido, mas para servir e dar a sua vida em resgate de muitos."
               </div>
               <div style={{ fontSize: 12, color: "#c9a84c", marginTop: 8, textAlign: "right" }}>— Mateus 20:28</div>
             </div>
 
             {/* Texto sobre voluntariado */}
-            <div style={{ margin: "16px 16px 0", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "20px" }}>
+            <div style={{ margin: "16px 16px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "20px" }}>
               <div style={{ fontSize: 15, fontWeight: "bold", color: "#c9a84c", marginBottom: 10 }}>Por que ser voluntário?</div>
-              <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.8)" }}>
+              <div style={{ fontSize: 14, lineHeight: 1.8, color: T.textSub }}>
                 O voluntariado na Igreja Família Aliança é muito mais do que ajudar — é uma oportunidade de crescer espiritualmente, desenvolver dons e talentos, e fazer parte de algo maior do que nós mesmos.
               </div>
-              <div style={{ fontSize: 14, lineHeight: 1.8, color: "rgba(255,255,255,.8)", marginTop: 10 }}>
+              <div style={{ fontSize: 14, lineHeight: 1.8, color: T.textSub, marginTop: 10 }}>
                 Cada pessoa tem um dom único dado por Deus. Quando colocamos esses dons a serviço da Igreja, somos instrumentos da graça de Deus na vida das pessoas.
               </div>
             </div>
@@ -817,19 +817,19 @@ export default function FamiliaAliancaApp() {
             {/* Ministérios */}
             <div style={S.secTitle}>Conheça os nossos Ministérios</div>
             {MINISTERIOS.map(m => (
-              <div key={m.id} style={{ margin: "0 16px 10px", background: "rgba(255,255,255,.04)", border: `1px solid ${m.cor}30`, borderLeft: `3px solid ${m.cor}`, borderRadius: 14, padding: "14px 16px" }}>
+              <div key={m.id} style={{ margin: "0 16px 10px", background: T.card, border: `1px solid ${m.cor}30`, borderLeft: `3px solid ${m.cor}`, borderRadius: 14, padding: "14px 16px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                   <span style={{ fontSize: 22 }}>{m.icon}</span>
                   <div style={{ fontSize: 14, fontWeight: "bold", color: m.cor }}>{m.nome}</div>
                 </div>
-                <div style={{ fontSize: 13, color: "rgba(255,255,255,.65)", lineHeight: 1.6 }}>{m.desc}</div>
+                <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.6 }}>{m.desc}</div>
               </div>
             ))}
 
             {/* Formulário */}
             <div style={S.secTitle}>Quero Servir!</div>
-            <div style={{ margin: "0 16px 24px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "20px" }}>
-              <div style={{ fontSize: 13, color: "rgba(255,255,255,.55)", marginBottom: 16, lineHeight: 1.6 }}>
+            <div style={{ margin: "0 16px 24px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "20px" }}>
+              <div style={{ fontSize: 13, color: T.textSub, marginBottom: 16, lineHeight: 1.6 }}>
                 Preencha o formulário abaixo e nossa equipe entrará em contato com você! 🙏
               </div>
 
@@ -886,10 +886,10 @@ export default function FamiliaAliancaApp() {
             <div style={S.secTitle}>Horários dos Cultos</div>
             <div style={S.card}>
               {HORARIOS_CULTO.map((h, i) => (
-                <div key={i} style={{ ...S.contatoRow, borderBottom: i < HORARIOS_CULTO.length - 1 ? "1px solid rgba(255,255,255,.06)" : "none" }}>
+                <div key={i} style={{ ...S.contatoRow, borderBottom: i < HORARIOS_CULTO.length - 1 ? "1px solid " + T.cardBorder : "none" }}>
                   <div style={S.contatoIcon}>{h.icon}</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: "bold", color: "#fff" }}>{h.dia}</div>
+                    <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{h.dia}</div>
                     <div style={{ fontSize: 12, color: "#c9a84c", marginTop: 2 }}>{h.hora}</div>
                   </div>
                 </div>
@@ -899,7 +899,7 @@ export default function FamiliaAliancaApp() {
             {/* WhatsApp Atendimento */}
             <div style={S.secTitle}>Fale Conosco pelo WhatsApp</div>
             <div style={S.card}>
-              <div style={{ fontSize: 13, color: "rgba(255,255,255,.6)", marginBottom: 14, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 13, color: T.textSub, marginBottom: 14, lineHeight: 1.6 }}>
                 Entre em contato para:
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
@@ -909,7 +909,7 @@ export default function FamiliaAliancaApp() {
                   </div>
                 ))}
               </div>
-              <button style={{ width: "100%", padding: "14px 0", background: "linear-gradient(90deg,#25d366,#128C7E)", border: "none", borderRadius: 12, color: "#fff", fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+              <button style={{ width: "100%", padding: "14px 0", background: "linear-gradient(90deg,#25d366,#128C7E)", border: "none", borderRadius: 12, color: T.text, fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
                 onClick={() => window.open(`https://wa.me/${WHATSAPP_PASTOR}?text=${encodeURIComponent("Olá! Vim pelo app da Igreja Família Aliança.")}`, "_blank")}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                 (19) 99721-8590
@@ -922,11 +922,11 @@ export default function FamiliaAliancaApp() {
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
                 <div style={{ fontSize: 20, marginTop: 2 }}>📍</div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: "bold", color: "#fff", marginBottom: 3 }}>Rua Armando Longatti, nº 45</div>
-                  <div style={{ fontSize: 13, color: "rgba(255,255,255,.55)" }}>Vila Industrial — Piracicaba/SP</div>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>Rua Armando Longatti, nº 45</div>
+                  <div style={{ fontSize: 13, color: T.textSub }}>Vila Industrial — Piracicaba/SP</div>
                 </div>
               </div>
-              <div style={{ borderRadius: 10, overflow: "hidden", marginBottom: 12, border: "1px solid rgba(255,255,255,.08)" }}>
+              <div style={{ borderRadius: 10, overflow: "hidden", marginBottom: 12, border: "1px solid " + T.cardBorder }}>
                 <iframe
                   title="Localização Igreja Família Aliança"
                   width="100%" height="180"
@@ -947,12 +947,12 @@ export default function FamiliaAliancaApp() {
             <div style={S.pixCard}>
               <div style={S.pixTitle}>💛 Contribua com a Igreja</div>
               <div style={S.pixSub}>Sua contribuição sustenta a obra de Deus em Piracicaba</div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)", marginBottom: 6, letterSpacing: 1, textTransform: "uppercase" }}>Chave PIX</div>
+              <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6, letterSpacing: 1, textTransform: "uppercase" }}>Chave PIX</div>
               <div style={S.pixKey}>{PIX_KEY}</div>
               <button style={S.copyBtn} onClick={() => { navigator.clipboard.writeText(PIX_KEY); showToast("✅ Chave PIX copiada!"); }}>
                 📋 Copiar chave PIX
               </button>
-              <div style={{ marginTop: 12, fontSize: 12, color: "rgba(255,255,255,.4)", textAlign: "center" }}>
+              <div style={{ marginTop: 12, fontSize: 12, color: T.textSub, textAlign: "center" }}>
                 Você também pode entregar sua oferta presencialmente nos cultos
               </div>
             </div>
@@ -986,7 +986,7 @@ export default function FamiliaAliancaApp() {
             {/* Agenda completa */}
             <div style={S.secTitle}>Agenda Completa</div>
             {agenda.length === 0 ? (
-              <div style={{ ...S.card, textAlign: "center" }}><div style={{ fontSize: 13, color: "rgba(255,255,255,.4)" }}>Nenhum evento.</div></div>
+              <div style={{ ...S.card, textAlign: "center" }}><div style={{ fontSize: 13, color: T.textSub }}>Nenhum evento.</div></div>
             ) : agenda.map(ev => (
               <div key={ev.id} style={S.eventoCard}>
                 <div style={S.eventoData}>
@@ -1046,18 +1046,18 @@ export default function FamiliaAliancaApp() {
                   {editandoEvento ? "💾 Atualizar Evento" : "➕ Adicionar Evento"}
                 </button>
                 {editandoEvento && (
-                  <button style={{ ...S.saveBtn, background: "rgba(255,255,255,.06)", color: "rgba(255,255,255,.6)", marginTop: 8 }}
+                  <button style={{ ...S.saveBtn, background: T.card, color: T.textSub, marginTop: 8 }}
                     onClick={() => { setEditandoEvento(null); setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto" }); }}>
                     Cancelar
                   </button>
                 )}
 
-                <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "rgba(255,255,255,.3)", marginTop: 24, marginBottom: 12 }}>Eventos Cadastrados</div>
+                <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: T.textFaint, marginTop: 24, marginBottom: 12 }}>Eventos Cadastrados</div>
                 {agenda.map(ev => (
                   <div key={ev.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: "bold" }}>{ev.titulo}</div>
-                      <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)" }}>{fmtData(ev.data)} • {ev.hora}</div>
+                      <div style={{ fontSize: 12, color: T.textSub }}>{fmtData(ev.data)} • {ev.hora}</div>
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, color: "#c9a84c", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
@@ -1081,7 +1081,7 @@ export default function FamiliaAliancaApp() {
                   onChange={e => setNovaPalavra({ ...novaPalavra, referencia: e.target.value })} />
                 <label style={S.label}>Texto da Palavra</label>
                 {/* Dicas de formatação */}
-                <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 11, color: "rgba(255,255,255,.45)", lineHeight: 1.7 }}>
+                <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 11, color: T.textSub, lineHeight: 1.7 }}>
                   💡 <strong style={{ color: "#c9a84c" }}>Formatação:</strong> Use <code style={{ color: "#e8c97a" }}>**texto**</code> para <strong>negrito</strong>. Pressione Enter para novo parágrafo.
                 </div>
                 <textarea style={{ ...S.textarea, minHeight: 200, fontFamily: "Georgia,serif", lineHeight: 1.8 }}
@@ -1094,17 +1094,17 @@ export default function FamiliaAliancaApp() {
                 <button style={S.saveBtn} onClick={salvarPalavra}>💾 Publicar Palavra</button>
 
                 {/* Histórico de palavras */}
-                <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "rgba(255,255,255,.3)", marginTop: 28, marginBottom: 12 }}>Palavras Publicadas</div>
+                <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: T.textFaint, marginTop: 28, marginBottom: 12 }}>Palavras Publicadas</div>
                 {historicoPalavras.length === 0 ? (
                   <div style={{ ...S.card, marginLeft: 0, marginRight: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 13, color: "rgba(255,255,255,.4)" }}>Nenhuma palavra publicada ainda.</div>
+                    <div style={{ fontSize: 13, color: T.textSub }}>Nenhuma palavra publicada ainda.</div>
                   </div>
                 ) : historicoPalavras.map(p => (
                   <div key={p.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div style={{ flex: 1, paddingRight: 8 }}>
                       <div style={{ fontSize: 13, fontWeight: "bold", marginBottom: 3 }}>{p.titulo}</div>
                       <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 3 }}>{p.referencia}</div>
-                      <div style={{ fontSize: 11, color: "rgba(255,255,255,.35)" }}>{fmtData(p.data)}</div>
+                      <div style={{ fontSize: 11, color: T.textFaint }}>{fmtData(p.data)}</div>
                     </div>
                     <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                       <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, color: "#c9a84c", fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif" }}
@@ -1128,7 +1128,7 @@ export default function FamiliaAliancaApp() {
             {adminTab === "notif" && (
               <div style={{ padding: "0 16px" }}>
                 <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Enviar Notificação</div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 16 }}>Envie uma mensagem para todos os membros do app</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Envie uma mensagem para todos os membros do app</div>
                 <label style={S.label}>Título</label>
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Culto Especial hoje!" value={notifForm.titulo}
                   onChange={e => setNotifForm({ ...notifForm, titulo: e.target.value })} />
@@ -1146,7 +1146,7 @@ export default function FamiliaAliancaApp() {
                   setNotifForm({ titulo: "", mensagem: "" });
                   showToast("🔔 Notificação agendada!");
                 }}>🔔 Enviar para todos</button>
-                <div style={{ marginTop: 16, background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 10, padding: "12px 14px", fontSize: 12, color: "rgba(255,255,255,.5)", lineHeight: 1.7 }}>
+                <div style={{ marginTop: 16, background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 10, padding: "12px 14px", fontSize: 12, color: T.textSub, lineHeight: 1.7 }}>
                   💡 A notificação será recebida por todos os membros que permitiram notificações no app.
                 </div>
               </div>
@@ -1156,7 +1156,7 @@ export default function FamiliaAliancaApp() {
             {adminTab === "devocional" && (
               <div style={{ padding: "0 16px" }}>
                 <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Devocional da Semana</div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 16 }}>Publique o devocional semanal para os membros</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Publique o devocional semanal para os membros</div>
 
                 <label style={S.label}>Título do Devocional *</label>
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: A Graça que Transforma"
@@ -1175,7 +1175,7 @@ export default function FamiliaAliancaApp() {
                   onChange={e => setNovoDevocional({ ...novoDevocional, referencia: e.target.value })} />
 
                 <label style={S.label}>Palavra *</label>
-                <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 11, color: "rgba(255,255,255,.45)", lineHeight: 1.7 }}>
+                <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 11, color: T.textSub, lineHeight: 1.7 }}>
                   💡 Use **negrito** e Enter para parágrafos
                 </div>
                 <textarea style={{ ...S.textarea, minHeight: 160 }}
@@ -1213,7 +1213,7 @@ export default function FamiliaAliancaApp() {
                   <div style={{ ...S.card, marginLeft: 0, marginRight: 0, marginTop: 20 }}>
                     <div style={{ fontSize: 12, color: "#c9a84c", marginBottom: 6 }}>Devocional atual:</div>
                     <div style={{ fontSize: 13, fontWeight: "bold" }}>{devocional.referencia}</div>
-                    <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginTop: 4 }}>{fmtData(devocional.data)}</div>
+                    <div style={{ fontSize: 12, color: T.textSub, marginTop: 4 }}>{fmtData(devocional.data)}</div>
                   </div>
                 )}
               </div>
@@ -1223,7 +1223,7 @@ export default function FamiliaAliancaApp() {
             {adminTab === "video" && (
               <div style={{ padding: "0 16px" }}>
                 <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Último Culto no YouTube</div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 16 }}>Cole o link do vídeo para aparecer na tela inicial</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Cole o link do vídeo para aparecer na tela inicial</div>
                 <label style={S.label}>Título do culto</label>
                 <input style={{ ...S.input, marginBottom: 0 }}
                   placeholder="Ex: Culto de Domingo — 27/04/2026"
@@ -1239,7 +1239,7 @@ export default function FamiliaAliancaApp() {
                   value={ultimoVideo?.data || ""}
                   onChange={e => setUltimoVideo(v => ({ ...v, data: e.target.value }))} />
                 {ultimoVideo?.url && getYouTubeId(ultimoVideo.url) && (
-                  <div style={{ borderRadius: 12, overflow: "hidden", margin: "14px 0", border: "1px solid rgba(255,255,255,.08)" }}>
+                  <div style={{ borderRadius: 12, overflow: "hidden", margin: "14px 0", border: "1px solid " + T.cardBorder }}>
                     <iframe width="100%" height="180"
                       src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`}
                       title="Preview" frameBorder="0" allowFullScreen style={{ display: "block" }} />
@@ -1262,10 +1262,10 @@ export default function FamiliaAliancaApp() {
             {adminTab === "membros" && (
               <div style={{ padding: "0 16px" }}>
                 <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Membros Cadastrados</div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 16 }}>{membros.length} membro(s)</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>{membros.length} membro(s)</div>
                 {membros.length === 0 ? (
                   <div style={{ ...S.card, marginLeft: 0, marginRight: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 13, color: "rgba(255,255,255,.4)" }}>Nenhum membro cadastrado ainda.</div>
+                    <div style={{ fontSize: 13, color: T.textSub }}>Nenhum membro cadastrado ainda.</div>
                   </div>
                 ) : membros.map(m => (
                   <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", alignItems: "center", gap: 12 }}>
@@ -1274,7 +1274,7 @@ export default function FamiliaAliancaApp() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: "bold" }}>{m.nome}</div>
-                      <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)" }}>{m.email}</div>
+                      <div style={{ fontSize: 12, color: T.textSub }}>{m.email}</div>
                     </div>
                     <button style={S.delBtn} onClick={async () => {
                       if (window.confirm(`Excluir membro ${m.nome}?`)) {
@@ -1306,13 +1306,13 @@ export default function FamiliaAliancaApp() {
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
             <img src="/logo-igreja.png" alt="logo" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "contain" }} />
             <div>
-              <div style={{ fontSize: 14, fontWeight: "bold", color: "#fff" }}>Instalar o App</div>
-              <div style={{ fontSize: 12, color: "rgba(255,255,255,.5)" }}>Igreja Família Aliança</div>
+              <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>Instalar o App</div>
+              <div style={{ fontSize: 12, color: T.textSub }}>Igreja Família Aliança</div>
             </div>
-            <button style={{ marginLeft: "auto", background: "none", border: "none", color: "rgba(255,255,255,.4)", fontSize: 20, cursor: "pointer", padding: "0 4px" }} onClick={() => setShowInstallBanner(false)}>✕</button>
+            <button style={{ marginLeft: "auto", background: "none", border: "none", color: T.textSub, fontSize: 20, cursor: "pointer", padding: "0 4px" }} onClick={() => setShowInstallBanner(false)}>✕</button>
           </div>
           {isIOS ? (
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,.65)", lineHeight: 1.7, background: "rgba(255,255,255,.05)", borderRadius: 10, padding: "10px 12px" }}>
+            <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.7, background: T.card, borderRadius: 10, padding: "10px 12px" }}>
               Para instalar no iPhone: toque em <strong style={{ color: "#c9a84c" }}>Compartilhar</strong> (ícone de seta) e depois em <strong style={{ color: "#c9a84c" }}>"Adicionar à Tela de Início"</strong>
             </div>
           ) : (
