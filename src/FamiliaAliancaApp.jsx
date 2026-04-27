@@ -904,7 +904,7 @@ export default function FamiliaAliancaApp() {
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
                 {WHATSAPP_SERVICOS.map((s, i) => (
-                  <div key={i} style={{ padding: "6px 12px", background: "rgba(37,211,102,.08)", border: "1px solid rgba(37,211,102,.2)", borderRadius: 20, fontSize: 12, color: "#4ade80", display: "flex", alignItems: "center", gap: 5 }}>
+                  <div key={i} style={{ padding: "6px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 20, fontSize: 12, color: T.text, display: "flex", alignItems: "center", gap: 5 }}>
                     <span>{s.icon}</span>{s.label}
                   </div>
                 ))}
