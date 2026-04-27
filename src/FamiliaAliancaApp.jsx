@@ -261,99 +261,94 @@ export default function FamiliaAliancaApp() {
     showToast("🙏 Pedido enviado!");
   };
 
-  // ── STYLES ──
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("familiaAlianca_theme");
+    return saved ? saved === "dark" : true;
+  });
+
+  const toggleTheme = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem("familiaAlianca_theme", newMode ? "dark" : "light");
+  };
+
+  // Cores do tema
+  const T = {
+    bg: darkMode ? "#080810" : "#f5f5f7",
+    bg2: darkMode ? "#0f0f1a" : "#ffffff",
+    card: darkMode ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)",
+    cardBorder: darkMode ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.1)",
+    text: darkMode ? "#f0eefc" : "#1a1a2e",
+    textSub: darkMode ? "rgba(255,255,255,.5)" : "rgba(0,0,0,.5)",
+    textFaint: darkMode ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.25)",
+    nav: darkMode ? "#0a0a14" : "#ffffff",
+    navBorder: darkMode ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.1)",
+    header: darkMode ? "#0a0a14" : "#ffffff",
+    input: darkMode ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.06)",
+    inputBorder: darkMode ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.12)",
+    gold: "#c9a84c",
+  };
   const S = {
-    app: { minHeight: "100vh", background: "#080810", color: "#f0eefc", fontFamily: "'Georgia', 'Times New Roman', serif", position: "relative", overflowX: "hidden" },
-    bg: { position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(100,60,180,.15) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 80% 100%, rgba(201,168,76,.08) 0%, transparent 60%)" },
+    app: { minHeight: "100vh", background: T.bg, color: T.text, fontFamily: "'Georgia', 'Times New Roman', serif", position: "relative", overflowX: "hidden" },
+    bg: { position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", background: darkMode ? "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(100,60,180,.15) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 80% 100%, rgba(201,168,76,.08) 0%, transparent 60%)" : "none" },
     wrap: { position: "relative", zIndex: 1, maxWidth: 430, margin: "0 auto", paddingBottom: 90 },
-
-    // Splash
-    splash: { minHeight: "100vh", background: "#080810", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 },
+    splash: { minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 },
     splashLogo: { width: 160, animation: "fadeIn 1s ease" },
-    splashTag: { fontSize: 13, letterSpacing: 4, textTransform: "uppercase", color: "rgba(255,255,255,.35)" },
-
-    // Login
-    loginWrap: { minHeight: "100vh", background: "#080810", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 28px" },
+    splashTag: { fontSize: 13, letterSpacing: 4, textTransform: "uppercase", color: T.textSub },
+    loginWrap: { minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 28px" },
     loginLogo: { width: 120, marginBottom: 32 },
     loginTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 6, textAlign: "center" },
-    loginSub: { fontSize: 13, color: "rgba(255,255,255,.4)", marginBottom: 32, textAlign: "center" },
-    input: { width: "100%", background: "rgba(255,255,255,.10)", border: "1px solid rgba(255,255,255,.25)", borderRadius: 12, padding: "14px 16px", color: "#ffffff", fontSize: 15, fontFamily: "Georgia,serif", outline: "none", boxSizing: "border-box", marginBottom: 12 },
+    loginSub: { fontSize: 13, color: T.textSub, marginBottom: 32, textAlign: "center" },
+    input: { width: "100%", background: T.input, border: `1px solid ${T.inputBorder}`, borderRadius: 12, padding: "14px 16px", color: T.text, fontSize: 15, fontFamily: "Georgia,serif", outline: "none", boxSizing: "border-box", marginBottom: 12 },
     loginBtn: { width: "100%", padding: "14px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 12 },
     switchBtn: { background: "none", border: "none", color: "#c9a84c", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif", textDecoration: "underline" },
     errMsg: { color: "#ef4444", fontSize: 13, marginBottom: 10, textAlign: "center" },
-
-    // Header
-    header: { padding: "28px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" },
+    header: { padding: "28px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", background: T.header, borderBottom: `1px solid ${T.navBorder}` },
     headerLogo: { height: 38 },
-    headerUser: { fontSize: 12, color: "rgba(255,255,255,.4)", textAlign: "right" },
+    headerUser: { fontSize: 12, color: T.textSub, textAlign: "right" },
     headerName: { fontSize: 13, color: "#c9a84c", fontWeight: "bold" },
-
-    // Section
-    secTitle: { fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "rgba(255,255,255,.3)", padding: "0 20px", marginBottom: 12, marginTop: 24 },
-
-    // Cards
-    card: { margin: "0 16px 12px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "16px 18px" },
+    secTitle: { fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub, padding: "0 20px", marginBottom: 12, marginTop: 24 },
+    card: { margin: "0 16px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "16px 18px" },
     heroCard: { margin: "0 16px 8px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.12))", border: "1px solid rgba(201,168,76,.2)", borderRadius: 20, padding: "22px 20px" },
-
-    // Evento
-    eventoCard: { margin: "0 16px 10px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.07)", borderRadius: 14, padding: "14px 16px", display: "flex", gap: 14, alignItems: "center" },
+    eventoCard: { margin: "0 16px 10px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", display: "flex", gap: 14, alignItems: "center" },
     eventoData: { minWidth: 44, textAlign: "center" },
     eventoDay: { fontSize: 22, fontWeight: "bold", color: "#c9a84c", lineHeight: 1 },
-    eventoMon: { fontSize: 10, color: "rgba(255,255,255,.4)", textTransform: "uppercase" },
+    eventoMon: { fontSize: 10, color: T.textSub, textTransform: "uppercase" },
     eventoInfo: { flex: 1 },
     eventoTitle: { fontSize: 14, fontWeight: "bold", marginBottom: 3 },
-    eventoSub: { fontSize: 12, color: "rgba(255,255,255,.4)" },
+    eventoSub: { fontSize: 12, color: T.textSub },
     eventoBadge: (tipo) => ({ display: "inline-block", fontSize: 10, padding: "2px 8px", borderRadius: 20, background: `${tipoColor[tipo]}22`, color: tipoColor[tipo], border: `1px solid ${tipoColor[tipo]}44`, marginTop: 4 }),
-
-    // Ministerio
-    minCard: { margin: "0 16px 10px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 },
+    minCard: { margin: "0 16px 10px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 },
     minIcon: { fontSize: 28, minWidth: 44, textAlign: "center" },
     minInfo: { flex: 1 },
     minNome: { fontSize: 14, fontWeight: "bold", marginBottom: 3 },
-    minDesc: { fontSize: 12, color: "rgba(255,255,255,.45)", lineHeight: 1.5 },
-
-    // Nav
-    nav: { position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: "rgba(8,8,16,.96)", borderTop: "1px solid rgba(255,255,255,.07)", display: "flex", backdropFilter: "blur(20px)", zIndex: 100 },
-    navBtn: (a) => ({ flex: 1, padding: "10px 0 14px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: a ? "#c9a84c" : "rgba(255,255,255,.65)", fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "Georgia,serif" }),
+    minDesc: { fontSize: 12, color: T.textSub, lineHeight: 1.5 },
+    nav: { position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: T.nav, borderTop: `1px solid ${T.navBorder}`, display: "flex", backdropFilter: "blur(20px)", zIndex: 100 },
+    navBtn: (a) => ({ flex: 1, padding: "10px 0 14px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: a ? "#c9a84c" : darkMode ? "rgba(255,255,255,.65)" : "rgba(0,0,0,.45)", fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "Georgia,serif" }),
     navIcon: { fontSize: 18 },
-
-
-    // Contribuição
     pixCard: { margin: "0 16px 12px", background: "linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 16, padding: "20px" },
     pixTitle: { fontSize: 16, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" },
-    pixSub: { fontSize: 12, color: "rgba(255,255,255,.5)", marginBottom: 16 },
-    pixKey: { background: "rgba(0,0,0,.3)", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "#e8c97a", letterSpacing: 1, marginBottom: 8, wordBreak: "break-all" },
+    pixSub: { fontSize: 12, color: T.textSub, marginBottom: 16 },
+    pixKey: { background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.08)", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "#e8c97a", letterSpacing: 1, marginBottom: 8, wordBreak: "break-all" },
     copyBtn: { width: "100%", padding: "12px 0", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 10, color: "#c9a84c", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" },
-
-    // Palavra
-    palavraCard: { margin: "0 16px 12px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "20px" },
+    palavraCard: { margin: "0 16px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "20px" },
     palavraTitulo: { fontSize: 18, fontWeight: "bold", marginBottom: 8, lineHeight: 1.3 },
     palavraRef: { fontSize: 13, color: "#c9a84c", marginBottom: 12, fontStyle: "italic" },
-    palavraTexto: { fontSize: 14.5, lineHeight: 1.8, color: "rgba(255,255,255,.82)" },
-
-    // Contato
-    contatoRow: { display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,.06)" },
+    palavraTexto: { fontSize: 14.5, lineHeight: 1.8, color: T.textSub },
+    contatoRow: { display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: `1px solid ${T.cardBorder}` },
     contatoIcon: { fontSize: 20, minWidth: 32, textAlign: "center" },
-    contatoText: { fontSize: 13, color: "rgba(255,255,255,.75)" },
-
-    // Admin
+    contatoText: { fontSize: 13, color: T.textSub },
     adminHeader: { padding: "24px 20px 8px", display: "flex", justifyContent: "space-between", alignItems: "center" },
     adminTitle: { fontSize: 17, fontWeight: "bold" },
     adminTabs: { display: "flex", gap: 8, padding: "0 16px", marginBottom: 20, overflowX: "auto" },
-    adminTab: (a) => ({ padding: "8px 16px", background: a ? "rgba(201,168,76,.2)" : "rgba(255,255,255,.04)", border: `1px solid ${a ? "rgba(201,168,76,.4)" : "rgba(255,255,255,.08)"}`, borderRadius: 20, fontSize: 12, color: a ? "#c9a84c" : "rgba(255,255,255,.5)", cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }),
-    label: { display: "block", fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "rgba(255,255,255,.35)", marginBottom: 6, marginTop: 14 },
-    select: { width: "100%", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 10, padding: "12px 14px", color: "#f0eefc", fontSize: 14, fontFamily: "Georgia,serif", outline: "none", boxSizing: "border-box" },
+    adminTab: (a) => ({ padding: "8px 16px", background: a ? "rgba(201,168,76,.2)" : T.card, border: `1px solid ${a ? "rgba(201,168,76,.4)" : T.cardBorder}`, borderRadius: 20, fontSize: 12, color: a ? "#c9a84c" : T.textSub, cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }),
+    label: { display: "block", fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.textSub, marginBottom: 6, marginTop: 14 },
+    select: { width: "100%", background: T.input, border: `1px solid ${T.inputBorder}`, borderRadius: 10, padding: "12px 14px", color: T.text, fontSize: 14, fontFamily: "Georgia,serif", outline: "none", boxSizing: "border-box" },
     saveBtn: { width: "100%", marginTop: 16, padding: "14px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" },
     delBtn: { padding: "6px 12px", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 8, color: "#ef4444", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" },
-    textarea: { width: "100%", background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 10, padding: "12px 14px", color: "#f0eefc", fontSize: 14, fontFamily: "Georgia,serif", outline: "none", resize: "vertical", minHeight: 100, boxSizing: "border-box" },
-
-    // Toast
-    toast: { position: "fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", background: "#1a1830", border: "1px solid rgba(201,168,76,.3)", borderRadius: 12, padding: "12px 24px", fontSize: 13, color: "#f0eefc", zIndex: 999, whiteSpace: "nowrap", boxShadow: "0 4px 24px rgba(0,0,0,.5)" },
-
-    // Logout
-    logoutBtn: { background: "none", border: "1px solid rgba(255,255,255,.12)", borderRadius: 8, color: "rgba(255,255,255,.4)", fontSize: 11, padding: "5px 10px", cursor: "pointer", fontFamily: "Georgia,serif" },
-
-    // Oração form
+    textarea: { width: "100%", background: T.input, border: `1px solid ${T.inputBorder}`, borderRadius: 10, padding: "12px 14px", color: T.text, fontSize: 14, fontFamily: "Georgia,serif", outline: "none", resize: "vertical", minHeight: 100, boxSizing: "border-box" },
+    toast: { position: "fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", background: darkMode ? "#1a1830" : "#fff", border: "1px solid rgba(201,168,76,.3)", borderRadius: 12, padding: "12px 24px", fontSize: 13, color: T.text, zIndex: 999, whiteSpace: "nowrap", boxShadow: "0 4px 24px rgba(0,0,0,.2)" },
+    logoutBtn: { background: "none", border: `1px solid ${T.cardBorder}`, borderRadius: 8, color: T.textSub, fontSize: 11, padding: "5px 10px", cursor: "pointer", fontFamily: "Georgia,serif" },
     oracaoBtn: { width: "100%", marginTop: 12, padding: "14px 0", background: "linear-gradient(90deg,#25d366,#128C7E)", border: "none", borderRadius: 12, color: "#fff", fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 },
   };
 
@@ -444,7 +439,12 @@ export default function FamiliaAliancaApp() {
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
-            <button style={S.logoutBtn} onClick={handleLogout}>Sair</button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button onClick={toggleTheme} style={{ background: "none", border: `1px solid ${T.cardBorder}`, borderRadius: 20, padding: "5px 10px", cursor: "pointer", fontSize: 15 }}>
+                {darkMode ? "☀️" : "🌙"}
+              </button>
+              <button style={S.logoutBtn} onClick={handleLogout}>Sair</button>
+            </div>
           </div>
         </div>
 
