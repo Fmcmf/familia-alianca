@@ -357,7 +357,7 @@ export default function FamiliaAliancaApp() {
   if (screen === "splash") return (
     <div style={S.splash}>
       <style>{`@keyframes fadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}} @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}`}</style>
-      <img src="/logo-igreja.png" alt="Família Aliança" style={{ width: 180, animation: "fadeIn 1s ease" }} />
+      <img src="/logo-igreja.png" alt="Família Aliança" style={{ width: 180, animation: "fadeIn 1s ease", borderRadius: 16, background: darkMode ? "transparent" : "#080810", padding: darkMode ? 0 : 12 }} />
       <div style={{ textAlign: "center", animation: "fadeIn 1.4s ease" }}>
         <div style={{ fontSize: 12, color: T.textFaint, animation: "pulse 1.5s ease infinite", marginTop: 8, letterSpacing: 3 }}>Igreja do Nazareno</div>
       </div>
@@ -368,7 +368,7 @@ export default function FamiliaAliancaApp() {
   // ── LOGIN ──
   if (screen === "login") return (
     <div style={S.loginWrap}>
-      <img src="/logo-igreja.png" alt="Família Aliança" style={{ width: 160, marginBottom: 28 }} />
+      <img src="/logo-igreja.png" alt="Família Aliança" style={{ width: 160, marginBottom: 28, borderRadius: 16, background: darkMode ? "transparent" : "#080810", padding: darkMode ? 0 : 12 }} />
       <div style={{ fontSize: 16, fontWeight: "bold", marginBottom: 32, textAlign: "center", color: T.text, letterSpacing: 1 }}>
         {loginForm.modo === "login" ? "Entrar na sua conta" : "Criar sua conta"}
       </div>
@@ -432,7 +432,7 @@ export default function FamiliaAliancaApp() {
         {/* HEADER */}
         <div style={S.header}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <img src="/logo-igreja.png" alt="Família Aliança" style={{ height: 48, width: 48, objectFit: "contain" }} />
+            <img src="/logo-igreja.png" alt="Família Aliança" style={{ height: 48, width: 48, objectFit: "contain", borderRadius: 10, background: darkMode ? "transparent" : "#080810", padding: darkMode ? 0 : 4 }} />
             <div>
               <div style={{ fontSize: 13, fontWeight: "bold", letterSpacing: 2, color: T.text }}>FAMÍLIA ALIANÇA</div>
               <div style={{ fontSize: 10, color: T.textSub, letterSpacing: 1 }}>Igreja do Nazareno</div>
