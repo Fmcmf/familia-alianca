@@ -274,19 +274,19 @@ export default function FamiliaAliancaApp() {
 
   // Cores do tema
   const T = {
-    bg: darkMode ? "#080810" : "#f5f5f7",
+    bg: darkMode ? "#080810" : "#f0f0f5",
     bg2: darkMode ? "#0f0f1a" : "#ffffff",
-    card: darkMode ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)",
-    cardBorder: darkMode ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.1)",
-    text: darkMode ? "#f0eefc" : "#1a1a2e",
-    textSub: darkMode ? "rgba(255,255,255,.5)" : "rgba(0,0,0,.5)",
-    textFaint: darkMode ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.25)",
+    card: darkMode ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.07)",
+    cardBorder: darkMode ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.18)",
+    text: darkMode ? "#f0eefc" : "#0a0a1a",
+    textSub: darkMode ? "rgba(255,255,255,.5)" : "rgba(0,0,0,.65)",
+    textFaint: darkMode ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.4)",
     nav: darkMode ? "#0a0a14" : "#ffffff",
-    navBorder: darkMode ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.1)",
+    navBorder: darkMode ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.15)",
     header: darkMode ? "#0a0a14" : "#ffffff",
-    input: darkMode ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.06)",
-    inputBorder: darkMode ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.12)",
-    gold: "#c9a84c",
+    input: darkMode ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.07)",
+    inputBorder: darkMode ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.2)",
+    gold: darkMode ? "#c9a84c" : "#9a7020",
   };
   const S = {
     app: { minHeight: "100vh", background: T.bg, color: T.text, fontFamily: "'Georgia', 'Times New Roman', serif", position: "relative", overflowX: "hidden" },
@@ -301,18 +301,18 @@ export default function FamiliaAliancaApp() {
     loginSub: { fontSize: 13, color: T.textSub, marginBottom: 32, textAlign: "center" },
     input: { width: "100%", background: T.input, border: `1px solid ${T.inputBorder}`, borderRadius: 12, padding: "14px 16px", color: T.text, fontSize: 15, fontFamily: "Georgia,serif", outline: "none", boxSizing: "border-box", marginBottom: 12 },
     loginBtn: { width: "100%", padding: "14px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 12 },
-    switchBtn: { background: "none", border: "none", color: "#c9a84c", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif", textDecoration: "underline" },
+    switchBtn: { background: "none", border: "none", color: T.gold, fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif", textDecoration: "underline" },
     errMsg: { color: "#ef4444", fontSize: 13, marginBottom: 10, textAlign: "center" },
     header: { padding: "28px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", background: T.header, borderBottom: `1px solid ${T.navBorder}` },
     headerLogo: { height: 38 },
     headerUser: { fontSize: 12, color: T.textSub, textAlign: "right" },
-    headerName: { fontSize: 13, color: "#c9a84c", fontWeight: "bold" },
+    headerName: { fontSize: 13, color: T.gold, fontWeight: "bold" },
     secTitle: { fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub, padding: "0 20px", marginBottom: 12, marginTop: 24 },
     card: { margin: "0 16px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "16px 18px" },
-    heroCard: { margin: "0 16px 8px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.12))", border: "1px solid rgba(201,168,76,.2)", borderRadius: 20, padding: "22px 20px" },
+    heroCard: { margin: "0 16px 8px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.12))", border: `1px solid ${darkMode ? "rgba(201,168,76,.2)" : "rgba(154,112,32,.5)"}`, borderRadius: 20, padding: "22px 20px" },
     eventoCard: { margin: "0 16px 10px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", display: "flex", gap: 14, alignItems: "center" },
     eventoData: { minWidth: 44, textAlign: "center" },
-    eventoDay: { fontSize: 22, fontWeight: "bold", color: "#c9a84c", lineHeight: 1 },
+    eventoDay: { fontSize: 22, fontWeight: "bold", color: T.gold, lineHeight: 1 },
     eventoMon: { fontSize: 10, color: T.textSub, textTransform: "uppercase" },
     eventoInfo: { flex: 1 },
     eventoTitle: { fontSize: 14, fontWeight: "bold", marginBottom: 3 },
@@ -326,14 +326,14 @@ export default function FamiliaAliancaApp() {
     nav: { position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: T.nav, borderTop: `1px solid ${T.navBorder}`, display: "flex", backdropFilter: "blur(20px)", zIndex: 100 },
     navBtn: (a) => ({ flex: 1, padding: "10px 0 14px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: a ? "#c9a84c" : darkMode ? "rgba(255,255,255,.65)" : "rgba(0,0,0,.45)", fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "Georgia,serif" }),
     navIcon: { fontSize: 18 },
-    pixCard: { margin: "0 16px 12px", background: "linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 16, padding: "20px" },
-    pixTitle: { fontSize: 16, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" },
+    pixCard: { margin: "0 16px 12px", background: "linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 16, padding: "20px" },
+    pixTitle: { fontSize: 16, fontWeight: "bold", marginBottom: 4, color: T.gold },
     pixSub: { fontSize: 12, color: T.textSub, marginBottom: 16 },
     pixKey: { background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.08)", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "#e8c97a", letterSpacing: 1, marginBottom: 8, wordBreak: "break-all" },
-    copyBtn: { width: "100%", padding: "12px 0", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 10, color: "#c9a84c", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" },
+    copyBtn: { width: "100%", padding: "12px 0", background: "rgba(201,168,76,.15)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 10, color: T.gold, fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" },
     palavraCard: { margin: "0 16px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "20px" },
     palavraTitulo: { fontSize: 18, fontWeight: "bold", marginBottom: 8, lineHeight: 1.3 },
-    palavraRef: { fontSize: 13, color: "#c9a84c", marginBottom: 12, fontStyle: "italic" },
+    palavraRef: { fontSize: 13, color: T.gold, marginBottom: 12, fontStyle: "italic" },
     palavraTexto: { fontSize: 14.5, lineHeight: 1.8, color: T.textSub },
     contatoRow: { display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: `1px solid ${T.cardBorder}` },
     contatoIcon: { fontSize: 20, minWidth: 32, textAlign: "center" },
@@ -347,7 +347,7 @@ export default function FamiliaAliancaApp() {
     saveBtn: { width: "100%", marginTop: 16, padding: "14px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" },
     delBtn: { padding: "6px 12px", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 8, color: "#ef4444", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" },
     textarea: { width: "100%", background: T.input, border: `1px solid ${T.inputBorder}`, borderRadius: 10, padding: "12px 14px", color: T.text, fontSize: 14, fontFamily: "Georgia,serif", outline: "none", resize: "vertical", minHeight: 100, boxSizing: "border-box" },
-    toast: { position: "fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", background: darkMode ? "#1a1830" : "#fff", border: "1px solid rgba(201,168,76,.3)", borderRadius: 12, padding: "12px 24px", fontSize: 13, color: T.text, zIndex: 999, whiteSpace: "nowrap", boxShadow: "0 4px 24px rgba(0,0,0,.2)" },
+    toast: { position: "fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", background: darkMode ? "#1a1830" : "#fff", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 12, padding: "12px 24px", fontSize: 13, color: T.text, zIndex: 999, whiteSpace: "nowrap", boxShadow: "0 4px 24px rgba(0,0,0,.2)" },
     logoutBtn: { background: "none", border: `1px solid ${T.cardBorder}`, borderRadius: 8, color: T.textSub, fontSize: 11, padding: "5px 10px", cursor: "pointer", fontFamily: "Georgia,serif" },
     oracaoBtn: { width: "100%", marginTop: 12, padding: "14px 0", background: "linear-gradient(90deg,#25d366,#128C7E)", border: "none", borderRadius: 12, color: T.text, fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 },
   };
@@ -456,7 +456,7 @@ export default function FamiliaAliancaApp() {
               <>
                 <div style={S.secTitle}>Palavra Semanal</div>
                 <div style={S.heroCard}>
-                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 8 }}>Pr Fernando Mello</div>
+                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.gold, marginBottom: 8 }}>Pr Fernando Mello</div>
                   <div style={{ fontSize: 19, fontWeight: "bold", lineHeight: 1.3, marginBottom: 8 }}>{palavra.titulo}</div>
                   {palavra.referencia && <div style={{ fontSize: 13, color: T.textSub, fontStyle: "italic", marginBottom: 12 }}>{palavra.referencia}</div>}
                   <div style={{ fontSize: 14, lineHeight: 1.7, color: T.textSub, borderLeft: "2px solid #c9a84c", paddingLeft: 12 }}>
@@ -552,11 +552,11 @@ export default function FamiliaAliancaApp() {
         {/* ══ PALAVRA COMPLETA ══ */}
         {tab === "palavra" && palavra && (
           <div style={{ animation: "slideUp .4s ease", padding: "0 0 20px" }}>
-            <div style={{ padding: "20px 20px 0", cursor: "pointer", color: "#c9a84c", fontSize: 13 }} onClick={() => setTab("home")}>← Voltar</div>
+            <div style={{ padding: "20px 20px 0", cursor: "pointer", color: T.gold, fontSize: 13 }} onClick={() => setTab("home")}>← Voltar</div>
             <div style={{ padding: "16px 20px 0" }}>
-              <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 8 }}>Palavra Semanal • {fmtData(palavra.data)}</div>
+              <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.gold, marginBottom: 8 }}>Palavra Semanal • {fmtData(palavra.data)}</div>
               <div style={{ fontSize: 22, fontWeight: "bold", lineHeight: 1.3, marginBottom: 8 }}>{palavra.titulo}</div>
-              {palavra.referencia && <div style={{ fontSize: 14, color: "#c9a84c", fontStyle: "italic", marginBottom: 20 }}>{palavra.referencia}</div>}
+              {palavra.referencia && <div style={{ fontSize: 14, color: T.gold, fontStyle: "italic", marginBottom: 20 }}>{palavra.referencia}</div>}
               {/* Renderiza parágrafos formatados */}
               <div style={{ fontSize: 15, lineHeight: 1.9, color: T.textSub }}>
                 {palavra.texto.split("\n").map((par, i) => {
@@ -584,7 +584,7 @@ export default function FamiliaAliancaApp() {
             <div style={S.secTitle}>Bíblia Sagrada</div>
 
             {/* Hero */}
-            <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
+            <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
               <div style={{ fontSize: 52, marginBottom: 16 }}>📖</div>
               <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 10 }}>Leia a Bíblia Sagrada</div>
               <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.7, marginBottom: 20 }}>
@@ -610,12 +610,12 @@ export default function FamiliaAliancaApp() {
             ].map(v => (
               <div key={v.sigla} style={{ margin: "0 16px 10px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
                 onClick={() => window.open(v.url, "_blank")}>
-                <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>{v.sigla}</div>
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>{v.sigla}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{v.nome}</div>
                   <div style={{ fontSize: 12, color: T.textSub }}>{v.desc}</div>
                 </div>
-                <div style={{ color: "#c9a84c", fontSize: 18 }}>›</div>
+                <div style={{ color: T.gold, fontSize: 18 }}>›</div>
               </div>
             ))}
           </div>
@@ -646,7 +646,7 @@ export default function FamiliaAliancaApp() {
                 {oracoes.map(o => (
                   <div key={o.id} style={{ ...S.card, display: "flex", alignItems: "flex-start", gap: 12 }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: "bold", color: "#c9a84c", marginBottom: 4 }}>{o.nome}</div>
+                      <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>{o.nome}</div>
                       <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.6 }}>{o.pedido}</div>
                       {o.data && <div style={{ fontSize: 11, color: T.textFaint, marginTop: 6 }}>{fmtData(o.data)}</div>}
                     </div>
@@ -668,7 +668,7 @@ export default function FamiliaAliancaApp() {
           <div style={{ animation: "slideUp .4s ease", paddingBottom: 20 }}>
 
             {/* Hero */}
-            <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.12))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
+            <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.12))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🕊️</div>
               <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Devocional da Semana</div>
               <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.8, fontStyle: "italic", borderLeft: "2px solid #c9a84c", paddingLeft: 14, textAlign: "left" }}>
@@ -678,14 +678,14 @@ export default function FamiliaAliancaApp() {
 
             {/* Sobre o devocional */}
             <div style={{ margin: "16px 16px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "18px" }}>
-              <div style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c", marginBottom: 10 }}>Por que fazer o devocional?</div>
+              <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>Por que fazer o devocional?</div>
               <div style={{ fontSize: 14, lineHeight: 1.8, color: T.textSub }}>
                 O devocional diário é o momento sagrado em que nos aproximamos de Deus através da Sua Palavra e da oração. É nesse tempo de intimidade que nossa fé é fortalecida, nossa mente renovada e nosso coração transformado.
               </div>
               <div style={{ fontSize: 14, lineHeight: 1.8, color: T.textSub, marginTop: 10 }}>
                 Assim como o corpo precisa de alimento diário, nossa alma precisa da Palavra de Deus para crescer, viver e prosperar em todas as áreas da vida.
               </div>
-              <div style={{ marginTop: 14, fontSize: 13, color: "#c9a84c", fontStyle: "italic", borderLeft: "2px solid rgba(201,168,76,.4)", paddingLeft: 12 }}>
+              <div style={{ marginTop: 14, fontSize: 13, color: T.gold, fontStyle: "italic", borderLeft: "2px solid rgba(201,168,76,.4)", paddingLeft: 12 }}>
                 "A tua palavra é lâmpada que ilumina os meus passos e luz que clareia o meu caminho." — Salmos 119:105
               </div>
             </div>
@@ -696,20 +696,20 @@ export default function FamiliaAliancaApp() {
                 <div style={S.secTitle}>Esta Semana</div>
 
                 {/* Versículo */}
-                <div style={{ margin: "0 16px 12px", background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.25)", borderRadius: 16, padding: "20px" }}>
+                <div style={{ margin: "0 16px 12px", background: "rgba(201,168,76,.08)", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 16, padding: "20px" }}>
                   {devocional.titulo && (
                     <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 14, textAlign: "center" }}>{devocional.titulo}</div>
                   )}
-                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 12 }}>📖 Versículo da Semana</div>
+                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.gold, marginBottom: 12 }}>📖 Versículo da Semana</div>
                   <div style={{ fontSize: 17, lineHeight: 1.8, color: T.text, fontStyle: "italic", borderLeft: "3px solid #c9a84c", paddingLeft: 16, marginBottom: 10 }}>
                     "{devocional.versiculo}"
                   </div>
-                  <div style={{ fontSize: 13, color: "#c9a84c", textAlign: "right" }}>— {devocional.referencia}</div>
+                  <div style={{ fontSize: 13, color: T.gold, textAlign: "right" }}>— {devocional.referencia}</div>
                 </div>
 
                 {/* Palavra */}
                 <div style={{ margin: "0 16px 12px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "20px" }}>
-                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 12 }}>✝️ Palavra</div>
+                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.gold, marginBottom: 12 }}>✝️ Palavra</div>
                   {devocional.palavra.split("\n").map((par, i) => {
                     if (!par.trim()) return <br key={i} />;
                     const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
@@ -774,7 +774,7 @@ export default function FamiliaAliancaApp() {
 
         {tab === "ministerios" && ministerioAtivo && (
           <div style={{ animation: "slideUp .4s ease" }}>
-            <div style={{ padding: "20px 20px 0", cursor: "pointer", color: "#c9a84c", fontSize: 13 }} onClick={() => setMinisterioAtivo(null)}>← Voltar</div>
+            <div style={{ padding: "20px 20px 0", cursor: "pointer", color: T.gold, fontSize: 13 }} onClick={() => setMinisterioAtivo(null)}>← Voltar</div>
             <div style={{ padding: "20px" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>{ministerioAtivo.icon}</div>
               <div style={{ fontSize: 22, fontWeight: "bold", color: ministerioAtivo.cor, marginBottom: 12 }}>{ministerioAtivo.nome}</div>
@@ -794,18 +794,18 @@ export default function FamiliaAliancaApp() {
         {tab === "voluntario" && (
           <div style={{ animation: "slideUp .4s ease" }}>
             {/* Hero */}
-            <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: "1px solid rgba(201,168,76,.25)", borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
+            <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🤲</div>
               <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 12, lineHeight: 1.3 }}>Seja um Voluntário</div>
               <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.8, fontStyle: "italic", borderLeft: "2px solid #c9a84c", paddingLeft: 14, textAlign: "left" }}>
                 "O ato que mais nos assemelha a Cristo é o ato de Servir. Jesus não veio para ser servido, mas para servir e dar a sua vida em resgate de muitos."
               </div>
-              <div style={{ fontSize: 12, color: "#c9a84c", marginTop: 8, textAlign: "right" }}>— Mateus 20:28</div>
+              <div style={{ fontSize: 12, color: T.gold, marginTop: 8, textAlign: "right" }}>— Mateus 20:28</div>
             </div>
 
             {/* Texto sobre voluntariado */}
             <div style={{ margin: "16px 16px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "20px" }}>
-              <div style={{ fontSize: 15, fontWeight: "bold", color: "#c9a84c", marginBottom: 10 }}>Por que ser voluntário?</div>
+              <div style={{ fontSize: 15, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>Por que ser voluntário?</div>
               <div style={{ fontSize: 14, lineHeight: 1.8, color: T.textSub }}>
                 O voluntariado na Igreja Família Aliança é muito mais do que ajudar — é uma oportunidade de crescer espiritualmente, desenvolver dons e talentos, e fazer parte de algo maior do que nós mesmos.
               </div>
@@ -890,7 +890,7 @@ export default function FamiliaAliancaApp() {
                   <div style={S.contatoIcon}>{h.icon}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{h.dia}</div>
-                    <div style={{ fontSize: 12, color: "#c9a84c", marginTop: 2 }}>{h.hora}</div>
+                    <div style={{ fontSize: 12, color: T.gold, marginTop: 2 }}>{h.hora}</div>
                   </div>
                 </div>
               ))}
@@ -936,7 +936,7 @@ export default function FamiliaAliancaApp() {
                   src="https://maps.google.com/maps?q=Rua+Armando+Longatti+45+Vila+Industrial+Piracicaba+SP&output=embed"
                 />
               </div>
-              <button style={{ width: "100%", padding: "11px 0", background: "rgba(201,168,76,.12)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 10, color: "#c9a84c", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}
+              <button style={{ width: "100%", padding: "11px 0", background: "rgba(201,168,76,.12)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 10, color: T.gold, fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}
                 onClick={() => window.open(MAPS_URL, "_blank")}>
                 🗺️ Abrir no Google Maps
               </button>
@@ -1020,7 +1020,7 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Agenda */}
             {adminTab === "agenda" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 14, color: "#c9a84c" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 14, color: T.gold }}>
                   {editandoEvento ? "Editar Evento" : "Novo Evento"}
                 </div>
                 <label style={S.label}>Título</label>
@@ -1060,7 +1060,7 @@ export default function FamiliaAliancaApp() {
                       <div style={{ fontSize: 12, color: T.textSub }}>{fmtData(ev.data)} • {ev.hora}</div>
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
-                      <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, color: "#c9a84c", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                      <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
                         onClick={() => { setEditandoEvento(ev.id); setNovoEvento({ ...ev }); }}>✏️</button>
                       <button style={S.delBtn} onClick={() => deletarEvento(ev.id)}>🗑️</button>
                     </div>
@@ -1072,7 +1072,7 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Palavra */}
             {adminTab === "palavra" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 14, color: "#c9a84c" }}>Nova Palavra Semanal</div>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 14, color: T.gold }}>Nova Palavra Semanal</div>
                 <label style={S.label}>Título da Palavra</label>
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: A Fidelidade de Deus" value={novaPalavra.titulo}
                   onChange={e => setNovaPalavra({ ...novaPalavra, titulo: e.target.value })} />
@@ -1082,7 +1082,7 @@ export default function FamiliaAliancaApp() {
                 <label style={S.label}>Texto da Palavra</label>
                 {/* Dicas de formatação */}
                 <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 11, color: T.textSub, lineHeight: 1.7 }}>
-                  💡 <strong style={{ color: "#c9a84c" }}>Formatação:</strong> Use <code style={{ color: "#e8c97a" }}>**texto**</code> para <strong>negrito</strong>. Pressione Enter para novo parágrafo.
+                  💡 <strong style={{ color: T.gold }}>Formatação:</strong> Use <code style={{ color: "#e8c97a" }}>**texto**</code> para <strong>negrito</strong>. Pressione Enter para novo parágrafo.
                 </div>
                 <textarea style={{ ...S.textarea, minHeight: 200, fontFamily: "Georgia,serif", lineHeight: 1.8 }}
                   placeholder={"Escreva a mensagem da semana...\n\nUse Enter para separar parágrafos.\n\nUse **negrito** para destacar palavras."}
@@ -1103,11 +1103,11 @@ export default function FamiliaAliancaApp() {
                   <div key={p.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div style={{ flex: 1, paddingRight: 8 }}>
                       <div style={{ fontSize: 13, fontWeight: "bold", marginBottom: 3 }}>{p.titulo}</div>
-                      <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 3 }}>{p.referencia}</div>
+                      <div style={{ fontSize: 11, color: T.gold, marginBottom: 3 }}>{p.referencia}</div>
                       <div style={{ fontSize: 11, color: T.textFaint }}>{fmtData(p.data)}</div>
                     </div>
                     <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                      <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, color: "#c9a84c", fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                      <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif" }}
                         onClick={async () => {
                           await setDoc(doc(db, "palavra", "atual"), p);
                           showToast("✅ Palavra reativada!");
@@ -1127,7 +1127,7 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Notificações */}
             {adminTab === "notif" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Enviar Notificação</div>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Enviar Notificação</div>
                 <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Envie uma mensagem para todos os membros do app</div>
                 <label style={S.label}>Título</label>
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Culto Especial hoje!" value={notifForm.titulo}
@@ -1155,7 +1155,7 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Devocional */}
             {adminTab === "devocional" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Devocional da Semana</div>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Devocional da Semana</div>
                 <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Publique o devocional semanal para os membros</div>
 
                 <label style={S.label}>Título do Devocional *</label>
@@ -1211,7 +1211,7 @@ export default function FamiliaAliancaApp() {
 
                 {devocional && (
                   <div style={{ ...S.card, marginLeft: 0, marginRight: 0, marginTop: 20 }}>
-                    <div style={{ fontSize: 12, color: "#c9a84c", marginBottom: 6 }}>Devocional atual:</div>
+                    <div style={{ fontSize: 12, color: T.gold, marginBottom: 6 }}>Devocional atual:</div>
                     <div style={{ fontSize: 13, fontWeight: "bold" }}>{devocional.referencia}</div>
                     <div style={{ fontSize: 12, color: T.textSub, marginTop: 4 }}>{fmtData(devocional.data)}</div>
                   </div>
@@ -1222,7 +1222,7 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Vídeo */}
             {adminTab === "video" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Último Culto no YouTube</div>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Último Culto no YouTube</div>
                 <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Cole o link do vídeo para aparecer na tela inicial</div>
                 <label style={S.label}>Título do culto</label>
                 <input style={{ ...S.input, marginBottom: 0 }}
@@ -1261,7 +1261,7 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Membros */}
             {adminTab === "membros" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Membros Cadastrados</div>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Membros Cadastrados</div>
                 <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>{membros.length} membro(s)</div>
                 {membros.length === 0 ? (
                   <div style={{ ...S.card, marginLeft: 0, marginRight: 0, textAlign: "center" }}>
@@ -1269,7 +1269,7 @@ export default function FamiliaAliancaApp() {
                   </div>
                 ) : membros.map(m => (
                   <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: "#c9a84c", fontWeight: "bold", flexShrink: 0 }}>
+                    <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: T.gold, fontWeight: "bold", flexShrink: 0 }}>
                       {m.nome.charAt(0).toUpperCase()}
                     </div>
                     <div style={{ flex: 1 }}>
@@ -1302,7 +1302,7 @@ export default function FamiliaAliancaApp() {
 
       {/* Banner de instalação */}
       {showInstallBanner && (
-        <div style={{ position: "fixed", bottom: 90, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 400, background: "#1a1830", border: "1px solid rgba(201,168,76,.4)", borderRadius: 16, padding: "16px 18px", zIndex: 998, boxShadow: "0 4px 24px rgba(0,0,0,.6)" }}>
+        <div style={{ position: "fixed", bottom: 90, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 400, background: "#1a1830", border: `1px solid ${darkMode ? "rgba(201,168,76,.4)" : "rgba(154,112,32,.7)"}`, borderRadius: 16, padding: "16px 18px", zIndex: 998, boxShadow: "0 4px 24px rgba(0,0,0,.6)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
             <img src="/logo-igreja.png" alt="logo" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "contain" }} />
             <div>
@@ -1313,7 +1313,7 @@ export default function FamiliaAliancaApp() {
           </div>
           {isIOS ? (
             <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.7, background: T.card, borderRadius: 10, padding: "10px 12px" }}>
-              Para instalar no iPhone: toque em <strong style={{ color: "#c9a84c" }}>Compartilhar</strong> (ícone de seta) e depois em <strong style={{ color: "#c9a84c" }}>"Adicionar à Tela de Início"</strong>
+              Para instalar no iPhone: toque em <strong style={{ color: T.gold }}>Compartilhar</strong> (ícone de seta) e depois em <strong style={{ color: T.gold }}>"Adicionar à Tela de Início"</strong>
             </div>
           ) : (
             <button style={{ width: "100%", padding: "12px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 10, color: "#080810", fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}
