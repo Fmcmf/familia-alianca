@@ -92,6 +92,7 @@ export default function FamiliaAliancaApp() {
   const [isIOS, setIsIOS] = useState(false);
   const [historicoPalavras, setHistoricoPalavras] = useState([]);
   const [ultimoVideo, setUltimoVideo] = useState(null);
+  const [aoVivo, setAoVivo] = useState(null);
   const [devocional, setDevocional] = useState(null);
   const [novoDevocional, setNovoDevocional] = useState({ titulo: "", versiculo: "", referencia: "", palavra: "", aplicacao: "", oracao: "" });
   const [notifForm, setNotifForm] = useState({ titulo: "", mensagem: "" });
@@ -168,6 +169,12 @@ export default function FamiliaAliancaApp() {
       if (snap.exists()) setUltimoVideo(snap.data());
     });
 
+    // Ao Vivo
+    const unsubAoVivo = onSnapshot(doc(db, "config", "aoVivo"), (snap) => {
+      if (snap.exists()) setAoVivo(snap.data());
+      else setAoVivo(null);
+    });
+
     // Devocional da semana
     const unsubDevocional = onSnapshot(doc(db, "config", "devocional"), (snap) => {
       if (snap.exists()) setDevocional(snap.data());
@@ -178,7 +185,7 @@ export default function FamiliaAliancaApp() {
       setMembros(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
-    return () => { unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico(); unsubMembros(); unsubVideo(); unsubDevocional(); };
+    return () => { unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico(); unsubMembros(); unsubVideo(); unsubDevocional(); unsubAoVivo(); };
   }, []);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
@@ -451,6 +458,29 @@ export default function FamiliaAliancaApp() {
         {/* ══ HOME ══ */}
         {tab === "home" && (
           <div style={{ animation: "slideUp .4s ease" }}>
+            {/* Banner AO VIVO */}
+            {aoVivo?.ativo && (
+              <div style={{ margin: "16px 16px 0", borderRadius: 16, overflow: "hidden", border: "2px solid #ef4444", boxShadow: "0 0 20px rgba(239,68,68,.4)" }}>
+                <div style={{ background: "linear-gradient(90deg,#ef4444,#dc2626)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#fff", display: "inline-block", animation: "pulse 1s ease infinite" }} />
+                  <span style={{ fontSize: 13, fontWeight: "bold", color: "#fff", letterSpacing: 1 }}>AO VIVO AGORA</span>
+                  <span style={{ fontSize: 12, color: "rgba(255,255,255,.8)", marginLeft: "auto" }}>{aoVivo.titulo || "Culto Online"}</span>
+                </div>
+                {aoVivo.url && getYouTubeId(aoVivo.url) && (
+                  <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
+                    <iframe
+                      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+                      src={`https://www.youtube.com/embed/${getYouTubeId(aoVivo.url)}?autoplay=1&mute=0`}
+                      title="Ao Vivo"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Palavra Semanal */}
             {palavra ? (
               <>
@@ -1010,9 +1040,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "devocional", "video", "membros"].map(t => (
+              {["agenda", "palavra", "devocional", "video", "aovivo", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", video: "▶️ Vídeo", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
@@ -1216,6 +1246,57 @@ export default function FamiliaAliancaApp() {
                     <div style={{ fontSize: 12, color: T.textSub, marginTop: 4 }}>{fmtData(devocional.data)}</div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Admin: Ao Vivo */}
+            {adminTab === "aovivo" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#c9a84c" }}>Transmissão Ao Vivo</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 20 }}>Ative quando estiver transmitindo o culto online</div>
+
+                {/* Status atual */}
+                <div style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 20, display: "flex", alignItems: "center", gap: 14 }}>
+                  <div style={{ width: 14, height: 14, borderRadius: "50%", background: aoVivo?.ativo ? "#ef4444" : "rgba(255,255,255,.2)", flexShrink: 0, boxShadow: aoVivo?.ativo ? "0 0 10px #ef4444" : "none" }} />
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: "bold" }}>{aoVivo?.ativo ? "🔴 AO VIVO AGORA" : "⚫ Offline"}</div>
+                    <div style={{ fontSize: 12, color: T.textSub }}>{aoVivo?.ativo ? "Transmissão ativa para todos os membros" : "Nenhuma transmissão ativa"}</div>
+                  </div>
+                </div>
+
+                <label style={S.label}>Título da transmissão</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Culto de Domingo — 10h"
+                  value={aoVivo?.titulo || ""}
+                  onChange={async (e) => {
+                    await setDoc(doc(db, "config", "aoVivo"), { ...aoVivo, titulo: e.target.value });
+                  }} />
+
+                <label style={S.label}>Link do YouTube (Live)</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="https://youtube.com/live/..."
+                  value={aoVivo?.url || ""}
+                  onChange={async (e) => {
+                    await setDoc(doc(db, "config", "aoVivo"), { ...aoVivo, url: e.target.value });
+                  }} />
+
+                <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
+                  <button style={{ flex: 1, padding: "16px 0", background: "linear-gradient(90deg,#ef4444,#dc2626)", border: "none", borderRadius: 12, color: "#fff", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", opacity: aoVivo?.ativo ? 0.4 : 1 }}
+                    disabled={aoVivo?.ativo}
+                    onClick={async () => {
+                      if (!aoVivo?.url) { showToast("⚠️ Cole o link do YouTube!"); return; }
+                      await setDoc(doc(db, "config", "aoVivo"), { ...aoVivo, ativo: true });
+                      showToast("🔴 Transmissão ativada!");
+                    }}>
+                    🔴 Iniciar Transmissão
+                  </button>
+                  <button style={{ flex: 1, padding: "16px 0", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, color: T.text, fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", opacity: !aoVivo?.ativo ? 0.4 : 1 }}
+                    disabled={!aoVivo?.ativo}
+                    onClick={async () => {
+                      await setDoc(doc(db, "config", "aoVivo"), { ...aoVivo, ativo: false });
+                      showToast("⚫ Transmissão encerrada!");
+                    }}>
+                    ⏹ Encerrar
+                  </button>
+                </div>
               </div>
             )}
 
