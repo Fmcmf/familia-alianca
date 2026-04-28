@@ -458,29 +458,6 @@ export default function FamiliaAliancaApp() {
         {/* ══ HOME ══ */}
         {tab === "home" && (
           <div style={{ animation: "slideUp .4s ease" }}>
-            {/* Banner AO VIVO */}
-            {aoVivo?.ativo && (
-              <div style={{ margin: "16px 16px 0", borderRadius: 16, overflow: "hidden", border: "2px solid #ef4444", boxShadow: "0 0 20px rgba(239,68,68,.4)" }}>
-                <div style={{ background: "linear-gradient(90deg,#ef4444,#dc2626)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#fff", display: "inline-block", animation: "pulse 1s ease infinite" }} />
-                  <span style={{ fontSize: 13, fontWeight: "bold", color: "#fff", letterSpacing: 1 }}>AO VIVO AGORA</span>
-                  <span style={{ fontSize: 12, color: "rgba(255,255,255,.8)", marginLeft: "auto" }}>{aoVivo.titulo || "Culto Online"}</span>
-                </div>
-                {aoVivo.url && getYouTubeId(aoVivo.url) && (
-                  <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
-                    <iframe
-                      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
-                      src={`https://www.youtube.com/embed/${getYouTubeId(aoVivo.url)}?autoplay=1&mute=0`}
-                      title="Ao Vivo"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Palavra Semanal */}
             {palavra ? (
               <>
@@ -522,6 +499,40 @@ export default function FamiliaAliancaApp() {
                 </div>
               </div>
             ))}
+
+            {/* ── AO VIVO ── */}
+            <div style={S.secTitle}>Transmissão Online</div>
+            {aoVivo?.ativo ? (
+              <div style={{ margin: "0 16px 12px", borderRadius: 16, overflow: "hidden", border: "2px solid #ef4444", boxShadow: "0 0 20px rgba(239,68,68,.3)" }}>
+                <div style={{ background: "linear-gradient(90deg,#ef4444,#dc2626)", padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#fff", display: "inline-block", animation: "pulse 1s ease infinite", flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: "bold", color: "#fff", letterSpacing: 1 }}>🔴 ESTAMOS AO VIVO!</div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,.85)" }}>{aoVivo.titulo || "Culto Online"}</div>
+                  </div>
+                </div>
+                {aoVivo.url && getYouTubeId(aoVivo.url) && (
+                  <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, background: "#000" }}>
+                    <iframe
+                      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+                      src={`https://www.youtube.com/embed/${getYouTubeId(aoVivo.url)}?autoplay=1`}
+                      title="Ao Vivo"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ ...S.card, display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ width: 12, height: 12, borderRadius: "50%", background: T.textFaint, flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: "bold" }}>Não estamos ao vivo</div>
+                  <div style={{ fontSize: 12, color: T.textSub }}>Cultos: Qui 20h • Dom 10h e 19h</div>
+                </div>
+              </div>
+            )}
 
             {/* YouTube */}
             <div style={S.secTitle}>Canal no YouTube</div>
