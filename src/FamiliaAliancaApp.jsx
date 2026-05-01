@@ -206,15 +206,15 @@ export default function FamiliaAliancaApp() {
     };
 
     registrarPresenca();
-    const heartbeat = setInterval(registrarPresenca, 30000); // atualiza a cada 30s
+    const heartbeat = setInterval(registrarPresenca, 20000); // atualiza a cada 20s
 
     const removerPresenca = () => deleteDoc(presencaRef);
     window.addEventListener("beforeunload", removerPresenca);
 
-    // Conta ativos (vistos nos últimos 2 minutos)
+    // Conta ativos (vistos nos últimos 60 segundos)
     const unsubPresenca = onSnapshot(collection(db, "presenca"), (snap) => {
       const agora = Date.now();
-      const ativos = snap.docs.filter(d => agora - (d.data().visto || 0) < 120000);
+      const ativos = snap.docs.filter(d => agora - (d.data().visto || 0) < 60000);
       setOnlineCount(ativos.length);
     });
 
