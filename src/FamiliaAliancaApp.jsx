@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db, messaging, solicitarPermissaoNotificacao, onMessage } from "./firebase";
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
 
 // ─── EMAILJS CONFIG ────────────────────────────────────────────────────────
@@ -103,6 +103,7 @@ export default function FamiliaAliancaApp() {
   const [novoDevocional, setNovoDevocional] = useState({ titulo: "", versiculo: "", referencia: "", palavra: "", aplicacao: "", oracao: "" });
   const [notifForm, setNotifForm] = useState({ titulo: "", mensagem: "" });
   const [voluntarioForm, setVoluntarioForm] = useState({ nome: "", email: "", telefone: "", ministerio: "", mensagem: "" });
+  const [onlineCount, setOnlineCount] = useState(0);
   const [enviandoVoluntario, setEnviandoVoluntario] = useState(false);
 
   // Splash + Firebase load
@@ -191,7 +192,34 @@ export default function FamiliaAliancaApp() {
       setMembros(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
-    return () => { unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico(); unsubMembros(); unsubVideo(); unsubDevocional(); unsubAoVivo(); };
+    // ── PRESENÇA ONLINE ──
+    const sessionId = Math.random().toString(36).slice(2);
+    const presencaRef = doc(db, "presenca", sessionId);
+
+    const registrarPresenca = () => {
+      setDoc(presencaRef, { ativo: true, visto: Date.now() });
+    };
+
+    registrarPresenca();
+    const heartbeat = setInterval(registrarPresenca, 30000); // atualiza a cada 30s
+
+    const removerPresenca = () => deleteDoc(presencaRef);
+    window.addEventListener("beforeunload", removerPresenca);
+
+    // Conta ativos (vistos nos últimos 2 minutos)
+    const unsubPresenca = onSnapshot(collection(db, "presenca"), (snap) => {
+      const agora = Date.now();
+      const ativos = snap.docs.filter(d => agora - (d.data().visto || 0) < 120000);
+      setOnlineCount(ativos.length);
+    });
+
+    return () => {
+      unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
+      unsubMembros(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
+      clearInterval(heartbeat);
+      removerPresenca();
+      window.removeEventListener("beforeunload", removerPresenca);
+    };
   }, []);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
@@ -453,6 +481,11 @@ export default function FamiliaAliancaApp() {
           </div>
           <div style={{ textAlign: "right" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {/* Contador online */}
+              <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(34,197,94,.12)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 20, padding: "4px 10px" }}>
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", display: "inline-block", boxShadow: "0 0 6px #22c55e" }} />
+                <span style={{ fontSize: 11, color: "#22c55e", fontWeight: "bold" }}>{onlineCount}</span>
+              </div>
               <button onClick={toggleTheme} style={{ background: "none", border: `1px solid ${T.cardBorder}`, borderRadius: 20, padding: "5px 10px", cursor: "pointer", fontSize: 15 }}>
                 {darkMode ? "☀️" : "🌙"}
               </button>
