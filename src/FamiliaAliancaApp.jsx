@@ -3,7 +3,7 @@ import { db, messaging, solicitarPermissaoNotificacao, onMessage } from "./fireb
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
 
-// ─── EMAILJS CONFIG ────────────────────────────────────────────────────────
+// ─── EMAILJS CONFIG ─────────────────────────────────────────── v1.1 ───────
 const EMAILJS_SERVICE_ID  = "service_sffzlx2";
 const EMAILJS_TEMPLATE_ID = "template_142tb2a";
 const EMAILJS_PUBLIC_KEY  = "KkcyGeZOZYPkwGing";
