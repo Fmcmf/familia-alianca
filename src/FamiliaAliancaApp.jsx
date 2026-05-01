@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { db, messaging, solicitarPermissaoNotificacao, onMessage } from "./firebase";
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc } from "firebase/firestore";
+import emailjs from "@emailjs/browser";
+
+// ─── EMAILJS CONFIG ────────────────────────────────────────────────────────
+const EMAILJS_SERVICE_ID  = "service_sffzlx2";
+const EMAILJS_TEMPLATE_ID = "template_142tb2a";
+const EMAILJS_PUBLIC_KEY  = "KkcyGeZOZYPkwGing";
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
 const YOUTUBE_CHANNEL = "familiaaliancapiracicaba";
@@ -900,18 +906,29 @@ export default function FamiliaAliancaApp() {
 
               <button style={{ width: "100%", marginTop: 16, padding: "15px 0", background: (enviandoVoluntario || !voluntarioForm.nome || !voluntarioForm.email || !voluntarioForm.telefone || !voluntarioForm.ministerio) ? "rgba(201,168,76,.3)" : "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: (enviandoVoluntario || !voluntarioForm.nome || !voluntarioForm.email || !voluntarioForm.telefone || !voluntarioForm.ministerio) ? "not-allowed" : "pointer", fontFamily: "Georgia,serif" }}
                 disabled={enviandoVoluntario || !voluntarioForm.nome || !voluntarioForm.email || !voluntarioForm.telefone || !voluntarioForm.ministerio}
-                onClick={() => {
+                onClick={async () => {
                   setEnviandoVoluntario(true);
-                  const assunto = encodeURIComponent(`Voluntário: ${voluntarioForm.nome} — ${voluntarioForm.ministerio}`);
-                  const corpo = encodeURIComponent(
-                    `Nome: ${voluntarioForm.nome}\nE-mail: ${voluntarioForm.email}\nWhatsApp: ${voluntarioForm.telefone}\nMinistério: ${voluntarioForm.ministerio}\n\n${voluntarioForm.mensagem}`
-                  );
-                  window.open(`mailto:voluntariado@familiaaliancapiracicaba.com.br?subject=${assunto}&body=${corpo}`, "_blank");
-                  setTimeout(() => {
+                  try {
+                    await emailjs.send(
+                      EMAILJS_SERVICE_ID,
+                      EMAILJS_TEMPLATE_ID,
+                      {
+                        nome:       voluntarioForm.nome,
+                        email:      voluntarioForm.email,
+                        telefone:   voluntarioForm.telefone,
+                        ministerio: voluntarioForm.ministerio,
+                        mensagem:   voluntarioForm.mensagem || "—",
+                      },
+                      EMAILJS_PUBLIC_KEY
+                    );
                     setVoluntarioForm({ nome: "", email: "", telefone: "", ministerio: "", mensagem: "" });
-                    setEnviandoVoluntario(false);
                     showToast("🤲 Candidatura enviada! Que Deus abençoe!");
-                  }, 1000);
+                  } catch (err) {
+                    console.error("EmailJS erro:", err);
+                    showToast("⚠️ Erro ao enviar. Tente novamente.");
+                  } finally {
+                    setEnviandoVoluntario(false);
+                  }
                 }}>
                 {enviandoVoluntario ? "Enviando..." : "🤲 Enviar candidatura"}
               </button>
