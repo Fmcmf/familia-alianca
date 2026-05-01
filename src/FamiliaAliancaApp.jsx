@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db, messaging, solicitarPermissaoNotificacao, onMessage } from "./firebase";
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
 
 // ─── EMAILJS CONFIG ─────────────────────────────────────────── v1.1 ───────
