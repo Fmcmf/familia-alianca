@@ -193,7 +193,12 @@ export default function FamiliaAliancaApp() {
     });
 
     // ── PRESENÇA ONLINE ──
-    const sessionId = Math.random().toString(36).slice(2);
+    // Reutiliza o mesmo ID durante toda a sessão do navegador
+    let sessionId = sessionStorage.getItem("fa-session-id");
+    if (!sessionId) {
+      sessionId = Math.random().toString(36).slice(2);
+      sessionStorage.setItem("fa-session-id", sessionId);
+    }
     const presencaRef = doc(db, "presenca", sessionId);
 
     const registrarPresenca = () => {
