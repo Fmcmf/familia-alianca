@@ -17,6 +17,7 @@ const ENDERECO = "Rua Armando Longatti, nº 45 - Vila Industrial - Piracicaba/SP
 const MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Rua+Armando+Longatti+45+Vila+Industrial+Piracicaba+SP";
 
 const HORARIOS_CULTO = [
+  { dia: "Terça-feira", hora: "15h — Oração", icon: "🙏" },
   { dia: "Quinta-feira", hora: "20h", icon: "🌙" },
   { dia: "Domingo", hora: "10h", icon: "🌅" },
   { dia: "Domingo", hora: "19h", icon: "🌆" },
@@ -685,7 +686,7 @@ export default function FamiliaAliancaApp() {
                 <div style={{ width: 12, height: 12, borderRadius: "50%", background: T.textFaint, flexShrink: 0 }} />
                 <div>
                   <div style={{ fontSize: 14, fontWeight: "bold" }}>Não estamos ao vivo</div>
-                  <div style={{ fontSize: 12, color: T.textSub }}>Cultos: Qui 20h • Dom 10h e 19h</div>
+                  <div style={{ fontSize: 12, color: T.textSub }}>Cultos: Ter 15h • Qui 20h • Dom 10h e 19h</div>
                 </div>
               </div>
             )}
