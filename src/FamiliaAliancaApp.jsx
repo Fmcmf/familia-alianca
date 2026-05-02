@@ -502,21 +502,45 @@ export default function FamiliaAliancaApp() {
         {/* ══ HOME ══ */}
         {tab === "home" && (
           <div style={{ animation: "slideUp .4s ease" }}>
-            {/* Palavra Semanal */}
+
+            {/* Boas-vindas */}
+            <div style={{ padding: "20px 20px 4px" }}>
+              <div style={{ fontSize: 13, color: T.textSub }}>Bem-vindo!</div>
+              <div style={{ fontSize: 16, color: T.text, fontWeight: "bold" }}>Que bom ter você aqui. 🙏</div>
+            </div>
+
+            {/* ── CARD PALAVRA SEMANAL (com foto do pastor) ── */}
             {palavra ? (
-              <>
-                <div style={S.secTitle}>Palavra Semanal</div>
-                <div style={S.heroCard}>
-                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.gold, marginBottom: 8 }}>Pr Fernando Mello</div>
-                  <div style={{ fontSize: 19, fontWeight: "bold", lineHeight: 1.3, marginBottom: 8 }}>{palavra.titulo}</div>
-                  {palavra.referencia && <div style={{ fontSize: 13, color: T.textSub, fontStyle: "italic", marginBottom: 12 }}>{palavra.referencia}</div>}
-                  <div style={{ fontSize: 14, lineHeight: 1.7, color: T.textSub, borderLeft: "2px solid #c9a84c", paddingLeft: 12 }}>
-                    {palavra.texto.substring(0, 180)}{palavra.texto.length > 180 ? "..." : ""}
-                  </div>
-                  <button style={{ marginTop: 14, padding: "10px 0", width: "100%", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 10, color: "#080810", fontSize: 13, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}
-                    onClick={() => setTab("palavra")}>Ler Palavra Completa →</button>
+              <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", position: "relative", background: "linear-gradient(135deg,#1a1230 0%,#0f0f1a 60%)", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, minHeight: 150 }}>
+                {/* faixa dourada topo */}
+                <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>Palavra Semanal</span>
                 </div>
-              </>
+                {/* conteúdo */}
+                <div style={{ display: "flex", alignItems: "stretch" }}>
+                  {/* texto */}
+                  <div style={{ flex: 1, padding: "14px 16px 16px" }}>
+                    <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4, letterSpacing: 1 }}>Pr. Fernando Mello</div>
+                    <div style={{ fontSize: 20, fontWeight: "bold", lineHeight: 1.25, color: "#fff", marginBottom: 14 }}>
+                      {palavra.titulo}
+                    </div>
+                    <button
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 20, padding: "8px 16px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}
+                      onClick={() => setTab("palavra")}>
+                      Ler Palavra Completa →
+                    </button>
+                  </div>
+                  {/* foto pastor */}
+                  <div style={{ width: 110, flexShrink: 0, position: "relative", overflow: "hidden" }}>
+                    <img
+                      src="/pastor.png"
+                      alt="Pastor"
+                      style={{ position: "absolute", bottom: 0, right: 0, height: "100%", maxHeight: 160, objectFit: "cover", objectPosition: "top center" }}
+                      onError={e => { e.target.style.display = "none"; }}
+                    />
+                  </div>
+                </div>
+              </div>
             ) : (
               <div style={{ ...S.card, textAlign: "center", padding: "32px 20px" }}>
                 <div style={{ fontSize: 36, marginBottom: 12 }}>📜</div>
@@ -524,22 +548,50 @@ export default function FamiliaAliancaApp() {
               </div>
             )}
 
-            {/* Próximas Programações */}
-            <div style={S.secTitle}>Próximas Programações</div>
+            {/* ── GRADE DE ACESSO RÁPIDO ── */}
+            <div style={{ padding: "20px 16px 0" }}>
+              <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub, marginBottom: 14 }}>Acesso rápido</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+                {[
+                  { icon: "📅", label: "Agenda",       action: () => setTab("mais") },
+                  { icon: "▶️", label: "Mensagens",    action: () => window.open(`https://www.youtube.com/@${YOUTUBE_CHANNEL}`, "_blank") },
+                  { icon: "🤍", label: "Contribuir",   action: () => setTab("mais") },
+                  { icon: "👥", label: "Grupos",       action: () => setTab("mais") },
+                  { icon: "⭐", label: "Ministérios",  action: () => setTab("mais") },
+                  { icon: "📰", label: "Notícias",     action: () => setTab("mais") },
+                ].map(item => (
+                  <button key={item.label} onClick={item.action}
+                    style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "16px 8px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                    <span style={{ fontSize: 24 }}>{item.icon}</span>
+                    <span style={{ fontSize: 11, color: T.textSub }}>{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* ── PRÓXIMOS EVENTOS ── */}
+            <div style={{ padding: "20px 16px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub }}>Próximos eventos</div>
+              <button style={{ background: "none", border: "none", color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }} onClick={() => setTab("mais")}>Ver todos</button>
+            </div>
             {proximos.length === 0 ? (
-              <div style={{ ...S.card, textAlign: "center", padding: "28px 20px" }}>
+              <div style={{ ...S.card, textAlign: "center", padding: "28px 20px", margin: "12px 16px" }}>
                 <div style={{ fontSize: 13, color: T.textSub }}>Nenhum evento programado.</div>
               </div>
             ) : proximos.map(ev => (
-              <div key={ev.id} style={S.eventoCard}>
-                <div style={S.eventoData}>
-                  <div style={S.eventoDay}>{getDay(ev.data)}</div>
-                  <div style={S.eventoMon}>{getMonAbbr(ev.data)}</div>
+              <div key={ev.id} style={{ margin: "10px 16px 0", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", display: "flex", gap: 16, alignItems: "center" }}>
+                {/* data lateral */}
+                <div style={{ minWidth: 42, textAlign: "center" }}>
+                  <div style={{ fontSize: 24, fontWeight: "bold", color: T.gold, lineHeight: 1 }}>{getDay(ev.data)}</div>
+                  <div style={{ fontSize: 10, color: T.textSub, textTransform: "uppercase", letterSpacing: 1 }}>{getMonAbbr(ev.data)}</div>
                 </div>
-                <div style={S.eventoInfo}>
-                  <div style={S.eventoTitle}>{ev.titulo}</div>
-                  <div style={S.eventoSub}>{ev.hora}{ev.local ? ` • ${ev.local}` : ""}</div>
-                  <div style={S.eventoBadge(ev.tipo)}>{tipoLabel[ev.tipo]}</div>
+                {/* divider */}
+                <div style={{ width: 1, alignSelf: "stretch", background: T.cardBorder }} />
+                {/* info */}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 2 }}>{ev.titulo}</div>
+                  <div style={{ fontSize: 12, color: T.textSub }}>{tipoLabel[ev.tipo] || ev.tipo}{ev.hora ? `, ${ev.hora}` : ""}</div>
+                  {ev.local && <div style={{ fontSize: 12, color: T.textFaint, marginTop: 2 }}>{ev.local}</div>}
                 </div>
               </div>
             ))}
