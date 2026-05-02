@@ -548,7 +548,7 @@ export default function FamiliaAliancaApp() {
                       {palavra.titulo}
                     </div>
                     <button
-                      style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 20, padding: "8px 16px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 20, padding: "10px 16px", fontSize: 13, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}
                       onClick={() => setTab("palavra")}>
                       Ler Palavra Completa →
                     </button>
@@ -752,16 +752,15 @@ export default function FamiliaAliancaApp() {
               <div style={{ fontSize: 22, fontWeight: "bold", lineHeight: 1.3, marginBottom: 8 }}>{palavra.titulo}</div>
               {palavra.referencia && <div style={{ fontSize: 14, color: T.gold, fontStyle: "italic", marginBottom: 20 }}>{palavra.referencia}</div>}
               {/* Renderiza parágrafos formatados */}
-              <div style={{ fontSize: 15, lineHeight: 1.7, color: T.textSub }}>
+              <div style={{ fontSize: 15, lineHeight: 1.6, color: T.textSub }}>
                 {palavra.texto.split("\n").map((par, i) => {
-                  if (par.trim() === "") return <br key={i} style={{ lineHeight: "0.5" }} />;
-                  // **negrito**
+                  if (par.trim() === "") return <br key={i} style={{ lineHeight: "0.3" }} />;
                   const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
                     p.startsWith("**") && p.endsWith("**")
                       ? <strong key={j} style={{ color: T.text }}>{p.slice(2, -2)}</strong>
                       : p
                   );
-                  return <p key={i} style={{ marginBottom: 8 }}>{parts}</p>;
+                  return <p key={i} style={{ marginBottom: 5 }}>{parts}</p>;
                 })}
               </div>
               {palavra.video && (
@@ -1317,12 +1316,29 @@ export default function FamiliaAliancaApp() {
                 <label style={S.label}>Texto da Palavra</label>
                 {/* Dicas de formatação */}
                 <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 11, color: T.textSub, lineHeight: 1.7 }}>
-                  💡 <strong style={{ color: T.gold }}>Formatação:</strong> Use <code style={{ color: "#e8c97a" }}>**texto**</code> para <strong>negrito</strong>. Pressione Enter para novo parágrafo.
+                  💡 <strong style={{ color: T.gold }}>Formatação:</strong> Use <code style={{ color: "#e8c97a" }}>**texto**</code> para <strong>negrito</strong>. Pressione Enter para novo parágrafo. Linha em branco cria espaço extra.
                 </div>
-                <textarea style={{ ...S.textarea, minHeight: 200, fontFamily: "Georgia,serif", lineHeight: 1.8 }}
+                <textarea style={{ ...S.textarea, minHeight: 200, fontFamily: "Georgia,serif", lineHeight: 1.6 }}
                   placeholder={"Escreva a mensagem da semana...\n\nUse Enter para separar parágrafos.\n\nUse **negrito** para destacar palavras."}
                   value={novaPalavra.texto}
                   onChange={e => setNovaPalavra({ ...novaPalavra, texto: e.target.value })} />
+                {/* Preview da formatação */}
+                {novaPalavra.texto.trim() && (
+                  <div style={{ background: "rgba(201,168,76,.04)", border: "1px solid rgba(201,168,76,.12)", borderRadius: 10, padding: "12px 14px", marginTop: 8 }}>
+                    <div style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 8 }}>Preview</div>
+                    <div style={{ fontSize: 13, lineHeight: 1.6, color: T.textSub }}>
+                      {novaPalavra.texto.split("\n").map((par, i) => {
+                        if (par.trim() === "") return <br key={i} style={{ lineHeight: "0.3" }} />;
+                        const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
+                          p.startsWith("**") && p.endsWith("**")
+                            ? <strong key={j} style={{ color: T.text }}>{p.slice(2, -2)}</strong>
+                            : p
+                        );
+                        return <p key={i} style={{ marginBottom: 5 }}>{parts}</p>;
+                      })}
+                    </div>
+                  </div>
+                )}
                 <label style={S.label}>Link do vídeo (opcional)</label>
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="https://youtube.com/..." value={novaPalavra.video}
                   onChange={e => setNovaPalavra({ ...novaPalavra, video: e.target.value })} />
@@ -1641,7 +1657,11 @@ export default function FamiliaAliancaApp() {
       {/* NAV */}
       <nav style={S.nav}>
         {TABS.map(t => (
-          <button key={t.id} style={S.navBtn(tab === t.id)} onClick={() => { setTab(t.id); setMinisterioAtivo(null); }}>
+          <button key={t.id} style={S.navBtn(tab === t.id)} onClick={() => {
+            setTab(t.id);
+            setMinisterioAtivo(null);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}>
             <span style={S.navIcon}>{t.icon}</span>
             {t.label}
           </button>
