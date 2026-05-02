@@ -374,7 +374,7 @@ export default function FamiliaAliancaApp() {
     headerLogo: { height: 38 },
     headerUser: { fontSize: 12, color: T.textSub, textAlign: "right" },
     headerName: { fontSize: 13, color: T.gold, fontWeight: "bold" },
-    secTitle: { fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub, padding: "0 20px", marginBottom: 12, marginTop: 24 },
+    secTitle: { fontSize: 12, letterSpacing: 3, textTransform: "uppercase", color: T.textSub, padding: "0 20px", marginBottom: 12, marginTop: 24 },
     card: { margin: "0 16px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "16px 18px" },
     heroCard: { margin: "0 16px 8px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.12))", border: `1px solid ${darkMode ? "rgba(201,168,76,.2)" : "rgba(154,112,32,.5)"}`, borderRadius: 20, padding: "22px 20px" },
     eventoCard: { margin: "0 16px 10px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", display: "flex", gap: 14, alignItems: "center" },
@@ -382,20 +382,20 @@ export default function FamiliaAliancaApp() {
     eventoDay: { fontSize: 22, fontWeight: "bold", color: T.gold, lineHeight: 1 },
     eventoMon: { fontSize: 10, color: T.textSub, textTransform: "uppercase" },
     eventoInfo: { flex: 1 },
-    eventoTitle: { fontSize: 14, fontWeight: "bold", marginBottom: 3 },
-    eventoSub: { fontSize: 12, color: T.textSub },
-    eventoBadge: (tipo) => ({ display: "inline-block", fontSize: 10, padding: "2px 8px", borderRadius: 20, background: `${tipoColor[tipo]}22`, color: tipoColor[tipo], border: `1px solid ${tipoColor[tipo]}44`, marginTop: 4 }),
+    eventoTitle: { fontSize: 15, fontWeight: "bold", marginBottom: 3 },
+    eventoSub: { fontSize: 13, color: T.textSub },
+    eventoBadge: (tipo) => ({ display: "inline-block", fontSize: 11, padding: "2px 8px", borderRadius: 20, background: `${tipoColor[tipo]}22`, color: tipoColor[tipo], border: `1px solid ${tipoColor[tipo]}44`, marginTop: 4 }),
     minCard: { margin: "0 16px 10px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 },
     minIcon: { fontSize: 28, minWidth: 44, textAlign: "center" },
     minInfo: { flex: 1 },
-    minNome: { fontSize: 14, fontWeight: "bold", marginBottom: 3 },
-    minDesc: { fontSize: 12, color: T.textSub, lineHeight: 1.5 },
+    minNome: { fontSize: 15, fontWeight: "bold", marginBottom: 3 },
+    minDesc: { fontSize: 13, color: T.textSub, lineHeight: 1.5 },
     nav: { position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: T.nav, borderTop: `1px solid ${T.navBorder}`, display: "flex", backdropFilter: "blur(20px)", zIndex: 100 },
-    navBtn: (a) => ({ flex: 1, padding: "10px 0 14px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: a ? "#c9a84c" : darkMode ? "rgba(255,255,255,.65)" : "rgba(0,0,0,.45)", fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: "Georgia,serif" }),
-    navIcon: { fontSize: 18 },
+    navBtn: (a) => ({ flex: 1, padding: "10px 0 14px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: a ? "#c9a84c" : darkMode ? "rgba(255,255,255,.65)" : "rgba(0,0,0,.45)", fontSize: 10, letterSpacing: 1, textTransform: "uppercase", fontFamily: "Georgia,serif" }),
+    navIcon: { fontSize: 20 },
     pixCard: { margin: "0 16px 12px", background: "linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 16, padding: "20px" },
     pixTitle: { fontSize: 16, fontWeight: "bold", marginBottom: 4, color: T.gold },
-    pixSub: { fontSize: 12, color: T.textSub, marginBottom: 16 },
+    pixSub: { fontSize: 13, color: T.textSub, marginBottom: 16 },
     pixKey: { background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.08)", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: darkMode ? "#e8c97a" : "#0a0a1a", letterSpacing: 1, marginBottom: 8, wordBreak: "break-all" },
     copyBtn: { width: "100%", padding: "12px 0", background: "rgba(201,168,76,.15)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 10, color: T.gold, fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" },
     palavraCard: { margin: "0 16px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "20px" },
@@ -404,7 +404,7 @@ export default function FamiliaAliancaApp() {
     palavraTexto: { fontSize: 14.5, lineHeight: 1.8, color: T.textSub },
     contatoRow: { display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: `1px solid ${T.cardBorder}` },
     contatoIcon: { fontSize: 20, minWidth: 32, textAlign: "center" },
-    contatoText: { fontSize: 13, color: T.textSub },
+    contatoText: { fontSize: 14, color: T.textSub },
     adminHeader: { padding: "24px 20px 8px", display: "flex", justifyContent: "space-between", alignItems: "center" },
     adminTitle: { fontSize: 17, fontWeight: "bold" },
     adminTabs: { display: "flex", gap: 8, padding: "0 16px", marginBottom: 20, overflowX: "auto" },
@@ -486,6 +486,8 @@ export default function FamiliaAliancaApp() {
     <div style={S.app}>
       <div style={S.bg} />
       <style>{`
+        * { box-sizing: border-box; }
+        html { font-size: 17px; }
         input::placeholder,textarea::placeholder{color:${darkMode ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.35)"};}
         input,textarea,select{color:${T.text} !important; background:${T.input} !important;}
         ::-webkit-scrollbar{width:4px;height:4px}
