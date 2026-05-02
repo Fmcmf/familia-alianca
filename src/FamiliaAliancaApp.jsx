@@ -86,6 +86,7 @@ export default function FamiliaAliancaApp() {
   const [membros, setMembros] = useState([]);
   const [avisos, setAvisos] = useState([]);
   const [novoAviso, setNovoAviso] = useState({ titulo: "", texto: "", tipo: "info" });
+  const [editandoAviso, setEditandoAviso] = useState(null);
 
   // UI
   const [toast, setToast] = useState("");
@@ -346,8 +347,8 @@ export default function FamiliaAliancaApp() {
     card: darkMode ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.07)",
     cardBorder: darkMode ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.18)",
     text: darkMode ? "#ffffff" : "#0a0a1a",
-    textSub: darkMode ? "rgba(255,255,255,.82)" : "rgba(0,0,0,.65)",
-    textFaint: darkMode ? "rgba(255,255,255,.5)" : "rgba(0,0,0,.4)",
+    textSub: darkMode ? "rgba(255,255,255,.72)" : "rgba(0,0,0,.65)",
+    textFaint: darkMode ? "rgba(255,255,255,.42)" : "rgba(0,0,0,.4)",
     nav: darkMode ? "#040810" : "#ffffff",
     navBorder: darkMode ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.15)",
     header: darkMode ? "#040810" : "#ffffff",
@@ -487,7 +488,7 @@ export default function FamiliaAliancaApp() {
       <div style={S.bg} />
       <style>{`
         * { box-sizing: border-box; }
-        html { font-size: 17px; }
+        html { font-size: 18px; }
         input::placeholder,textarea::placeholder{color:${darkMode ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.35)"};}
         input,textarea,select{color:${T.text} !important; background:${T.input} !important;}
         ::-webkit-scrollbar{width:4px;height:4px}
@@ -1475,10 +1476,13 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Avisos */}
             {adminTab === "avisos" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Avisos da Igreja</div>
-                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 20 }}>Publique avisos que aparecerão para todos os membros na aba Mais</div>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>
+                  {editandoAviso ? "✏️ Editar Aviso" : "📢 Novo Aviso"}
+                </div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 20 }}>
+                  {editandoAviso ? "Edite as informações do aviso abaixo" : "Publique avisos que aparecerão para todos os membros na aba Mais"}
+                </div>
 
-                {/* Novo aviso */}
                 <label style={S.label}>Título do aviso *</label>
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Culto especial neste domingo!"
                   value={novoAviso.titulo}
@@ -1502,13 +1506,32 @@ export default function FamiliaAliancaApp() {
 
                 <button style={S.saveBtn} onClick={async () => {
                   if (!novoAviso.titulo || !novoAviso.texto) { showToast("⚠️ Preencha título e mensagem!"); return; }
-                  await addDoc(collection(db, "avisos"), {
-                    ...novoAviso,
-                    data: new Date().toISOString().split("T")[0]
-                  });
+                  if (editandoAviso) {
+                    await updateDoc(doc(db, "avisos", editandoAviso), {
+                      titulo: novoAviso.titulo,
+                      texto: novoAviso.texto,
+                      tipo: novoAviso.tipo,
+                    });
+                    setEditandoAviso(null);
+                    showToast("✅ Aviso atualizado!");
+                  } else {
+                    await addDoc(collection(db, "avisos"), {
+                      ...novoAviso,
+                      data: new Date().toISOString().split("T")[0]
+                    });
+                    showToast("✅ Aviso publicado!");
+                  }
                   setNovoAviso({ titulo: "", texto: "", tipo: "info" });
-                  showToast("✅ Aviso publicado!");
-                }}>📢 Publicar Aviso</button>
+                }}>
+                  {editandoAviso ? "💾 Salvar Alterações" : "📢 Publicar Aviso"}
+                </button>
+
+                {editandoAviso && (
+                  <button style={{ ...S.saveBtn, background: T.card, color: T.textSub, marginTop: 8 }}
+                    onClick={() => { setEditandoAviso(null); setNovoAviso({ titulo: "", texto: "", tipo: "info" }); }}>
+                    Cancelar edição
+                  </button>
+                )}
 
                 {/* Lista de avisos existentes */}
                 {avisos.length > 0 && (
@@ -1521,12 +1544,20 @@ export default function FamiliaAliancaApp() {
                           <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5 }}>{av.texto}</div>
                           <div style={{ fontSize: 11, color: T.textFaint, marginTop: 4 }}>{fmtData(av.data)} • {av.tipo}</div>
                         </div>
-                        <button style={S.delBtn} onClick={async () => {
-                          if (window.confirm("Excluir este aviso?")) {
-                            await deleteDoc(doc(db, "avisos", av.id));
-                            showToast("🗑️ Aviso removido!");
-                          }
-                        }}>🗑️</button>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid rgba(201,168,76,.3)`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                            onClick={() => {
+                              setEditandoAviso(av.id);
+                              setNovoAviso({ titulo: av.titulo, texto: av.texto, tipo: av.tipo });
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}>✏️</button>
+                          <button style={S.delBtn} onClick={async () => {
+                            if (window.confirm("Excluir este aviso?")) {
+                              await deleteDoc(doc(db, "avisos", av.id));
+                              showToast("🗑️ Aviso removido!");
+                            }
+                          }}>🗑️</button>
+                        </div>
                       </div>
                     ))}
                   </>
