@@ -105,6 +105,18 @@ export default function FamiliaAliancaApp() {
   const [voluntarioForm, setVoluntarioForm] = useState({ nome: "", email: "", telefone: "", ministerio: "", mensagem: "" });
   const [onlineCount, setOnlineCount] = useState(0);
   const [enviandoVoluntario, setEnviandoVoluntario] = useState(false);
+  const [maisScrollTarget, setMaisScrollTarget] = useState(null);
+
+  // Scroll até seção alvo na aba Mais/Voluntario
+  useEffect(() => {
+    if (!maisScrollTarget) return;
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`mais-${maisScrollTarget}`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setMaisScrollTarget(null);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [tab, maisScrollTarget]);
 
   // Splash + Firebase load
   useEffect(() => {
@@ -320,23 +332,23 @@ export default function FamiliaAliancaApp() {
 
   // Cores do tema
   const T = {
-    bg: darkMode ? "#080810" : "#f0f0f5",
-    bg2: darkMode ? "#0f0f1a" : "#ffffff",
+    bg: darkMode ? "#03060f" : "#f0f0f5",
+    bg2: darkMode ? "#060d1c" : "#ffffff",
     card: darkMode ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.07)",
     cardBorder: darkMode ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.18)",
     text: darkMode ? "#f0eefc" : "#0a0a1a",
     textSub: darkMode ? "rgba(255,255,255,.5)" : "rgba(0,0,0,.65)",
     textFaint: darkMode ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.4)",
-    nav: darkMode ? "#0a0a14" : "#ffffff",
+    nav: darkMode ? "#040810" : "#ffffff",
     navBorder: darkMode ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.15)",
-    header: darkMode ? "#0a0a14" : "#ffffff",
+    header: darkMode ? "#040810" : "#ffffff",
     input: darkMode ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.07)",
     inputBorder: darkMode ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.2)",
     gold: darkMode ? "#c9a84c" : "#9a7020",
   };
   const S = {
     app: { minHeight: "100vh", background: T.bg, color: T.text, fontFamily: "'Georgia', 'Times New Roman', serif", position: "relative", overflowX: "hidden" },
-    bg: { position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", background: darkMode ? "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(100,60,180,.15) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 80% 100%, rgba(201,168,76,.08) 0%, transparent 60%)" : "none" },
+    bg: { position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", background: darkMode ? "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(10,40,100,.35) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 80% 100%, rgba(201,168,76,.07) 0%, transparent 60%)" : "none" },
     wrap: { position: "relative", zIndex: 1, maxWidth: 430, margin: "0 auto", paddingBottom: 90 },
     splash: { minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 },
     splashLogo: { width: 160, animation: "fadeIn 1s ease" },
@@ -393,7 +405,7 @@ export default function FamiliaAliancaApp() {
     saveBtn: { width: "100%", marginTop: 16, padding: "14px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" },
     delBtn: { padding: "6px 12px", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 8, color: "#ef4444", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" },
     textarea: { width: "100%", background: T.input, border: `1px solid ${T.inputBorder}`, borderRadius: 10, padding: "12px 14px", color: T.text, fontSize: 14, fontFamily: "Georgia,serif", outline: "none", resize: "vertical", minHeight: 100, boxSizing: "border-box" },
-    toast: { position: "fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", background: darkMode ? "#1a1830" : "#fff", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 12, padding: "12px 24px", fontSize: 13, color: T.text, zIndex: 999, whiteSpace: "nowrap", boxShadow: "0 4px 24px rgba(0,0,0,.2)" },
+    toast: { position: "fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", background: darkMode ? "#040e20" : "#fff", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 12, padding: "12px 24px", fontSize: 13, color: T.text, zIndex: 999, whiteSpace: "nowrap", boxShadow: "0 4px 24px rgba(0,0,0,.2)" },
     logoutBtn: { background: "none", border: `1px solid ${T.cardBorder}`, borderRadius: 8, color: T.textSub, fontSize: 11, padding: "5px 10px", cursor: "pointer", fontFamily: "Georgia,serif" },
     oracaoBtn: { width: "100%", marginTop: 12, padding: "14px 0", background: "linear-gradient(90deg,#25d366,#128C7E)", border: "none", borderRadius: 12, color: T.text, fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 },
   };
@@ -470,7 +482,7 @@ export default function FamiliaAliancaApp() {
         ::-webkit-scrollbar{width:4px;height:4px}
         ::-webkit-scrollbar-track{background:transparent}
         ::-webkit-scrollbar-thumb{background:rgba(201,168,76,.3);border-radius:2px}
-        select option{background:${darkMode ? "#1a1830" : "#ffffff"}; color:${T.text};}
+        select option{background:${darkMode ? "#040e20" : "#ffffff"}; color:${T.text};}
         @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
       `}</style>
 
@@ -511,13 +523,13 @@ export default function FamiliaAliancaApp() {
 
             {/* ── CARD PALAVRA SEMANAL (com foto do pastor) ── */}
             {palavra ? (
-              <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", position: "relative", background: "linear-gradient(135deg,#1a1230 0%,#0f0f1a 60%)", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, minHeight: 150 }}>
+              <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", position: "relative", background: "linear-gradient(135deg,#071428 0%,#03060f 60%)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.55)"}`, minHeight: 190 }}>
                 {/* faixa dourada topo */}
                 <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px", display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>Palavra Semanal</span>
                 </div>
                 {/* conteúdo */}
-                <div style={{ display: "flex", alignItems: "stretch" }}>
+                <div style={{ display: "flex", alignItems: "stretch", minHeight: 160 }}>
                   {/* texto */}
                   <div style={{ flex: 1, padding: "14px 16px 16px" }}>
                     <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4, letterSpacing: 1 }}>Pr. Fernando Mello</div>
@@ -530,12 +542,12 @@ export default function FamiliaAliancaApp() {
                       Ler Palavra Completa →
                     </button>
                   </div>
-                  {/* foto pastor */}
-                  <div style={{ width: 110, flexShrink: 0, position: "relative", overflow: "hidden" }}>
+                  {/* foto pastor — maior */}
+                  <div style={{ width: 140, flexShrink: 0, position: "relative", overflow: "hidden" }}>
                     <img
                       src="/pastor.png"
                       alt="Pastor"
-                      style={{ position: "absolute", bottom: 0, right: 0, height: "100%", maxHeight: 160, objectFit: "cover", objectPosition: "top center" }}
+                      style={{ position: "absolute", bottom: 0, right: 0, height: "115%", maxHeight: 220, objectFit: "cover", objectPosition: "top center" }}
                       onError={e => { e.target.style.display = "none"; }}
                     />
                   </div>
@@ -553,16 +565,40 @@ export default function FamiliaAliancaApp() {
               <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub, marginBottom: 14 }}>Acesso rápido</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
                 {[
-                  { icon: "📅", label: "Agenda",       action: () => setTab("mais") },
-                  { icon: "▶️", label: "Mensagens",    action: () => window.open(`https://www.youtube.com/@${YOUTUBE_CHANNEL}`, "_blank") },
-                  { icon: "🤍", label: "Contribuir",   action: () => setTab("mais") },
-                  { icon: "👥", label: "Grupos",       action: () => setTab("mais") },
-                  { icon: "⭐", label: "Ministérios",  action: () => setTab("mais") },
-                  { icon: "📰", label: "Notícias",     action: () => setTab("mais") },
+                  {
+                    label: "Agenda",
+                    action: () => { setTab("mais"); setMaisScrollTarget("agenda"); },
+                    svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  },
+                  {
+                    label: "Mensagens",
+                    action: () => window.open(`https://www.youtube.com/@${YOUTUBE_CHANNEL}`, "_blank"),
+                    svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#c9a84c" stroke="none"/></svg>
+                  },
+                  {
+                    label: "Contribuir",
+                    action: () => { setTab("mais"); setMaisScrollTarget("pix"); },
+                    svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="rgba(201,168,76,.15)"/></svg>
+                  },
+                  {
+                    label: "Grupos",
+                    action: () => setTab("mais"),
+                    svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.31 2.69-6 6-6s6 2.69 6 6"/><path d="M17 14c1.66 0 4 .83 4 3v1"/></svg>
+                  },
+                  {
+                    label: "Ministérios",
+                    action: () => { setTab("voluntario"); setMaisScrollTarget("ministerios"); },
+                    svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="rgba(201,168,76,.12)"/></svg>
+                  },
+                  {
+                    label: "Notícias",
+                    action: () => setTab("mais"),
+                    svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><line x1="4" y1="8" x2="20" y2="8"/><line x1="8" y1="4" x2="8" y2="8"/></svg>
+                  },
                 ].map(item => (
                   <button key={item.label} onClick={item.action}
-                    style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "16px 8px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer", fontFamily: "Georgia,serif" }}>
-                    <span style={{ fontSize: 24 }}>{item.icon}</span>
+                    style={{ background: darkMode ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.05)", border: `1px solid rgba(201,168,76,.18)`, borderRadius: 14, padding: "16px 8px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                    {item.svg}
                     <span style={{ fontSize: 11, color: T.textSub }}>{item.label}</span>
                   </button>
                 ))}
@@ -952,7 +988,7 @@ export default function FamiliaAliancaApp() {
             </div>
 
             {/* Ministérios */}
-            <div style={S.secTitle}>Conheça os nossos Ministérios</div>
+            <div id="mais-ministerios" style={S.secTitle}>Conheça os nossos Ministérios</div>
             {MINISTERIOS.map(m => (
               <div key={m.id} style={{ margin: "0 16px 10px", background: T.card, border: `1px solid ${m.cor}30`, borderLeft: `3px solid ${m.cor}`, borderRadius: 14, padding: "14px 16px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
@@ -1091,7 +1127,7 @@ export default function FamiliaAliancaApp() {
             </div>
 
             {/* Contribuição */}
-            <div style={S.secTitle}>Dízimos & Ofertas</div>
+            <div id="mais-pix" style={S.secTitle}>Dízimos & Ofertas</div>
             <div style={S.pixCard}>
               <div style={S.pixTitle}>💛 Contribua com a Igreja</div>
               <div style={S.pixSub}>Sua contribuição sustenta a obra de Deus em Piracicaba</div>
@@ -1132,7 +1168,7 @@ export default function FamiliaAliancaApp() {
             </div>
 
             {/* Agenda completa */}
-            <div style={S.secTitle}>Agenda Completa</div>
+            <div id="mais-agenda" style={S.secTitle}>Agenda Completa</div>
             {agenda.length === 0 ? (
               <div style={{ ...S.card, textAlign: "center" }}><div style={{ fontSize: 13, color: T.textSub }}>Nenhum evento.</div></div>
             ) : agenda.map(ev => (
@@ -1501,7 +1537,7 @@ export default function FamiliaAliancaApp() {
 
       {/* Banner de instalação */}
       {showInstallBanner && (
-        <div style={{ position: "fixed", bottom: 90, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 400, background: "#1a1830", border: `1px solid ${darkMode ? "rgba(201,168,76,.4)" : "rgba(154,112,32,.7)"}`, borderRadius: 16, padding: "16px 18px", zIndex: 998, boxShadow: "0 4px 24px rgba(0,0,0,.6)" }}>
+        <div style={{ position: "fixed", bottom: 90, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 400, background: "#040e20", border: `1px solid ${darkMode ? "rgba(201,168,76,.4)" : "rgba(154,112,32,.7)"}`, borderRadius: 16, padding: "16px 18px", zIndex: 998, boxShadow: "0 4px 24px rgba(0,0,0,.6)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
             <img src="/logo-igreja.png" alt="logo" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "contain" }} />
             <div>
