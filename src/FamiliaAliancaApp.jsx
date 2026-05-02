@@ -537,7 +537,7 @@ export default function FamiliaAliancaApp() {
 
             {/* ── CARD PALAVRA SEMANAL (com foto do pastor) ── */}
             {palavra ? (
-              <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", position: "relative", background: "linear-gradient(135deg,#071428 0%,#03060f 60%)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.55)"}`, minHeight: 190 }}>
+              <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", position: "relative", background: darkMode ? "linear-gradient(135deg,#071428 0%,#03060f 60%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 60%)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.55)"}`, minHeight: 190 }}>
                 {/* faixa dourada topo */}
                 <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px", display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>Palavra Semanal</span>
@@ -547,7 +547,7 @@ export default function FamiliaAliancaApp() {
                   {/* texto */}
                   <div style={{ flex: 1, padding: "14px 16px 16px" }}>
                     <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4, letterSpacing: 1 }}>Pr. Fernando Mello</div>
-                    <div style={{ fontSize: 20, fontWeight: "bold", lineHeight: 1.25, color: "#fff", marginBottom: 14 }}>
+                    <div style={{ fontSize: 20, fontWeight: "bold", lineHeight: 1.25, color: darkMode ? "#fff" : "#1a0f00", marginBottom: 14 }}>
                       {palavra.titulo}
                     </div>
                     <button
