@@ -84,6 +84,8 @@ export default function FamiliaAliancaApp() {
   const [palavra, setPalavra] = useState(null);
   const [oracoes, setOracoes] = useState([]);
   const [membros, setMembros] = useState([]);
+  const [avisos, setAvisos] = useState([]);
+  const [novoAviso, setNovoAviso] = useState({ titulo: "", texto: "", tipo: "info" });
 
   // UI
   const [toast, setToast] = useState("");
@@ -204,6 +206,13 @@ export default function FamiliaAliancaApp() {
       setMembros(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
+    // Avisos — tempo real
+    const unsubAvisos = onSnapshot(collection(db, "avisos"), (snap) => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => b.data.localeCompare(a.data));
+      setAvisos(lista);
+    });
+
     // ── PRESENÇA ONLINE ──
     // Reutiliza o mesmo ID durante toda a sessão do navegador
     let sessionId = sessionStorage.getItem("fa-session-id");
@@ -232,7 +241,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
+      unsubMembros(); unsubAvisos(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
       clearInterval(heartbeat);
       removerPresenca();
       window.removeEventListener("beforeunload", removerPresenca);
@@ -581,9 +590,9 @@ export default function FamiliaAliancaApp() {
                     svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="rgba(201,168,76,.15)"/></svg>
                   },
                   {
-                    label: "Grupos",
-                    action: () => setTab("mais"),
-                    svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.31 2.69-6 6-6s6 2.69 6 6"/><path d="M17 14c1.66 0 4 .83 4 3v1"/></svg>
+                    label: "Fale Conosco",
+                    action: () => { setTab("mais"); setMaisScrollTarget("whatsapp"); },
+                    svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="rgba(201,168,76,.1)"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="13" y2="14"/></svg>
                   },
                   {
                     label: "Ministérios",
@@ -591,9 +600,9 @@ export default function FamiliaAliancaApp() {
                     svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="rgba(201,168,76,.12)"/></svg>
                   },
                   {
-                    label: "Notícias",
-                    action: () => setTab("mais"),
-                    svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><line x1="4" y1="8" x2="20" y2="8"/><line x1="8" y1="4" x2="8" y2="8"/></svg>
+                    label: "Avisos",
+                    action: () => { setTab("mais"); setMaisScrollTarget("avisos"); },
+                    svg: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0" fill="rgba(201,168,76,.15)"/><circle cx="18" cy="5" r="3" fill="#c9a84c" stroke="none"/></svg>
                   },
                 ].map(item => (
                   <button key={item.label} onClick={item.action}
@@ -1081,7 +1090,7 @@ export default function FamiliaAliancaApp() {
             </div>
 
             {/* WhatsApp Atendimento */}
-            <div style={S.secTitle}>Fale Conosco pelo WhatsApp</div>
+            <div id="mais-whatsapp" style={S.secTitle}>Fale Conosco pelo WhatsApp</div>
             <div style={S.card}>
               <div style={{ fontSize: 13, color: T.textSub, marginBottom: 14, lineHeight: 1.6 }}>
                 Entre em contato para:
@@ -1167,6 +1176,32 @@ export default function FamiliaAliancaApp() {
               ))}
             </div>
 
+            {/* ── AVISOS ── */}
+            <div id="mais-avisos" style={S.secTitle}>📢 Avisos da Igreja</div>
+            {avisos.length === 0 ? (
+              <div style={{ ...S.card, textAlign: "center", padding: "24px 20px" }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>🔔</div>
+                <div style={{ fontSize: 13, color: T.textSub }}>Nenhum aviso no momento.</div>
+              </div>
+            ) : avisos.map(av => {
+              const tipoAviso = {
+                info:    { cor: "#3b82f6", bg: "rgba(59,130,246,.08)",  borda: "rgba(59,130,246,.25)",  icon: "ℹ️" },
+                urgente: { cor: "#ef4444", bg: "rgba(239,68,68,.08)",   borda: "rgba(239,68,68,.25)",   icon: "🚨" },
+                evento:  { cor: "#c9a84c", bg: "rgba(201,168,76,.08)",  borda: "rgba(201,168,76,.25)",  icon: "📅" },
+                oracao:  { cor: "#8b5cf6", bg: "rgba(139,92,246,.08)",  borda: "rgba(139,92,246,.25)",  icon: "🙏" },
+              }[av.tipo] || { cor: "#3b82f6", bg: "rgba(59,130,246,.08)", borda: "rgba(59,130,246,.25)", icon: "ℹ️" };
+              return (
+                <div key={av.id} style={{ margin: "0 16px 10px", background: tipoAviso.bg, border: `1px solid ${tipoAviso.borda}`, borderLeft: `3px solid ${tipoAviso.cor}`, borderRadius: 14, padding: "14px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                    <span style={{ fontSize: 16 }}>{tipoAviso.icon}</span>
+                    <div style={{ fontSize: 14, fontWeight: "bold", color: tipoAviso.cor, flex: 1 }}>{av.titulo}</div>
+                    <div style={{ fontSize: 10, color: T.textFaint }}>{fmtData(av.data)}</div>
+                  </div>
+                  <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.6 }}>{av.texto}</div>
+                </div>
+              );
+            })}
+
             {/* Agenda completa */}
             <div id="mais-agenda" style={S.secTitle}>Agenda Completa</div>
             {agenda.length === 0 ? (
@@ -1194,9 +1229,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "devocional", "video", "aovivo", "membros"].map(t => (
+              {["agenda", "palavra", "devocional", "avisos", "video", "aovivo", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
@@ -1399,6 +1434,68 @@ export default function FamiliaAliancaApp() {
                     <div style={{ fontSize: 13, fontWeight: "bold" }}>{devocional.referencia}</div>
                     <div style={{ fontSize: 12, color: T.textSub, marginTop: 4 }}>{fmtData(devocional.data)}</div>
                   </div>
+                )}
+              </div>
+            )}
+
+            {/* Admin: Avisos */}
+            {adminTab === "avisos" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Avisos da Igreja</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 20 }}>Publique avisos que aparecerão para todos os membros na aba Mais</div>
+
+                {/* Novo aviso */}
+                <label style={S.label}>Título do aviso *</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Culto especial neste domingo!"
+                  value={novoAviso.titulo}
+                  onChange={e => setNovoAviso({ ...novoAviso, titulo: e.target.value })} />
+
+                <label style={S.label}>Mensagem *</label>
+                <textarea style={{ ...S.textarea, minHeight: 100 }}
+                  placeholder="Escreva o texto completo do aviso..."
+                  value={novoAviso.texto}
+                  onChange={e => setNovoAviso({ ...novoAviso, texto: e.target.value })} />
+
+                <label style={S.label}>Tipo</label>
+                <select style={{ ...S.select, marginBottom: 0 }}
+                  value={novoAviso.tipo}
+                  onChange={e => setNovoAviso({ ...novoAviso, tipo: e.target.value })}>
+                  <option value="info">ℹ️ Informativo</option>
+                  <option value="urgente">🚨 Urgente</option>
+                  <option value="evento">📅 Evento</option>
+                  <option value="oracao">🙏 Oração</option>
+                </select>
+
+                <button style={S.saveBtn} onClick={async () => {
+                  if (!novoAviso.titulo || !novoAviso.texto) { showToast("⚠️ Preencha título e mensagem!"); return; }
+                  await addDoc(collection(db, "avisos"), {
+                    ...novoAviso,
+                    data: new Date().toISOString().split("T")[0]
+                  });
+                  setNovoAviso({ titulo: "", texto: "", tipo: "info" });
+                  showToast("✅ Aviso publicado!");
+                }}>📢 Publicar Aviso</button>
+
+                {/* Lista de avisos existentes */}
+                {avisos.length > 0 && (
+                  <>
+                    <div style={{ fontSize: 12, color: T.gold, marginTop: 24, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>Avisos publicados ({avisos.length})</div>
+                    {avisos.map(av => (
+                      <div key={av.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 3 }}>{av.titulo}</div>
+                          <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5 }}>{av.texto}</div>
+                          <div style={{ fontSize: 11, color: T.textFaint, marginTop: 4 }}>{fmtData(av.data)} • {av.tipo}</div>
+                        </div>
+                        <button style={S.delBtn} onClick={async () => {
+                          if (window.confirm("Excluir este aviso?")) {
+                            await deleteDoc(doc(db, "avisos", av.id));
+                            showToast("🗑️ Aviso removido!");
+                          }
+                        }}>🗑️</button>
+                      </div>
+                    ))}
+                  </>
                 )}
               </div>
             )}
