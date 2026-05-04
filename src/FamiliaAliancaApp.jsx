@@ -69,6 +69,7 @@ const store = {
 const fmtData = (s) => { if (!s) return ""; const [a, m, d] = s.split("-"); return `${d}/${m}/${a}`; };
 const tipoColor = { culto: "#c9a84c", oracao: "#3b82f6", kids: "#f59e0b", music: "#8b5cf6" };
 const tipoLabel = { culto: "Culto", oracao: "Oração", kids: "Kids", music: "Music" };
+const RADIO_URL = "https://streaming.dedicadofm.com.br/dedicado";
 
 export default function FamiliaAliancaApp() {
   const [screen, setScreen] = useState("splash");
@@ -127,8 +128,6 @@ export default function FamiliaAliancaApp() {
   }, [tab, maisScrollTarget]);
 
   // ── RÁDIO GOSPEL ──
-  const RADIO_URL = "https://streaming.dedicadofm.com.br/dedicado";
-
   useEffect(() => {
     const audio = radioRef.current;
     if (!audio) return;
@@ -141,13 +140,11 @@ export default function FamiliaAliancaApp() {
   }, [radioPlaying, radioVolume]);
 
   useEffect(() => {
+    const audio = radioRef.current;
     const tryPlay = () => {
-      if (radioRef.current && !radioPlaying) {
-        radioRef.current.volume = radioVolume;
-        radioRef.current.play()
-          .then(() => setRadioPlaying(true))
-          .catch(() => {});
-      }
+      if (!audio) return;
+      audio.volume = 0.7;
+      audio.play().then(() => setRadioPlaying(true)).catch(() => {});
       window.removeEventListener("click", tryPlay);
       window.removeEventListener("touchstart", tryPlay);
     };
