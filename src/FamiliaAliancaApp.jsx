@@ -157,7 +157,7 @@ export default function FamiliaAliancaApp() {
       window.removeEventListener("click", tryPlay);
       window.removeEventListener("touchstart", tryPlay);
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Splash + Firebase load
   useEffect(() => {
