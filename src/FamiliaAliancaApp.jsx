@@ -69,7 +69,7 @@ const store = {
 const fmtData = (s) => { if (!s) return ""; const [a, m, d] = s.split("-"); return `${d}/${m}/${a}`; };
 const tipoColor = { culto: "#c9a84c", oracao: "#3b82f6", kids: "#f59e0b", music: "#8b5cf6" };
 const tipoLabel = { culto: "Culto", oracao: "Oração", kids: "Kids", music: "Music" };
-const RADIO_URL = "https://streaming.dedicadofm.com.br/dedicado";
+const RADIO_URL = "https://cast2.hoost.com.br:7080/live";
 
 export default function FamiliaAliancaApp() {
   const [screen, setScreen] = useState("splash");
@@ -131,19 +131,30 @@ export default function FamiliaAliancaApp() {
   useEffect(() => {
     const audio = radioRef.current;
     if (!audio) return;
-    audio.volume = radioVolume;
     if (radioPlaying) {
-      audio.play().catch(() => setRadioPlaying(false));
+      audio.volume = radioVolume;
+      // Força reload do stream ao dar play (necessário para streams ao vivo)
+      if (audio.paused) {
+        audio.load();
+        audio.play().catch(() => setRadioPlaying(false));
+      }
     } else {
       audio.pause();
     }
-  }, [radioPlaying, radioVolume]);
+  }, [radioPlaying]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const audio = radioRef.current;
+    if (!audio) return;
+    audio.volume = radioVolume;
+  }, [radioVolume]);
 
   useEffect(() => {
     const audio = radioRef.current;
     const tryPlay = () => {
       if (!audio) return;
       audio.volume = 0.7;
+      audio.load();
       audio.play().then(() => setRadioPlaying(true)).catch(() => {});
       window.removeEventListener("click", tryPlay);
       window.removeEventListener("touchstart", tryPlay);
@@ -554,7 +565,7 @@ export default function FamiliaAliancaApp() {
               </div>
 
               <div style={{ fontSize: 11, color: "rgba(255,255,255,.65)", marginBottom: 10, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {radioPlaying ? "🎶 Dedicada FM — Ao vivo" : "Pausado"}
+                {radioPlaying ? "🎶 Rádio Gospel — Ao vivo" : "Pausado"}
               </div>
 
               {/* Controles */}
