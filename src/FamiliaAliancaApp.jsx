@@ -343,23 +343,23 @@ export default function FamiliaAliancaApp() {
 
   // Cores do tema
   const T = {
-    bg: darkMode ? "#03060f" : "#f0f0f5",
-    bg2: darkMode ? "#060d1c" : "#ffffff",
+    bg: darkMode ? "#050d1f" : "#f0f0f5",
+    bg2: darkMode ? "#07112a" : "#ffffff",
     card: darkMode ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.07)",
     cardBorder: darkMode ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.18)",
     text: darkMode ? "#ffffff" : "#0a0a1a",
     textSub: darkMode ? "rgba(255,255,255,.72)" : "rgba(0,0,0,.65)",
     textFaint: darkMode ? "rgba(255,255,255,.42)" : "rgba(0,0,0,.4)",
-    nav: darkMode ? "#040810" : "#ffffff",
+    nav: darkMode ? "#040c1c" : "#ffffff",
     navBorder: darkMode ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.15)",
-    header: darkMode ? "#040810" : "#ffffff",
+    header: darkMode ? "#040c1c" : "#ffffff",
     input: darkMode ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.07)",
     inputBorder: darkMode ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.2)",
     gold: darkMode ? "#c9a84c" : "#9a7020",
   };
   const S = {
     app: { minHeight: "100vh", background: T.bg, color: T.text, fontFamily: "'Georgia', 'Times New Roman', serif", position: "relative", overflowX: "hidden" },
-    bg: { position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", background: darkMode ? "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(10,40,100,.35) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 80% 100%, rgba(201,168,76,.07) 0%, transparent 60%)" : "none" },
+    bg: { position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", background: darkMode ? "linear-gradient(160deg, #0a1a3a 0%, #050d1f 40%, #03091a 70%, #060f28 100%)" : "none" },
     wrap: { position: "relative", zIndex: 1, maxWidth: 430, margin: "0 auto", paddingBottom: 90 },
     splash: { minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 },
     splashLogo: { width: 160, animation: "fadeIn 1s ease" },
@@ -495,7 +495,7 @@ export default function FamiliaAliancaApp() {
         ::-webkit-scrollbar{width:4px;height:4px}
         ::-webkit-scrollbar-track{background:transparent}
         ::-webkit-scrollbar-thumb{background:rgba(201,168,76,.3);border-radius:2px}
-        select option{background:${darkMode ? "#040e20" : "#ffffff"}; color:${T.text};}
+        select option{background:${darkMode ? "#07112a" : "#ffffff"}; color:${T.text};}
         @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         .acesso-rapido::-webkit-scrollbar{display:none}
         .acesso-rapido{scrollbar-width:none;-ms-overflow-style:none;}
@@ -538,7 +538,7 @@ export default function FamiliaAliancaApp() {
 
             {/* ── CARD PALAVRA SEMANAL (com foto do pastor) ── */}
             {palavra ? (
-              <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", position: "relative", background: darkMode ? "linear-gradient(135deg,#071428 0%,#03060f 60%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 60%)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.55)"}`, minHeight: 190 }}>
+              <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", position: "relative", background: darkMode ? "linear-gradient(135deg,#0a1a3a 0%,#050d1f 60%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 60%)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.55)"}`, minHeight: 190 }}>
                 {/* faixa dourada topo */}
                 <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px", display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>Palavra Semanal</span>
