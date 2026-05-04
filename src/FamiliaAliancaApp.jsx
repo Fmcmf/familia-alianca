@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { db, messaging, solicitarPermissaoNotificacao, onMessage } from "./firebase";
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
@@ -88,6 +88,10 @@ export default function FamiliaAliancaApp() {
   const [avisos, setAvisos] = useState([]);
   const [novoAviso, setNovoAviso] = useState({ titulo: "", texto: "", tipo: "info" });
   const [editandoAviso, setEditandoAviso] = useState(null);
+  const [radioPlaying, setRadioPlaying] = useState(false);
+  const [radioVolume, setRadioVolume] = useState(0.7);
+  const [radioMinimized, setRadioMinimized] = useState(false);
+  const radioRef = useRef(null);
 
   // UI
   const [toast, setToast] = useState("");
@@ -121,6 +125,39 @@ export default function FamiliaAliancaApp() {
     }, 350);
     return () => clearTimeout(timer);
   }, [tab, maisScrollTarget]);
+
+  // ── RÁDIO GOSPEL ──
+  const RADIO_URL = "https://streaming.dedicadofm.com.br/dedicado";
+
+  useEffect(() => {
+    const audio = radioRef.current;
+    if (!audio) return;
+    audio.volume = radioVolume;
+    if (radioPlaying) {
+      audio.play().catch(() => setRadioPlaying(false));
+    } else {
+      audio.pause();
+    }
+  }, [radioPlaying, radioVolume]);
+
+  useEffect(() => {
+    const tryPlay = () => {
+      if (radioRef.current && !radioPlaying) {
+        radioRef.current.volume = radioVolume;
+        radioRef.current.play()
+          .then(() => setRadioPlaying(true))
+          .catch(() => {});
+      }
+      window.removeEventListener("click", tryPlay);
+      window.removeEventListener("touchstart", tryPlay);
+    };
+    window.addEventListener("click", tryPlay);
+    window.addEventListener("touchstart", tryPlay);
+    return () => {
+      window.removeEventListener("click", tryPlay);
+      window.removeEventListener("touchstart", tryPlay);
+    };
+  }, []);
 
   // Splash + Firebase load
   useEffect(() => {
@@ -487,6 +524,59 @@ export default function FamiliaAliancaApp() {
   return (
     <div style={S.app}>
       <div style={S.bg} />
+
+      {/* ── RÁDIO — áudio oculto ── */}
+      <audio ref={radioRef} src={RADIO_URL} preload="none" />
+
+      {/* ── MINI PLAYER FLUTUANTE ── */}
+      {screen === "app" && (
+        <div style={{
+          position: "fixed", bottom: 76, right: 14, zIndex: 999,
+          background: darkMode ? "linear-gradient(135deg,#0a1a3a,#050d1f)" : "linear-gradient(135deg,#1a3a7a,#0a1a3a)",
+          border: "1px solid rgba(201,168,76,.35)", borderRadius: radioMinimized ? 30 : 18,
+          boxShadow: "0 4px 24px rgba(0,0,0,.5)", overflow: "hidden",
+          transition: "all .3s ease", width: radioMinimized ? 48 : 220,
+        }}>
+          {radioMinimized ? (
+            /* Minimizado — só o botão play/pause */
+            <button onClick={() => setRadioMinimized(false)}
+              style={{ width: 48, height: 48, background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
+              {radioPlaying ? "🎵" : "📻"}
+            </button>
+          ) : (
+            /* Expandido */
+            <div style={{ padding: "10px 12px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  {/* indicador ao vivo */}
+                  {radioPlaying && <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", display: "inline-block", boxShadow: "0 0 6px #22c55e" }} />}
+                  <span style={{ fontSize: 11, color: "#c9a84c", fontWeight: "bold", letterSpacing: 1 }}>📻 RÁDIO GOSPEL</span>
+                </div>
+                <button onClick={() => setRadioMinimized(true)}
+                  style={{ background: "none", border: "none", color: "rgba(255,255,255,.5)", cursor: "pointer", fontSize: 14, lineHeight: 1 }}>−</button>
+              </div>
+
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,.65)", marginBottom: 10, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {radioPlaying ? "🎶 Dedicada FM — Ao vivo" : "Pausado"}
+              </div>
+
+              {/* Controles */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <button onClick={() => setRadioPlaying(p => !p)}
+                  style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#c9a84c,#e8c97a)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
+                  {radioPlaying ? "⏸" : "▶️"}
+                </button>
+                <input type="range" min="0" max="1" step="0.05" value={radioVolume}
+                  onChange={e => setRadioVolume(Number(e.target.value))}
+                  style={{ flex: 1, accentColor: "#c9a84c", height: 3, cursor: "pointer" }} />
+                <span style={{ fontSize: 10, color: "rgba(255,255,255,.4)", minWidth: 24 }}>
+                  {Math.round(radioVolume * 100)}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       <style>{`
         * { box-sizing: border-box; }
         html { font-size: 18px; }
