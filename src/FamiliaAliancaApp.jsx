@@ -575,6 +575,39 @@ export default function FamiliaAliancaApp() {
               </div>
             )}
 
+            {/* ── BANNER EM BREVE ── */}
+            <div style={{ margin: "14px 16px 0", borderRadius: 18, overflow: "hidden", border: "1px solid rgba(201,168,76,.35)", background: darkMode ? "linear-gradient(135deg,#0a1a3a 0%,#050d1f 60%,#07112a 100%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 100%)", position: "relative" }}>
+              {/* faixa dourada topo */}
+              <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "5px 16px" }}>
+                <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>Em breve</span>
+              </div>
+              {/* conteúdo */}
+              <div style={{ padding: "18px 20px 20px", display: "flex", alignItems: "center", gap: 16 }}>
+                {/* ícone bíblia */}
+                <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(201,168,76,.12)", border: "1.5px solid rgba(201,168,76,.4)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 4h7a4 4 0 0 1 4 4v12H4V4z" fill="rgba(201,168,76,.1)"/>
+                    <path d="M20 20H11a4 4 0 0 1-4-4V4"/>
+                    <line x1="12" y1="4" x2="12" y2="20"/>
+                    <line x1="8" y1="9" x2="11" y2="9"/>
+                    <line x1="8" y1="13" x2="11" y2="13"/>
+                  </svg>
+                </div>
+                {/* texto */}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 1, marginBottom: 5 }}>Aguarde!</div>
+                  <div style={{ fontSize: 17, fontWeight: "bold", color: darkMode ? "#fff" : "#1a0f00", lineHeight: 1.3, marginBottom: 6 }}>Estudo Bíblico Temático</div>
+                  <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5 }}>Em breve disponível aqui no nosso APP</div>
+                </div>
+                {/* botão */}
+                <div style={{ background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 20, padding: "6px 12px", fontSize: 11, color: "#c9a84c", whiteSpace: "nowrap", flexShrink: 0 }}>
+                  🔔 Em breve
+                </div>
+              </div>
+              {/* brilho decorativo */}
+              <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: "100%", background: "radial-gradient(ellipse at right, rgba(201,168,76,.07) 0%, transparent 70%)", pointerEvents: "none" }} />
+            </div>
+
             {/* ── GRADE DE ACESSO RÁPIDO ── */}
             <div style={{ padding: "20px 16px 0" }}>
               <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub, marginBottom: 14 }}>Acesso rápido</div>
