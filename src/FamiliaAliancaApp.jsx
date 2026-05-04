@@ -372,7 +372,7 @@ export default function FamiliaAliancaApp() {
     loginBtn: { width: "100%", padding: "14px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 12 },
     switchBtn: { background: "none", border: "none", color: T.gold, fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif", textDecoration: "underline" },
     errMsg: { color: "#ef4444", fontSize: 13, marginBottom: 10, textAlign: "center" },
-    header: { padding: "28px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", background: T.header, borderBottom: `1px solid ${T.navBorder}` },
+    header: { padding: "28px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "transparent", borderBottom: "none" },
     headerLogo: { height: 38 },
     headerUser: { fontSize: 12, color: T.textSub, textAlign: "right" },
     headerName: { fontSize: 13, color: T.gold, fontWeight: "bold" },
