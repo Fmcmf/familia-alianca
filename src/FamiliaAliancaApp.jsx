@@ -79,6 +79,9 @@ export default function FamiliaAliancaApp() {
   // Auth
   const [loginForm, setLoginForm] = useState({ nome: "", email: "", senha: "", modo: "login" });
   const [loginErro, setLoginErro] = useState("");
+  const [recuperando, setRecuperando] = useState(false);
+  const [recuperandoEmail, setRecuperandoEmail] = useState("");
+  const [recuperandoMsg, setRecuperandoMsg] = useState("");
 
   // Dados
   const [agenda, setAgenda] = useState([]);
@@ -289,6 +292,29 @@ export default function FamiliaAliancaApp() {
     }
   };
 
+  const handleRecuperarSenha = async () => {
+    if (!recuperandoEmail.trim()) { setRecuperandoMsg("⚠️ Digite seu e-mail cadastrado."); return; }
+    const snap = await getDoc(doc(db, "membros", recuperandoEmail.trim().toLowerCase()));
+    if (!snap.exists()) { setRecuperandoMsg("⚠️ E-mail não encontrado. Verifique e tente novamente."); return; }
+    const dados = snap.data();
+    try {
+      await emailjs.send(
+        "service_sffzlx2",
+        "template_o6kyn56",
+        {
+          to_name: dados.nome,
+          to_email: recuperandoEmail.trim().toLowerCase(),
+          senha_atual: dados.senha,
+          app_url: window.location.origin,
+        },
+        "KkcyGeZOZYPkwGing"
+      );
+      setRecuperandoMsg("✅ E-mail enviado! Verifique sua caixa de entrada.");
+    } catch {
+      setRecuperandoMsg("❌ Erro ao enviar e-mail. Tente novamente.");
+    }
+  };
+
   const handleLogout = () => { store.set(SK.user, null); setUser(null); setIsAdmin(false); setScreen("login"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
 
   // ── AGENDA ──
@@ -439,28 +465,66 @@ export default function FamiliaAliancaApp() {
     <div style={S.loginWrap}>
       <img src="/logo-igreja.png" alt="Família Aliança" style={{ width: 160, marginBottom: 28, borderRadius: 16, background: darkMode ? "transparent" : "#080810", padding: darkMode ? 0 : 12 }} />
       <div style={{ fontSize: 16, fontWeight: "bold", marginBottom: 32, textAlign: "center", color: T.text, letterSpacing: 1 }}>
-        {loginForm.modo === "login" ? "Entrar na sua conta" : "Criar sua conta"}
+        {recuperando ? "Recuperar Senha" : loginForm.modo === "login" ? "Entrar na sua conta" : "Criar sua conta"}
       </div>
 
       <div style={{ width: "100%", maxWidth: 360 }}>
-        {loginErro && <div style={S.errMsg}>{loginErro}</div>}
-        {loginForm.modo === "cadastro" && (
-          <input style={S.input} placeholder="Seu nome completo" value={loginForm.nome}
-            onChange={e => { setLoginForm({ ...loginForm, nome: e.target.value }); setLoginErro(""); }} />
+
+        {/* ── TELA RECUPERAR SENHA ── */}
+        {recuperando ? (
+          <>
+            <div style={{ fontSize: 13, color: T.textSub, marginBottom: 20, textAlign: "center", lineHeight: 1.6 }}>
+              Digite o e-mail cadastrado e enviaremos suas informações de acesso.
+            </div>
+            {recuperandoMsg && (
+              <div style={{ padding: "12px 16px", borderRadius: 10, marginBottom: 16, fontSize: 13, textAlign: "center", lineHeight: 1.5,
+                background: recuperandoMsg.startsWith("✅") ? "rgba(34,197,94,.1)" : recuperandoMsg.startsWith("❌") ? "rgba(239,68,68,.1)" : "rgba(201,168,76,.1)",
+                border: `1px solid ${recuperandoMsg.startsWith("✅") ? "rgba(34,197,94,.3)" : recuperandoMsg.startsWith("❌") ? "rgba(239,68,68,.3)" : "rgba(201,168,76,.3)"}`,
+                color: recuperandoMsg.startsWith("✅") ? "#22c55e" : recuperandoMsg.startsWith("❌") ? "#ef4444" : "#c9a84c"
+              }}>{recuperandoMsg}</div>
+            )}
+            <input style={S.input} placeholder="Seu e-mail cadastrado" type="email"
+              value={recuperandoEmail}
+              onChange={e => { setRecuperandoEmail(e.target.value); setRecuperandoMsg(""); }}
+              onKeyDown={e => e.key === "Enter" && handleRecuperarSenha()} />
+            <button style={S.loginBtn} onClick={handleRecuperarSenha}>Enviar e-mail de recuperação</button>
+            <div style={{ textAlign: "center" }}>
+              <button style={S.switchBtn} onClick={() => { setRecuperando(false); setRecuperandoEmail(""); setRecuperandoMsg(""); }}>
+                ← Voltar para o login
+              </button>
+            </div>
+          </>
+        ) : (
+          /* ── TELA LOGIN / CADASTRO ── */
+          <>
+            {loginErro && <div style={S.errMsg}>{loginErro}</div>}
+            {loginForm.modo === "cadastro" && (
+              <input style={S.input} placeholder="Seu nome completo" value={loginForm.nome}
+                onChange={e => { setLoginForm({ ...loginForm, nome: e.target.value }); setLoginErro(""); }} />
+            )}
+            <input style={S.input} placeholder="E-mail" type="email" value={loginForm.email}
+              onChange={e => { setLoginForm({ ...loginForm, email: e.target.value }); setLoginErro(""); }} />
+            <input style={S.input} placeholder="Senha" type="password" value={loginForm.senha}
+              onChange={e => { setLoginForm({ ...loginForm, senha: e.target.value }); setLoginErro(""); }}
+              onKeyDown={e => e.key === "Enter" && handleLogin()} />
+            <button style={S.loginBtn} onClick={handleLogin}>
+              {loginForm.modo === "login" ? "Entrar" : "Criar conta"}
+            </button>
+            {/* Esqueci a senha — só no modo login */}
+            {loginForm.modo === "login" && (
+              <div style={{ textAlign: "center", marginBottom: 8 }}>
+                <button style={{ ...S.switchBtn, color: "#c9a84c" }} onClick={() => { setRecuperando(true); setRecuperandoEmail(loginForm.email); setRecuperandoMsg(""); }}>
+                  Esqueci minha senha
+                </button>
+              </div>
+            )}
+            <div style={{ textAlign: "center" }}>
+              <button style={S.switchBtn} onClick={() => { setLoginForm({ ...loginForm, modo: loginForm.modo === "login" ? "cadastro" : "login" }); setLoginErro(""); }}>
+                {loginForm.modo === "login" ? "Não tenho conta — Cadastrar" : "Já tenho conta — Entrar"}
+              </button>
+            </div>
+          </>
         )}
-        <input style={S.input} placeholder="E-mail" type="email" value={loginForm.email}
-          onChange={e => { setLoginForm({ ...loginForm, email: e.target.value }); setLoginErro(""); }} />
-        <input style={S.input} placeholder="Senha" type="password" value={loginForm.senha}
-          onChange={e => { setLoginForm({ ...loginForm, senha: e.target.value }); setLoginErro(""); }}
-          onKeyDown={e => e.key === "Enter" && handleLogin()} />
-        <button style={S.loginBtn} onClick={handleLogin}>
-          {loginForm.modo === "login" ? "Entrar" : "Criar conta"}
-        </button>
-        <div style={{ textAlign: "center" }}>
-          <button style={S.switchBtn} onClick={() => { setLoginForm({ ...loginForm, modo: loginForm.modo === "login" ? "cadastro" : "login" }); setLoginErro(""); }}>
-            {loginForm.modo === "login" ? "Não tenho conta — Cadastrar" : "Já tenho conta — Entrar"}
-          </button>
-        </div>
       </div>
     </div>
   );
