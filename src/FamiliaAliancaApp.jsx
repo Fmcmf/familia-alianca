@@ -42,6 +42,41 @@ const MINISTERIOS = [
   { id: 7, nome: "MOVE — Jovens", icon: "🔥", desc: "Um movimento de jovens apaixonados por Deus, transformando vidas e gerações.", cor: "#f97316" },
 ];
 
+const ESTUDOS_FIXOS = [
+  {
+    id: "f1", nivel: "iniciante", fixo: true,
+    titulo: "Quem é Jesus?",
+    versiculo: "João 14:6 — \"Eu sou o caminho, a verdade e a vida.\"",
+    texto: "Conhecer Jesus é o primeiro passo da caminhada cristã.\n\nJesus não é apenas um personagem histórico ou um bom exemplo moral. Ele é o Filho de Deus que veio ao mundo para nos reconciliar com o Pai. Em João 14:6, Ele declara ser o único caminho para Deus.\n\n**Jesus como Caminho:** Ele abriu uma porta que estava fechada pelo pecado. Por meio da Sua morte e ressurreição, temos acesso livre ao Pai.\n\n**Jesus como Verdade:** Em um mundo cheio de mentiras e incertezas, Jesus é a verdade absoluta. Conhecê-Lo é conhecer a realidade sobre Deus, sobre nós mesmos e sobre a vida.\n\n**Jesus como Vida:** Ele não veio apenas nos dar uma religião, mas vida em abundância (João 10:10). Uma vida com propósito, paz e esperança eterna.",
+    perguntas: ["O que significa para você dizer que Jesus é o seu caminho?", "Como a verdade de Jesus pode transformar suas decisões diárias?", "De que forma você tem experimentado a vida que Jesus promete?"],
+    oracao: "Senhor Jesus, obrigado por ser meu caminho, minha verdade e minha vida. Quero Te conhecer cada dia mais profundamente. Que minha vida reflita a Tua presença. Amém."
+  },
+  {
+    id: "f2", nivel: "iniciante", fixo: true,
+    titulo: "O que é Graça?",
+    versiculo: "Efésios 2:8-9 — \"Porque pela graça sois salvos, por meio da fé.\"",
+    texto: "A graça é um dos conceitos mais belos e libertadores da fé cristã.\n\nGraça significa favor imerecido. Não é algo que conquistamos pelo nosso esforço ou bondade — é um presente de Deus para nós.\n\n**Graça não é merecimento:** A Bíblia é clara ao dizer que nenhum de nós merece a salvação. Todos pecamos e estamos destituídos da glória de Deus (Romanos 3:23). Mas Deus, em Seu amor infinito, escolheu nos salvar mesmo assim.\n\n**Graça gera transformação:** Receber a graça não significa que podemos viver como quisermos. Ao contrário, a graça nos transforma de dentro para fora, nos tornando pessoas que desejam agir com amor e justiça.\n\n**Graça é libertadora:** Você não precisa carregar o peso de tentar ser perfeito. A graça de Deus é suficiente para cobrir todos os seus erros.",
+    perguntas: ["Você já tentou merecer o amor de Deus? Como isso te fez sentir?", "De que forma entender a graça muda a sua relação com Deus?", "Como você pode demonstrar graça às pessoas ao seu redor?"],
+    oracao: "Pai, obrigado pela Tua graça que me salva e me transforma. Que eu nunca tome isso como garantido, mas que viva grato e transformado pelo Teu amor. Amém."
+  },
+  {
+    id: "f3", nivel: "avancado", fixo: true,
+    titulo: "A Armadura de Deus",
+    versiculo: "Efésios 6:11 — \"Revesti-vos de toda a armadura de Deus.\"",
+    texto: "A vida cristã é uma batalha espiritual real, e Deus nos equipou completamente para vencê-la.\n\nPaulo escreve aos Efésios descrevendo cada peça de uma armadura romana, usando-as como metáforas poderosas para a nossa proteção espiritual.\n\n**Cinto da Verdade:** A verdade de Deus nos mantém firmes e nos protege das mentiras do inimigo. Conhecer a Palavra é fundamental.\n\n**Couraça da Justiça:** A justiça de Cristo nos protege o coração. Não é nossa perfeição, mas a de Jesus aplicada à nossa vida.\n\n**Calçado do Evangelho:** Estamos sempre prontos para compartilhar as boas novas onde quer que vamos.\n\n**Escudo da Fé:** A fé apaga os dardos inflamados do maligno — dúvidas, medos e acusações.\n\n**Capacete da Salvação:** Protege nossa mente. Saber que somos salvos nos dá segurança e clareza.\n\n**Espada do Espírito:** A Palavra de Deus é nossa única arma ofensiva. Jesus a usou contra Satanás no deserto.",
+    perguntas: ["Qual peça da armadura você sente que precisa fortalecer mais?", "Como a oração se conecta com o uso da armadura de Deus?", "Cite uma situação em que você usou a Palavra de Deus como espada do Espírito."],
+    oracao: "Senhor, me revisto hoje de toda a Tua armadura. Protege minha mente, meu coração e meus passos. Que eu possa estar firme contra os ataques do inimigo, confiando em Teu poder. Amém."
+  },
+  {
+    id: "f4", nivel: "avancado", fixo: true,
+    titulo: "Vida de Oração",
+    versiculo: "Lucas 18:1 — \"Era preciso orar sempre e nunca esmorecer.\"",
+    texto: "A oração é o respirar da alma cristã. Sem ela, nossa vida espiritual se enfraquece.\n\nJesus não apenas ensinou sobre a oração — Ele orava. Em momentos de decisão, de angústia e de gratidão, Jesus buscava o Pai. Se o Filho de Deus precisava orar, quanto mais nós?\n\n**Oração é relacionamento:** Não é uma lista de pedidos, mas uma conversa com o Pai que nos ama. Deus quer ouvir sobre tudo — suas alegrias, medos, dúvidas e gratidão.\n\n**Oração transforma quem ora:** Muitas vezes não mudamos as circunstâncias orando, mas somos transformados por elas. A oração alinha nossa vontade com a de Deus.\n\n**Oração tem poder real:** A Bíblia está cheia de exemplos de orações que mudaram histórias. Deus age quando o Seu povo clama.\n\n**Como cultivar uma vida de oração:** Reserve um tempo fixo, encontre um lugar tranquilo, use a Palavra como base e seja honesto com Deus.",
+    perguntas: ["Qual é o maior obstáculo na sua vida de oração atualmente?", "Você já teve uma oração respondida de forma surpreendente? Compartilhe.", "Como você pode tornar a oração uma prioridade na sua rotina?"],
+    oracao: "Pai, ensinai-me a orar como Jesus orava. Quero um coração que busca a Tua face todos os dias. Que minha oração seja real, constante e cheia de fé. Amém."
+  },
+];
+
 const CONTATOS = {
   endereco: ENDERECO,
   whatsapp: "(19) 99721-8590",
@@ -92,6 +127,11 @@ export default function FamiliaAliancaApp() {
   const [avisos, setAvisos] = useState([]);
   const [novoAviso, setNovoAviso] = useState({ titulo: "", texto: "", tipo: "info" });
   const [editandoAviso, setEditandoAviso] = useState(null);
+  const [estudos, setEstudos] = useState([]);
+  const [estudoAberto, setEstudoAberto] = useState(null);
+  const [estudoNivel, setEstudoNivel] = useState("iniciante");
+  const [concluidos, setConcluidos] = useState({});
+  const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
 
   // UI
   const [toast, setToast] = useState("");
@@ -219,6 +259,19 @@ export default function FamiliaAliancaApp() {
       setAvisos(lista);
     });
 
+    // Estudos — tempo real
+    const unsubEstudos = onSnapshot(collection(db, "estudos"), (snap) => {
+      setEstudos(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
+    // Concluídos do usuário
+    const userEmail = store.get(SK.user, null)?.email;
+    if (userEmail) {
+      getDoc(doc(db, "concluidos", userEmail)).then(snap => {
+        if (snap.exists()) setConcluidos(snap.data());
+      });
+    }
+
     // ── PRESENÇA ONLINE ──
     // Reutiliza o mesmo ID durante toda a sessão do navegador
     let sessionId = sessionStorage.getItem("fa-session-id");
@@ -247,7 +300,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
+      unsubMembros(); unsubAvisos(); unsubEstudos(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
       clearInterval(heartbeat);
       removerPresenca();
       window.removeEventListener("beforeunload", removerPresenca);
@@ -913,6 +966,110 @@ export default function FamiliaAliancaApp() {
                 <div style={{ color: T.gold, fontSize: 18 }}>›</div>
               </div>
             ))}
+
+            {/* ── ESTUDOS TEMÁTICOS ── */}
+            {!estudoAberto ? (
+              <>
+                <div style={{ ...S.secTitle, marginTop: 28 }}>📚 Estudos Temáticos</div>
+                <div style={{ display: "flex", margin: "0 16px 16px", background: T.card, borderRadius: 12, padding: 4, border: `1px solid ${T.cardBorder}` }}>
+                  {[{ id: "iniciante", label: "🌱 Iniciantes" }, { id: "avancado", label: "🔥 Avançados" }].map(n => (
+                    <button key={n.id} onClick={() => setEstudoNivel(n.id)}
+                      style={{ flex: 1, padding: "10px 0", border: "none", borderRadius: 9, cursor: "pointer", fontSize: 13, fontWeight: estudoNivel === n.id ? "bold" : "normal", fontFamily: "Georgia,serif",
+                        background: estudoNivel === n.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : "transparent",
+                        color: estudoNivel === n.id ? "#080810" : T.textSub }}>
+                      {n.label}
+                    </button>
+                  ))}
+                </div>
+                {[...ESTUDOS_FIXOS, ...estudos].filter(e => e.nivel === estudoNivel).map(estudo => {
+                  const feito = concluidos[estudo.id];
+                  return (
+                    <div key={estudo.id} style={{ margin: "0 16px 12px", background: T.card, border: `1px solid ${feito ? "rgba(34,197,94,.3)" : T.cardBorder}`, borderLeft: `3px solid ${feito ? "#22c55e" : "#c9a84c"}`, borderRadius: 14, padding: "14px 16px", cursor: "pointer" }}
+                      onClick={() => setEstudoAberto(estudo)}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                            <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{estudo.titulo}</div>
+                            {feito && <span style={{ fontSize: 10, background: "rgba(34,197,94,.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,.3)", borderRadius: 20, padding: "2px 8px" }}>✓ Concluído</span>}
+                          </div>
+                          <div style={{ fontSize: 12, color: T.gold, marginBottom: 4 }}>{estudo.versiculo}</div>
+                          <div style={{ fontSize: 12, color: T.textSub }}>{estudo.perguntas?.length || 0} perguntas de reflexão</div>
+                        </div>
+                        <div style={{ color: T.gold, fontSize: 22 }}>›</div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {[...ESTUDOS_FIXOS, ...estudos].filter(e => e.nivel === estudoNivel).length === 0 && (
+                  <div style={{ ...S.card, textAlign: "center", padding: "28px 20px" }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>📖</div>
+                    <div style={{ fontSize: 13, color: T.textSub }}>Novos estudos em breve!</div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ animation: "slideUp .3s ease" }}>
+                <button onClick={() => setEstudoAberto(null)}
+                  style={{ margin: "12px 16px 0", background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", gap: 6 }}>
+                  ← Voltar aos estudos
+                </button>
+                <div style={{ margin: "12px 16px 0", borderRadius: 18, overflow: "hidden", border: `1px solid rgba(201,168,76,.3)`, background: darkMode ? "linear-gradient(135deg,#0a1a3a,#050d1f)" : "linear-gradient(135deg,#f5f0e8,#ede4d0)" }}>
+                  <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px" }}>
+                    <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>
+                      {estudoAberto.nivel === "iniciante" ? "🌱 Iniciantes" : "🔥 Avançados"}
+                    </span>
+                  </div>
+                  <div style={{ padding: "18px 18px 20px" }}>
+                    <div style={{ fontSize: 20, fontWeight: "bold", color: darkMode ? "#fff" : "#1a0f00", marginBottom: 10 }}>{estudoAberto.titulo}</div>
+                    <div style={{ fontSize: 13, color: "#c9a84c", fontStyle: "italic", marginBottom: 4, lineHeight: 1.5 }}>{estudoAberto.versiculo}</div>
+                  </div>
+                </div>
+                <div style={{ ...S.card, margin: "12px 16px" }}>
+                  <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 12 }}>📖 Estudo</div>
+                  <div style={{ fontSize: 14, lineHeight: 1.65, color: T.textSub }}>
+                    {estudoAberto.texto.split("\n").map((par, i) => {
+                      if (par.trim() === "") return <br key={i} />;
+                      const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
+                        p.startsWith("**") && p.endsWith("**") ? <strong key={j} style={{ color: T.text }}>{p.slice(2, -2)}</strong> : p
+                      );
+                      return <p key={i} style={{ marginBottom: 6 }}>{parts}</p>;
+                    })}
+                  </div>
+                </div>
+                {estudoAberto.perguntas?.length > 0 && (
+                  <div style={{ ...S.card, margin: "0 16px 12px" }}>
+                    <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 14 }}>💬 Reflexão</div>
+                    {estudoAberto.perguntas.filter(p => p.trim()).map((p, i) => (
+                      <div key={i} style={{ display: "flex", gap: 12, marginBottom: 14 }}>
+                        <div style={{ width: 26, height: 26, borderRadius: "50%", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>{i + 1}</div>
+                        <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.6, paddingTop: 3 }}>{p}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {estudoAberto.oracao && (
+                  <div style={{ margin: "0 16px 12px", background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 14, padding: "16px 18px" }}>
+                    <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 10 }}>🙏 Oração</div>
+                    <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.7, fontStyle: "italic" }}>{estudoAberto.oracao}</div>
+                  </div>
+                )}
+                <div style={{ margin: "0 16px 24px" }}>
+                  <button style={{ width: "100%", padding: "14px 0", border: "none", borderRadius: 12, cursor: "pointer", fontSize: 14, fontWeight: "bold", fontFamily: "Georgia,serif",
+                    background: concluidos[estudoAberto.id] ? "rgba(34,197,94,.15)" : "linear-gradient(90deg,#c9a84c,#e8c97a)",
+                    color: concluidos[estudoAberto.id] ? "#22c55e" : "#080810",
+                    border: concluidos[estudoAberto.id] ? "1px solid rgba(34,197,94,.3)" : "none" }}
+                    onClick={async () => {
+                      const novo = { ...concluidos, [estudoAberto.id]: !concluidos[estudoAberto.id] };
+                      setConcluidos(novo);
+                      if (user?.email) await setDoc(doc(db, "concluidos", user.email), novo);
+                      showToast(novo[estudoAberto.id] ? "✅ Estudo marcado como concluído!" : "↩️ Marcado como não concluído");
+                    }}>
+                    {concluidos[estudoAberto.id] ? "✓ Concluído — Clique para desfazer" : "Marcar como Concluído"}
+                  </button>
+                </div>
+              </div>
+            )}
+
           </div>
         )}
 
@@ -1346,9 +1503,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "devocional", "avisos", "video", "aovivo", "membros"].map(t => (
+              {["agenda", "palavra", "devocional", "avisos", "estudos", "video", "aovivo", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
@@ -1657,6 +1814,87 @@ export default function FamiliaAliancaApp() {
                             }
                           }}>🗑️</button>
                         </div>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Admin: Estudos Temáticos */}
+            {adminTab === "estudos" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>📚 Novo Estudo Temático</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 20 }}>Crie estudos que aparecerão na aba Bíblia para os membros</div>
+
+                <label style={S.label}>Nível</label>
+                <select style={{ ...S.select, marginBottom: 0 }} value={novoEstudo.nivel}
+                  onChange={e => setNovoEstudo({ ...novoEstudo, nivel: e.target.value })}>
+                  <option value="iniciante">🌱 Iniciantes</option>
+                  <option value="avancado">🔥 Avançados</option>
+                </select>
+
+                <label style={S.label}>Título do estudo *</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: O Poder da Oração"
+                  value={novoEstudo.titulo}
+                  onChange={e => setNovoEstudo({ ...novoEstudo, titulo: e.target.value })} />
+
+                <label style={S.label}>Versículo base *</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Lucas 18:1 — Era preciso orar sempre..."
+                  value={novoEstudo.versiculo}
+                  onChange={e => setNovoEstudo({ ...novoEstudo, versiculo: e.target.value })} />
+
+                <label style={S.label}>Texto do estudo *</label>
+                <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 11, color: T.textSub }}>
+                  💡 Use **negrito** para destacar. Enter para novo parágrafo.
+                </div>
+                <textarea style={{ ...S.textarea, minHeight: 180 }}
+                  placeholder={"Escreva o conteúdo do estudo...\n\nUse **negrito** para destacar palavras importantes."}
+                  value={novoEstudo.texto}
+                  onChange={e => setNovoEstudo({ ...novoEstudo, texto: e.target.value })} />
+
+                <label style={S.label}>Perguntas de Reflexão</label>
+                {novoEstudo.perguntas.map((p, i) => (
+                  <input key={i} style={{ ...S.input, marginBottom: 8 }} placeholder={`Pergunta ${i + 1}...`}
+                    value={p} onChange={e => {
+                      const ps = [...novoEstudo.perguntas];
+                      ps[i] = e.target.value;
+                      setNovoEstudo({ ...novoEstudo, perguntas: ps });
+                    }} />
+                ))}
+                <button style={{ ...S.switchBtn, marginBottom: 8 }} onClick={() => setNovoEstudo({ ...novoEstudo, perguntas: [...novoEstudo.perguntas, ""] })}>
+                  + Adicionar pergunta
+                </button>
+
+                <label style={S.label}>Oração final</label>
+                <textarea style={{ ...S.textarea, minHeight: 100 }}
+                  placeholder="Escreva uma oração para encerrar o estudo..."
+                  value={novoEstudo.oracao}
+                  onChange={e => setNovoEstudo({ ...novoEstudo, oracao: e.target.value })} />
+
+                <button style={S.saveBtn} onClick={async () => {
+                  if (!novoEstudo.titulo || !novoEstudo.texto || !novoEstudo.versiculo) { showToast("⚠️ Preencha título, versículo e texto!"); return; }
+                  await addDoc(collection(db, "estudos"), { ...novoEstudo, data: new Date().toISOString().split("T")[0] });
+                  setNovoEstudo({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
+                  showToast("✅ Estudo publicado!");
+                }}>📚 Publicar Estudo</button>
+
+                {/* Lista de estudos do admin */}
+                {estudos.length > 0 && (
+                  <>
+                    <div style={{ fontSize: 12, color: T.gold, marginTop: 24, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>Estudos publicados ({estudos.length})</div>
+                    {estudos.map(e => (
+                      <div key={e.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 3 }}>{e.titulo}</div>
+                          <div style={{ fontSize: 11, color: T.textSub }}>{e.nivel === "iniciante" ? "🌱 Iniciantes" : "🔥 Avançados"} • {e.versiculo}</div>
+                        </div>
+                        <button style={S.delBtn} onClick={async () => {
+                          if (window.confirm("Excluir este estudo?")) {
+                            await deleteDoc(doc(db, "estudos", e.id));
+                            showToast("🗑️ Estudo removido!");
+                          }
+                        }}>🗑️</button>
                       </div>
                     ))}
                   </>
