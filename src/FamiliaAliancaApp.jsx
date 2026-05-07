@@ -1073,9 +1073,6 @@ export default function FamiliaAliancaApp() {
                 </div>
               </div>
             )}
-
-          )}
-
           </div>
         )}
 
