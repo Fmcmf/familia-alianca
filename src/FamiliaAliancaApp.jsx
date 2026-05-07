@@ -1037,7 +1037,7 @@ export default function FamiliaAliancaApp() {
                   </div>
                 )}
                 <div style={{ margin: "0 16px 24px" }}>
-                  <button style={{ width: "100%", padding: "14px 0", border: "none", borderRadius: 12, cursor: "pointer", fontSize: 14, fontWeight: "bold", fontFamily: "Georgia,serif",
+                  <button style={{ width: "100%", padding: "14px 0", borderRadius: 12, cursor: "pointer", fontSize: 14, fontWeight: "bold", fontFamily: "Georgia,serif",
                     background: concluidos[estudoAberto.id] ? "rgba(34,197,94,.15)" : "linear-gradient(90deg,#c9a84c,#e8c97a)",
                     color: concluidos[estudoAberto.id] ? "#22c55e" : "#080810",
                     border: concluidos[estudoAberto.id] ? "1px solid rgba(34,197,94,.3)" : "none" }}
