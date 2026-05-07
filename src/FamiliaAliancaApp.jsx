@@ -133,6 +133,7 @@ const ESTUDOS_FIXOS = [
     ],
     oracao: "Pai, que maravilha é poder Te chamar de Pai! Obrigado por me convidar a essa intimidade, a conversar contigo a qualquer hora, em qualquer lugar, sobre qualquer coisa. Perdoa-me pelas vezes que tratei a oração como obrigação em vez de privilégio. Ensinai-me a orar como Jesus orava, com persistência, com honestidade, com total dependência de Ti. Que a oração se torne o respirar da minha alma, tão natural quanto o ar que respiro. Em nome de Jesus, amém."
   },
+];
 
 const CONTATOS = {
   endereco: ENDERECO,
