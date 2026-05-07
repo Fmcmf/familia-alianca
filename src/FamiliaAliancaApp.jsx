@@ -132,8 +132,7 @@ export default function FamiliaAliancaApp() {
   const [estudoNivel, setEstudoNivel] = useState("iniciante");
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
-  const [bibliaSubmenu, setBibliaSubmenu] = useState(false);
-  const [bibliaMode, setBibliaMode] = useState("biblia"); // "biblia" | "estudos"
+  const [estudosAberto, setEstudosAberto] = useState(false);
 
   // UI
   const [toast, setToast] = useState("");
@@ -695,38 +694,138 @@ export default function FamiliaAliancaApp() {
               </div>
             )}
 
-            {/* ── BANNER EM BREVE ── */}
-            <div style={{ margin: "14px 16px 0", borderRadius: 18, overflow: "hidden", border: "1px solid rgba(201,168,76,.35)", background: darkMode ? "linear-gradient(135deg,#0a1a3a 0%,#050d1f 60%,#07112a 100%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 100%)", position: "relative" }}>
-              {/* faixa dourada topo */}
-              <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "5px 16px" }}>
-                <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>Em breve</span>
+            {/* ── BANNER ESTUDOS NOVIDADE ── */}
+            {!estudosAberto ? (
+              <div style={{ margin: "14px 16px 0", borderRadius: 18, overflow: "hidden", border: "1px solid rgba(201,168,76,.35)", background: darkMode ? "linear-gradient(135deg,#0a1a3a 0%,#050d1f 60%,#07112a 100%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 100%)", position: "relative" }}>
+                <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "5px 16px" }}>
+                  <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>🎉 Novidade no APP!</span>
+                </div>
+                <div style={{ padding: "16px 18px 18px", display: "flex", alignItems: "center", gap: 14 }}>
+                  <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(201,168,76,.12)", border: "1.5px solid rgba(201,168,76,.4)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 4h7a4 4 0 0 1 4 4v12H4V4z" fill="rgba(201,168,76,.1)"/>
+                      <path d="M20 20H11a4 4 0 0 1-4-4V4"/>
+                      <line x1="12" y1="4" x2="12" y2="20"/>
+                      <line x1="8" y1="9" x2="11" y2="9"/>
+                      <line x1="8" y1="13" x2="11" y2="13"/>
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 1, marginBottom: 4 }}>Já disponível!</div>
+                    <div style={{ fontSize: 16, fontWeight: "bold", color: darkMode ? "#fff" : "#1a0f00", lineHeight: 1.3, marginBottom: 6 }}>Estudo Bíblico Temático</div>
+                    <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5, marginBottom: 10 }}>Para iniciantes e avançados na caminhada com Deus.</div>
+                    <button onClick={() => { setEstudosAberto(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 20, padding: "8px 18px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                      📚 Clique aqui para acessar →
+                    </button>
+                  </div>
+                </div>
+                <div style={{ position: "absolute", top: 0, right: 0, width: 100, height: "100%", background: "radial-gradient(ellipse at right, rgba(201,168,76,.07) 0%, transparent 70%)", pointerEvents: "none" }} />
               </div>
-              {/* conteúdo */}
-              <div style={{ padding: "18px 20px 20px", display: "flex", alignItems: "center", gap: 16 }}>
-                {/* ícone bíblia */}
-                <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(201,168,76,.12)", border: "1.5px solid rgba(201,168,76,.4)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 4h7a4 4 0 0 1 4 4v12H4V4z" fill="rgba(201,168,76,.1)"/>
-                    <path d="M20 20H11a4 4 0 0 1-4-4V4"/>
-                    <line x1="12" y1="4" x2="12" y2="20"/>
-                    <line x1="8" y1="9" x2="11" y2="9"/>
-                    <line x1="8" y1="13" x2="11" y2="13"/>
-                  </svg>
+            ) : (
+              <div style={{ animation: "slideUp .3s ease" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px 0" }}>
+                  <button onClick={() => { setEstudosAberto(false); setEstudoAberto(null); }}
+                    style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif" }}>← Voltar</button>
+                  <div style={{ fontSize: 16, fontWeight: "bold", color: T.text }}>📚 Estudos Temáticos</div>
                 </div>
-                {/* texto */}
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 1, marginBottom: 5 }}>Aguarde!</div>
-                  <div style={{ fontSize: 17, fontWeight: "bold", color: darkMode ? "#fff" : "#1a0f00", lineHeight: 1.3, marginBottom: 6 }}>Estudo Bíblico Temático</div>
-                  <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5 }}>Em breve disponível aqui no nosso APP</div>
-                </div>
-                {/* botão */}
-                <div style={{ background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 20, padding: "6px 12px", fontSize: 11, color: "#c9a84c", whiteSpace: "nowrap", flexShrink: 0 }}>
-                  🔔 Em breve
-                </div>
+                {!estudoAberto ? (
+                  <>
+                    <div style={{ display: "flex", margin: "14px 16px 16px", background: T.card, borderRadius: 12, padding: 4, border: `1px solid ${T.cardBorder}` }}>
+                      {[{ id: "iniciante", label: "🌱 Iniciantes" }, { id: "avancado", label: "🔥 Avançados" }].map(n => (
+                        <button key={n.id} onClick={() => setEstudoNivel(n.id)}
+                          style={{ flex: 1, padding: "10px 0", border: "none", borderRadius: 9, cursor: "pointer", fontSize: 13, fontWeight: estudoNivel === n.id ? "bold" : "normal", fontFamily: "Georgia,serif",
+                            background: estudoNivel === n.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : "transparent",
+                            color: estudoNivel === n.id ? "#080810" : T.textSub }}>
+                          {n.label}
+                        </button>
+                      ))}
+                    </div>
+                    {[...ESTUDOS_FIXOS, ...estudos].filter(e => e.nivel === estudoNivel).map(estudo => {
+                      const feito = concluidos[estudo.id];
+                      return (
+                        <div key={estudo.id} style={{ margin: "0 16px 12px", background: T.card, border: `1px solid ${feito ? "rgba(34,197,94,.3)" : T.cardBorder}`, borderLeft: `3px solid ${feito ? "#22c55e" : "#c9a84c"}`, borderRadius: 14, padding: "14px 16px", cursor: "pointer" }}
+                          onClick={() => setEstudoAberto(estudo)}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                                <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{estudo.titulo}</div>
+                                {feito && <span style={{ fontSize: 10, background: "rgba(34,197,94,.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,.3)", borderRadius: 20, padding: "2px 8px" }}>✓ Concluído</span>}
+                              </div>
+                              <div style={{ fontSize: 12, color: T.gold, marginBottom: 4 }}>{estudo.versiculo}</div>
+                              <div style={{ fontSize: 12, color: T.textSub }}>{estudo.perguntas?.length || 0} perguntas de reflexão</div>
+                            </div>
+                            <div style={{ color: T.gold, fontSize: 22 }}>›</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <div style={{ animation: "slideUp .3s ease" }}>
+                    <button onClick={() => setEstudoAberto(null)}
+                      style={{ margin: "12px 16px 0", background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif" }}>
+                      ← Voltar aos estudos
+                    </button>
+                    <div style={{ margin: "12px 16px 0", borderRadius: 18, overflow: "hidden", border: "1px solid rgba(201,168,76,.3)", background: darkMode ? "linear-gradient(135deg,#0a1a3a,#050d1f)" : "linear-gradient(135deg,#f5f0e8,#ede4d0)" }}>
+                      <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px" }}>
+                        <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>
+                          {estudoAberto.nivel === "iniciante" ? "🌱 Iniciantes" : "🔥 Avançados"}
+                        </span>
+                      </div>
+                      <div style={{ padding: "18px 18px 20px" }}>
+                        <div style={{ fontSize: 20, fontWeight: "bold", color: darkMode ? "#fff" : "#1a0f00", marginBottom: 10 }}>{estudoAberto.titulo}</div>
+                        <div style={{ fontSize: 13, color: "#c9a84c", fontStyle: "italic", marginBottom: 4, lineHeight: 1.5 }}>{estudoAberto.versiculo}</div>
+                      </div>
+                    </div>
+                    <div style={{ ...S.card, margin: "12px 16px" }}>
+                      <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 12 }}>📖 Estudo</div>
+                      <div style={{ fontSize: 14, lineHeight: 1.65, color: T.textSub }}>
+                        {estudoAberto.texto.split("\n").map((par, i) => {
+                          if (par.trim() === "") return <br key={i} />;
+                          const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
+                            p.startsWith("**") && p.endsWith("**") ? <strong key={j} style={{ color: T.text }}>{p.slice(2, -2)}</strong> : p
+                          );
+                          return <p key={i} style={{ marginBottom: 6 }}>{parts}</p>;
+                        })}
+                      </div>
+                    </div>
+                    {estudoAberto.perguntas?.length > 0 && (
+                      <div style={{ ...S.card, margin: "0 16px 12px" }}>
+                        <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 14 }}>💬 Reflexão</div>
+                        {estudoAberto.perguntas.filter(p => p.trim()).map((p, i) => (
+                          <div key={i} style={{ display: "flex", gap: 12, marginBottom: 14 }}>
+                            <div style={{ width: 26, height: 26, borderRadius: "50%", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>{i + 1}</div>
+                            <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.6, paddingTop: 3 }}>{p}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {estudoAberto.oracao && (
+                      <div style={{ margin: "0 16px 12px", background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 14, padding: "16px 18px" }}>
+                        <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 10 }}>🙏 Oração</div>
+                        <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.7, fontStyle: "italic" }}>{estudoAberto.oracao}</div>
+                      </div>
+                    )}
+                    <div style={{ margin: "0 16px 24px" }}>
+                      <button style={{ width: "100%", padding: "14px 0", borderRadius: 12, cursor: "pointer", fontSize: 14, fontWeight: "bold", fontFamily: "Georgia,serif",
+                        background: concluidos[estudoAberto.id] ? "rgba(34,197,94,.15)" : "linear-gradient(90deg,#c9a84c,#e8c97a)",
+                        color: concluidos[estudoAberto.id] ? "#22c55e" : "#080810",
+                        border: concluidos[estudoAberto.id] ? "1px solid rgba(34,197,94,.3)" : "none" }}
+                        onClick={async () => {
+                          const novo = { ...concluidos, [estudoAberto.id]: !concluidos[estudoAberto.id] };
+                          setConcluidos(novo);
+                          if (user?.email) await setDoc(doc(db, "concluidos", user.email), novo);
+                          showToast(novo[estudoAberto.id] ? "✅ Estudo marcado como concluído!" : "↩️ Marcado como não concluído");
+                        }}>
+                        {concluidos[estudoAberto.id] ? "✓ Concluído — Clique para desfazer" : "Marcar como Concluído"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              {/* brilho decorativo */}
-              <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: "100%", background: "radial-gradient(ellipse at right, rgba(201,168,76,.07) 0%, transparent 70%)", pointerEvents: "none" }} />
-            </div>
+            )}
+
 
             {/* ── GRADE DE ACESSO RÁPIDO ── */}
             <div style={{ padding: "20px 16px 0" }}>
@@ -928,157 +1027,42 @@ export default function FamiliaAliancaApp() {
           </div>
         )}
 
-                {/* ══ BÍBLIA ══ */}
+                        {/* ══ BÍBLIA ══ */}
         {tab === "biblia" && (
-          <div style={{ animation: "slideUp .4s ease" }} onClick={() => setBibliaSubmenu(false)}>
-
-            {/* ── MODO BÍBLIA ── */}
-            {bibliaMode === "biblia" && (
-              <>
-                <div style={S.secTitle}>Bíblia Sagrada</div>
-                <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
-                  <div style={{ fontSize: 52, marginBottom: 16 }}>📖</div>
-                  <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 10 }}>Leia a Bíblia Sagrada</div>
-                  <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.7, marginBottom: 20 }}>
-                    Acesse a Bíblia completa em diversas versões — NVI, NVT, ARC e muito mais — pelo YouVersion, o app de Bíblia mais usado no mundo!
-                  </div>
-                  <button style={{ width: "100%", padding: "15px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 10 }}
-                    onClick={() => window.open("https://www.bible.com/pt", "_blank")}>
-                    📖 Abrir Bíblia Online
-                  </button>
-                  <button style={{ width: "100%", padding: "13px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 12, color: T.textSub, fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif" }}
-                    onClick={() => window.open("https://www.bible.com/app", "_blank")}>
-                    📱 Baixar App YouVersion
-                  </button>
+          <div style={{ animation: "slideUp .4s ease" }}>
+            <div style={S.secTitle}>Bíblia Sagrada</div>
+            <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
+              <div style={{ fontSize: 52, marginBottom: 16 }}>📖</div>
+              <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 10 }}>Leia a Bíblia Sagrada</div>
+              <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.7, marginBottom: 20 }}>
+                Acesse a Bíblia completa em diversas versões — NVI, NVT, ARC e muito mais — pelo YouVersion, o app de Bíblia mais usado no mundo!
+              </div>
+              <button style={{ width: "100%", padding: "15px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 10 }}
+                onClick={() => window.open("https://www.bible.com/pt", "_blank")}>
+                📖 Abrir Bíblia Online
+              </button>
+              <button style={{ width: "100%", padding: "13px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 12, color: T.textSub, fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                onClick={() => window.open("https://www.bible.com/app", "_blank")}>
+                📱 Baixar App YouVersion
+              </button>
+            </div>
+            <div style={S.secTitle}>Versões Disponíveis</div>
+            {[
+              { nome: "Nova Versão Internacional", sigla: "NVI", desc: "Tradução moderna e fiel ao texto original", url: "https://www.bible.com/pt/bible/129/GEN.1.NVI" },
+              { nome: "Nova Versão Transformadora", sigla: "NVT", desc: "Linguagem contemporânea e clara", url: "https://www.bible.com/pt/bible/1608/GEN.1.NVT" },
+              { nome: "Almeida Revista e Corrigida", sigla: "ARC", desc: "A versão clássica mais conhecida", url: "https://www.bible.com/pt/bible/212/GEN.1.ARC" },
+              { nome: "Nova Tradução na Linguagem de Hoje", sigla: "NTLH", desc: "Linguagem simples e acessível", url: "https://www.bible.com/pt/bible/211/GEN.1.NTLH" },
+            ].map(v => (
+              <div key={v.sigla} style={{ margin: "0 16px 10px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
+                onClick={() => window.open(v.url, "_blank")}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>{v.sigla}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{v.nome}</div>
+                  <div style={{ fontSize: 12, color: T.textSub }}>{v.desc}</div>
                 </div>
-                <div style={S.secTitle}>Versões Disponíveis</div>
-                {[
-                  { nome: "Nova Versão Internacional", sigla: "NVI", desc: "Tradução moderna e fiel ao texto original", url: "https://www.bible.com/pt/bible/129/GEN.1.NVI" },
-                  { nome: "Nova Versão Transformadora", sigla: "NVT", desc: "Linguagem contemporânea e clara", url: "https://www.bible.com/pt/bible/1608/GEN.1.NVT" },
-                  { nome: "Almeida Revista e Corrigida", sigla: "ARC", desc: "A versão clássica mais conhecida", url: "https://www.bible.com/pt/bible/212/GEN.1.ARC" },
-                  { nome: "Nova Tradução na Linguagem de Hoje", sigla: "NTLH", desc: "Linguagem simples e acessível", url: "https://www.bible.com/pt/bible/211/GEN.1.NTLH" },
-                ].map(v => (
-                  <div key={v.sigla} style={{ margin: "0 16px 10px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
-                    onClick={() => window.open(v.url, "_blank")}>
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>{v.sigla}</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{v.nome}</div>
-                      <div style={{ fontSize: 12, color: T.textSub }}>{v.desc}</div>
-                    </div>
-                    <div style={{ color: T.gold, fontSize: 18 }}>›</div>
-                  </div>
-                ))}
-              </>
-            )}
-
-            {/* ── MODO ESTUDOS ── */}
-            {bibliaMode === "estudos" && (
-              <>
-                {!estudoAberto ? (
-                  <>
-                    <div style={{ ...S.secTitle, marginTop: 16 }}>📚 Estudos Temáticos</div>
-                    <div style={{ display: "flex", margin: "0 16px 16px", background: T.card, borderRadius: 12, padding: 4, border: `1px solid ${T.cardBorder}` }}>
-                      {[{ id: "iniciante", label: "🌱 Iniciantes" }, { id: "avancado", label: "🔥 Avançados" }].map(n => (
-                        <button key={n.id} onClick={() => setEstudoNivel(n.id)}
-                          style={{ flex: 1, padding: "10px 0", border: "none", borderRadius: 9, cursor: "pointer", fontSize: 13, fontWeight: estudoNivel === n.id ? "bold" : "normal", fontFamily: "Georgia,serif",
-                            background: estudoNivel === n.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : "transparent",
-                            color: estudoNivel === n.id ? "#080810" : T.textSub }}>
-                          {n.label}
-                        </button>
-                      ))}
-                    </div>
-                    {[...ESTUDOS_FIXOS, ...estudos].filter(e => e.nivel === estudoNivel).map(estudo => {
-                      const feito = concluidos[estudo.id];
-                      return (
-                        <div key={estudo.id} style={{ margin: "0 16px 12px", background: T.card, border: `1px solid ${feito ? "rgba(34,197,94,.3)" : T.cardBorder}`, borderLeft: `3px solid ${feito ? "#22c55e" : "#c9a84c"}`, borderRadius: 14, padding: "14px 16px", cursor: "pointer" }}
-                          onClick={() => setEstudoAberto(estudo)}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                                <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{estudo.titulo}</div>
-                                {feito && <span style={{ fontSize: 10, background: "rgba(34,197,94,.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,.3)", borderRadius: 20, padding: "2px 8px" }}>✓ Concluído</span>}
-                              </div>
-                              <div style={{ fontSize: 12, color: T.gold, marginBottom: 4 }}>{estudo.versiculo}</div>
-                              <div style={{ fontSize: 12, color: T.textSub }}>{estudo.perguntas?.length || 0} perguntas de reflexão</div>
-                            </div>
-                            <div style={{ color: T.gold, fontSize: 22 }}>›</div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {[...ESTUDOS_FIXOS, ...estudos].filter(e => e.nivel === estudoNivel).length === 0 && (
-                      <div style={{ ...S.card, textAlign: "center", padding: "28px 20px" }}>
-                        <div style={{ fontSize: 32, marginBottom: 8 }}>📖</div>
-                        <div style={{ fontSize: 13, color: T.textSub }}>Novos estudos em breve!</div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div style={{ animation: "slideUp .3s ease" }}>
-                    <button onClick={() => setEstudoAberto(null)}
-                      style={{ margin: "12px 16px 0", background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", gap: 6 }}>
-                      ← Voltar aos estudos
-                    </button>
-                    <div style={{ margin: "12px 16px 0", borderRadius: 18, overflow: "hidden", border: "1px solid rgba(201,168,76,.3)", background: darkMode ? "linear-gradient(135deg,#0a1a3a,#050d1f)" : "linear-gradient(135deg,#f5f0e8,#ede4d0)" }}>
-                      <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px" }}>
-                        <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>
-                          {estudoAberto.nivel === "iniciante" ? "🌱 Iniciantes" : "🔥 Avançados"}
-                        </span>
-                      </div>
-                      <div style={{ padding: "18px 18px 20px" }}>
-                        <div style={{ fontSize: 20, fontWeight: "bold", color: darkMode ? "#fff" : "#1a0f00", marginBottom: 10 }}>{estudoAberto.titulo}</div>
-                        <div style={{ fontSize: 13, color: "#c9a84c", fontStyle: "italic", marginBottom: 4, lineHeight: 1.5 }}>{estudoAberto.versiculo}</div>
-                      </div>
-                    </div>
-                    <div style={{ ...S.card, margin: "12px 16px" }}>
-                      <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 12 }}>📖 Estudo</div>
-                      <div style={{ fontSize: 14, lineHeight: 1.65, color: T.textSub }}>
-                        {estudoAberto.texto.split("
-").map((par, i) => {
-                          if (par.trim() === "") return <br key={i} />;
-                          const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
-                            p.startsWith("**") && p.endsWith("**") ? <strong key={j} style={{ color: T.text }}>{p.slice(2, -2)}</strong> : p
-                          );
-                          return <p key={i} style={{ marginBottom: 6 }}>{parts}</p>;
-                        })}
-                      </div>
-                    </div>
-                    {estudoAberto.perguntas?.length > 0 && (
-                      <div style={{ ...S.card, margin: "0 16px 12px" }}>
-                        <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 14 }}>💬 Reflexão</div>
-                        {estudoAberto.perguntas.filter(p => p.trim()).map((p, i) => (
-                          <div key={i} style={{ display: "flex", gap: 12, marginBottom: 14 }}>
-                            <div style={{ width: 26, height: 26, borderRadius: "50%", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>{i + 1}</div>
-                            <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.6, paddingTop: 3 }}>{p}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {estudoAberto.oracao && (
-                      <div style={{ margin: "0 16px 12px", background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 14, padding: "16px 18px" }}>
-                        <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 10 }}>🙏 Oração</div>
-                        <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.7, fontStyle: "italic" }}>{estudoAberto.oracao}</div>
-                      </div>
-                    )}
-                    <div style={{ margin: "0 16px 24px" }}>
-                      <button style={{ width: "100%", padding: "14px 0", borderRadius: 12, cursor: "pointer", fontSize: 14, fontWeight: "bold", fontFamily: "Georgia,serif",
-                        background: concluidos[estudoAberto.id] ? "rgba(34,197,94,.15)" : "linear-gradient(90deg,#c9a84c,#e8c97a)",
-                        color: concluidos[estudoAberto.id] ? "#22c55e" : "#080810",
-                        border: concluidos[estudoAberto.id] ? "1px solid rgba(34,197,94,.3)" : "none" }}
-                        onClick={async () => {
-                          const novo = { ...concluidos, [estudoAberto.id]: !concluidos[estudoAberto.id] };
-                          setConcluidos(novo);
-                          if (user?.email) await setDoc(doc(db, "concluidos", user.email), novo);
-                          showToast(novo[estudoAberto.id] ? "✅ Estudo marcado como concluído!" : "↩️ Marcado como não concluído");
-                        }}>
-                        {concluidos[estudoAberto.id] ? "✓ Concluído — Clique para desfazer" : "Marcar como Concluído"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-
+                <div style={{ color: T.gold, fontSize: 18 }}>›</div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -2035,30 +2019,8 @@ export default function FamiliaAliancaApp() {
 
       {/* NAV */}
       <nav style={S.nav}>
-        {/* Submenu Bíblia */}
-        {bibliaSubmenu && (
-          <div style={{ position: "absolute", bottom: 70, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 1000, pointerEvents: "none" }}>
-            <div style={{ display: "flex", gap: 10, background: darkMode ? "rgba(7,17,42,.97)" : "#fff", border: "1px solid rgba(201,168,76,.3)", borderRadius: 16, padding: "10px 14px", boxShadow: "0 -4px 24px rgba(0,0,0,.4)", pointerEvents: "all" }}>
-              <button onClick={() => { setBibliaMode("biblia"); setBibliaSubmenu(false); setTab("biblia"); setEstudoAberto(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 18px", background: bibliaMode === "biblia" ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : "transparent", border: `1px solid ${bibliaMode === "biblia" ? "transparent" : "rgba(201,168,76,.25)"}`, borderRadius: 10, cursor: "pointer", fontFamily: "Georgia,serif" }}>
-                <span style={{ fontSize: 20 }}>📖</span>
-                <span style={{ fontSize: 11, fontWeight: "bold", color: bibliaMode === "biblia" ? "#080810" : T.textSub }}>Bíblia</span>
-              </button>
-              <button onClick={() => { setBibliaMode("estudos"); setBibliaSubmenu(false); setTab("biblia"); setEstudoAberto(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 18px", background: bibliaMode === "estudos" ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : "transparent", border: `1px solid ${bibliaMode === "estudos" ? "transparent" : "rgba(201,168,76,.25)"}`, borderRadius: 10, cursor: "pointer", fontFamily: "Georgia,serif" }}>
-                <span style={{ fontSize: 20 }}>📚</span>
-                <span style={{ fontSize: 11, fontWeight: "bold", color: bibliaMode === "estudos" ? "#080810" : T.textSub }}>Estudos</span>
-              </button>
-            </div>
-          </div>
-        )}
         {TABS.map(t => (
-          <button key={t.id} style={S.navBtn(tab === t.id && !(t.id === "biblia" && bibliaSubmenu))} onClick={() => {
-            if (t.id === "biblia") {
-              setBibliaSubmenu(s => !s);
-              return;
-            }
-            setBibliaSubmenu(false);
+          <button key={t.id} style={S.navBtn(tab === t.id)} onClick={() => {
             setTab(t.id);
             setMinisterioAtivo(null);
             window.scrollTo({ top: 0, behavior: "smooth" });
