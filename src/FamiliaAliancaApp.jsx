@@ -929,9 +929,10 @@ export default function FamiliaAliancaApp() {
         {/* ══ BÍBLIA ══ */}
         {tab === "biblia" && (
           <div style={{ animation: "slideUp .4s ease" }}>
-            <div style={S.secTitle}>Bíblia Sagrada</div>
+            {!estudoAberto && <div style={S.secTitle}>Bíblia Sagrada</div>}
 
             {/* Hero */}
+            {!estudoAberto && (
             <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
               <div style={{ fontSize: 52, marginBottom: 16 }}>📖</div>
               <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 10 }}>Leia a Bíblia Sagrada</div>
@@ -947,25 +948,7 @@ export default function FamiliaAliancaApp() {
                 📱 Baixar App YouVersion
               </button>
             </div>
-
-            {/* Versões disponíveis */}
-            <div style={S.secTitle}>Versões Disponíveis</div>
-            {[
-              { nome: "Nova Versão Internacional", sigla: "NVI", desc: "Tradução moderna e fiel ao texto original", url: "https://www.bible.com/pt/bible/129/GEN.1.NVI" },
-              { nome: "Nova Versão Transformadora", sigla: "NVT", desc: "Linguagem contemporânea e clara", url: "https://www.bible.com/pt/bible/1608/GEN.1.NVT" },
-              { nome: "Almeida Revista e Corrigida", sigla: "ARC", desc: "A versão clássica mais conhecida", url: "https://www.bible.com/pt/bible/212/GEN.1.ARC" },
-              { nome: "Nova Tradução na Linguagem de Hoje", sigla: "NTLH", desc: "Linguagem simples e acessível", url: "https://www.bible.com/pt/bible/211/GEN.1.NTLH" },
-            ].map(v => (
-              <div key={v.sigla} style={{ margin: "0 16px 10px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
-                onClick={() => window.open(v.url, "_blank")}>
-                <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>{v.sigla}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{v.nome}</div>
-                  <div style={{ fontSize: 12, color: T.textSub }}>{v.desc}</div>
-                </div>
-                <div style={{ color: T.gold, fontSize: 18 }}>›</div>
-              </div>
-            ))}
+            )}
 
             {/* ── ESTUDOS TEMÁTICOS ── */}
             {!estudoAberto ? (
@@ -1069,6 +1052,31 @@ export default function FamiliaAliancaApp() {
                 </div>
               </div>
             )}
+
+
+            {/* Versões disponíveis — só quando não tem estudo aberto */}
+            {!estudoAberto && (
+              <>
+                <div style={S.secTitle}>Versões Disponíveis</div>
+                {[
+                  { nome: "Nova Versão Internacional", sigla: "NVI", desc: "Tradução moderna e fiel ao texto original", url: "https://www.bible.com/pt/bible/129/GEN.1.NVI" },
+                  { nome: "Nova Versão Transformadora", sigla: "NVT", desc: "Linguagem contemporânea e clara", url: "https://www.bible.com/pt/bible/1608/GEN.1.NVT" },
+                  { nome: "Almeida Revista e Corrigida", sigla: "ARC", desc: "A versão clássica mais conhecida", url: "https://www.bible.com/pt/bible/212/GEN.1.ARC" },
+                  { nome: "Nova Tradução na Linguagem de Hoje", sigla: "NTLH", desc: "Linguagem simples e acessível", url: "https://www.bible.com/pt/bible/211/GEN.1.NTLH" },
+                ].map(v => (
+                  <div key={v.sigla} style={{ margin: "0 16px 10px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
+                    onClick={() => window.open(v.url, "_blank")}>
+                    <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>{v.sigla}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{v.nome}</div>
+                      <div style={{ fontSize: 12, color: T.textSub }}>{v.desc}</div>
+                    </div>
+                    <div style={{ color: T.gold, fontSize: 18 }}>›</div>
+                  </div>
+                ))}
+              </>
+            )}
+
 
           </div>
         )}
