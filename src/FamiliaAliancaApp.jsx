@@ -152,6 +152,7 @@ export default function FamiliaAliancaApp() {
   const [estudoNivel, setEstudoNivel] = useState("iniciante");
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
+  const [editandoEstudo, setEditandoEstudo] = useState(null);
   const [estudosAberto, setEstudosAberto] = useState(false);
 
   // UI
@@ -1837,8 +1838,12 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Estudos Temáticos */}
             {adminTab === "estudos" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>📚 Novo Estudo Temático</div>
-                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 20 }}>Crie estudos que aparecerão na aba Bíblia para os membros</div>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>
+                  {editandoEstudo ? "✏️ Editar Estudo" : "📚 Novo Estudo Temático"}
+                </div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 20 }}>
+                  {editandoEstudo ? "Edite as informações do estudo abaixo" : "Crie estudos que aparecerão para os membros"}
+                </div>
 
                 <label style={S.label}>Nível</label>
                 <select style={{ ...S.select, marginBottom: 0 }} value={novoEstudo.nivel}
@@ -1868,12 +1873,20 @@ export default function FamiliaAliancaApp() {
 
                 <label style={S.label}>Perguntas de Reflexão</label>
                 {novoEstudo.perguntas.map((p, i) => (
-                  <input key={i} style={{ ...S.input, marginBottom: 8 }} placeholder={`Pergunta ${i + 1}...`}
-                    value={p} onChange={e => {
-                      const ps = [...novoEstudo.perguntas];
-                      ps[i] = e.target.value;
-                      setNovoEstudo({ ...novoEstudo, perguntas: ps });
-                    }} />
+                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                    <input style={{ ...S.input, marginBottom: 0, flex: 1 }} placeholder={`Pergunta ${i + 1}...`}
+                      value={p} onChange={e => {
+                        const ps = [...novoEstudo.perguntas];
+                        ps[i] = e.target.value;
+                        setNovoEstudo({ ...novoEstudo, perguntas: ps });
+                      }} />
+                    {novoEstudo.perguntas.length > 1 && (
+                      <button style={{ ...S.delBtn, flexShrink: 0 }} onClick={() => {
+                        const ps = novoEstudo.perguntas.filter((_, idx) => idx !== i);
+                        setNovoEstudo({ ...novoEstudo, perguntas: ps });
+                      }}>✕</button>
+                    )}
+                  </div>
                 ))}
                 <button style={{ ...S.switchBtn, marginBottom: 8 }} onClick={() => setNovoEstudo({ ...novoEstudo, perguntas: [...novoEstudo.perguntas, ""] })}>
                   + Adicionar pergunta
@@ -1887,27 +1900,67 @@ export default function FamiliaAliancaApp() {
 
                 <button style={S.saveBtn} onClick={async () => {
                   if (!novoEstudo.titulo || !novoEstudo.texto || !novoEstudo.versiculo) { showToast("⚠️ Preencha título, versículo e texto!"); return; }
-                  await addDoc(collection(db, "estudos"), { ...novoEstudo, data: new Date().toISOString().split("T")[0] });
+                  if (editandoEstudo) {
+                    await updateDoc(doc(db, "estudos", editandoEstudo), {
+                      titulo: novoEstudo.titulo,
+                      versiculo: novoEstudo.versiculo,
+                      texto: novoEstudo.texto,
+                      perguntas: novoEstudo.perguntas,
+                      oracao: novoEstudo.oracao,
+                      nivel: novoEstudo.nivel,
+                    });
+                    setEditandoEstudo(null);
+                    showToast("✅ Estudo atualizado!");
+                  } else {
+                    await addDoc(collection(db, "estudos"), { ...novoEstudo, data: new Date().toISOString().split("T")[0] });
+                    showToast("✅ Estudo publicado!");
+                  }
                   setNovoEstudo({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
-                  showToast("✅ Estudo publicado!");
-                }}>📚 Publicar Estudo</button>
+                }}>
+                  {editandoEstudo ? "💾 Salvar Alterações" : "📚 Publicar Estudo"}
+                </button>
 
-                {/* Lista de estudos do admin */}
+                {editandoEstudo && (
+                  <button style={{ ...S.saveBtn, background: T.card, color: T.textSub, marginTop: 8 }}
+                    onClick={() => { setEditandoEstudo(null); setNovoEstudo({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" }); }}>
+                    Cancelar edição
+                  </button>
+                )}
+
+                {/* Lista de estudos publicados */}
                 {estudos.length > 0 && (
                   <>
-                    <div style={{ fontSize: 12, color: T.gold, marginTop: 24, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>Estudos publicados ({estudos.length})</div>
+                    <div style={{ fontSize: 12, color: T.gold, marginTop: 24, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>
+                      Estudos publicados ({estudos.length})
+                    </div>
                     {estudos.map(e => (
                       <div key={e.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12 }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 3 }}>{e.titulo}</div>
-                          <div style={{ fontSize: 11, color: T.textSub }}>{e.nivel === "iniciante" ? "🌱 Iniciantes" : "🔥 Avançados"} • {e.versiculo}</div>
+                          <div style={{ fontSize: 11, color: T.textSub, marginBottom: 2 }}>{e.nivel === "iniciante" ? "🌱 Iniciantes" : "🔥 Avançados"}</div>
+                          <div style={{ fontSize: 11, color: T.textFaint, fontStyle: "italic" }}>{e.versiculo}</div>
                         </div>
-                        <button style={S.delBtn} onClick={async () => {
-                          if (window.confirm("Excluir este estudo?")) {
-                            await deleteDoc(doc(db, "estudos", e.id));
-                            showToast("🗑️ Estudo removido!");
-                          }
-                        }}>🗑️</button>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                            onClick={() => {
+                              setEditandoEstudo(e.id);
+                              setNovoEstudo({
+                                titulo: e.titulo,
+                                versiculo: e.versiculo,
+                                texto: e.texto,
+                                perguntas: e.perguntas || [""],
+                                oracao: e.oracao || "",
+                                nivel: e.nivel,
+                              });
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}>✏️</button>
+                          <button style={S.delBtn} onClick={async () => {
+                            if (window.confirm("Excluir este estudo?")) {
+                              await deleteDoc(doc(db, "estudos", e.id));
+                              showToast("🗑️ Estudo removido!");
+                            }
+                          }}>🗑️</button>
+                        </div>
                       </div>
                     ))}
                   </>
