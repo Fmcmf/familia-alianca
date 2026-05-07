@@ -928,7 +928,7 @@ export default function FamiliaAliancaApp() {
           </div>
         )}
 
-        {/* ══ BÍBLIA ══ */}
+                {/* ══ BÍBLIA ══ */}
         {tab === "biblia" && (
           <div style={{ animation: "slideUp .4s ease" }} onClick={() => setBibliaSubmenu(false)}>
 
@@ -974,105 +974,111 @@ export default function FamiliaAliancaApp() {
             {/* ── MODO ESTUDOS ── */}
             {bibliaMode === "estudos" && (
               <>
-                <div style={{ ...S.secTitle, marginTop: 28 }}>📚 Estudos Temáticos</div>
-                <div style={{ display: "flex", margin: "0 16px 16px", background: T.card, borderRadius: 12, padding: 4, border: `1px solid ${T.cardBorder}` }}>
-                  {[{ id: "iniciante", label: "🌱 Iniciantes" }, { id: "avancado", label: "🔥 Avançados" }].map(n => (
-                    <button key={n.id} onClick={() => setEstudoNivel(n.id)}
-                      style={{ flex: 1, padding: "10px 0", border: "none", borderRadius: 9, cursor: "pointer", fontSize: 13, fontWeight: estudoNivel === n.id ? "bold" : "normal", fontFamily: "Georgia,serif",
-                        background: estudoNivel === n.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : "transparent",
-                        color: estudoNivel === n.id ? "#080810" : T.textSub }}>
-                      {n.label}
-                    </button>
-                  ))}
-                </div>
-                {[...ESTUDOS_FIXOS, ...estudos].filter(e => e.nivel === estudoNivel).map(estudo => {
-                  const feito = concluidos[estudo.id];
-                  return (
-                    <div key={estudo.id} style={{ margin: "0 16px 12px", background: T.card, border: `1px solid ${feito ? "rgba(34,197,94,.3)" : T.cardBorder}`, borderLeft: `3px solid ${feito ? "#22c55e" : "#c9a84c"}`, borderRadius: 14, padding: "14px 16px", cursor: "pointer" }}
-                      onClick={() => setEstudoAberto(estudo)}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                            <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{estudo.titulo}</div>
-                            {feito && <span style={{ fontSize: 10, background: "rgba(34,197,94,.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,.3)", borderRadius: 20, padding: "2px 8px" }}>✓ Concluído</span>}
+                {!estudoAberto ? (
+                  <>
+                    <div style={{ ...S.secTitle, marginTop: 16 }}>📚 Estudos Temáticos</div>
+                    <div style={{ display: "flex", margin: "0 16px 16px", background: T.card, borderRadius: 12, padding: 4, border: `1px solid ${T.cardBorder}` }}>
+                      {[{ id: "iniciante", label: "🌱 Iniciantes" }, { id: "avancado", label: "🔥 Avançados" }].map(n => (
+                        <button key={n.id} onClick={() => setEstudoNivel(n.id)}
+                          style={{ flex: 1, padding: "10px 0", border: "none", borderRadius: 9, cursor: "pointer", fontSize: 13, fontWeight: estudoNivel === n.id ? "bold" : "normal", fontFamily: "Georgia,serif",
+                            background: estudoNivel === n.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : "transparent",
+                            color: estudoNivel === n.id ? "#080810" : T.textSub }}>
+                          {n.label}
+                        </button>
+                      ))}
+                    </div>
+                    {[...ESTUDOS_FIXOS, ...estudos].filter(e => e.nivel === estudoNivel).map(estudo => {
+                      const feito = concluidos[estudo.id];
+                      return (
+                        <div key={estudo.id} style={{ margin: "0 16px 12px", background: T.card, border: `1px solid ${feito ? "rgba(34,197,94,.3)" : T.cardBorder}`, borderLeft: `3px solid ${feito ? "#22c55e" : "#c9a84c"}`, borderRadius: 14, padding: "14px 16px", cursor: "pointer" }}
+                          onClick={() => setEstudoAberto(estudo)}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                                <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{estudo.titulo}</div>
+                                {feito && <span style={{ fontSize: 10, background: "rgba(34,197,94,.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,.3)", borderRadius: 20, padding: "2px 8px" }}>✓ Concluído</span>}
+                              </div>
+                              <div style={{ fontSize: 12, color: T.gold, marginBottom: 4 }}>{estudo.versiculo}</div>
+                              <div style={{ fontSize: 12, color: T.textSub }}>{estudo.perguntas?.length || 0} perguntas de reflexão</div>
+                            </div>
+                            <div style={{ color: T.gold, fontSize: 22 }}>›</div>
                           </div>
-                          <div style={{ fontSize: 12, color: T.gold, marginBottom: 4 }}>{estudo.versiculo}</div>
-                          <div style={{ fontSize: 12, color: T.textSub }}>{estudo.perguntas?.length || 0} perguntas de reflexão</div>
                         </div>
-                        <div style={{ color: T.gold, fontSize: 22 }}>›</div>
+                      );
+                    })}
+                    {[...ESTUDOS_FIXOS, ...estudos].filter(e => e.nivel === estudoNivel).length === 0 && (
+                      <div style={{ ...S.card, textAlign: "center", padding: "28px 20px" }}>
+                        <div style={{ fontSize: 32, marginBottom: 8 }}>📖</div>
+                        <div style={{ fontSize: 13, color: T.textSub }}>Novos estudos em breve!</div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div style={{ animation: "slideUp .3s ease" }}>
+                    <button onClick={() => setEstudoAberto(null)}
+                      style={{ margin: "12px 16px 0", background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", gap: 6 }}>
+                      ← Voltar aos estudos
+                    </button>
+                    <div style={{ margin: "12px 16px 0", borderRadius: 18, overflow: "hidden", border: "1px solid rgba(201,168,76,.3)", background: darkMode ? "linear-gradient(135deg,#0a1a3a,#050d1f)" : "linear-gradient(135deg,#f5f0e8,#ede4d0)" }}>
+                      <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px" }}>
+                        <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>
+                          {estudoAberto.nivel === "iniciante" ? "🌱 Iniciantes" : "🔥 Avançados"}
+                        </span>
+                      </div>
+                      <div style={{ padding: "18px 18px 20px" }}>
+                        <div style={{ fontSize: 20, fontWeight: "bold", color: darkMode ? "#fff" : "#1a0f00", marginBottom: 10 }}>{estudoAberto.titulo}</div>
+                        <div style={{ fontSize: 13, color: "#c9a84c", fontStyle: "italic", marginBottom: 4, lineHeight: 1.5 }}>{estudoAberto.versiculo}</div>
                       </div>
                     </div>
-                  );
-                })}
-                {[...ESTUDOS_FIXOS, ...estudos].filter(e => e.nivel === estudoNivel).length === 0 && (
-                  <div style={{ ...S.card, textAlign: "center", padding: "28px 20px" }}>
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>📖</div>
-                    <div style={{ fontSize: 13, color: T.textSub }}>Novos estudos em breve!</div>
+                    <div style={{ ...S.card, margin: "12px 16px" }}>
+                      <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 12 }}>📖 Estudo</div>
+                      <div style={{ fontSize: 14, lineHeight: 1.65, color: T.textSub }}>
+                        {estudoAberto.texto.split("
+").map((par, i) => {
+                          if (par.trim() === "") return <br key={i} />;
+                          const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
+                            p.startsWith("**") && p.endsWith("**") ? <strong key={j} style={{ color: T.text }}>{p.slice(2, -2)}</strong> : p
+                          );
+                          return <p key={i} style={{ marginBottom: 6 }}>{parts}</p>;
+                        })}
+                      </div>
+                    </div>
+                    {estudoAberto.perguntas?.length > 0 && (
+                      <div style={{ ...S.card, margin: "0 16px 12px" }}>
+                        <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 14 }}>💬 Reflexão</div>
+                        {estudoAberto.perguntas.filter(p => p.trim()).map((p, i) => (
+                          <div key={i} style={{ display: "flex", gap: 12, marginBottom: 14 }}>
+                            <div style={{ width: 26, height: 26, borderRadius: "50%", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>{i + 1}</div>
+                            <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.6, paddingTop: 3 }}>{p}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {estudoAberto.oracao && (
+                      <div style={{ margin: "0 16px 12px", background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 14, padding: "16px 18px" }}>
+                        <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 10 }}>🙏 Oração</div>
+                        <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.7, fontStyle: "italic" }}>{estudoAberto.oracao}</div>
+                      </div>
+                    )}
+                    <div style={{ margin: "0 16px 24px" }}>
+                      <button style={{ width: "100%", padding: "14px 0", borderRadius: 12, cursor: "pointer", fontSize: 14, fontWeight: "bold", fontFamily: "Georgia,serif",
+                        background: concluidos[estudoAberto.id] ? "rgba(34,197,94,.15)" : "linear-gradient(90deg,#c9a84c,#e8c97a)",
+                        color: concluidos[estudoAberto.id] ? "#22c55e" : "#080810",
+                        border: concluidos[estudoAberto.id] ? "1px solid rgba(34,197,94,.3)" : "none" }}
+                        onClick={async () => {
+                          const novo = { ...concluidos, [estudoAberto.id]: !concluidos[estudoAberto.id] };
+                          setConcluidos(novo);
+                          if (user?.email) await setDoc(doc(db, "concluidos", user.email), novo);
+                          showToast(novo[estudoAberto.id] ? "✅ Estudo marcado como concluído!" : "↩️ Marcado como não concluído");
+                        }}>
+                        {concluidos[estudoAberto.id] ? "✓ Concluído — Clique para desfazer" : "Marcar como Concluído"}
+                      </button>
+                    </div>
                   </div>
                 )}
               </>
-            ) : (
-              <div style={{ animation: "slideUp .3s ease" }}>
-                <button onClick={() => setEstudoAberto(null)}
-                  style={{ margin: "12px 16px 0", background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", gap: 6 }}>
-                  ← Voltar aos estudos
-                </button>
-                <div style={{ margin: "12px 16px 0", borderRadius: 18, overflow: "hidden", border: `1px solid rgba(201,168,76,.3)`, background: darkMode ? "linear-gradient(135deg,#0a1a3a,#050d1f)" : "linear-gradient(135deg,#f5f0e8,#ede4d0)" }}>
-                  <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px" }}>
-                    <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>
-                      {estudoAberto.nivel === "iniciante" ? "🌱 Iniciantes" : "🔥 Avançados"}
-                    </span>
-                  </div>
-                  <div style={{ padding: "18px 18px 20px" }}>
-                    <div style={{ fontSize: 20, fontWeight: "bold", color: darkMode ? "#fff" : "#1a0f00", marginBottom: 10 }}>{estudoAberto.titulo}</div>
-                    <div style={{ fontSize: 13, color: "#c9a84c", fontStyle: "italic", marginBottom: 4, lineHeight: 1.5 }}>{estudoAberto.versiculo}</div>
-                  </div>
-                </div>
-                <div style={{ ...S.card, margin: "12px 16px" }}>
-                  <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 12 }}>📖 Estudo</div>
-                  <div style={{ fontSize: 14, lineHeight: 1.65, color: T.textSub }}>
-                    {estudoAberto.texto.split("\n").map((par, i) => {
-                      if (par.trim() === "") return <br key={i} />;
-                      const parts = par.split(/(\*\*.*?\*\*)/g).map((p, j) =>
-                        p.startsWith("**") && p.endsWith("**") ? <strong key={j} style={{ color: T.text }}>{p.slice(2, -2)}</strong> : p
-                      );
-                      return <p key={i} style={{ marginBottom: 6 }}>{parts}</p>;
-                    })}
-                  </div>
-                </div>
-                {estudoAberto.perguntas?.length > 0 && (
-                  <div style={{ ...S.card, margin: "0 16px 12px" }}>
-                    <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 14 }}>💬 Reflexão</div>
-                    {estudoAberto.perguntas.filter(p => p.trim()).map((p, i) => (
-                      <div key={i} style={{ display: "flex", gap: 12, marginBottom: 14 }}>
-                        <div style={{ width: 26, height: 26, borderRadius: "50%", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>{i + 1}</div>
-                        <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.6, paddingTop: 3 }}>{p}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {estudoAberto.oracao && (
-                  <div style={{ margin: "0 16px 12px", background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 14, padding: "16px 18px" }}>
-                    <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 10 }}>🙏 Oração</div>
-                    <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.7, fontStyle: "italic" }}>{estudoAberto.oracao}</div>
-                  </div>
-                )}
-                <div style={{ margin: "0 16px 24px" }}>
-                  <button style={{ width: "100%", padding: "14px 0", borderRadius: 12, cursor: "pointer", fontSize: 14, fontWeight: "bold", fontFamily: "Georgia,serif",
-                    background: concluidos[estudoAberto.id] ? "rgba(34,197,94,.15)" : "linear-gradient(90deg,#c9a84c,#e8c97a)",
-                    color: concluidos[estudoAberto.id] ? "#22c55e" : "#080810",
-                    border: concluidos[estudoAberto.id] ? "1px solid rgba(34,197,94,.3)" : "none" }}
-                    onClick={async () => {
-                      const novo = { ...concluidos, [estudoAberto.id]: !concluidos[estudoAberto.id] };
-                      setConcluidos(novo);
-                      if (user?.email) await setDoc(doc(db, "concluidos", user.email), novo);
-                      showToast(novo[estudoAberto.id] ? "✅ Estudo marcado como concluído!" : "↩️ Marcado como não concluído");
-                    }}>
-                    {concluidos[estudoAberto.id] ? "✓ Concluído — Clique para desfazer" : "Marcar como Concluído"}
-                  </button>
-                </div>
-              </div>
             )}
+
           </div>
         )}
 
