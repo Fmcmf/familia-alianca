@@ -132,6 +132,8 @@ export default function FamiliaAliancaApp() {
   const [estudoNivel, setEstudoNivel] = useState("iniciante");
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
+  const [bibliaSubmenu, setBibliaSubmenu] = useState(false);
+  const [bibliaMode, setBibliaMode] = useState("biblia"); // "biblia" | "estudos"
 
   // UI
   const [toast, setToast] = useState("");
@@ -928,30 +930,49 @@ export default function FamiliaAliancaApp() {
 
         {/* ══ BÍBLIA ══ */}
         {tab === "biblia" && (
-          <div style={{ animation: "slideUp .4s ease" }}>
-            {!estudoAberto && <div style={S.secTitle}>Bíblia Sagrada</div>}
+          <div style={{ animation: "slideUp .4s ease" }} onClick={() => setBibliaSubmenu(false)}>
 
-            {/* Hero */}
-            {!estudoAberto && (
-            <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
-              <div style={{ fontSize: 52, marginBottom: 16 }}>📖</div>
-              <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 10 }}>Leia a Bíblia Sagrada</div>
-              <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.7, marginBottom: 20 }}>
-                Acesse a Bíblia completa em diversas versões — NVI, NVT, ARC e muito mais — pelo YouVersion, o app de Bíblia mais usado no mundo!
-              </div>
-              <button style={{ width: "100%", padding: "15px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 10 }}
-                onClick={() => window.open("https://www.bible.com/pt", "_blank")}>
-                📖 Abrir Bíblia Online
-              </button>
-              <button style={{ width: "100%", padding: "13px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 12, color: T.textSub, fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif" }}
-                onClick={() => window.open("https://www.bible.com/app", "_blank")}>
-                📱 Baixar App YouVersion
-              </button>
-            </div>
+            {/* ── MODO BÍBLIA ── */}
+            {bibliaMode === "biblia" && (
+              <>
+                <div style={S.secTitle}>Bíblia Sagrada</div>
+                <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
+                  <div style={{ fontSize: 52, marginBottom: 16 }}>📖</div>
+                  <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 10 }}>Leia a Bíblia Sagrada</div>
+                  <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.7, marginBottom: 20 }}>
+                    Acesse a Bíblia completa em diversas versões — NVI, NVT, ARC e muito mais — pelo YouVersion, o app de Bíblia mais usado no mundo!
+                  </div>
+                  <button style={{ width: "100%", padding: "15px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 10 }}
+                    onClick={() => window.open("https://www.bible.com/pt", "_blank")}>
+                    📖 Abrir Bíblia Online
+                  </button>
+                  <button style={{ width: "100%", padding: "13px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 12, color: T.textSub, fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                    onClick={() => window.open("https://www.bible.com/app", "_blank")}>
+                    📱 Baixar App YouVersion
+                  </button>
+                </div>
+                <div style={S.secTitle}>Versões Disponíveis</div>
+                {[
+                  { nome: "Nova Versão Internacional", sigla: "NVI", desc: "Tradução moderna e fiel ao texto original", url: "https://www.bible.com/pt/bible/129/GEN.1.NVI" },
+                  { nome: "Nova Versão Transformadora", sigla: "NVT", desc: "Linguagem contemporânea e clara", url: "https://www.bible.com/pt/bible/1608/GEN.1.NVT" },
+                  { nome: "Almeida Revista e Corrigida", sigla: "ARC", desc: "A versão clássica mais conhecida", url: "https://www.bible.com/pt/bible/212/GEN.1.ARC" },
+                  { nome: "Nova Tradução na Linguagem de Hoje", sigla: "NTLH", desc: "Linguagem simples e acessível", url: "https://www.bible.com/pt/bible/211/GEN.1.NTLH" },
+                ].map(v => (
+                  <div key={v.sigla} style={{ margin: "0 16px 10px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
+                    onClick={() => window.open(v.url, "_blank")}>
+                    <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>{v.sigla}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{v.nome}</div>
+                      <div style={{ fontSize: 12, color: T.textSub }}>{v.desc}</div>
+                    </div>
+                    <div style={{ color: T.gold, fontSize: 18 }}>›</div>
+                  </div>
+                ))}
+              </>
             )}
 
-            {/* ── ESTUDOS TEMÁTICOS ── */}
-            {!estudoAberto ? (
+            {/* ── MODO ESTUDOS ── */}
+            {bibliaMode === "estudos" && (
               <>
                 <div style={{ ...S.secTitle, marginTop: 28 }}>📚 Estudos Temáticos</div>
                 <div style={{ display: "flex", margin: "0 16px 16px", background: T.card, borderRadius: 12, padding: 4, border: `1px solid ${T.cardBorder}` }}>
@@ -1053,30 +1074,7 @@ export default function FamiliaAliancaApp() {
               </div>
             )}
 
-
-            {/* Versões disponíveis — só quando não tem estudo aberto */}
-            {!estudoAberto && (
-              <>
-                <div style={S.secTitle}>Versões Disponíveis</div>
-                {[
-                  { nome: "Nova Versão Internacional", sigla: "NVI", desc: "Tradução moderna e fiel ao texto original", url: "https://www.bible.com/pt/bible/129/GEN.1.NVI" },
-                  { nome: "Nova Versão Transformadora", sigla: "NVT", desc: "Linguagem contemporânea e clara", url: "https://www.bible.com/pt/bible/1608/GEN.1.NVT" },
-                  { nome: "Almeida Revista e Corrigida", sigla: "ARC", desc: "A versão clássica mais conhecida", url: "https://www.bible.com/pt/bible/212/GEN.1.ARC" },
-                  { nome: "Nova Tradução na Linguagem de Hoje", sigla: "NTLH", desc: "Linguagem simples e acessível", url: "https://www.bible.com/pt/bible/211/GEN.1.NTLH" },
-                ].map(v => (
-                  <div key={v.sigla} style={{ margin: "0 16px 10px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
-                    onClick={() => window.open(v.url, "_blank")}>
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>{v.sigla}</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{v.nome}</div>
-                      <div style={{ fontSize: 12, color: T.textSub }}>{v.desc}</div>
-                    </div>
-                    <div style={{ color: T.gold, fontSize: 18 }}>›</div>
-                  </div>
-                ))}
-              </>
-            )}
-
+          )}
 
           </div>
         )}
@@ -2034,8 +2032,30 @@ export default function FamiliaAliancaApp() {
 
       {/* NAV */}
       <nav style={S.nav}>
+        {/* Submenu Bíblia */}
+        {bibliaSubmenu && (
+          <div style={{ position: "absolute", bottom: 70, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 1000, pointerEvents: "none" }}>
+            <div style={{ display: "flex", gap: 10, background: darkMode ? "rgba(7,17,42,.97)" : "#fff", border: "1px solid rgba(201,168,76,.3)", borderRadius: 16, padding: "10px 14px", boxShadow: "0 -4px 24px rgba(0,0,0,.4)", pointerEvents: "all" }}>
+              <button onClick={() => { setBibliaMode("biblia"); setBibliaSubmenu(false); setTab("biblia"); setEstudoAberto(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 18px", background: bibliaMode === "biblia" ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : "transparent", border: `1px solid ${bibliaMode === "biblia" ? "transparent" : "rgba(201,168,76,.25)"}`, borderRadius: 10, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                <span style={{ fontSize: 20 }}>📖</span>
+                <span style={{ fontSize: 11, fontWeight: "bold", color: bibliaMode === "biblia" ? "#080810" : T.textSub }}>Bíblia</span>
+              </button>
+              <button onClick={() => { setBibliaMode("estudos"); setBibliaSubmenu(false); setTab("biblia"); setEstudoAberto(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 18px", background: bibliaMode === "estudos" ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : "transparent", border: `1px solid ${bibliaMode === "estudos" ? "transparent" : "rgba(201,168,76,.25)"}`, borderRadius: 10, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                <span style={{ fontSize: 20 }}>📚</span>
+                <span style={{ fontSize: 11, fontWeight: "bold", color: bibliaMode === "estudos" ? "#080810" : T.textSub }}>Estudos</span>
+              </button>
+            </div>
+          </div>
+        )}
         {TABS.map(t => (
-          <button key={t.id} style={S.navBtn(tab === t.id)} onClick={() => {
+          <button key={t.id} style={S.navBtn(tab === t.id && !(t.id === "biblia" && bibliaSubmenu))} onClick={() => {
+            if (t.id === "biblia") {
+              setBibliaSubmenu(s => !s);
+              return;
+            }
+            setBibliaSubmenu(false);
             setTab(t.id);
             setMinisterioAtivo(null);
             window.scrollTo({ top: 0, behavior: "smooth" });
