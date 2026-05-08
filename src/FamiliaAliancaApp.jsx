@@ -215,6 +215,7 @@ export default function FamiliaAliancaApp() {
   const [voluntarioForm, setVoluntarioForm] = useState({ nome: "", email: "", telefone: "", ministerio: "", mensagem: "" });
   const [notifAtivada, setNotifAtivada] = useState(false);
   const [mostrarBannerNotif, setMostrarBannerNotif] = useState(false);
+  const [notifBloqueada, setNotifBloqueada] = useState(false);
   const [onlineCount, setOnlineCount] = useState(0);
 
   // Verificar status das notificações
@@ -234,15 +235,35 @@ export default function FamiliaAliancaApp() {
   }, []);
 
   const ativarNotificacoes = async () => {
+    // Verificar se já foi bloqueado pelo navegador
+    if (Notification.permission === "denied") {
+      showToast("🔒 Notificações bloqueadas — veja como liberar abaixo");
+      setNotifBloqueada(true);
+      return;
+    }
     try {
       if (window.OneSignal) {
         await window.OneSignal.Notifications.requestPermission();
         const perm = await window.OneSignal.Notifications.permission;
         setNotifAtivada(perm);
-        if (perm) { setMostrarBannerNotif(false); showToast("🔔 Notificações ativadas!"); }
-        else { showToast("⚠️ Permissão negada. Ative nas configurações do navegador."); }
+        if (perm) {
+          setMostrarBannerNotif(false);
+          setNotifBloqueada(false);
+          showToast("🔔 Notificações ativadas com sucesso!");
+        } else {
+          setNotifBloqueada(true);
+        }
+      } else {
+        const perm = await Notification.requestPermission();
+        if (perm === "granted") {
+          setNotifAtivada(true);
+          setMostrarBannerNotif(false);
+          showToast("🔔 Notificações ativadas com sucesso!");
+        } else {
+          setNotifBloqueada(true);
+        }
       }
-    } catch { showToast("❌ Erro ao solicitar permissão."); }
+    } catch { setNotifBloqueada(true); }
   };
   const [enviandoVoluntario, setEnviandoVoluntario] = useState(false);
   const [maisScrollTarget, setMaisScrollTarget] = useState(null);
@@ -1540,22 +1561,40 @@ export default function FamiliaAliancaApp() {
             {/* Notificações */}
             <div style={S.secTitle}>🔔 Notificações</div>
             <div style={{ margin: "0 16px 16px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: notifBloqueada ? 14 : 0 }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 4 }}>
-                    {notifAtivada ? "✅ Notificações ativadas" : "🔕 Notificações desativadas"}
+                    {notifAtivada ? "✅ Notificações ativadas" : notifBloqueada ? "🔒 Notificações bloqueadas" : "🔕 Notificações desativadas"}
                   </div>
                   <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5 }}>
-                    {notifAtivada ? "Você receberá avisos e novidades da igreja." : "Ative para receber avisos e novidades em tempo real."}
+                    {notifAtivada ? "Você receberá avisos e novidades da igreja." : notifBloqueada ? "Seu navegador bloqueou as notificações. Siga os passos abaixo para liberar." : "Ative para receber avisos e novidades em tempo real."}
                   </div>
                 </div>
-                {!notifAtivada && (
+                {!notifAtivada && !notifBloqueada && (
                   <button onClick={ativarNotificacoes}
                     style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 10, padding: "10px 16px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif", flexShrink: 0 }}>
                     Ativar
                   </button>
                 )}
               </div>
+
+              {/* Instruções quando bloqueada */}
+              {notifBloqueada && (
+                <div style={{ background: "rgba(239,68,68,.06)", border: "1px solid rgba(239,68,68,.2)", borderRadius: 10, padding: "12px 14px" }}>
+                  <div style={{ fontSize: 12, fontWeight: "bold", color: "#f87171", marginBottom: 8 }}>Como liberar as notificações:</div>
+                  <div style={{ fontSize: 11, color: T.textSub, lineHeight: 1.8 }}>
+                    <div>📱 <strong>Android (Chrome):</strong></div>
+                    <div style={{ marginLeft: 18, marginBottom: 6 }}>Toque nos 3 pontos → Configurações → Configurações do site → Notificações → Encontre este site → Permitir</div>
+                    <div>🍎 <strong>iPhone (Safari):</strong></div>
+                    <div style={{ marginLeft: 18, marginBottom: 6 }}>Ajustes → Safari → Notificações → Encontre familia-alianca.vercel.app → Permitir</div>
+                    <div>💻 <strong>Computador (Chrome):</strong></div>
+                    <div style={{ marginLeft: 18 }}>Clique no 🔒 na barra de endereço → Notificações → Permitir → Recarregue a página</div>
+                  </div>
+                  <button onClick={ativarNotificacoes} style={{ marginTop: 10, width: "100%", padding: "8px 0", background: "rgba(239,68,68,.15)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 8, color: "#f87171", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                    Tentar novamente após liberar
+                  </button>
+                </div>
+              )}
             </div>
 
             <div id="mais-pix" style={S.secTitle}>Dízimos & Ofertas</div>
