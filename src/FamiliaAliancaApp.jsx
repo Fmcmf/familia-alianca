@@ -6,6 +6,7 @@ import emailjs from "@emailjs/browser";
 // ─── EMAILJS CONFIG ─────────────────────────────────────────── v1.1 ───────
 const ONESIGNAL_APP_ID = "10ba1be7-f0bc-4c2d-bb2e-e9a02d4235f1";
 const ONESIGNAL_API_KEY = "os_v2_app_cc5bxz7qxrgc3ozo5gqc2qrv6fvhavzuxthuwrubrn6h6e6hhl7llhqjzm642hcawtwg2341hscb4t6xdvqjwptkzb1665spna4xk3a";
+const EMAILJS_SERVICE_ID  = "service_sffzlx2";
 const EMAILJS_TEMPLATE_ID = "template_142tb2a";
 const EMAILJS_PUBLIC_KEY  = "KkcyGeZOZYPkwGing";
 
@@ -214,6 +215,7 @@ export default function FamiliaAliancaApp() {
   const [voluntarioForm, setVoluntarioForm] = useState({ nome: "", email: "", telefone: "", ministerio: "", mensagem: "" });
   const [notifAtivada, setNotifAtivada] = useState(false);
   const [mostrarBannerNotif, setMostrarBannerNotif] = useState(false);
+  const [onlineCount, setOnlineCount] = useState(0);
 
   // Verificar status das notificações
   useEffect(() => {
