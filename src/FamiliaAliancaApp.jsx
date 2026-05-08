@@ -4,7 +4,8 @@ import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getD
 import emailjs from "@emailjs/browser";
 
 // ─── EMAILJS CONFIG ─────────────────────────────────────────── v1.1 ───────
-const EMAILJS_SERVICE_ID  = "service_sffzlx2";
+const ONESIGNAL_APP_ID = "10ba1be7-f0bc-4c2d-bb2e-e9a02d4235f1";
+const ONESIGNAL_API_KEY = "os_v2_app_cc5bxz7qxrgc3ozo5gqc2qrv6fvhavzuxthuwrubrn6h6e6hhl7llhqjzm642hcawtwg2341hscb4t6xdvqjwptkzb1665spna4xk3a";
 const EMAILJS_TEMPLATE_ID = "template_142tb2a";
 const EMAILJS_PUBLIC_KEY  = "KkcyGeZOZYPkwGing";
 
@@ -225,6 +226,20 @@ export default function FamiliaAliancaApp() {
     }, 350);
     return () => clearTimeout(timer);
   }, [tab, maisScrollTarget]);
+
+  // ── ONESIGNAL INIT ──
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
+    script.defer = true;
+    script.onload = () => {
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({ appId: ONESIGNAL_APP_ID });
+      });
+    };
+    document.head.appendChild(script);
+  }, []);
 
   // Splash + Firebase load
   useEffect(() => {
@@ -1703,8 +1718,8 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Notificações */}
             {adminTab === "notif" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Enviar Notificação</div>
-                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Envie uma mensagem para todos os membros do app</div>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>🔔 Enviar Notificação</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Envie uma mensagem push para todos os membros do app</div>
                 <label style={S.label}>Título</label>
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Culto Especial hoje!" value={notifForm.titulo}
                   onChange={e => setNotifForm({ ...notifForm, titulo: e.target.value })} />
@@ -1712,18 +1727,35 @@ export default function FamiliaAliancaApp() {
                 <textarea style={{ ...S.textarea, minHeight: 80 }} placeholder="Ex: Não perca o culto de hoje às 19h. Te esperamos!"
                   value={notifForm.mensagem} onChange={e => setNotifForm({ ...notifForm, mensagem: e.target.value })} />
                 <button style={S.saveBtn} onClick={async () => {
-                  if (!notifForm.titulo || !notifForm.mensagem) return;
-                  await addDoc(collection(db, "notificacoes"), {
-                    titulo: notifForm.titulo,
-                    mensagem: notifForm.mensagem,
-                    data: new Date().toISOString(),
-                    enviado: false
-                  });
-                  setNotifForm({ titulo: "", mensagem: "" });
-                  showToast("🔔 Notificação agendada!");
+                  if (!notifForm.titulo || !notifForm.mensagem) { showToast("⚠️ Preencha título e mensagem!"); return; }
+                  try {
+                    const res = await fetch("https://api.onesignal.com/notifications", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Key ${ONESIGNAL_API_KEY}`,
+                      },
+                      body: JSON.stringify({
+                        app_id: ONESIGNAL_APP_ID,
+                        included_segments: ["Total Subscriptions"],
+                        headings: { pt: notifForm.titulo, en: notifForm.titulo },
+                        contents: { pt: notifForm.mensagem, en: notifForm.mensagem },
+                        url: "https://familia-alianca.vercel.app",
+                      }),
+                    });
+                    const data = await res.json();
+                    if (data.id) {
+                      showToast("✅ Notificação enviada para todos!");
+                      setNotifForm({ titulo: "", mensagem: "" });
+                    } else {
+                      showToast("❌ Erro ao enviar. Tente novamente.");
+                    }
+                  } catch {
+                    showToast("❌ Erro de conexão com OneSignal.");
+                  }
                 }}>🔔 Enviar para todos</button>
                 <div style={{ marginTop: 16, background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 10, padding: "12px 14px", fontSize: 12, color: T.textSub, lineHeight: 1.7 }}>
-                  💡 A notificação será recebida por todos os membros que permitiram notificações no app.
+                  💡 A notificação será enviada imediatamente para todos os membros que permitiram notificações no app. Powered by OneSignal.
                 </div>
               </div>
             )}
