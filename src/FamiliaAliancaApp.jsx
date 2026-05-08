@@ -212,7 +212,36 @@ export default function FamiliaAliancaApp() {
   const [novoDevocional, setNovoDevocional] = useState({ titulo: "", versiculo: "", referencia: "", palavra: "", aplicacao: "", oracao: "" });
   const [notifForm, setNotifForm] = useState({ titulo: "", mensagem: "" });
   const [voluntarioForm, setVoluntarioForm] = useState({ nome: "", email: "", telefone: "", ministerio: "", mensagem: "" });
-  const [onlineCount, setOnlineCount] = useState(0);
+  const [notifAtivada, setNotifAtivada] = useState(false);
+  const [mostrarBannerNotif, setMostrarBannerNotif] = useState(false);
+
+  // Verificar status das notificações
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (window.OneSignal) {
+        try {
+          const perm = await window.OneSignal.Notifications.permission;
+          setNotifAtivada(perm);
+          setMostrarBannerNotif(!perm);
+        } catch { setMostrarBannerNotif(true); }
+      } else {
+        setMostrarBannerNotif(true);
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const ativarNotificacoes = async () => {
+    try {
+      if (window.OneSignal) {
+        await window.OneSignal.Notifications.requestPermission();
+        const perm = await window.OneSignal.Notifications.permission;
+        setNotifAtivada(perm);
+        if (perm) { setMostrarBannerNotif(false); showToast("🔔 Notificações ativadas!"); }
+        else { showToast("⚠️ Permissão negada. Ative nas configurações do navegador."); }
+      }
+    } catch { showToast("❌ Erro ao solicitar permissão."); }
+  };
   const [enviandoVoluntario, setEnviandoVoluntario] = useState(false);
   const [maisScrollTarget, setMaisScrollTarget] = useState(null);
 
@@ -915,7 +944,26 @@ export default function FamiliaAliancaApp() {
             )}
 
 
-            {/* ── GRADE DE ACESSO RÁPIDO ── */}
+            {/* ── BANNER NOTIFICAÇÕES ── */}
+            {mostrarBannerNotif && screen === "app" && (
+              <div style={{ margin: "12px 16px 0", borderRadius: 14, background: darkMode ? "rgba(59,130,246,.08)" : "rgba(59,130,246,.06)", border: "1px solid rgba(59,130,246,.25)", padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 22, flexShrink: 0 }}>🔔</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 12, fontWeight: "bold", color: "#60a5fa", marginBottom: 2 }}>Ative as notificações</div>
+                  <div style={{ fontSize: 11, color: T.textSub }}>Receba avisos e novidades da igreja em tempo real.</div>
+                </div>
+                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                  <button onClick={ativarNotificacoes}
+                    style={{ background: "#3b82f6", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 11, fontWeight: "bold", color: "#fff", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                    Ativar
+                  </button>
+                  <button onClick={() => setMostrarBannerNotif(false)}
+                    style={{ background: "none", border: "none", color: T.textFaint, cursor: "pointer", fontSize: 16, padding: "0 4px" }}>×</button>
+                </div>
+              </div>
+            )}
+
+            {/* ── ACESSO RÁPIDO ── */}
             <div style={{ padding: "20px 16px 0" }}>
               <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub, marginBottom: 14 }}>Acesso rápido</div>
               <div className="acesso-rapido" style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4 }}>
@@ -1487,6 +1535,27 @@ export default function FamiliaAliancaApp() {
             </div>
 
             {/* Contribuição */}
+            {/* Notificações */}
+            <div style={S.secTitle}>🔔 Notificações</div>
+            <div style={{ margin: "0 16px 16px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 4 }}>
+                    {notifAtivada ? "✅ Notificações ativadas" : "🔕 Notificações desativadas"}
+                  </div>
+                  <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5 }}>
+                    {notifAtivada ? "Você receberá avisos e novidades da igreja." : "Ative para receber avisos e novidades em tempo real."}
+                  </div>
+                </div>
+                {!notifAtivada && (
+                  <button onClick={ativarNotificacoes}
+                    style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 10, padding: "10px 16px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif", flexShrink: 0 }}>
+                    Ativar
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div id="mais-pix" style={S.secTitle}>Dízimos & Ofertas</div>
             <div style={S.pixCard}>
               <div style={S.pixTitle}>💛 Contribua com a Igreja</div>
