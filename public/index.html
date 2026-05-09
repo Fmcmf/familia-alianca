@@ -24,6 +24,16 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
+ <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+ <script>
+     window.OneSignalDeferred = window.OneSignalDeferred || [];
+     OneSignalDeferred.push(async function(OneSignal) {
+     await OneSignal.init({
+     appId: "10ba1be7-f0bc-4c2d-bb2e-e9a02d4235f1",
+     notifyButton: { enable: false },
+    });
+  });
+</script>
     <title>React App</title>
   </head>
   <body>
