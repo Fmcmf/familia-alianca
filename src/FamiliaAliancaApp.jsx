@@ -1325,9 +1325,6 @@ export default function FamiliaAliancaApp() {
               </div>
             ))}
           </div>
-        )}
-
-        {/* ══ ORAÇÃO ══ */}
             {!dicionarioAberto && (
               <div style={{ margin: "14px 16px 4px", borderRadius: 18, overflow: "hidden", border: "1px solid rgba(201,168,76,.35)", background: darkMode ? "linear-gradient(135deg,#0a1a3a 0%,#050d1f 100%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 100%)", position: "relative", cursor: "pointer" }}
                 onClick={() => { setDicionarioAberto(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
@@ -1426,6 +1423,9 @@ export default function FamiliaAliancaApp() {
                 )}
               </div>
             )}
+        )}
+
+        {/* ══ ORAÇÃO ══ */}
         {tab === "oracao" && (
           <div style={{ animation: "slideUp .4s ease" }}>
             <div style={S.secTitle}>Pedido de Oração</div>
