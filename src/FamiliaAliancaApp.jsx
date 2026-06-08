@@ -291,7 +291,7 @@ export default function FamiliaAliancaApp() {
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
   const [editandoEstudo, setEditandoEstudo] = useState(null);
-  const [estudosAberto, setEstudosAberto] = useState(false);
+  const [bannerHome, setBannerHome] = useState(null);
   const [dicionarioAberto, setDicionarioAberto] = useState(false);
   const [dicionarioLetra, setDicionarioLetra] = useState("A");
   const [dicionarioTermo, setDicionarioTermo] = useState(null);
@@ -488,6 +488,12 @@ export default function FamiliaAliancaApp() {
       setAvisos(lista);
     });
 
+    // Banner Home — tempo real
+    const unsubBanner = onSnapshot(doc(db, "config", "bannerHome"), (snap) => {
+      if (snap.exists()) setBannerHome(snap.data());
+      else setBannerHome(null);
+    });
+
     // Estudos — tempo real
     const unsubEstudos = onSnapshot(collection(db, "estudos"), (snap) => {
       setEstudos(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -529,7 +535,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubEstudos(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubEstudos(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
       clearInterval(heartbeat);
       removerPresenca();
       window.removeEventListener("beforeunload", removerPresenca);
@@ -882,6 +888,18 @@ export default function FamiliaAliancaApp() {
               <div style={{ fontSize: 13, color: T.textSub }}>Bem-vindo!</div>
               <div style={{ fontSize: 16, color: T.text, fontWeight: "bold" }}>Que bom ter você aqui. 🙏</div>
             </div>
+
+            {/* ── BANNER DE IMAGEM ── */}
+            {bannerHome?.url && (
+              <div style={{ margin: "12px 16px 0", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(201,168,76,.2)" }}>
+                <img
+                  src={bannerHome.url}
+                  alt={bannerHome.titulo || "Banner"}
+                  onClick={() => bannerHome.link && window.open(bannerHome.link, "_blank")}
+                  style={{ width: "100%", display: "block", borderRadius: 16, cursor: bannerHome.link ? "pointer" : "default" }}
+                />
+              </div>
+            )}
 
             {/* ── CARD PALAVRA SEMANAL (com foto do pastor) ── */}
             {palavra ? (
@@ -1894,9 +1912,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "devocional", "avisos", "estudos", "video", "aovivo", "membros"].map(t => (
+              {["agenda", "palavra", "devocional", "avisos", "estudos", "banner", "video", "aovivo", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
@@ -2358,6 +2376,73 @@ export default function FamiliaAliancaApp() {
                       </div>
                     ))}
                   </>
+                )}
+              </div>
+            )}
+
+            {/* Admin: Banner Home */}
+            {adminTab === "banner" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>🖼️ Banner da Home</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 8 }}>Aparece acima da Palavra Semanal na tela inicial</div>
+
+                {/* Medidas recomendadas */}
+                <div style={{ background: "rgba(59,130,246,.08)", border: "1px solid rgba(59,130,246,.25)", borderRadius: 10, padding: "10px 14px", marginBottom: 16, fontSize: 12, color: "#60a5fa", lineHeight: 1.8 }}>
+                  📐 <strong>Medidas recomendadas:</strong><br/>
+                  Largura: <strong>700px</strong> — Altura: <strong>280px</strong><br/>
+                  Proporção: <strong>5:2</strong> — Formato: JPG ou PNG<br/>
+                  Tamanho máximo: 2MB
+                </div>
+
+                <label style={S.label}>URL da Imagem *</label>
+                <input style={{ ...S.input, marginBottom: 0 }}
+                  placeholder="https://... (hospede a imagem no ImgBB, Cloudinary, etc)"
+                  value={bannerHome?.url || ""}
+                  onChange={e => setBannerHome({ ...bannerHome, url: e.target.value })} />
+
+                <label style={S.label}>Título (opcional)</label>
+                <input style={{ ...S.input, marginBottom: 0 }}
+                  placeholder="Ex: Culto Especial de Páscoa"
+                  value={bannerHome?.titulo || ""}
+                  onChange={e => setBannerHome({ ...bannerHome, titulo: e.target.value })} />
+
+                <label style={S.label}>Link ao clicar (opcional)</label>
+                <input style={{ ...S.input, marginBottom: 0 }}
+                  placeholder="Ex: https://youtube.com/..."
+                  value={bannerHome?.link || ""}
+                  onChange={e => setBannerHome({ ...bannerHome, link: e.target.value })} />
+
+                {/* Preview */}
+                {bannerHome?.url && (
+                  <div style={{ marginTop: 16, marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 8 }}>Preview</div>
+                    <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(201,168,76,.2)" }}>
+                      <img src={bannerHome.url} alt="Preview" style={{ width: "100%", display: "block" }}
+                        onError={e => e.target.style.display = "none"} />
+                    </div>
+                  </div>
+                )}
+
+                <button style={S.saveBtn} onClick={async () => {
+                  if (!bannerHome?.url) { showToast("⚠️ Insira a URL da imagem!"); return; }
+                  await setDoc(doc(db, "config", "bannerHome"), {
+                    url: bannerHome.url,
+                    titulo: bannerHome.titulo || "",
+                    link: bannerHome.link || "",
+                    atualizado: new Date().toISOString()
+                  });
+                  showToast("✅ Banner publicado!");
+                }}>🖼️ Publicar Banner</button>
+
+                {bannerHome?.url && (
+                  <button style={{ ...S.saveBtn, background: "rgba(239,68,68,.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,.3)", marginTop: 8 }}
+                    onClick={async () => {
+                      if (window.confirm("Remover o banner da home?")) {
+                        await setDoc(doc(db, "config", "bannerHome"), { url: "", titulo: "", link: "" });
+                        setBannerHome(null);
+                        showToast("🗑️ Banner removido!");
+                      }
+                    }}>🗑️ Remover Banner</button>
                 )}
               </div>
             )}
