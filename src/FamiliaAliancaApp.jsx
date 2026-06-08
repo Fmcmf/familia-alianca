@@ -292,6 +292,7 @@ export default function FamiliaAliancaApp() {
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
   const [editandoEstudo, setEditandoEstudo] = useState(null);
   const [bannerHome, setBannerHome] = useState(null);
+  const [estudosAberto, setEstudosAberto] = useState(false);
   const [dicionarioAberto, setDicionarioAberto] = useState(false);
   const [dicionarioLetra, setDicionarioLetra] = useState("A");
   const [dicionarioTermo, setDicionarioTermo] = useState(null);
