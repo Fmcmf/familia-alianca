@@ -292,12 +292,6 @@ export default function FamiliaAliancaApp() {
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
   const [editandoEstudo, setEditandoEstudo] = useState(null);
   const [bannerHome, setBannerHome] = useState(null);
-  const [bannerJejum, setBannerJejum] = useState({
-    ativo: true,
-    titulo: "JEJUM EM FAMÍLIA — DIA 1",
-    subtitulo: "22/06 — BUSQUE A PRESENÇA",
-    imagemUrl: "https://i.ibb.co/NdLhjscT/Chat-GPT-Image-8-de-jun-de-2026-15-55-33.png",
-  });
   const [estudosAberto, setEstudosAberto] = useState(false);
   const [dicionarioAberto, setDicionarioAberto] = useState(false);
   const [dicionarioLetra, setDicionarioLetra] = useState("A");
@@ -501,12 +495,6 @@ export default function FamiliaAliancaApp() {
       else setBannerHome(null);
     });
 
-    // Banner Jejum — tempo real
-    const unsubBannerJejum = onSnapshot(doc(db, "config", "bannerJejum"), (snap) => {
-      if (snap.exists()) setBannerJejum(snap.data());
-      else setBannerJejum(null);
-    });
-
     // Estudos — tempo real
     const unsubEstudos = onSnapshot(collection(db, "estudos"), (snap) => {
       setEstudos(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -548,7 +536,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubEstudos(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
       clearInterval(heartbeat);
       removerPresenca();
       window.removeEventListener("beforeunload", removerPresenca);
@@ -583,7 +571,7 @@ export default function FamiliaAliancaApp() {
       setUser({ ...u, id: loginForm.email }); setScreen("app");
     } else {
       // admin master
-      if (loginForm.email === "pastor@familiaalianca.com.br" && loginForm.senha === "alianca2024") {
+      if (loginForm.email === "ALIANCA" && loginForm.senha === "mello2026") {
         const u = { id: 0, nome: "Pr Fernando Mello", email: loginForm.email, admin: true };
         store.set(SK.user, u); setUser(u); setIsAdmin(true); setScreen("app"); return;
       }
@@ -911,50 +899,6 @@ export default function FamiliaAliancaApp() {
                   onClick={() => bannerHome.link && window.open(bannerHome.link, "_blank")}
                   style={{ width: "100%", display: "block", borderRadius: 16, cursor: bannerHome.link ? "pointer" : "default" }}
                 />
-              </div>
-            )}
-
-            {/* ── BANNER JEJUM ── */}
-            {bannerJejum?.ativo && (
-              <div
-                onClick={() => bannerJejum.imagemUrl && window.open(bannerJejum.imagemUrl, "_blank")}
-                style={{
-                  margin: "12px 16px 0",
-                  borderRadius: 16,
-                  overflow: "hidden",
-                  border: "1px solid rgba(99,102,241,.35)",
-                  background: darkMode
-                    ? "linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%)"
-                    : "linear-gradient(135deg,#eef2ff 0%,#e0e7ff 50%,#eef2ff 100%)",
-                  cursor: bannerJejum.imagemUrl ? "pointer" : "default",
-                  position: "relative",
-                  boxShadow: "0 2px 12px rgba(99,102,241,.18)",
-                }}>
-                {/* faixa topo */}
-                <div style={{ background: "linear-gradient(90deg,#4f46e5,#7c3aed)", padding: "5px 16px", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 13 }}>🙏</span>
-                  <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#fff" }}>Jejum em Família</span>
-                </div>
-                {/* conteúdo */}
-                <div style={{ padding: "14px 16px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 17, fontWeight: "bold", color: darkMode ? "#e0e7ff" : "#312e81", lineHeight: 1.3, marginBottom: 6 }}>
-                      {bannerJejum.titulo || "Jejum em Família"}
-                    </div>
-                    {bannerJejum.subtitulo ? (
-                      <div style={{ fontSize: 13, color: darkMode ? "#a5b4fc" : "#4f46e5", marginBottom: 10 }}>
-                        {bannerJejum.subtitulo}
-                      </div>
-                    ) : null}
-                    {bannerJejum.imagemUrl && (
-                      <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "linear-gradient(90deg,#4f46e5,#7c3aed)", borderRadius: 20, padding: "7px 14px" }}>
-                        <span style={{ fontSize: 12, fontWeight: "bold", color: "#fff" }}>Clique aqui e acompanhe o dia</span>
-                        <span style={{ fontSize: 12, color: "#fff" }}>→</span>
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ fontSize: 38, flexShrink: 0 }}>✨</div>
-                </div>
               </div>
             )}
 
@@ -1969,9 +1913,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "devocional", "avisos", "estudos", "banner", "jejum", "video", "aovivo", "membros"].map(t => (
+              {["agenda", "palavra", "devocional", "avisos", "estudos", "banner", "video", "aovivo", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
@@ -2498,105 +2442,6 @@ export default function FamiliaAliancaApp() {
                         await setDoc(doc(db, "config", "bannerHome"), { url: "", titulo: "", link: "" });
                         setBannerHome(null);
                         showToast("🗑️ Banner removido!");
-                      }
-                    }}>🗑️ Remover Banner</button>
-                )}
-              </div>
-            )}
-
-            {/* Admin: Banner Jejum */}
-            {adminTab === "jejum" && (
-              <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: "#818cf8" }}>🙏 Banner de Jejum</div>
-                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Aparece antes da Palavra Semanal. Atualize todo dia com o texto do dia.</div>
-
-                {/* Toggle ativo */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, padding: "12px 16px", marginBottom: 16 }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>Banner visível na Home</div>
-                    <div style={{ fontSize: 11, color: T.textSub }}>Desative para esconder sem apagar o conteúdo</div>
-                  </div>
-                  <div
-                    onClick={() => setBannerJejum(bj => ({ ...bj, ativo: !bj?.ativo }))}
-                    style={{ width: 46, height: 26, borderRadius: 13, background: bannerJejum?.ativo ? "#4f46e5" : "rgba(150,150,150,.3)", cursor: "pointer", position: "relative", transition: "background .2s", flexShrink: 0 }}>
-                    <div style={{ position: "absolute", top: 3, left: bannerJejum?.ativo ? 23 : 3, width: 20, height: 20, borderRadius: "50%", background: "#fff", transition: "left .2s", boxShadow: "0 1px 4px rgba(0,0,0,.3)" }} />
-                  </div>
-                </div>
-
-                {/* Título principal */}
-                <label style={S.label}>Título do banner *</label>
-                <input style={{ ...S.input, marginBottom: 0 }}
-                  placeholder="Ex: JEJUM EM FAMÍLIA — DIA 1"
-                  value={bannerJejum?.titulo || ""}
-                  onChange={e => setBannerJejum(bj => ({ ...bj, titulo: e.target.value }))} />
-
-                {/* Subtítulo */}
-                <label style={S.label}>Subtítulo (data / tema do dia)</label>
-                <input style={{ ...S.input, marginBottom: 0 }}
-                  placeholder="Ex: 22/06 — BUSQUE A PRESENÇA"
-                  value={bannerJejum?.subtitulo || ""}
-                  onChange={e => setBannerJejum(bj => ({ ...bj, subtitulo: e.target.value }))} />
-
-                {/* URL da imagem */}
-                <label style={S.label}>URL da imagem (abre ao clicar)</label>
-                <input style={{ ...S.input, marginBottom: 0 }}
-                  placeholder="https://... (hospede no ImgBB, Cloudinary, Google Drive, etc)"
-                  value={bannerJejum?.imagemUrl || ""}
-                  onChange={e => setBannerJejum(bj => ({ ...bj, imagemUrl: e.target.value }))} />
-                <div style={{ fontSize: 11, color: T.textSub, marginBottom: 12, marginTop: 4 }}>
-                  💡 Cole aqui o link direto da imagem do dia do jejum. O fiel vai clicar no banner e ver a imagem.
-                </div>
-
-                {/* Preview */}
-                {(bannerJejum?.titulo || bannerJejum?.imagemUrl) && (
-                  <div style={{ marginBottom: 16 }}>
-                    <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#818cf8", marginBottom: 8 }}>Preview</div>
-                    <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(99,102,241,.35)", background: "linear-gradient(135deg,#eef2ff 0%,#e0e7ff 50%,#eef2ff 100%)" }}>
-                      <div style={{ background: "linear-gradient(90deg,#4f46e5,#7c3aed)", padding: "5px 16px", display: "flex", alignItems: "center", gap: 6 }}>
-                        <span style={{ fontSize: 13 }}>🙏</span>
-                        <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#fff" }}>Jejum em Família</span>
-                      </div>
-                      <div style={{ padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 17, fontWeight: "bold", color: "#312e81", lineHeight: 1.3, marginBottom: 6 }}>
-                            {bannerJejum?.titulo || "Título do dia"}
-                          </div>
-                          {bannerJejum?.subtitulo && (
-                            <div style={{ fontSize: 13, color: "#4f46e5", marginBottom: 10 }}>{bannerJejum.subtitulo}</div>
-                          )}
-                          {bannerJejum?.imagemUrl && (
-                            <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "linear-gradient(90deg,#4f46e5,#7c3aed)", borderRadius: 20, padding: "7px 14px" }}>
-                              <span style={{ fontSize: 12, fontWeight: "bold", color: "#fff" }}>Clique aqui e acompanhe o dia</span>
-                              <span style={{ color: "#fff" }}>→</span>
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ fontSize: 38 }}>✨</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Botão salvar */}
-                <button style={S.saveBtn} onClick={async () => {
-                  if (!bannerJejum?.titulo) { showToast("⚠️ Insira o título do banner!"); return; }
-                  await setDoc(doc(db, "config", "bannerJejum"), {
-                    ativo: bannerJejum?.ativo ?? true,
-                    titulo: bannerJejum?.titulo || "",
-                    subtitulo: bannerJejum?.subtitulo || "",
-                    imagemUrl: bannerJejum?.imagemUrl || "",
-                    atualizado: new Date().toISOString(),
-                  });
-                  showToast("✅ Banner do Jejum publicado!");
-                }}>🙏 Publicar Banner do Jejum</button>
-
-                {bannerJejum?.titulo && (
-                  <button style={{ ...S.saveBtn, background: "rgba(239,68,68,.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,.3)", marginTop: 8 }}
-                    onClick={async () => {
-                      if (window.confirm("Remover o banner do Jejum?")) {
-                        await setDoc(doc(db, "config", "bannerJejum"), { ativo: false, titulo: "", subtitulo: "", imagemUrl: "" });
-                        setBannerJejum(null);
-                        showToast("🗑️ Banner do Jejum removido!");
                       }
                     }}>🗑️ Remover Banner</button>
                 )}
