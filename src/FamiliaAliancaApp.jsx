@@ -287,6 +287,7 @@ export default function FamiliaAliancaApp() {
   const [editandoAviso, setEditandoAviso] = useState(null);
   const [estudos, setEstudos] = useState([]);
   const [estudoAberto, setEstudoAberto] = useState(null);
+  const [membroSelecionado, setMembroSelecionado] = useState(null);
   const [estudoNivel, setEstudoNivel] = useState("iniciante");
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
@@ -572,10 +573,25 @@ export default function FamiliaAliancaApp() {
   // ── AUTH ──
   const handleLogin = async () => {
     if (loginForm.modo === "cadastro") {
-      if (!loginForm.nome || !loginForm.email || !loginForm.senha) { setLoginErro("Preencha todos os campos."); return; }
+      if (!loginForm.nome || !loginForm.email || !loginForm.senha || !loginForm.celular || !loginForm.sexo || !loginForm.estadoCivil || !loginForm.dataNascimento) {
+        setLoginErro("Preencha todos os campos obrigatórios."); return;
+      }
       const snap = await getDoc(doc(db, "membros", loginForm.email));
       if (snap.exists()) { setLoginErro("E-mail já cadastrado."); return; }
-      const u = { nome: loginForm.nome, email: loginForm.email, senha: loginForm.senha, admin: false };
+      const u = {
+        nome: loginForm.nome,
+        email: loginForm.email,
+        senha: loginForm.senha,
+        celular: loginForm.celular || "",
+        sexo: loginForm.sexo || "",
+        estadoCivil: loginForm.estadoCivil || "",
+        dataNascimento: loginForm.dataNascimento || "",
+        batizado: loginForm.batizado || "nao",
+        igrejaBAT: loginForm.batizado === "sim" ? (loginForm.igrejaBAT || "") : "",
+        dataBAT: loginForm.batizado === "sim" ? (loginForm.dataBAT || "") : "",
+        admin: false,
+        dataCadastro: new Date().toISOString(),
+      };
       await setDoc(doc(db, "membros", loginForm.email), u);
       store.set(SK.user, { ...u, id: loginForm.email });
       setUser({ ...u, id: loginForm.email }); setScreen("app");
@@ -799,8 +815,52 @@ export default function FamiliaAliancaApp() {
           <>
             {loginErro && <div style={S.errMsg}>{loginErro}</div>}
             {loginForm.modo === "cadastro" && (
-              <input style={S.input} placeholder="Seu nome completo" value={loginForm.nome}
-                onChange={e => { setLoginForm({ ...loginForm, nome: e.target.value }); setLoginErro(""); }} />
+              <>
+                <input style={S.input} placeholder="Seu nome completo *" value={loginForm.nome || ""}
+                  onChange={e => { setLoginForm({ ...loginForm, nome: e.target.value }); setLoginErro(""); }} />
+                <input style={S.input} placeholder="Celular (WhatsApp) *" type="tel" value={loginForm.celular || ""}
+                  onChange={e => { setLoginForm({ ...loginForm, celular: e.target.value }); setLoginErro(""); }} />
+                <select style={{ ...S.input, color: loginForm.sexo ? "inherit" : "#888" }}
+                  value={loginForm.sexo || ""}
+                  onChange={e => { setLoginForm({ ...loginForm, sexo: e.target.value }); setLoginErro(""); }}>
+                  <option value="">Sexo *</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                </select>
+                <select style={{ ...S.input, color: loginForm.estadoCivil ? "inherit" : "#888" }}
+                  value={loginForm.estadoCivil || ""}
+                  onChange={e => { setLoginForm({ ...loginForm, estadoCivil: e.target.value }); setLoginErro(""); }}>
+                  <option value="">Estado Civil *</option>
+                  <option value="Solteiro(a)">Solteiro(a)</option>
+                  <option value="Casado(a)">Casado(a)</option>
+                  <option value="Divorciado(a)">Divorciado(a)</option>
+                  <option value="Viúvo(a)">Viúvo(a)</option>
+                  <option value="União Estável">União Estável</option>
+                </select>
+                <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4, marginTop: 4 }}>Data de Nascimento *</div>
+                <input style={S.input} type="date" value={loginForm.dataNascimento || ""}
+                  onChange={e => { setLoginForm({ ...loginForm, dataNascimento: e.target.value }); setLoginErro(""); }} />
+                <div style={{ fontSize: 13, color: "#c9a84c", marginBottom: 8, marginTop: 4, fontWeight: "bold" }}>É Batizado(a)?</div>
+                <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+                  <button onClick={() => setLoginForm({ ...loginForm, batizado: "sim" })}
+                    style={{ flex: 1, padding: "10px", borderRadius: 10, border: `2px solid ${loginForm.batizado === "sim" ? "#c9a84c" : "rgba(255,255,255,.2)"}`, background: loginForm.batizado === "sim" ? "rgba(201,168,76,.15)" : "transparent", color: loginForm.batizado === "sim" ? "#c9a84c" : "#aaa", fontWeight: "bold", cursor: "pointer" }}>
+                    ✅ Sim
+                  </button>
+                  <button onClick={() => setLoginForm({ ...loginForm, batizado: "nao", igrejaBAT: "", dataBAT: "" })}
+                    style={{ flex: 1, padding: "10px", borderRadius: 10, border: `2px solid ${loginForm.batizado === "nao" ? "#c9a84c" : "rgba(255,255,255,.2)"}`, background: loginForm.batizado === "nao" ? "rgba(201,168,76,.15)" : "transparent", color: loginForm.batizado === "nao" ? "#c9a84c" : "#aaa", fontWeight: "bold", cursor: "pointer" }}>
+                    ❌ Não
+                  </button>
+                </div>
+                {loginForm.batizado === "sim" && (
+                  <>
+                    <input style={S.input} placeholder="Em qual Igreja foi batizado(a)?" value={loginForm.igrejaBAT || ""}
+                      onChange={e => setLoginForm({ ...loginForm, igrejaBAT: e.target.value })} />
+                    <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4 }}>Data do Batismo</div>
+                    <input style={S.input} type="date" value={loginForm.dataBAT || ""}
+                      onChange={e => setLoginForm({ ...loginForm, dataBAT: e.target.value })} />
+                  </>
+                )}
+              </>
             )}
             <input style={S.input} placeholder="E-mail" type="email" value={loginForm.email}
               onChange={e => { setLoginForm({ ...loginForm, email: e.target.value }); setLoginErro(""); }} />
@@ -2680,29 +2740,76 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Membros */}
             {adminTab === "membros" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Membros Cadastrados</div>
-                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>{membros.length} membro(s)</div>
-                {membros.length === 0 ? (
-                  <div style={{ ...S.card, marginLeft: 0, marginRight: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 13, color: T.textSub }}>Nenhum membro cadastrado ainda.</div>
-                  </div>
-                ) : membros.map(m => (
-                  <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: T.gold, fontWeight: "bold", flexShrink: 0 }}>
-                      {m.nome.charAt(0).toUpperCase()}
+                {membroSelecionado ? (
+                  <div>
+                    <button onClick={() => setMembroSelecionado(null)}
+                      style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", color: T.gold, fontSize: 13, cursor: "pointer", marginBottom: 16, padding: 0 }}>
+                      ← Voltar à lista
+                    </button>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 20 }}>
+                      <div style={{ width: 70, height: 70, borderRadius: "50%", background: "rgba(201,168,76,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, color: T.gold, fontWeight: "bold", border: `2px solid ${T.gold}`, marginBottom: 10 }}>
+                        {membroSelecionado.nome?.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, textAlign: "center" }}>{membroSelecionado.nome}</div>
+                      {membroSelecionado.admin && <div style={{ fontSize: 11, color: T.gold, marginTop: 4, letterSpacing: 2 }}>ADMIN</div>}
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: "bold" }}>{m.nome}</div>
-                      <div style={{ fontSize: 12, color: T.textSub }}>{m.email}</div>
-                    </div>
-                    <button style={S.delBtn} onClick={async () => {
-                      if (window.confirm(`Excluir membro ${m.nome}?`)) {
-                        await deleteDoc(doc(db, "membros", m.email));
-                        showToast("✅ Membro removido!");
-                      }
-                    }}>🗑️</button>
+                    {[
+                      { label: "E-mail", valor: membroSelecionado.email, icon: "✉️" },
+                      { label: "Celular", valor: membroSelecionado.celular, icon: "📱" },
+                      { label: "Sexo", valor: membroSelecionado.sexo, icon: "👤" },
+                      { label: "Estado Civil", valor: membroSelecionado.estadoCivil, icon: "💍" },
+                      { label: "Data de Nascimento", valor: membroSelecionado.dataNascimento ? new Date(membroSelecionado.dataNascimento + "T00:00:00").toLocaleDateString("pt-BR") : null, icon: "🎂" },
+                      { label: "Batizado(a)", valor: membroSelecionado.batizado === "sim" ? "Sim" : membroSelecionado.batizado === "nao" ? "Não" : null, icon: "✝️" },
+                      { label: "Igreja do Batismo", valor: membroSelecionado.igrejaBAT, icon: "⛪" },
+                      { label: "Data do Batismo", valor: membroSelecionado.dataBAT ? new Date(membroSelecionado.dataBAT + "T00:00:00").toLocaleDateString("pt-BR") : null, icon: "📅" },
+                      { label: "Cadastrado em", valor: membroSelecionado.dataCadastro ? new Date(membroSelecionado.dataCadastro).toLocaleDateString("pt-BR") : null, icon: "🗓️" },
+                    ].filter(d => d.valor).map((d, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, marginBottom: 8 }}>
+                        <span style={{ fontSize: 20, flexShrink: 0 }}>{d.icon}</span>
+                        <div>
+                          <div style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: T.textSub, marginBottom: 2 }}>{d.label}</div>
+                          <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{d.valor}</div>
+                        </div>
+                      </div>
+                    ))}
+                    {membroSelecionado.celular && (
+                      <button style={{ ...S.saveBtn, background: "#25d366", marginTop: 8 }}
+                        onClick={() => window.open(`https://wa.me/55${membroSelecionado.celular.replace(/\D/g, "")}`, "_blank")}>
+                        📱 Chamar no WhatsApp
+                      </button>
+                    )}
+                    <button style={{ ...S.saveBtn, background: "rgba(239,68,68,.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,.3)", marginTop: 8 }}
+                      onClick={async () => {
+                        if (window.confirm(`Excluir membro ${membroSelecionado.nome}?`)) {
+                          await deleteDoc(doc(db, "membros", membroSelecionado.email));
+                          setMembroSelecionado(null);
+                          showToast("✅ Membro removido!");
+                        }
+                      }}>🗑️ Excluir Membro</button>
                   </div>
-                ))}
+                ) : (
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Membros Cadastrados</div>
+                    <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>{membros.length} membro(s) — toque no nome para ver os detalhes</div>
+                    {membros.length === 0 ? (
+                      <div style={{ ...S.card, marginLeft: 0, marginRight: 0, textAlign: "center" }}>
+                        <div style={{ fontSize: 13, color: T.textSub }}>Nenhum membro cadastrado ainda.</div>
+                      </div>
+                    ) : membros.map(m => (
+                      <div key={m.id} onClick={() => setMembroSelecionado(m)}
+                        style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", alignItems: "center", gap: 12, cursor: "pointer", marginBottom: 8 }}>
+                        <div style={{ width: 42, height: 42, borderRadius: "50%", background: "rgba(201,168,76,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: T.gold, fontWeight: "bold", flexShrink: 0, border: `1px solid rgba(201,168,76,.3)` }}>
+                          {m.nome?.charAt(0).toUpperCase()}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                          <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
+                        </div>
+                        <span style={{ fontSize: 18, color: T.textSub }}>›</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
