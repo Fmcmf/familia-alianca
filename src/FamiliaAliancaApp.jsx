@@ -867,8 +867,8 @@ export default function FamiliaAliancaApp() {
                   <option value="União Estável">União Estável</option>
                 </select>
                 <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4, marginTop: 4 }}>Data de Nascimento *</div>
-                <input style={S.input} type="date" value={loginForm.dataNascimento || ""}
-                  onChange={e => { setLoginForm({ ...loginForm, dataNascimento: e.target.value }); setLoginErro(""); }} />
+                <input style={S.input} type="text" inputMode="numeric" placeholder="DD/MM/AAAA *" maxLength={10} value={loginForm.dataNascimento || ""}
+                  onChange={e => { let v=e.target.value.replace(/\D/g,""); if(v.length>=2)v=v.slice(0,2)+"/"+v.slice(2); if(v.length>=5)v=v.slice(0,5)+"/"+v.slice(5); setLoginForm({ ...loginForm, dataNascimento: v }); setLoginErro(""); }} />
                 <div style={{ fontSize: 13, color: "#c9a84c", marginBottom: 8, marginTop: 4, fontWeight: "bold" }}>É Batizado(a)?</div>
                 <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
                   <button onClick={() => setLoginForm({ ...loginForm, batizado: "sim" })}
@@ -885,8 +885,8 @@ export default function FamiliaAliancaApp() {
                     <input style={S.input} placeholder="Em qual Igreja foi batizado(a)?" value={loginForm.igrejaBAT || ""}
                       onChange={e => setLoginForm({ ...loginForm, igrejaBAT: e.target.value })} />
                     <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4 }}>Data do Batismo</div>
-                    <input style={S.input} type="date" value={loginForm.dataBAT || ""}
-                      onChange={e => setLoginForm({ ...loginForm, dataBAT: e.target.value })} />
+                    <input style={S.input} type="text" inputMode="numeric" placeholder="DD/MM/AAAA" maxLength={10} value={loginForm.dataBAT || ""}
+                      onChange={e => { let v=e.target.value.replace(/\D/g,""); if(v.length>=2)v=v.slice(0,2)+"/"+v.slice(2); if(v.length>=5)v=v.slice(0,5)+"/"+v.slice(5); setLoginForm({ ...loginForm, dataBAT: v }); }} />
                   </>
                 )}
               </>
@@ -982,8 +982,8 @@ export default function FamiliaAliancaApp() {
               <option value="União Estável">União Estável</option>
             </select>
             <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4 }}>Data de Nascimento *</div>
-            <input style={S.input} type="date" value={completarForm.dataNascimento || ""}
-              onChange={e => setCompletarForm({ ...completarForm, dataNascimento: e.target.value })} />
+            <input style={S.input} type="text" inputMode="numeric" placeholder="DD/MM/AAAA *" maxLength={10} value={completarForm.dataNascimento || ""}
+              onChange={e => { let v=e.target.value.replace(/\D/g,""); if(v.length>=2)v=v.slice(0,2)+"/"+v.slice(2); if(v.length>=5)v=v.slice(0,5)+"/"+v.slice(5); setCompletarForm({ ...completarForm, dataNascimento: v }); }} />
             <div style={{ fontSize: 13, color: "#c9a84c", marginBottom: 8, fontWeight: "bold" }}>É Batizado(a)?</div>
             <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
               <button onClick={() => setCompletarForm({ ...completarForm, batizado: "sim" })}
@@ -1000,8 +1000,8 @@ export default function FamiliaAliancaApp() {
                 <input style={S.input} placeholder="Em qual Igreja foi batizado(a)?" value={completarForm.igrejaBAT || ""}
                   onChange={e => setCompletarForm({ ...completarForm, igrejaBAT: e.target.value })} />
                 <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4 }}>Data do Batismo</div>
-                <input style={S.input} type="date" value={completarForm.dataBAT || ""}
-                  onChange={e => setCompletarForm({ ...completarForm, dataBAT: e.target.value })} />
+                <input style={S.input} type="text" inputMode="numeric" placeholder="DD/MM/AAAA" maxLength={10} value={completarForm.dataBAT || ""}
+                  onChange={e => { let v=e.target.value.replace(/\D/g,""); if(v.length>=2)v=v.slice(0,2)+"/"+v.slice(2); if(v.length>=5)v=v.slice(0,5)+"/"+v.slice(5); setCompletarForm({ ...completarForm, dataBAT: v }); }} />
               </>
             )}
             <button style={S.saveBtn} onClick={salvarCadastroCompleto}>✅ Salvar e continuar</button>
@@ -2168,8 +2168,8 @@ export default function FamiliaAliancaApp() {
               <option value="União Estável">União Estável</option>
             </select>
             <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4 }}>Data de Nascimento *</div>
-            <input style={S.input} type="date" value={completarForm.dataNascimento ?? (user?.dataNascimento || "")}
-              onChange={e => setCompletarForm({ ...completarForm, dataNascimento: e.target.value })} />
+            <input style={S.input} type="text" inputMode="numeric" placeholder="DD/MM/AAAA *" maxLength={10} value={completarForm.dataNascimento ?? (user?.dataNascimento || "")}
+              onChange={e => { let v=e.target.value.replace(/\D/g,""); if(v.length>=2)v=v.slice(0,2)+"/"+v.slice(2); if(v.length>=5)v=v.slice(0,5)+"/"+v.slice(5); setCompletarForm({ ...completarForm, dataNascimento: v }); }} />
             <div style={{ fontSize: 13, color: "#c9a84c", marginBottom: 8, fontWeight: "bold" }}>É Batizado(a)?</div>
             <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
               {["sim", "nao"].map(v => (
@@ -2184,8 +2184,8 @@ export default function FamiliaAliancaApp() {
                 <input style={S.input} placeholder="Em qual Igreja foi batizado(a)?" value={completarForm.igrejaBAT ?? (user?.igrejaBAT || "")}
                   onChange={e => setCompletarForm({ ...completarForm, igrejaBAT: e.target.value })} />
                 <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4 }}>Data do Batismo</div>
-                <input style={S.input} type="date" value={completarForm.dataBAT ?? (user?.dataBAT || "")}
-                  onChange={e => setCompletarForm({ ...completarForm, dataBAT: e.target.value })} />
+                <input style={S.input} type="text" inputMode="numeric" placeholder="DD/MM/AAAA" maxLength={10} value={completarForm.dataBAT ?? (user?.dataBAT || "")}
+                  onChange={e => { let v=e.target.value.replace(/\D/g,""); if(v.length>=2)v=v.slice(0,2)+"/"+v.slice(2); if(v.length>=5)v=v.slice(0,5)+"/"+v.slice(5); setCompletarForm({ ...completarForm, dataBAT: v }); }} />
               </>
             )}
 
