@@ -269,6 +269,9 @@ export default function FamiliaAliancaApp() {
   const [tab, setTab] = useState("home");
   const [user, setUser] = useState(null); // eslint-disable-line no-unused-vars
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showCompletarCadastro, setShowCompletarCadastro] = useState(false);
+  const [completarForm, setCompletarForm] = useState({});
+  const [completarPulado, setCompletarPulado] = useState(false);
 
   // Auth
   const [loginForm, setLoginForm] = useState({ nome: "", email: "", senha: "", modo: "login" });
@@ -605,7 +608,33 @@ export default function FamiliaAliancaApp() {
       if (!snap.exists() || snap.data().senha !== loginForm.senha) { setLoginErro("E-mail ou senha incorretos."); return; }
       const u = { id: loginForm.email, ...snap.data() };
       store.set(SK.user, u); setUser(u); setIsAdmin(u.admin || false); setScreen("app");
+      // Verificar se cadastro está incompleto
+      const cadastroCompleto = u.celular && u.sexo && u.estadoCivil && u.dataNascimento;
+      if (!cadastroCompleto) {
+        setCompletarForm({ celular: u.celular || "", sexo: u.sexo || "", estadoCivil: u.estadoCivil || "", dataNascimento: u.dataNascimento || "", batizado: u.batizado || "", igrejaBAT: u.igrejaBAT || "", dataBAT: u.dataBAT || "" });
+        setShowCompletarCadastro(true);
+      }
     }
+  };
+
+  const salvarCadastroCompleto = async () => {
+    if (!completarForm.celular || !completarForm.sexo || !completarForm.estadoCivil || !completarForm.dataNascimento) {
+      showToast("⚠️ Preencha os campos obrigatórios!"); return;
+    }
+    const dadosAtualizados = {
+      celular: completarForm.celular || "",
+      sexo: completarForm.sexo || "",
+      estadoCivil: completarForm.estadoCivil || "",
+      dataNascimento: completarForm.dataNascimento || "",
+      batizado: completarForm.batizado || "nao",
+      igrejaBAT: completarForm.batizado === "sim" ? (completarForm.igrejaBAT || "") : "",
+      dataBAT: completarForm.batizado === "sim" ? (completarForm.dataBAT || "") : "",
+    };
+    await updateDoc(doc(db, "membros", user.email), dadosAtualizados);
+    const u = { ...user, ...dadosAtualizados };
+    store.set(SK.user, u); setUser(u);
+    setShowCompletarCadastro(false);
+    showToast("✅ Cadastro completado! Obrigado!");
   };
 
   const handleRecuperarSenha = async () => {
@@ -897,6 +926,7 @@ export default function FamiliaAliancaApp() {
     { id: "devocional", icon: "🕊️", label: "Devocional" },
     { id: "voluntario", icon: "🤲", label: "Servir" },
     { id: "mais", icon: "⋯", label: "Mais" },
+    { id: "perfil", icon: "👤", label: "Perfil" },
     ...(isAdmin ? [{ id: "admin", icon: "⚙️", label: "Admin" }] : []),
   ];
 
@@ -924,6 +954,64 @@ export default function FamiliaAliancaApp() {
         .acesso-rapido::-webkit-scrollbar{display:none}
         .acesso-rapido{scrollbar-width:none;-ms-overflow-style:none;}
       `}</style>
+
+      {/* ── MODAL COMPLETAR CADASTRO ── */}
+      {showCompletarCadastro && !completarPulado && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.85)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div style={{ background: "#0d1117", border: "1px solid rgba(201,168,76,.3)", borderRadius: 20, padding: 24, width: "100%", maxWidth: 420, maxHeight: "90vh", overflowY: "auto" }}>
+            <div style={{ textAlign: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>
+              <div style={{ fontSize: 18, fontWeight: "bold", color: "#c9a84c", marginBottom: 4 }}>Complete seu cadastro</div>
+              <div style={{ fontSize: 13, color: "#aaa" }}>Precisamos de mais algumas informações para conhecer melhor você!</div>
+            </div>
+            <input style={S.input} placeholder="Celular (WhatsApp) *" type="tel" value={completarForm.celular || ""}
+              onChange={e => setCompletarForm({ ...completarForm, celular: e.target.value })} />
+            <select style={{ ...S.input, color: completarForm.sexo ? "inherit" : "#888" }}
+              value={completarForm.sexo || ""} onChange={e => setCompletarForm({ ...completarForm, sexo: e.target.value })}>
+              <option value="">Sexo *</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Feminino">Feminino</option>
+            </select>
+            <select style={{ ...S.input, color: completarForm.estadoCivil ? "inherit" : "#888" }}
+              value={completarForm.estadoCivil || ""} onChange={e => setCompletarForm({ ...completarForm, estadoCivil: e.target.value })}>
+              <option value="">Estado Civil *</option>
+              <option value="Solteiro(a)">Solteiro(a)</option>
+              <option value="Casado(a)">Casado(a)</option>
+              <option value="Divorciado(a)">Divorciado(a)</option>
+              <option value="Viúvo(a)">Viúvo(a)</option>
+              <option value="União Estável">União Estável</option>
+            </select>
+            <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4 }}>Data de Nascimento *</div>
+            <input style={S.input} type="date" value={completarForm.dataNascimento || ""}
+              onChange={e => setCompletarForm({ ...completarForm, dataNascimento: e.target.value })} />
+            <div style={{ fontSize: 13, color: "#c9a84c", marginBottom: 8, fontWeight: "bold" }}>É Batizado(a)?</div>
+            <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+              <button onClick={() => setCompletarForm({ ...completarForm, batizado: "sim" })}
+                style={{ flex: 1, padding: "10px", borderRadius: 10, border: `2px solid ${completarForm.batizado === "sim" ? "#c9a84c" : "rgba(255,255,255,.2)"}`, background: completarForm.batizado === "sim" ? "rgba(201,168,76,.15)" : "transparent", color: completarForm.batizado === "sim" ? "#c9a84c" : "#aaa", fontWeight: "bold", cursor: "pointer" }}>
+                ✅ Sim
+              </button>
+              <button onClick={() => setCompletarForm({ ...completarForm, batizado: "nao", igrejaBAT: "", dataBAT: "" })}
+                style={{ flex: 1, padding: "10px", borderRadius: 10, border: `2px solid ${completarForm.batizado === "nao" ? "#c9a84c" : "rgba(255,255,255,.2)"}`, background: completarForm.batizado === "nao" ? "rgba(201,168,76,.15)" : "transparent", color: completarForm.batizado === "nao" ? "#c9a84c" : "#aaa", fontWeight: "bold", cursor: "pointer" }}>
+                ❌ Não
+              </button>
+            </div>
+            {completarForm.batizado === "sim" && (
+              <>
+                <input style={S.input} placeholder="Em qual Igreja foi batizado(a)?" value={completarForm.igrejaBAT || ""}
+                  onChange={e => setCompletarForm({ ...completarForm, igrejaBAT: e.target.value })} />
+                <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4 }}>Data do Batismo</div>
+                <input style={S.input} type="date" value={completarForm.dataBAT || ""}
+                  onChange={e => setCompletarForm({ ...completarForm, dataBAT: e.target.value })} />
+              </>
+            )}
+            <button style={S.saveBtn} onClick={salvarCadastroCompleto}>✅ Salvar e continuar</button>
+            <button onClick={() => { setCompletarPulado(true); setShowCompletarCadastro(false); }}
+              style={{ width: "100%", padding: "12px", borderRadius: 12, border: "none", background: "transparent", color: "#666", fontSize: 13, cursor: "pointer", marginTop: 8 }}>
+              Pular por agora — completar depois no Meu Perfil
+            </button>
+          </div>
+        </div>
+      )}
 
       <div style={S.wrap}>
         {/* HEADER */}
@@ -2014,6 +2102,94 @@ export default function FamiliaAliancaApp() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* ══ PERFIL ══ */}
+        {tab === "perfil" && (
+          <div style={{ padding: "0 16px 24px", animation: "slideUp .4s ease" }}>
+            <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 16 }}>Meu Perfil</div>
+
+            {/* Avatar */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 24 }}>
+              <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(201,168,76,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, color: "#c9a84c", fontWeight: "bold", border: "2px solid rgba(201,168,76,.4)", marginBottom: 12 }}>
+                {user?.nome?.charAt(0).toUpperCase()}
+              </div>
+              <div style={{ fontSize: 20, fontWeight: "bold", color: "#fff", textAlign: "center" }}>{user?.nome}</div>
+              <div style={{ fontSize: 13, color: "#aaa", marginTop: 4 }}>{user?.email}</div>
+              {(!user?.celular || !user?.sexo || !user?.estadoCivil) && (
+                <div style={{ marginTop: 12, background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 10, padding: "8px 14px", fontSize: 12, color: "#c9a84c", textAlign: "center" }}>
+                  ⚠️ Seu cadastro está incompleto. Complete abaixo!
+                </div>
+              )}
+            </div>
+
+            {/* Dados atuais */}
+            {[
+              { label: "Celular", valor: user?.celular, icon: "📱" },
+              { label: "Sexo", valor: user?.sexo, icon: "👤" },
+              { label: "Estado Civil", valor: user?.estadoCivil, icon: "💍" },
+              { label: "Data de Nascimento", valor: user?.dataNascimento ? new Date(user.dataNascimento + "T00:00:00").toLocaleDateString("pt-BR") : null, icon: "🎂" },
+              { label: "Batizado(a)", valor: user?.batizado === "sim" ? "Sim" : user?.batizado === "nao" ? "Não" : null, icon: "✝️" },
+              { label: "Igreja do Batismo", valor: user?.igrejaBAT, icon: "⛪" },
+              { label: "Data do Batismo", valor: user?.dataBAT ? new Date(user.dataBAT + "T00:00:00").toLocaleDateString("pt-BR") : null, icon: "📅" },
+            ].filter(d => d.valor).map((d, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 12, marginBottom: 8 }}>
+                <span style={{ fontSize: 20, flexShrink: 0 }}>{d.icon}</span>
+                <div>
+                  <div style={{ fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: "#aaa", marginBottom: 2 }}>{d.label}</div>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: "#fff" }}>{d.valor}</div>
+                </div>
+              </div>
+            ))}
+
+            {/* Formulário edição */}
+            <div style={{ fontSize: 13, fontWeight: "bold", color: "#c9a84c", marginTop: 20, marginBottom: 12 }}>
+              ✏️ {(!user?.celular || !user?.sexo) ? "Complete" : "Edite"} seus dados
+            </div>
+
+            <input style={S.input} placeholder="Celular (WhatsApp) *" type="tel" value={completarForm.celular ?? (user?.celular || "")}
+              onChange={e => setCompletarForm({ ...completarForm, celular: e.target.value })} />
+            <select style={{ ...S.input, color: (completarForm.sexo ?? user?.sexo) ? "inherit" : "#888" }}
+              value={completarForm.sexo ?? (user?.sexo || "")}
+              onChange={e => setCompletarForm({ ...completarForm, sexo: e.target.value })}>
+              <option value="">Sexo *</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Feminino">Feminino</option>
+            </select>
+            <select style={{ ...S.input, color: (completarForm.estadoCivil ?? user?.estadoCivil) ? "inherit" : "#888" }}
+              value={completarForm.estadoCivil ?? (user?.estadoCivil || "")}
+              onChange={e => setCompletarForm({ ...completarForm, estadoCivil: e.target.value })}>
+              <option value="">Estado Civil *</option>
+              <option value="Solteiro(a)">Solteiro(a)</option>
+              <option value="Casado(a)">Casado(a)</option>
+              <option value="Divorciado(a)">Divorciado(a)</option>
+              <option value="Viúvo(a)">Viúvo(a)</option>
+              <option value="União Estável">União Estável</option>
+            </select>
+            <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4 }}>Data de Nascimento *</div>
+            <input style={S.input} type="date" value={completarForm.dataNascimento ?? (user?.dataNascimento || "")}
+              onChange={e => setCompletarForm({ ...completarForm, dataNascimento: e.target.value })} />
+            <div style={{ fontSize: 13, color: "#c9a84c", marginBottom: 8, fontWeight: "bold" }}>É Batizado(a)?</div>
+            <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+              {["sim", "nao"].map(v => (
+                <button key={v} onClick={() => setCompletarForm({ ...completarForm, batizado: v, ...(v === "nao" ? { igrejaBAT: "", dataBAT: "" } : {}) })}
+                  style={{ flex: 1, padding: "10px", borderRadius: 10, border: `2px solid ${(completarForm.batizado ?? user?.batizado) === v ? "#c9a84c" : "rgba(255,255,255,.2)"}`, background: (completarForm.batizado ?? user?.batizado) === v ? "rgba(201,168,76,.15)" : "transparent", color: (completarForm.batizado ?? user?.batizado) === v ? "#c9a84c" : "#aaa", fontWeight: "bold", cursor: "pointer" }}>
+                  {v === "sim" ? "✅ Sim" : "❌ Não"}
+                </button>
+              ))}
+            </div>
+            {(completarForm.batizado ?? user?.batizado) === "sim" && (
+              <>
+                <input style={S.input} placeholder="Em qual Igreja foi batizado(a)?" value={completarForm.igrejaBAT ?? (user?.igrejaBAT || "")}
+                  onChange={e => setCompletarForm({ ...completarForm, igrejaBAT: e.target.value })} />
+                <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4 }}>Data do Batismo</div>
+                <input style={S.input} type="date" value={completarForm.dataBAT ?? (user?.dataBAT || "")}
+                  onChange={e => setCompletarForm({ ...completarForm, dataBAT: e.target.value })} />
+              </>
+            )}
+
+            <button style={S.saveBtn} onClick={salvarCadastroCompleto}>💾 Salvar alterações</button>
           </div>
         )}
 
