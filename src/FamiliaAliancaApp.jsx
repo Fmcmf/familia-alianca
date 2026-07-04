@@ -2129,10 +2129,10 @@ export default function FamiliaAliancaApp() {
               { label: "Celular", valor: user?.celular, icon: "📱" },
               { label: "Sexo", valor: user?.sexo, icon: "👤" },
               { label: "Estado Civil", valor: user?.estadoCivil, icon: "💍" },
-              { label: "Data de Nascimento", valor: user?.dataNascimento ? new Date(user.dataNascimento + "T00:00:00").toLocaleDateString("pt-BR") : null, icon: "🎂" },
+              { label: "Data de Nascimento", valor: user?.dataNascimento || null, icon: "🎂" },
               { label: "Batizado(a)", valor: user?.batizado === "sim" ? "Sim" : user?.batizado === "nao" ? "Não" : null, icon: "✝️" },
               { label: "Igreja do Batismo", valor: user?.igrejaBAT, icon: "⛪" },
-              { label: "Data do Batismo", valor: user?.dataBAT ? new Date(user.dataBAT + "T00:00:00").toLocaleDateString("pt-BR") : null, icon: "📅" },
+              { label: "Data do Batismo", valor: user?.dataBAT || null, icon: "📅" },
             ].filter(d => d.valor).map((d, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 12, marginBottom: 8 }}>
                 <span style={{ fontSize: 20, flexShrink: 0 }}>{d.icon}</span>
@@ -2934,10 +2934,10 @@ export default function FamiliaAliancaApp() {
                       { label: "Celular", valor: membroSelecionado.celular, icon: "📱" },
                       { label: "Sexo", valor: membroSelecionado.sexo, icon: "👤" },
                       { label: "Estado Civil", valor: membroSelecionado.estadoCivil, icon: "💍" },
-                      { label: "Data de Nascimento", valor: membroSelecionado.dataNascimento ? new Date(membroSelecionado.dataNascimento + "T00:00:00").toLocaleDateString("pt-BR") : null, icon: "🎂" },
+                      { label: "Data de Nascimento", valor: membroSelecionado.dataNascimento || null, icon: "🎂" },
                       { label: "Batizado(a)", valor: membroSelecionado.batizado === "sim" ? "Sim" : membroSelecionado.batizado === "nao" ? "Não" : null, icon: "✝️" },
                       { label: "Igreja do Batismo", valor: membroSelecionado.igrejaBAT, icon: "⛪" },
-                      { label: "Data do Batismo", valor: membroSelecionado.dataBAT ? new Date(membroSelecionado.dataBAT + "T00:00:00").toLocaleDateString("pt-BR") : null, icon: "📅" },
+                      { label: "Data do Batismo", valor: membroSelecionado.dataBAT || null, icon: "📅" },
                       { label: "Cadastrado em", valor: membroSelecionado.dataCadastro ? new Date(membroSelecionado.dataCadastro).toLocaleDateString("pt-BR") : null, icon: "🗓️" },
                     ].filter(d => d.valor).map((d, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, marginBottom: 8 }}>
