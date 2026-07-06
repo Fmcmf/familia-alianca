@@ -291,6 +291,7 @@ export default function FamiliaAliancaApp() {
   const [estudos, setEstudos] = useState([]);
   const [estudoAberto, setEstudoAberto] = useState(null);
   const [membroSelecionado, setMembroSelecionado] = useState(null);
+  const [buscaMembro, setBuscaMembro] = useState("");
   const [estudoNivel, setEstudoNivel] = useState("iniciante");
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
@@ -2918,7 +2919,7 @@ export default function FamiliaAliancaApp() {
               <div style={{ padding: "0 16px" }}>
                 {membroSelecionado ? (
                   <div>
-                    <button onClick={() => setMembroSelecionado(null)}
+                    <button onClick={() => { setMembroSelecionado(null); setBuscaMembro(""); }}
                       style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", color: T.gold, fontSize: 13, cursor: "pointer", marginBottom: 16, padding: 0 }}>
                       ← Voltar à lista
                     </button>
@@ -2966,12 +2967,38 @@ export default function FamiliaAliancaApp() {
                 ) : (
                   <div>
                     <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Membros Cadastrados</div>
-                    <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>{membros.length} membro(s) — toque no nome para ver os detalhes</div>
+                    <div style={{ fontSize: 12, color: T.textSub, marginBottom: 12 }}>{membros.length} membro(s) — toque no nome para ver os detalhes</div>
+
+                    {/* Campo de busca */}
+                    <input
+                      style={{ ...S.input, marginBottom: 12 }}
+                      placeholder="🔍 Buscar por nome ou e-mail..."
+                      value={buscaMembro}
+                      onChange={e => setBuscaMembro(e.target.value)}
+                    />
+
+                    {/* Contador de resultados */}
+                    {buscaMembro.trim() && (
+                      <div style={{ fontSize: 11, color: T.textFaint, marginBottom: 10 }}>
+                        {membros.filter(m =>
+                          m.nome?.toLowerCase().includes(buscaMembro.toLowerCase()) ||
+                          m.email?.toLowerCase().includes(buscaMembro.toLowerCase())
+                        ).length} resultado(s) encontrado(s)
+                      </div>
+                    )}
+
                     {membros.length === 0 ? (
                       <div style={{ ...S.card, marginLeft: 0, marginRight: 0, textAlign: "center" }}>
                         <div style={{ fontSize: 13, color: T.textSub }}>Nenhum membro cadastrado ainda.</div>
                       </div>
-                    ) : membros.map(m => (
+                    ) : membros
+                        .filter(m =>
+                          !buscaMembro.trim() ||
+                          m.nome?.toLowerCase().includes(buscaMembro.toLowerCase()) ||
+                          m.email?.toLowerCase().includes(buscaMembro.toLowerCase())
+                        )
+                        .sort((a, b) => a.nome?.localeCompare(b.nome))
+                        .map(m => (
                       <div key={m.id} onClick={() => setMembroSelecionado(m)}
                         style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", alignItems: "center", gap: 12, cursor: "pointer", marginBottom: 8 }}>
                         <div style={{ width: 42, height: 42, borderRadius: "50%", background: "rgba(201,168,76,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: T.gold, fontWeight: "bold", flexShrink: 0, border: `1px solid rgba(201,168,76,.3)` }}>
