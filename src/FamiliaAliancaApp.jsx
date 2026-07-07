@@ -292,6 +292,10 @@ export default function FamiliaAliancaApp() {
   const [estudoAberto, setEstudoAberto] = useState(null);
   const [membroSelecionado, setMembroSelecionado] = useState(null);
   const [buscaMembro, setBuscaMembro] = useState("");
+  const [lancamentos, setLancamentos] = useState([]);
+  const [novoLancamento, setNovoLancamento] = useState({ tipo: "entrada", categoria: "Dízimo", descricao: "", valor: "", data: new Date().toISOString().split("T")[0] });
+  const [finPeriodo, setFinPeriodo] = useState(new Date().toISOString().slice(0, 7));
+  const [finView, setFinView] = useState("dashboard"); // dashboard | lancamentos | novo
   const [estudoNivel, setEstudoNivel] = useState("iniciante");
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
@@ -506,6 +510,13 @@ export default function FamiliaAliancaApp() {
       else setBannerHome(null);
     });
 
+    // Lançamentos financeiros
+    const unsubLancamentos = onSnapshot(collection(db, "lancamentos"), (snap) => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => b.data.localeCompare(a.data));
+      setLancamentos(lista);
+    });
+
     const unsubBannerJejum = onSnapshot(doc(db, "config", "bannerJejum"), (snap) => {
       if (snap.exists()) setBannerJejum(snap.data());
     });
@@ -551,7 +562,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
       clearInterval(heartbeat);
       removerPresenca();
       window.removeEventListener("beforeunload", removerPresenca);
@@ -2201,9 +2212,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "devocional", "avisos", "estudos", "banner", "jejum", "video", "aovivo", "membros"].map(t => (
+              {["agenda", "palavra", "devocional", "avisos", "estudos", "banner", "financeiro", "jejum", "video", "aovivo", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", financeiro: "💰 Finanças", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
@@ -2823,6 +2834,200 @@ export default function FamiliaAliancaApp() {
                 )}
               </div>
             )}
+
+            {/* Admin: Financeiro */}
+            {adminTab === "financeiro" && (() => {
+              const CATS_ENTRADA = ["Dízimo", "Oferta", "Contribuição especial", "Doação"];
+              const CATS_SAIDA = ["Aluguel", "Contas", "Manutenção", "Material", "Eventos", "Salários/Honorários", "Missões", "Outros"];
+              const COR_ENTRADA = "#22c55e";
+              const COR_SAIDA = "#ef4444";
+
+              // Filtrar por período
+              const lancPeriodo = lancamentos.filter(l => l.data?.startsWith(finPeriodo));
+              const totalEntrada = lancPeriodo.filter(l => l.tipo === "entrada").reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
+              const totalSaida = lancPeriodo.filter(l => l.tipo === "saida").reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
+              const saldo = totalEntrada - totalSaida;
+
+              // Totais por categoria
+              const porCategoria = (tipo) => {
+                const cats = tipo === "entrada" ? CATS_ENTRADA : CATS_SAIDA;
+                return cats.map(cat => ({
+                  cat,
+                  total: lancPeriodo.filter(l => l.tipo === tipo && l.categoria === cat).reduce((s, l) => s + (parseFloat(l.valor) || 0), 0)
+                })).filter(c => c.total > 0);
+              };
+
+              const fmtVal = (v) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+
+              return (
+                <div style={{ padding: "0 16px" }}>
+                  {/* Seletor de view */}
+                  <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                    {[{ id: "dashboard", label: "📊 Resumo" }, { id: "lancamentos", label: "📋 Lançamentos" }, { id: "novo", label: "➕ Novo" }].map(v => (
+                      <button key={v.id} onClick={() => setFinView(v.id)}
+                        style={{ flex: 1, padding: "8px 0", border: `1px solid ${finView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: finView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: finView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: finView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                        {v.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Seletor de período */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                    <span style={{ fontSize: 12, color: T.textSub }}>Período:</span>
+                    <input type="month" value={finPeriodo} onChange={e => setFinPeriodo(e.target.value)}
+                      style={{ ...S.input, marginBottom: 0, flex: 1, padding: "8px 12px" }} />
+                  </div>
+
+                  {/* ── DASHBOARD ── */}
+                  {finView === "dashboard" && (
+                    <>
+                      {/* Cards de resumo */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+                        <div style={{ background: "rgba(34,197,94,.08)", border: "1px solid rgba(34,197,94,.25)", borderRadius: 14, padding: "14px 16px" }}>
+                          <div style={{ fontSize: 11, color: COR_ENTRADA, letterSpacing: 1, marginBottom: 4 }}>ENTRADAS</div>
+                          <div style={{ fontSize: 16, fontWeight: "bold", color: COR_ENTRADA }}>{fmtVal(totalEntrada)}</div>
+                        </div>
+                        <div style={{ background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.25)", borderRadius: 14, padding: "14px 16px" }}>
+                          <div style={{ fontSize: 11, color: COR_SAIDA, letterSpacing: 1, marginBottom: 4 }}>SAÍDAS</div>
+                          <div style={{ fontSize: 16, fontWeight: "bold", color: COR_SAIDA }}>{fmtVal(totalSaida)}</div>
+                        </div>
+                      </div>
+                      <div style={{ background: saldo >= 0 ? "rgba(34,197,94,.08)" : "rgba(239,68,68,.08)", border: `1px solid ${saldo >= 0 ? "rgba(34,197,94,.25)" : "rgba(239,68,68,.25)"}`, borderRadius: 14, padding: "16px", marginBottom: 16, textAlign: "center" }}>
+                        <div style={{ fontSize: 12, color: T.textSub, marginBottom: 4 }}>SALDO DO PERÍODO</div>
+                        <div style={{ fontSize: 22, fontWeight: "bold", color: saldo >= 0 ? COR_ENTRADA : COR_SAIDA }}>{saldo >= 0 ? "+" : ""}{fmtVal(saldo)}</div>
+                      </div>
+
+                      {/* Entradas por categoria */}
+                      {porCategoria("entrada").length > 0 && (
+                        <>
+                          <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: COR_ENTRADA, marginBottom: 8 }}>Entradas por categoria</div>
+                          {porCategoria("entrada").map((c, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: `3px solid ${COR_ENTRADA}`, borderRadius: 10, marginBottom: 6 }}>
+                              <span style={{ fontSize: 13, color: T.text }}>{c.cat}</span>
+                              <span style={{ fontSize: 13, fontWeight: "bold", color: COR_ENTRADA }}>{fmtVal(c.total)}</span>
+                            </div>
+                          ))}
+                        </>
+                      )}
+
+                      {/* Saídas por categoria */}
+                      {porCategoria("saida").length > 0 && (
+                        <>
+                          <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: COR_SAIDA, marginBottom: 8, marginTop: 14 }}>Saídas por categoria</div>
+                          {porCategoria("saida").map((c, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: `3px solid ${COR_SAIDA}`, borderRadius: 10, marginBottom: 6 }}>
+                              <span style={{ fontSize: 13, color: T.text }}>{c.cat}</span>
+                              <span style={{ fontSize: 13, fontWeight: "bold", color: COR_SAIDA }}>{fmtVal(c.total)}</span>
+                            </div>
+                          ))}
+                        </>
+                      )}
+
+                      {lancPeriodo.length === 0 && (
+                        <div style={{ textAlign: "center", padding: "28px 0", color: T.textSub, fontSize: 13 }}>
+                          <div style={{ fontSize: 32, marginBottom: 8 }}>💰</div>
+                          Nenhum lançamento neste período
+                        </div>
+                      )}
+
+                      {/* Botão PDF */}
+                      {lancPeriodo.length > 0 && (
+                        <button style={{ ...S.saveBtn, marginTop: 16, background: "#1a56db" }} onClick={() => {
+                          const linhas = lancPeriodo.map(l =>
+                            `${l.data} | ${l.tipo === "entrada" ? "ENTRADA" : "SAÍDA"} | ${l.categoria} | ${l.descricao || "-"} | R$ ${parseFloat(l.valor).toFixed(2)}`
+                          ).join("\n");
+                          const conteudo = `RELATÓRIO FINANCEIRO — FAMÍLIA ALIANÇA\nPeríodo: ${finPeriodo}\n\nENTRADAS: ${fmtVal(totalEntrada)}\nSAÍDAS: ${fmtVal(totalSaida)}\nSALDO: ${fmtVal(saldo)}\n\n${"─".repeat(60)}\nDATA       | TIPO    | CATEGORIA | DESCRIÇÃO | VALOR\n${"─".repeat(60)}\n${linhas}\n${"─".repeat(60)}\nGerado em: ${new Date().toLocaleDateString("pt-BR")}`;
+                          const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url; a.download = `financeiro-${finPeriodo}.txt`; a.click();
+                          showToast("📄 Relatório baixado!");
+                        }}>📄 Baixar Relatório</button>
+                      )}
+                    </>
+                  )}
+
+                  {/* ── LANÇAMENTOS ── */}
+                  {finView === "lancamentos" && (
+                    <>
+                      <div style={{ fontSize: 13, color: T.textSub, marginBottom: 12 }}>{lancPeriodo.length} lançamento(s) no período</div>
+                      {lancPeriodo.length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "28px 0", color: T.textSub, fontSize: 13 }}>Nenhum lançamento neste período</div>
+                      ) : lancPeriodo.map(l => (
+                        <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: `3px solid ${l.tipo === "entrada" ? COR_ENTRADA : COR_SAIDA}`, borderRadius: 12, marginBottom: 8 }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                              <span style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{l.categoria}</span>
+                              <span style={{ fontSize: 13, fontWeight: "bold", color: l.tipo === "entrada" ? COR_ENTRADA : COR_SAIDA }}>{l.tipo === "entrada" ? "+" : "-"}{fmtVal(parseFloat(l.valor))}</span>
+                            </div>
+                            {l.descricao && <div style={{ fontSize: 12, color: T.textSub }}>{l.descricao}</div>}
+                            <div style={{ fontSize: 11, color: T.textFaint, marginTop: 2 }}>{new Date(l.data + "T12:00:00").toLocaleDateString("pt-BR")}</div>
+                          </div>
+                          <button style={S.delBtn} onClick={async () => {
+                            if (window.confirm("Excluir lançamento?")) {
+                              await deleteDoc(doc(db, "lancamentos", l.id));
+                              showToast("🗑️ Removido!");
+                            }
+                          }}>🗑️</button>
+                        </div>
+                      ))}
+                    </>
+                  )}
+
+                  {/* ── NOVO LANÇAMENTO ── */}
+                  {finView === "novo" && (
+                    <>
+                      <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 16, color: T.gold }}>Novo Lançamento</div>
+
+                      <label style={S.label}>Tipo</label>
+                      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                        {[{ id: "entrada", label: "✅ Entrada" }, { id: "saida", label: "❌ Saída" }].map(t => (
+                          <button key={t.id} onClick={() => setNovoLancamento({ ...novoLancamento, tipo: t.id, categoria: t.id === "entrada" ? "Dízimo" : "Aluguel" })}
+                            style={{ flex: 1, padding: "10px 0", border: `1px solid ${novoLancamento.tipo === t.id ? (t.id === "entrada" ? COR_ENTRADA : COR_SAIDA) : T.cardBorder}`, borderRadius: 10, background: novoLancamento.tipo === t.id ? (t.id === "entrada" ? "rgba(34,197,94,.15)" : "rgba(239,68,68,.15)") : T.card, color: novoLancamento.tipo === t.id ? (t.id === "entrada" ? COR_ENTRADA : COR_SAIDA) : T.textSub, fontSize: 13, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                            {t.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      <label style={S.label}>Categoria</label>
+                      <select style={{ ...S.select, marginBottom: 0 }} value={novoLancamento.categoria}
+                        onChange={e => setNovoLancamento({ ...novoLancamento, categoria: e.target.value })}>
+                        {(novoLancamento.tipo === "entrada" ? CATS_ENTRADA : CATS_SAIDA).map(c => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+
+                      <label style={S.label}>Valor (R$) *</label>
+                      <input type="number" step="0.01" placeholder="0,00" style={{ ...S.input, marginBottom: 0 }}
+                        value={novoLancamento.valor}
+                        onChange={e => setNovoLancamento({ ...novoLancamento, valor: e.target.value })} />
+
+                      <label style={S.label}>Data *</label>
+                      <input type="date" style={{ ...S.input, marginBottom: 0 }}
+                        value={novoLancamento.data}
+                        onChange={e => setNovoLancamento({ ...novoLancamento, data: e.target.value })} />
+
+                      <label style={S.label}>Descrição (opcional)</label>
+                      <input placeholder="Ex: Oferta do culto dominical" style={{ ...S.input, marginBottom: 0 }}
+                        value={novoLancamento.descricao}
+                        onChange={e => setNovoLancamento({ ...novoLancamento, descricao: e.target.value })} />
+
+                      <button style={S.saveBtn} onClick={async () => {
+                        if (!novoLancamento.valor || !novoLancamento.data) { showToast("⚠️ Preencha valor e data!"); return; }
+                        await addDoc(collection(db, "lancamentos"), {
+                          ...novoLancamento,
+                          valor: parseFloat(novoLancamento.valor),
+                          criadoEm: new Date().toISOString()
+                        });
+                        setNovoLancamento({ tipo: "entrada", categoria: "Dízimo", descricao: "", valor: "", data: new Date().toISOString().split("T")[0] });
+                        setFinView("lancamentos");
+                        showToast("✅ Lançamento registrado!");
+                      }}>💰 Registrar Lançamento</button>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Admin: Ao Vivo */}
             {adminTab === "aovivo" && (
