@@ -301,6 +301,9 @@ export default function FamiliaAliancaApp() {
   const [buscaDizimista, setBuscaDizimista] = useState("");
   const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
   const [dizimoPeriodo, setDizimoPeriodo] = useState(new Date().toISOString().slice(0, 7));
+  const [dizimoFiltroTipo, setDizimoFiltroTipo] = useState("mes"); // mes | periodo
+  const [dizimoDataInicio, setDizimoDataInicio] = useState(new Date().toISOString().split("T")[0]);
+  const [dizimoDataFim, setDizimoDataFim] = useState(new Date().toISOString().split("T")[0]);
   const [estudoNivel, setEstudoNivel] = useState("iniciante");
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
@@ -3110,47 +3113,137 @@ export default function FamiliaAliancaApp() {
 
                       {/* Lista de dizimistas do período */}
                       <div style={{ marginTop: 24 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                          <div style={{ fontSize: 12, color: T.gold, letterSpacing: 2, textTransform: "uppercase", flex: 1 }}>Dízimos do período</div>
-                          <input type="month" value={dizimoPeriodo} onChange={e => setDizimoPeriodo(e.target.value)}
-                            style={{ ...S.input, marginBottom: 0, padding: "6px 10px", fontSize: 12, width: "auto" }} />
+                        <div style={{ fontSize: 12, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>📋 Relatório de Dizimistas</div>
+
+                        {/* Tipo de filtro */}
+                        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                          {[{ id: "mes", label: "📅 Por Mês" }, { id: "periodo", label: "📆 Por Período" }].map(f => (
+                            <button key={f.id} onClick={() => setDizimoFiltroTipo(f.id)}
+                              style={{ flex: 1, padding: "8px 0", border: `1px solid ${dizimoFiltroTipo === f.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: dizimoFiltroTipo === f.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: dizimoFiltroTipo === f.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: dizimoFiltroTipo === f.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                              {f.label}
+                            </button>
+                          ))}
                         </div>
 
-                        {dizimistas.filter(d => d.data?.startsWith(dizimoPeriodo)).length === 0 ? (
-                          <div style={{ textAlign: "center", padding: "20px 0", color: T.textSub, fontSize: 13 }}>Nenhum dízimo neste período</div>
-                        ) : (
-                          <>
-                            {/* Total do período */}
-                            <div style={{ background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 12, padding: "12px 14px", marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span style={{ fontSize: 12, color: T.textSub }}>{dizimistas.filter(d => d.data?.startsWith(dizimoPeriodo)).length} dizimista(s)</span>
-                              <span style={{ fontSize: 15, fontWeight: "bold", color: "#c9a84c" }}>
-                                R$ {dizimistas.filter(d => d.data?.startsWith(dizimoPeriodo)).reduce((s, d) => s + (parseFloat(d.valor) || 0), 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                              </span>
-                            </div>
-                            {dizimistas.filter(d => d.data?.startsWith(dizimoPeriodo)).map(d => (
-                              <div key={d.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 8 }}>
-                                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
-                                  {d.membroNome?.charAt(0).toUpperCase()}
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{d.membroNome}</div>
-                                  <div style={{ fontSize: 11, color: T.textSub }}>
-                                    {new Date(d.data + "T12:00:00").toLocaleDateString("pt-BR")} • {d.formaPagamento === "pix" ? "💠 PIX" : d.formaPagamento === "cartao" ? "💳 Cartão" : d.formaPagamento === "deposito" ? "🏦 Depósito" : "📄 Cheque"}
-                                  </div>
-                                </div>
-                                <div style={{ fontSize: 14, fontWeight: "bold", color: "#22c55e" }}>
-                                  R$ {parseFloat(d.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                                </div>
-                                <button style={S.delBtn} onClick={async () => {
-                                  if (window.confirm("Excluir este dízimo?")) {
-                                    await deleteDoc(doc(db, "dizimistas", d.id));
-                                    showToast("🗑️ Removido!");
-                                  }
-                                }}>🗑️</button>
-                              </div>
-                            ))}
-                          </>
+                        {/* Filtro por mês */}
+                        {dizimoFiltroTipo === "mes" && (
+                          <input type="month" value={dizimoPeriodo} onChange={e => setDizimoPeriodo(e.target.value)}
+                            style={{ ...S.input, marginBottom: 12 }} />
                         )}
+
+                        {/* Filtro por período */}
+                        {dizimoFiltroTipo === "periodo" && (
+                          <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "center" }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 11, color: T.textSub, marginBottom: 4 }}>De:</div>
+                              <input type="date" value={dizimoDataInicio} onChange={e => setDizimoDataInicio(e.target.value)}
+                                style={{ ...S.input, marginBottom: 0 }} />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 11, color: T.textSub, marginBottom: 4 }}>Até:</div>
+                              <input type="date" value={dizimoDataFim} onChange={e => setDizimoDataFim(e.target.value)}
+                                style={{ ...S.input, marginBottom: 0 }} />
+                            </div>
+                          </div>
+                        )}
+
+                        {(() => {
+                          // Filtrar dizimistas
+                          const filtrados = dizimistas.filter(d => {
+                            if (dizimoFiltroTipo === "mes") return d.data?.startsWith(dizimoPeriodo);
+                            return d.data >= dizimoDataInicio && d.data <= dizimoDataFim;
+                          }).sort((a, b) => a.membroNome?.localeCompare(b.membroNome));
+
+                          const totalPeriodo = filtrados.reduce((s, d) => s + (parseFloat(d.valor) || 0), 0);
+                          const fmtV = v => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+                          const fmtPag = p => p === "pix" ? "PIX" : p === "cartao" ? "Cartão" : p === "deposito" ? "Depósito" : "Cheque";
+                          const titulo = dizimoFiltroTipo === "mes"
+                            ? `${new Date(dizimoPeriodo + "-01").toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}`
+                            : `${new Date(dizimoDataInicio + "T12:00").toLocaleDateString("pt-BR")} a ${new Date(dizimoDataFim + "T12:00").toLocaleDateString("pt-BR")}`;
+
+                          return filtrados.length === 0 ? (
+                            <div style={{ textAlign: "center", padding: "20px 0", color: T.textSub, fontSize: 13 }}>
+                              <div style={{ fontSize: 28, marginBottom: 8 }}>🙏</div>
+                              Nenhum dízimo encontrado neste período
+                            </div>
+                          ) : (
+                            <>
+                              {/* Resumo */}
+                              <div style={{ background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 12, padding: "14px 16px", marginBottom: 12 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                                  <span style={{ fontSize: 12, color: T.textSub }}>Total de dizimistas</span>
+                                  <span style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{filtrados.length}</span>
+                                </div>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                                  <span style={{ fontSize: 12, color: T.textSub }}>Total arrecadado</span>
+                                  <span style={{ fontSize: 15, fontWeight: "bold", color: "#22c55e" }}>{fmtV(totalPeriodo)}</span>
+                                </div>
+                                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                  <span style={{ fontSize: 12, color: T.textSub }}>Média por dizimista</span>
+                                  <span style={{ fontSize: 13, fontWeight: "bold", color: "#c9a84c" }}>{fmtV(totalPeriodo / filtrados.length)}</span>
+                                </div>
+                              </div>
+
+                              {/* Lista */}
+                              {filtrados.map((d, idx) => (
+                                <div key={d.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 8 }}>
+                                  <div style={{ width: 30, height: 30, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
+                                    {idx + 1}
+                                  </div>
+                                  <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{d.membroNome}</div>
+                                    <div style={{ fontSize: 11, color: T.textSub }}>
+                                      {new Date(d.data + "T12:00:00").toLocaleDateString("pt-BR")} • {fmtPag(d.formaPagamento)}
+                                    </div>
+                                  </div>
+                                  <div style={{ fontSize: 13, fontWeight: "bold", color: "#22c55e", flexShrink: 0 }}>
+                                    {fmtV(parseFloat(d.valor))}
+                                  </div>
+                                  <button style={S.delBtn} onClick={async () => {
+                                    if (window.confirm("Excluir este dízimo?")) {
+                                      await deleteDoc(doc(db, "dizimistas", d.id));
+                                      showToast("🗑️ Removido!");
+                                    }
+                                  }}>🗑️</button>
+                                </div>
+                              ))}
+
+                              {/* Botão Relatório */}
+                              <button style={{ ...S.saveBtn, marginTop: 8, background: "#1a56db" }} onClick={() => {
+                                const linhas = filtrados.map((d, i) =>
+                                  `${String(i + 1).padStart(2, "0")}. ${d.membroNome.padEnd(30)} | ${new Date(d.data + "T12:00").toLocaleDateString("pt-BR")} | ${fmtPag(d.formaPagamento).padEnd(10)} | ${fmtV(parseFloat(d.valor))}`
+                                ).join("\n");
+
+                                const relatorio = [
+                                  "═".repeat(62),
+                                  "   RELATÓRIO DE DIZIMISTAS — IGREJA FAMÍLIA ALIANÇA",
+                                  "═".repeat(62),
+                                  `   Período: ${titulo}`,
+                                  `   Gerado em: ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`,
+                                  "─".repeat(62),
+                                  `   Total de dizimistas: ${filtrados.length}`,
+                                  `   Total arrecadado:    ${fmtV(totalPeriodo)}`,
+                                  `   Média por dizimista: ${fmtV(totalPeriodo / filtrados.length)}`,
+                                  "═".repeat(62),
+                                  "Nº  NOME                           DATA         PAGAMENTO  VALOR",
+                                  "─".repeat(62),
+                                  linhas,
+                                  "─".repeat(62),
+                                  `    TOTAL GERAL: ${fmtV(totalPeriodo)}`,
+                                  "═".repeat(62),
+                                ].join("\n");
+
+                                const blob = new Blob([relatorio], { type: "text/plain;charset=utf-8" });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = `dizimistas-${titulo.replace(/\s/g, "-")}.txt`;
+                                a.click();
+                                showToast("📄 Relatório baixado!");
+                              }}>📄 Baixar Relatório</button>
+                            </>
+                          );
+                        })()}
                       </div>
                     </>
                   )}
