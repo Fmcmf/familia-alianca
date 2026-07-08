@@ -3410,15 +3410,32 @@ export default function FamiliaAliancaApp() {
                       const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
                       const aniversariantes = membros.filter(m => {
                         if (!m.nascimento) return false;
-                        const p = m.nascimento.split(/[-/]/);
-                        const mes = m.nascimento.includes("-") && m.nascimento.indexOf("-") === 4 ? parseInt(p[1]) : parseInt(p[1]);
+                        const n = m.nascimento.trim();
+                        let mes;
+                        if (n.includes("/")) {
+                          // Formato DD/MM/AAAA
+                          mes = parseInt(n.split("/")[1]);
+                        } else if (n.includes("-") && n.indexOf("-") === 4) {
+                          // Formato AAAA-MM-DD
+                          mes = parseInt(n.split("-")[1]);
+                        } else if (n.includes("-") && n.indexOf("-") !== 4) {
+                          // Formato DD-MM-AAAA
+                          mes = parseInt(n.split("-")[1]);
+                        } else return false;
                         return mes === anivMes;
                       }).sort((a, b) => {
-                        const diaA = parseInt(a.nascimento.split(/[-/]/)[a.nascimento.indexOf("-") === 4 ? 2 : 0]);
-                        const diaB = parseInt(b.nascimento.split(/[-/]/)[b.nascimento.indexOf("-") === 4 ? 2 : 0]);
-                        return diaA - diaB;
+                        const getDiaSort = n => {
+                          if (n.includes("/")) return parseInt(n.split("/")[0]);
+                          if (n.indexOf("-") === 4) return parseInt(n.split("-")[2]);
+                          return parseInt(n.split("-")[0]);
+                        };
+                        return getDiaSort(a.nascimento) - getDiaSort(b.nascimento);
                       });
-                      const getDia = n => { const p = n.split(/[-/]/); return n.indexOf("-") === 4 ? p[2] : p[0]; };
+                      const getDia = n => {
+                        if (n.includes("/")) return n.split("/")[0];
+                        if (n.indexOf("-") === 4) return n.split("-")[2];
+                        return n.split("-")[0];
+                      };
                       return (
                         <>
                           <select style={{ ...S.select, marginBottom: 16 }} value={anivMes} onChange={e => setAnivMes(parseInt(e.target.value))}>
