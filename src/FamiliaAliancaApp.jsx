@@ -3100,14 +3100,6 @@ export default function FamiliaAliancaApp() {
                           valor: parseFloat(novoDizimo.valor),
                           criadoEm: new Date().toISOString()
                         });
-                        // Também registra como lançamento financeiro
-                        await addDoc(collection(db, "lancamentos"), {
-                          tipo: "entrada", categoria: "Dízimo",
-                          descricao: `Dízimo — ${novoDizimo.membroNome}`,
-                          valor: parseFloat(novoDizimo.valor),
-                          data: novoDizimo.data,
-                          criadoEm: new Date().toISOString()
-                        });
                         setNovoDizimo({ membroNome: "", membroEmail: "", valor: "", data: new Date().toISOString().split("T")[0], formaPagamento: "pix" });
                         setBuscaDizimista("");
                         showToast("✅ Dízimo registrado!");
