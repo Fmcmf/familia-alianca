@@ -3409,8 +3409,8 @@ export default function FamiliaAliancaApp() {
                     {membrosView === "aniversariantes" && (() => {
                       const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
                       const aniversariantes = membros.filter(m => {
-                        if (!m.nascimento) return false;
-                        const n = m.nascimento.trim();
+                        if (!m.dataNascimento) return false;
+                        const n = m.dataNascimento.trim();
                         let mes;
                         if (n.includes("/")) {
                           // Formato DD/MM/AAAA
@@ -3429,7 +3429,7 @@ export default function FamiliaAliancaApp() {
                           if (n.indexOf("-") === 4) return parseInt(n.split("-")[2]);
                           return parseInt(n.split("-")[0]);
                         };
-                        return getDiaSort(a.nascimento) - getDiaSort(b.nascimento);
+                        return getDiaSort(a.dataNascimento) - getDiaSort(b.dataNascimento);
                       });
                       const getDia = n => {
                         if (n.includes("/")) return n.split("/")[0];
@@ -3456,7 +3456,7 @@ export default function FamiliaAliancaApp() {
                               {aniversariantes.map((m, i) => (
                                 <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 8 }}>
                                   <div style={{ width: 42, height: 42, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, flexDirection: "column" }}>
-                                    <div style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c", lineHeight: 1 }}>{getDia(m.nascimento)}</div>
+                                    <div style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c", lineHeight: 1 }}>{getDia(m.dataNascimento)}</div>
                                     <div style={{ fontSize: 9, color: T.textFaint, textTransform: "uppercase" }}>{MESES[anivMes - 1].slice(0, 3)}</div>
                                   </div>
                                   <div style={{ flex: 1 }}>
@@ -3471,7 +3471,7 @@ export default function FamiliaAliancaApp() {
                               ))}
                               <button style={{ ...S.saveBtn, marginTop: 8, background: "#1a56db" }} onClick={() => {
                                 const linhas = aniversariantes.map((m, i) =>
-                                  `${String(i + 1).padStart(2, "0")}. Dia ${getDia(m.nascimento).toString().padStart(2, "0")} — ${m.nome}${m.celular ? ` | ${m.celular}` : ""}`
+                                  `${String(i + 1).padStart(2, "0")}. Dia ${getDia(m.dataNascimento).toString().padStart(2, "0")} — ${m.nome}${m.celular ? ` | ${m.celular}` : ""}`
                                 ).join("\n");
                                 const rel = ["═".repeat(55), `   ANIVERSARIANTES — ${MESES[anivMes - 1].toUpperCase()}`, "   IGREJA FAMÍLIA ALIANÇA", "═".repeat(55), `   Total: ${aniversariantes.length} aniversariante(s)`, `   Gerado em: ${new Date().toLocaleDateString("pt-BR")}`, "─".repeat(55), linhas, "═".repeat(55)].join("\n");
                                 const blob = new Blob([rel], { type: "text/plain;charset=utf-8" });
