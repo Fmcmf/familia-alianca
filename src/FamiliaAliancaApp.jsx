@@ -292,6 +292,8 @@ export default function FamiliaAliancaApp() {
   const [estudoAberto, setEstudoAberto] = useState(null);
   const [membroSelecionado, setMembroSelecionado] = useState(null);
   const [buscaMembro, setBuscaMembro] = useState("");
+  const [anivMes, setAnivMes] = useState(new Date().getMonth() + 1);
+  const [membrosView, setMembrosView] = useState("lista"); // lista | aniversariantes
   const [lancamentos, setLancamentos] = useState([]);
   const [novoLancamento, setNovoLancamento] = useState({ tipo: "entrada", categoria: "Dízimo", descricao: "", valor: "", data: new Date().toISOString().split("T")[0] });
   const [finPeriodo, setFinPeriodo] = useState(new Date().toISOString().slice(0, 7));
@@ -3393,6 +3395,81 @@ export default function FamiliaAliancaApp() {
                   </div>
                 ) : (
                   <div>
+                    {/* Seletor de view */}
+                    <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                      {[{ id: "lista", label: "👥 Membros" }, { id: "aniversariantes", label: "🎂 Aniversariantes" }].map(v => (
+                        <button key={v.id} onClick={() => setMembrosView(v.id)}
+                          style={{ flex: 1, padding: "9px 0", border: `1px solid ${membrosView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: membrosView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: membrosView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: membrosView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                          {v.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* ── ANIVERSARIANTES ── */}
+                    {membrosView === "aniversariantes" && (() => {
+                      const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+                      const aniversariantes = membros.filter(m => {
+                        if (!m.nascimento) return false;
+                        const p = m.nascimento.split(/[-/]/);
+                        const mes = m.nascimento.includes("-") && m.nascimento.indexOf("-") === 4 ? parseInt(p[1]) : parseInt(p[1]);
+                        return mes === anivMes;
+                      }).sort((a, b) => {
+                        const diaA = parseInt(a.nascimento.split(/[-/]/)[a.nascimento.indexOf("-") === 4 ? 2 : 0]);
+                        const diaB = parseInt(b.nascimento.split(/[-/]/)[b.nascimento.indexOf("-") === 4 ? 2 : 0]);
+                        return diaA - diaB;
+                      });
+                      const getDia = n => { const p = n.split(/[-/]/); return n.indexOf("-") === 4 ? p[2] : p[0]; };
+                      return (
+                        <>
+                          <select style={{ ...S.select, marginBottom: 16 }} value={anivMes} onChange={e => setAnivMes(parseInt(e.target.value))}>
+                            {MESES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+                          </select>
+                          {aniversariantes.length === 0 ? (
+                            <div style={{ textAlign: "center", padding: "32px 0" }}>
+                              <div style={{ fontSize: 36, marginBottom: 10 }}>🎂</div>
+                              <div style={{ fontSize: 13, color: T.textSub }}>Nenhum aniversariante em {MESES[anivMes - 1]}</div>
+                              <div style={{ fontSize: 12, color: T.textFaint, marginTop: 6 }}>Verifique se os membros têm data de nascimento cadastrada</div>
+                            </div>
+                          ) : (
+                            <>
+                              <div style={{ background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 12, padding: "12px 16px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ fontSize: 13, color: T.textSub }}>🎂 {MESES[anivMes - 1]}</span>
+                                <span style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c" }}>{aniversariantes.length} aniversariante(s)</span>
+                              </div>
+                              {aniversariantes.map((m, i) => (
+                                <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 8 }}>
+                                  <div style={{ width: 42, height: 42, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, flexDirection: "column" }}>
+                                    <div style={{ fontSize: 14, fontWeight: "bold", color: "#c9a84c", lineHeight: 1 }}>{getDia(m.nascimento)}</div>
+                                    <div style={{ fontSize: 9, color: T.textFaint, textTransform: "uppercase" }}>{MESES[anivMes - 1].slice(0, 3)}</div>
+                                  </div>
+                                  <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                                    {m.celular && <div style={{ fontSize: 12, color: T.textSub }}>📱 {m.celular}</div>}
+                                  </div>
+                                  {m.celular && (
+                                    <button onClick={() => window.open(`https://wa.me/55${m.celular.replace(/\D/g, "")}?text=Feliz%20Anivers%C3%A1rio%20${encodeURIComponent(m.nome.split(" ")[0])}!%20%F0%9F%8E%82%20Que%20Deus%20te%20aben%C3%A7oe!`, "_blank")}
+                                      style={{ background: "#25d366", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>💬</button>
+                                  )}
+                                </div>
+                              ))}
+                              <button style={{ ...S.saveBtn, marginTop: 8, background: "#1a56db" }} onClick={() => {
+                                const linhas = aniversariantes.map((m, i) =>
+                                  `${String(i + 1).padStart(2, "0")}. Dia ${getDia(m.nascimento).toString().padStart(2, "0")} — ${m.nome}${m.celular ? ` | ${m.celular}` : ""}`
+                                ).join("\n");
+                                const rel = ["═".repeat(55), `   ANIVERSARIANTES — ${MESES[anivMes - 1].toUpperCase()}`, "   IGREJA FAMÍLIA ALIANÇA", "═".repeat(55), `   Total: ${aniversariantes.length} aniversariante(s)`, `   Gerado em: ${new Date().toLocaleDateString("pt-BR")}`, "─".repeat(55), linhas, "═".repeat(55)].join("\n");
+                                const blob = new Blob([rel], { type: "text/plain;charset=utf-8" });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a"); a.href = url; a.download = `aniversariantes-${MESES[anivMes - 1]}.txt`; a.click();
+                                showToast("📄 Relatório baixado!");
+                              }}>📄 Baixar Relatório</button>
+                            </>
+                          )}
+                        </>
+                      );
+                    })()}
+
+                    {/* ── LISTA DE MEMBROS ── */}
+                    {membrosView === "lista" && (<>
                     <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Membros Cadastrados</div>
                     <div style={{ fontSize: 12, color: T.textSub, marginBottom: 12 }}>{membros.length} membro(s) — toque no nome para ver os detalhes</div>
 
@@ -3438,6 +3515,7 @@ export default function FamiliaAliancaApp() {
                         <span style={{ fontSize: 18, color: T.textSub }}>›</span>
                       </div>
                     ))}
+                    </>)}
                   </div>
                 )}
               </div>
