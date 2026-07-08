@@ -298,6 +298,7 @@ export default function FamiliaAliancaApp() {
   const [novoLancamento, setNovoLancamento] = useState({ tipo: "entrada", categoria: "Dízimo", descricao: "", valor: "", data: new Date().toISOString().split("T")[0] });
   const [finPeriodo, setFinPeriodo] = useState(new Date().toISOString().slice(0, 7));
   const [finView, setFinView] = useState("dashboard"); // dashboard | lancamentos | novo | dizimistas
+  const [relatorioVisivel, setRelatorioVisivel] = useState(null); // null | { titulo, conteudo }
   const [dizimistas, setDizimistas] = useState([]);
   const [novoDizimo, setNovoDizimo] = useState({ membroNome: "", membroEmail: "", valor: "", data: new Date().toISOString().split("T")[0], formaPagamento: "pix" });
   const [buscaDizimista, setBuscaDizimista] = useState("");
@@ -970,6 +971,36 @@ export default function FamiliaAliancaApp() {
   return (
     <div style={S.app}>
       <div style={S.bg} />
+
+      {/* ── MODAL RELATÓRIO ── */}
+      {relatorioVisivel && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(0,0,0,.85)", display: "flex", flexDirection: "column", padding: "20px 16px" }}>
+          <div style={{ background: darkMode ? "#07112a" : "#fff", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "90vh", border: "1px solid rgba(201,168,76,.3)" }}>
+            {/* Header */}
+            <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{relatorioVisivel.titulo}</div>
+              <button onClick={() => setRelatorioVisivel(null)}
+                style={{ background: "rgba(0,0,0,.2)", border: "none", borderRadius: 20, width: 28, height: 28, fontSize: 14, cursor: "pointer", color: "#080810", fontWeight: "bold" }}>✕</button>
+            </div>
+            {/* Conteúdo */}
+            <div style={{ overflowY: "auto", padding: "16px", flex: 1 }}>
+              <pre style={{ fontSize: 11, color: T.text, lineHeight: 1.7, whiteSpace: "pre-wrap", fontFamily: "monospace", margin: 0 }}>
+                {relatorioVisivel.conteudo}
+              </pre>
+            </div>
+            {/* Footer */}
+            <div style={{ padding: "12px 16px", borderTop: `1px solid ${T.cardBorder}`, display: "flex", gap: 8 }}>
+              <div style={{ fontSize: 11, color: T.textFaint, flex: 1, alignSelf: "center" }}>
+                Gerado em {new Date().toLocaleDateString("pt-BR")}
+              </div>
+              <button onClick={() => setRelatorioVisivel(null)}
+                style={{ padding: "8px 20px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, color: T.textSub, fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <style>{`
         * { box-sizing: border-box; }
         html { font-size: 18px; }
@@ -2947,19 +2978,30 @@ export default function FamiliaAliancaApp() {
                         </div>
                       )}
 
-                      {/* Botão PDF */}
+                      {/* Botões Relatório */}
                       {lancPeriodo.length > 0 && (
-                        <button style={{ ...S.saveBtn, marginTop: 16, background: "#1a56db" }} onClick={() => {
-                          const linhas = lancPeriodo.map(l =>
-                            `${l.data} | ${l.tipo === "entrada" ? "ENTRADA" : "SAÍDA"} | ${l.categoria} | ${l.descricao || "-"} | R$ ${parseFloat(l.valor).toFixed(2)}`
-                          ).join("\n");
-                          const conteudo = `RELATÓRIO FINANCEIRO — FAMÍLIA ALIANÇA\nPeríodo: ${finPeriodo}\n\nENTRADAS: ${fmtVal(totalEntrada)}\nSAÍDAS: ${fmtVal(totalSaida)}\nSALDO: ${fmtVal(saldo)}\n\n${"─".repeat(60)}\nDATA       | TIPO    | CATEGORIA | DESCRIÇÃO | VALOR\n${"─".repeat(60)}\n${linhas}\n${"─".repeat(60)}\nGerado em: ${new Date().toLocaleDateString("pt-BR")}`;
-                          const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement("a");
-                          a.href = url; a.download = `financeiro-${finPeriodo}.txt`; a.click();
-                          showToast("📄 Relatório baixado!");
-                        }}>📄 Baixar Relatório</button>
+                        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                          <button style={{ ...S.saveBtn, flex: 1, background: "rgba(201,168,76,.15)", color: T.gold, border: "1px solid rgba(201,168,76,.3)" }} onClick={() => {
+                            const linhas = lancPeriodo.map(l =>
+                              `${l.data} | ${l.tipo === "entrada" ? "ENTRADA" : "SAÍDA  "} | ${(l.categoria || "").padEnd(22)} | ${(l.descricao || "-").padEnd(25)} | R$ ${parseFloat(l.valor).toFixed(2)}`
+                            ).join("\n");
+                            setRelatorioVisivel({
+                              titulo: `Relatório Financeiro — ${finPeriodo}`,
+                              conteudo: `ENTRADAS: ${fmtVal(totalEntrada)}\nSAÍDAS:   ${fmtVal(totalSaida)}\nSALDO:    ${fmtVal(saldo)}\n\n${"─".repeat(50)}\nDATA       | TIPO    | CATEGORIA              | DESCRIÇÃO                 | VALOR\n${"─".repeat(50)}\n${linhas}\n${"─".repeat(50)}`
+                            });
+                          }}>👁️ Visualizar</button>
+                          <button style={{ ...S.saveBtn, flex: 1, background: "#1a56db" }} onClick={() => {
+                            const linhas = lancPeriodo.map(l =>
+                              `${l.data} | ${l.tipo === "entrada" ? "ENTRADA" : "SAÍDA"} | ${l.categoria} | ${l.descricao || "-"} | R$ ${parseFloat(l.valor).toFixed(2)}`
+                            ).join("\n");
+                            const conteudo = `RELATÓRIO FINANCEIRO — FAMÍLIA ALIANÇA\nPeríodo: ${finPeriodo}\n\nENTRADAS: ${fmtVal(totalEntrada)}\nSAÍDAS: ${fmtVal(totalSaida)}\nSALDO: ${fmtVal(saldo)}\n\n${"─".repeat(60)}\n${linhas}\n${"─".repeat(60)}\nGerado em: ${new Date().toLocaleDateString("pt-BR")}`;
+                            const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url; a.download = `financeiro-${finPeriodo}.txt`; a.click();
+                            showToast("📄 Relatório baixado!");
+                          }}>📥 Baixar</button>
+                        </div>
                       )}
                     </>
                   )}
@@ -3202,39 +3244,29 @@ export default function FamiliaAliancaApp() {
                                 </div>
                               ))}
 
-                              {/* Botão Relatório */}
-                              <button style={{ ...S.saveBtn, marginTop: 8, background: "#1a56db" }} onClick={() => {
-                                const linhas = filtrados.map((d, i) =>
-                                  `${String(i + 1).padStart(2, "0")}. ${d.membroNome.padEnd(30)} | ${new Date(d.data + "T12:00").toLocaleDateString("pt-BR")} | ${fmtPag(d.formaPagamento).padEnd(10)} | ${fmtV(parseFloat(d.valor))}`
-                                ).join("\n");
-
-                                const relatorio = [
-                                  "═".repeat(62),
-                                  "   RELATÓRIO DE DIZIMISTAS — IGREJA FAMÍLIA ALIANÇA",
-                                  "═".repeat(62),
-                                  `   Período: ${titulo}`,
-                                  `   Gerado em: ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`,
-                                  "─".repeat(62),
-                                  `   Total de dizimistas: ${filtrados.length}`,
-                                  `   Total arrecadado:    ${fmtV(totalPeriodo)}`,
-                                  `   Média por dizimista: ${fmtV(totalPeriodo / filtrados.length)}`,
-                                  "═".repeat(62),
-                                  "Nº  NOME                           DATA         PAGAMENTO  VALOR",
-                                  "─".repeat(62),
-                                  linhas,
-                                  "─".repeat(62),
-                                  `    TOTAL GERAL: ${fmtV(totalPeriodo)}`,
-                                  "═".repeat(62),
-                                ].join("\n");
-
-                                const blob = new Blob([relatorio], { type: "text/plain;charset=utf-8" });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement("a");
-                                a.href = url;
-                                a.download = `dizimistas-${titulo.replace(/\s/g, "-")}.txt`;
-                                a.click();
-                                showToast("📄 Relatório baixado!");
-                              }}>📄 Baixar Relatório</button>
+                              {/* Botões Relatório */}
+                              <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                                <button style={{ ...S.saveBtn, flex: 1, background: "rgba(201,168,76,.15)", color: T.gold, border: "1px solid rgba(201,168,76,.3)" }} onClick={() => {
+                                  const linhas = filtrados.map((d, i) =>
+                                    `${String(i + 1).padStart(2, "0")}. ${d.membroNome} | ${new Date(d.data + "T12:00").toLocaleDateString("pt-BR")} | ${fmtPag(d.formaPagamento)} | ${fmtV(parseFloat(d.valor))}`
+                                  ).join("\n");
+                                  setRelatorioVisivel({
+                                    titulo: `Dizimistas — ${titulo}`,
+                                    conteudo: `Total: ${filtrados.length} dizimista(s)\nTotal arrecadado: ${fmtV(totalPeriodo)}\nMédia: ${fmtV(totalPeriodo / filtrados.length)}\n\n${"─".repeat(55)}\n${linhas}\n${"─".repeat(55)}\nTOTAL: ${fmtV(totalPeriodo)}`
+                                  });
+                                }}>👁️ Visualizar</button>
+                                <button style={{ ...S.saveBtn, flex: 1, background: "#1a56db" }} onClick={() => {
+                                  const linhas = filtrados.map((d, i) =>
+                                    `${String(i + 1).padStart(2, "0")}. ${d.membroNome.padEnd(30)} | ${new Date(d.data + "T12:00").toLocaleDateString("pt-BR")} | ${fmtPag(d.formaPagamento).padEnd(10)} | ${fmtV(parseFloat(d.valor))}`
+                                  ).join("\n");
+                                  const relatorio = ["═".repeat(62), "   RELATÓRIO DE DIZIMISTAS — IGREJA FAMÍLIA ALIANÇA", `   Período: ${titulo}`, `   Gerado em: ${new Date().toLocaleDateString("pt-BR")}`, "─".repeat(62), `   Total: ${filtrados.length} dizimista(s)`, `   Total arrecadado: ${fmtV(totalPeriodo)}`, "═".repeat(62), linhas, "═".repeat(62), `   TOTAL GERAL: ${fmtV(totalPeriodo)}`, "═".repeat(62)].join("\n");
+                                  const blob = new Blob([relatorio], { type: "text/plain;charset=utf-8" });
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement("a");
+                                  a.href = url; a.download = `dizimistas-${titulo.replace(/\s/g, "-")}.txt`; a.click();
+                                  showToast("📄 Relatório baixado!");
+                                }}>📥 Baixar</button>
+                              </div>
                             </>
                           );
                         })()}
@@ -3461,16 +3493,27 @@ export default function FamiliaAliancaApp() {
                                   )}
                                 </div>
                               ))}
-                              <button style={{ ...S.saveBtn, marginTop: 8, background: "#1a56db" }} onClick={() => {
-                                const linhas = aniversariantes.map((m, i) =>
-                                  `${String(i + 1).padStart(2, "0")}. Dia ${getDia(m.dataNascimento).toString().padStart(2, "0")} — ${m.nome}${m.celular ? ` | ${m.celular}` : ""}`
-                                ).join("\n");
-                                const rel = ["═".repeat(55), `   ANIVERSARIANTES — ${MESES[anivMes - 1].toUpperCase()}`, "   IGREJA FAMÍLIA ALIANÇA", "═".repeat(55), `   Total: ${aniversariantes.length} aniversariante(s)`, `   Gerado em: ${new Date().toLocaleDateString("pt-BR")}`, "─".repeat(55), linhas, "═".repeat(55)].join("\n");
-                                const blob = new Blob([rel], { type: "text/plain;charset=utf-8" });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement("a"); a.href = url; a.download = `aniversariantes-${MESES[anivMes - 1]}.txt`; a.click();
-                                showToast("📄 Relatório baixado!");
-                              }}>📄 Baixar Relatório</button>
+                              <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                                <button style={{ ...S.saveBtn, flex: 1, background: "rgba(201,168,76,.15)", color: T.gold, border: "1px solid rgba(201,168,76,.3)" }} onClick={() => {
+                                  const linhas = aniversariantes.map((m, i) =>
+                                    `${String(i + 1).padStart(2, "0")}. Dia ${getDia(m.dataNascimento).toString().padStart(2, "0")} — ${m.nome}${m.celular ? ` | ${m.celular}` : ""}`
+                                  ).join("\n");
+                                  setRelatorioVisivel({
+                                    titulo: `Aniversariantes — ${MESES[anivMes - 1]}`,
+                                    conteudo: `Total: ${aniversariantes.length} aniversariante(s)\n\n${"─".repeat(50)}\n${linhas}\n${"─".repeat(50)}`
+                                  });
+                                }}>👁️ Visualizar</button>
+                                <button style={{ ...S.saveBtn, flex: 1, background: "#1a56db" }} onClick={() => {
+                                  const linhas = aniversariantes.map((m, i) =>
+                                    `${String(i + 1).padStart(2, "0")}. Dia ${getDia(m.dataNascimento).toString().padStart(2, "0")} — ${m.nome}${m.celular ? ` | ${m.celular}` : ""}`
+                                  ).join("\n");
+                                  const rel = ["═".repeat(55), `   ANIVERSARIANTES — ${MESES[anivMes - 1].toUpperCase()}`, "   IGREJA FAMÍLIA ALIANÇA", "═".repeat(55), `   Total: ${aniversariantes.length} aniversariante(s)`, `   Gerado em: ${new Date().toLocaleDateString("pt-BR")}`, "─".repeat(55), linhas, "═".repeat(55)].join("\n");
+                                  const blob = new Blob([rel], { type: "text/plain;charset=utf-8" });
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement("a"); a.href = url; a.download = `aniversariantes-${MESES[anivMes - 1]}.txt`; a.click();
+                                  showToast("📄 Relatório baixado!");
+                                }}>📥 Baixar</button>
+                              </div>
                             </>
                           )}
                         </>
