@@ -295,7 +295,12 @@ export default function FamiliaAliancaApp() {
   const [lancamentos, setLancamentos] = useState([]);
   const [novoLancamento, setNovoLancamento] = useState({ tipo: "entrada", categoria: "Dízimo", descricao: "", valor: "", data: new Date().toISOString().split("T")[0] });
   const [finPeriodo, setFinPeriodo] = useState(new Date().toISOString().slice(0, 7));
-  const [finView, setFinView] = useState("dashboard"); // dashboard | lancamentos | novo
+  const [finView, setFinView] = useState("dashboard"); // dashboard | lancamentos | novo | dizimistas
+  const [dizimistas, setDizimistas] = useState([]);
+  const [novoDizimo, setNovoDizimo] = useState({ membroNome: "", membroEmail: "", valor: "", data: new Date().toISOString().split("T")[0], formaPagamento: "pix" });
+  const [buscaDizimista, setBuscaDizimista] = useState("");
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+  const [dizimoPeriodo, setDizimoPeriodo] = useState(new Date().toISOString().slice(0, 7));
   const [estudoNivel, setEstudoNivel] = useState("iniciante");
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
@@ -517,6 +522,13 @@ export default function FamiliaAliancaApp() {
       setLancamentos(lista);
     });
 
+    // Dizimistas
+    const unsubDizimistas = onSnapshot(collection(db, "dizimistas"), (snap) => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => b.data.localeCompare(a.data));
+      setDizimistas(lista);
+    });
+
     const unsubBannerJejum = onSnapshot(doc(db, "config", "bannerJejum"), (snap) => {
       if (snap.exists()) setBannerJejum(snap.data());
     });
@@ -562,7 +574,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
       clearInterval(heartbeat);
       removerPresenca();
       window.removeEventListener("beforeunload", removerPresenca);
@@ -2862,10 +2874,10 @@ export default function FamiliaAliancaApp() {
               return (
                 <div style={{ padding: "0 16px" }}>
                   {/* Seletor de view */}
-                  <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                    {[{ id: "dashboard", label: "📊 Resumo" }, { id: "lancamentos", label: "📋 Lançamentos" }, { id: "novo", label: "➕ Novo" }].map(v => (
+                  <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", scrollbarWidth: "none" }}>
+                    {[{ id: "dashboard", label: "📊 Resumo" }, { id: "lancamentos", label: "📋 Lançamentos" }, { id: "novo", label: "➕ Novo" }, { id: "dizimistas", label: "🙏 Dizimistas" }].map(v => (
                       <button key={v.id} onClick={() => setFinView(v.id)}
-                        style={{ flex: 1, padding: "8px 0", border: `1px solid ${finView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: finView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: finView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: finView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                        style={{ flexShrink: 0, padding: "8px 14px", border: `1px solid ${finView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: finView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: finView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: finView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                         {v.label}
                       </button>
                     ))}
@@ -3023,6 +3035,123 @@ export default function FamiliaAliancaApp() {
                         setFinView("lancamentos");
                         showToast("✅ Lançamento registrado!");
                       }}>💰 Registrar Lançamento</button>
+                    </>
+                  )}
+                  {/* ── DIZIMISTAS ── */}
+                  {finView === "dizimistas" && (
+                    <>
+                      <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>🙏 Registrar Dízimo</div>
+                      <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Cadastre o dízimo de um membro buscando pelo nome</div>
+
+                      {/* Busca de membro */}
+                      <label style={S.label}>Nome do Dizimista *</label>
+                      <div style={{ position: "relative", marginBottom: 0 }}>
+                        <input style={{ ...S.input, marginBottom: 0 }}
+                          placeholder="Digite o nome do membro..."
+                          value={buscaDizimista}
+                          onChange={e => { setBuscaDizimista(e.target.value); setMostrarSugestoes(true); setNovoDizimo({ ...novoDizimo, membroNome: e.target.value, membroEmail: "" }); }}
+                          onFocus={() => setMostrarSugestoes(true)} />
+                        {/* Sugestões */}
+                        {mostrarSugestoes && buscaDizimista.length > 1 && (
+                          <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: darkMode ? "#07112a" : "#fff", border: `1px solid ${T.cardBorder}`, borderRadius: 10, zIndex: 100, maxHeight: 180, overflowY: "auto", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+                            {membros.filter(m => m.nome?.toLowerCase().includes(buscaDizimista.toLowerCase())).slice(0, 6).map(m => (
+                              <div key={m.id} style={{ padding: "10px 14px", cursor: "pointer", borderBottom: `1px solid ${T.cardBorder}`, fontSize: 13, color: T.text }}
+                                onClick={() => { setNovoDizimo({ ...novoDizimo, membroNome: m.nome, membroEmail: m.email || "" }); setBuscaDizimista(m.nome); setMostrarSugestoes(false); }}>
+                                <div style={{ fontWeight: "bold" }}>{m.nome}</div>
+                                {m.email && <div style={{ fontSize: 11, color: T.textSub }}>{m.email}</div>}
+                              </div>
+                            ))}
+                            {membros.filter(m => m.nome?.toLowerCase().includes(buscaDizimista.toLowerCase())).length === 0 && (
+                              <div style={{ padding: "10px 14px", fontSize: 13, color: T.textSub }}>Nenhum membro encontrado</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <label style={S.label}>Valor (R$) *</label>
+                      <input type="number" step="0.01" placeholder="0,00" style={{ ...S.input, marginBottom: 0 }}
+                        value={novoDizimo.valor}
+                        onChange={e => setNovoDizimo({ ...novoDizimo, valor: e.target.value })} />
+
+                      <label style={S.label}>Data *</label>
+                      <input type="date" style={{ ...S.input, marginBottom: 0 }}
+                        value={novoDizimo.data}
+                        onChange={e => setNovoDizimo({ ...novoDizimo, data: e.target.value })} />
+
+                      <label style={S.label}>Forma de Pagamento</label>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 0 }}>
+                        {[{ id: "pix", label: "💠 PIX" }, { id: "cartao", label: "💳 Cartão" }, { id: "deposito", label: "🏦 Depósito" }, { id: "cheque", label: "📄 Cheque" }].map(f => (
+                          <button key={f.id} onClick={() => setNovoDizimo({ ...novoDizimo, formaPagamento: f.id })}
+                            style={{ padding: "10px 0", border: `1px solid ${novoDizimo.formaPagamento === f.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: novoDizimo.formaPagamento === f.id ? "rgba(201,168,76,.15)" : T.card, color: novoDizimo.formaPagamento === f.id ? "#c9a84c" : T.textSub, fontSize: 12, fontWeight: novoDizimo.formaPagamento === f.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button style={{ ...S.saveBtn, marginTop: 16 }} onClick={async () => {
+                        if (!novoDizimo.membroNome || !novoDizimo.valor || !novoDizimo.data) { showToast("⚠️ Preencha nome, valor e data!"); return; }
+                        await addDoc(collection(db, "dizimistas"), {
+                          ...novoDizimo,
+                          valor: parseFloat(novoDizimo.valor),
+                          criadoEm: new Date().toISOString()
+                        });
+                        // Também registra como lançamento financeiro
+                        await addDoc(collection(db, "lancamentos"), {
+                          tipo: "entrada", categoria: "Dízimo",
+                          descricao: `Dízimo — ${novoDizimo.membroNome}`,
+                          valor: parseFloat(novoDizimo.valor),
+                          data: novoDizimo.data,
+                          criadoEm: new Date().toISOString()
+                        });
+                        setNovoDizimo({ membroNome: "", membroEmail: "", valor: "", data: new Date().toISOString().split("T")[0], formaPagamento: "pix" });
+                        setBuscaDizimista("");
+                        showToast("✅ Dízimo registrado!");
+                      }}>🙏 Registrar Dízimo</button>
+
+                      {/* Lista de dizimistas do período */}
+                      <div style={{ marginTop: 24 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                          <div style={{ fontSize: 12, color: T.gold, letterSpacing: 2, textTransform: "uppercase", flex: 1 }}>Dízimos do período</div>
+                          <input type="month" value={dizimoPeriodo} onChange={e => setDizimoPeriodo(e.target.value)}
+                            style={{ ...S.input, marginBottom: 0, padding: "6px 10px", fontSize: 12, width: "auto" }} />
+                        </div>
+
+                        {dizimistas.filter(d => d.data?.startsWith(dizimoPeriodo)).length === 0 ? (
+                          <div style={{ textAlign: "center", padding: "20px 0", color: T.textSub, fontSize: 13 }}>Nenhum dízimo neste período</div>
+                        ) : (
+                          <>
+                            {/* Total do período */}
+                            <div style={{ background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 12, padding: "12px 14px", marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span style={{ fontSize: 12, color: T.textSub }}>{dizimistas.filter(d => d.data?.startsWith(dizimoPeriodo)).length} dizimista(s)</span>
+                              <span style={{ fontSize: 15, fontWeight: "bold", color: "#c9a84c" }}>
+                                R$ {dizimistas.filter(d => d.data?.startsWith(dizimoPeriodo)).reduce((s, d) => s + (parseFloat(d.valor) || 0), 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                            {dizimistas.filter(d => d.data?.startsWith(dizimoPeriodo)).map(d => (
+                              <div key={d.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 8 }}>
+                                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
+                                  {d.membroNome?.charAt(0).toUpperCase()}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{d.membroNome}</div>
+                                  <div style={{ fontSize: 11, color: T.textSub }}>
+                                    {new Date(d.data + "T12:00:00").toLocaleDateString("pt-BR")} • {d.formaPagamento === "pix" ? "💠 PIX" : d.formaPagamento === "cartao" ? "💳 Cartão" : d.formaPagamento === "deposito" ? "🏦 Depósito" : "📄 Cheque"}
+                                  </div>
+                                </div>
+                                <div style={{ fontSize: 14, fontWeight: "bold", color: "#22c55e" }}>
+                                  R$ {parseFloat(d.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                                </div>
+                                <button style={S.delBtn} onClick={async () => {
+                                  if (window.confirm("Excluir este dízimo?")) {
+                                    await deleteDoc(doc(db, "dizimistas", d.id));
+                                    showToast("🗑️ Removido!");
+                                  }
+                                }}>🗑️</button>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                      </div>
                     </>
                   )}
                 </div>
