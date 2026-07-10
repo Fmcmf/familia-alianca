@@ -2749,7 +2749,7 @@ export default function FamiliaAliancaApp() {
             {/* Eventos do Ministério */}
             {adminTab === "eventos-min" && (() => {
               const membrosMin = membros.filter(m => m.ministerios?.includes(ministerioLider));
-              const CATEGORIAS = ["Vocal/Ministro(a)", "Soprano", "Contralto", "Tenor", "Backing Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado"];
+              const CATEGORIAS = ["Ministro(a)", "Soprano", "Contralto", "Tenor", "Backing Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado"];
 
               // Retorna membros que têm aquela função ou instrumento
               const membrosPorCategoria = (cat) => {
