@@ -275,6 +275,8 @@ export default function FamiliaAliancaApp() {
   const [mostrarAdicionar, setMostrarAdicionar] = useState(false);
   const [perfilMusical, setPerfilMusical] = useState({ funcoes: [], instrumentos: [] });
   const [membroParaAdicionar, setMembroParaAdicionar] = useState(null);
+  const [eventoModo, setEventoModo] = useState("novo"); // novo | buscar
+  const [buscaAgenda, setBuscaAgenda] = useState("");
   // Módulo Música
   const [musicaView, setMusicaView] = useState("escalas"); // escalas | musicas | cifras
   const [escalas, setEscalas] = useState([]);
@@ -2668,35 +2670,108 @@ export default function FamiliaAliancaApp() {
             {adminTab === "eventos-min" && (
               <div style={{ padding: "0 16px" }}>
                 <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>📅 Eventos — {ministerioLider}</div>
-                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Adicione eventos do seu ministério na agenda</div>
-                <label style={S.label}>Título do evento *</label>
-                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Ensaio do Ministério de Música"
-                  value={novoEvento.titulo} onChange={e => setNovoEvento({ ...novoEvento, titulo: e.target.value })} />
-                <label style={S.label}>Data *</label>
-                <input type="date" style={{ ...S.input, marginBottom: 0 }}
-                  value={novoEvento.data} onChange={e => setNovoEvento({ ...novoEvento, data: e.target.value })} />
-                <label style={S.label}>Horário</label>
-                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: 19h00"
-                  value={novoEvento.hora} onChange={e => setNovoEvento({ ...novoEvento, hora: e.target.value })} />
-                <label style={S.label}>Local</label>
-                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Sala de Ensaio"
-                  value={novoEvento.local} onChange={e => setNovoEvento({ ...novoEvento, local: e.target.value })} />
-                <button style={S.saveBtn} onClick={async () => {
-                  if (!novoEvento.titulo || !novoEvento.data) { showToast("⚠️ Preencha título e data!"); return; }
-                  await addDoc(collection(db, "agenda"), {
-                    ...novoEvento, tipo: "culto",
-                    ministerio: ministerioLider,
-                    criadoPor: user?.nome || "Líder"
-                  });
-                  setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto", descricao: "" });
-                  showToast("✅ Evento adicionado!");
-                }}>📅 Adicionar Evento</button>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>Crie um evento próprio ou vincule um evento da agenda da igreja</div>
+
+                {/* Seletor de modo */}
+                <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                  {[{ id: "novo", label: "➕ Novo Evento" }, { id: "buscar", label: "🔍 Buscar na Agenda" }].map(m => (
+                    <button key={m.id} onClick={() => setEventoModo(m.id)}
+                      style={{ flex: 1, padding: "9px 0", border: `1px solid ${eventoModo === m.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: eventoModo === m.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: eventoModo === m.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: eventoModo === m.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* ── NOVO EVENTO PRÓPRIO ── */}
+                {eventoModo === "novo" && (
+                  <>
+                    <label style={S.label}>Título do evento *</label>
+                    <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Ensaio do Ministério de Música"
+                      value={novoEvento.titulo} onChange={e => setNovoEvento({ ...novoEvento, titulo: e.target.value })} />
+                    <label style={S.label}>Data *</label>
+                    <input type="date" style={{ ...S.input, marginBottom: 0 }}
+                      value={novoEvento.data} onChange={e => setNovoEvento({ ...novoEvento, data: e.target.value })} />
+                    <label style={S.label}>Horário</label>
+                    <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: 19h00"
+                      value={novoEvento.hora} onChange={e => setNovoEvento({ ...novoEvento, hora: e.target.value })} />
+                    <label style={S.label}>Local</label>
+                    <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Sala de Ensaio"
+                      value={novoEvento.local} onChange={e => setNovoEvento({ ...novoEvento, local: e.target.value })} />
+                    <button style={S.saveBtn} onClick={async () => {
+                      if (!novoEvento.titulo || !novoEvento.data) { showToast("⚠️ Preencha título e data!"); return; }
+                      await addDoc(collection(db, "agenda"), {
+                        ...novoEvento, tipo: "culto",
+                        ministerio: ministerioLider,
+                        criadoPor: user?.nome || "Líder"
+                      });
+                      setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto", descricao: "" });
+                      showToast("✅ Evento adicionado!");
+                    }}>📅 Adicionar Evento</button>
+                  </>
+                )}
+
+                {/* ── BUSCAR NA AGENDA DA IGREJA ── */}
+                {eventoModo === "buscar" && (
+                  <>
+                    <div style={{ background: "rgba(59,130,246,.06)", border: "1px solid rgba(59,130,246,.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#60a5fa" }}>
+                      ℹ️ Selecione um evento da agenda da igreja para vincular ao seu ministério. Ele já aparecerá na tela principal do app.
+                    </div>
+                    <input style={{ ...S.input, marginBottom: 12 }}
+                      placeholder="🔍 Buscar evento por nome..."
+                      value={buscaAgenda}
+                      onChange={e => setBuscaAgenda(e.target.value)} />
+
+                    {/* Lista de eventos da agenda (excluindo os já do ministério) */}
+                    {agenda
+                      .filter(e => !e.ministerio || e.ministerio !== ministerioLider)
+                      .filter(e => !buscaAgenda.trim() || e.titulo?.toLowerCase().includes(buscaAgenda.toLowerCase()))
+                      .sort((a, b) => a.data?.localeCompare(b.data))
+                      .map(e => {
+                        const jaVinculado = e.ministeriosVinculados?.includes(ministerioLider);
+                        return (
+                          <div key={e.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${jaVinculado ? "rgba(34,197,94,.3)" : T.cardBorder}`, borderLeft: `3px solid ${jaVinculado ? "#22c55e" : "#c9a84c"}`, borderRadius: 12, marginBottom: 8 }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{e.titulo}</div>
+                              <div style={{ fontSize: 11, color: T.textSub }}>
+                                {new Date(e.data + "T12:00").toLocaleDateString("pt-BR")}
+                                {e.hora && ` • ${e.hora}`}
+                                {e.local && ` • ${e.local}`}
+                              </div>
+                            </div>
+                            {jaVinculado ? (
+                              <div style={{ display: "flex", gap: 6 }}>
+                                <span style={{ fontSize: 11, color: "#22c55e", background: "rgba(34,197,94,.1)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 20, padding: "4px 10px" }}>✓ Vinculado</span>
+                                <button style={S.delBtn} onClick={async () => {
+                                  const novosVinc = (e.ministeriosVinculados || []).filter(m => m !== ministerioLider);
+                                  await updateDoc(doc(db, "agenda", e.id), { ministeriosVinculados: novosVinc });
+                                  showToast("↩️ Vínculo removido!");
+                                }}>×</button>
+                              </div>
+                            ) : (
+                              <button onClick={async () => {
+                                const novosVinc = [...(e.ministeriosVinculados || []), ministerioLider];
+                                await updateDoc(doc(db, "agenda", e.id), { ministeriosVinculados: novosVinc });
+                                showToast(`✅ Evento vinculado ao ${ministerioLider}!`);
+                              }} style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif", flexShrink: 0 }}>
+                                + Vincular
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    {agenda.filter(e => !buscaAgenda.trim() || e.titulo?.toLowerCase().includes(buscaAgenda.toLowerCase())).length === 0 && (
+                      <div style={{ textAlign: "center", padding: "24px 0", color: T.textSub, fontSize: 13 }}>
+                        <div style={{ fontSize: 28, marginBottom: 8 }}>📅</div>Nenhum evento encontrado
+                      </div>
+                    )}
+                  </>
+                )}
 
                 {/* Lista de eventos criados pelo líder */}
                 {agenda.filter(e => e.ministerio === ministerioLider && !e.funcoes).length > 0 && (
                   <>
                     <div style={{ fontSize: 12, color: T.gold, marginTop: 24, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>
-                      Eventos do meu ministério ({agenda.filter(e => e.ministerio === ministerioLider && !e.funcoes).length})
+                      Eventos próprios ({agenda.filter(e => e.ministerio === ministerioLider && !e.funcoes).length})
                     </div>
                     {agenda
                       .filter(e => e.ministerio === ministerioLider && !e.funcoes)
@@ -2719,6 +2794,28 @@ export default function FamiliaAliancaApp() {
                           }}>🗑️</button>
                         </div>
                       ))}
+                  </>
+                )}
+
+                {/* Eventos vinculados da agenda da igreja */}
+                {agenda.filter(e => e.ministeriosVinculados?.includes(ministerioLider)).length > 0 && (
+                  <>
+                    <div style={{ fontSize: 12, color: "#60a5fa", marginTop: 16, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>
+                      🔗 Eventos vinculados ({agenda.filter(e => e.ministeriosVinculados?.includes(ministerioLider)).length})
+                    </div>
+                    {agenda.filter(e => e.ministeriosVinculados?.includes(ministerioLider)).map(e => (
+                      <div key={e.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 8, display: "flex", alignItems: "center", gap: 12, borderLeft: "3px solid #3b82f6" }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{e.titulo}</div>
+                          <div style={{ fontSize: 11, color: T.textSub }}>{new Date(e.data + "T12:00").toLocaleDateString("pt-BR")}{e.hora && ` • ${e.hora}`}</div>
+                        </div>
+                        <button style={{ ...S.delBtn, fontSize: 11 }} onClick={async () => {
+                          const novosVinc = (e.ministeriosVinculados || []).filter(m => m !== ministerioLider);
+                          await updateDoc(doc(db, "agenda", e.id), { ministeriosVinculados: novosVinc });
+                          showToast("↩️ Vínculo removido!");
+                        }}>× Desvincular</button>
+                      </div>
+                    ))}
                   </>
                 )}
               </div>
