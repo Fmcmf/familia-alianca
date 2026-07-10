@@ -2605,6 +2605,36 @@ export default function FamiliaAliancaApp() {
                   setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto", descricao: "" });
                   showToast("✅ Evento adicionado!");
                 }}>📅 Adicionar Evento</button>
+
+                {/* Lista de eventos criados pelo líder */}
+                {agenda.filter(e => e.ministerio === ministerioLider).length > 0 && (
+                  <>
+                    <div style={{ fontSize: 12, color: T.gold, marginTop: 24, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>
+                      Eventos do meu ministério ({agenda.filter(e => e.ministerio === ministerioLider).length})
+                    </div>
+                    {agenda
+                      .filter(e => e.ministerio === ministerioLider)
+                      .sort((a, b) => a.data?.localeCompare(b.data))
+                      .map(e => (
+                        <div key={e.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12 }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{e.titulo}</div>
+                            <div style={{ fontSize: 12, color: T.textSub }}>
+                              {new Date(e.data + "T12:00").toLocaleDateString("pt-BR")}
+                              {e.hora && ` • ${e.hora}`}
+                              {e.local && ` • ${e.local}`}
+                            </div>
+                          </div>
+                          <button style={S.delBtn} onClick={async () => {
+                            if (window.confirm("Excluir este evento?")) {
+                              await deleteDoc(doc(db, "agenda", e.id));
+                              showToast("🗑️ Evento removido!");
+                            }
+                          }}>🗑️</button>
+                        </div>
+                      ))}
+                  </>
+                )}
               </div>
             )}
 
