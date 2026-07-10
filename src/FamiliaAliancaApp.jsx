@@ -2827,7 +2827,6 @@ export default function FamiliaAliancaApp() {
 
             {/* ── MÓDULO MÚSICA ── */}
             {adminTab === "musica-min" && (() => {
-              const INSTRUMENTOS = ["Vocal","Violão","Guitarra","Baixo","Bateria","Teclado","Backing Vocal"];
               const membrosMin = membros.filter(m => m.ministerios?.includes(ministerioLider));
 
               return (
