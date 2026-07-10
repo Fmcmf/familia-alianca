@@ -273,6 +273,16 @@ export default function FamiliaAliancaApp() {
   const [ministerioLider, setMinisterioLider] = useState(null);
   const [buscaAddMin, setBuscaAddMin] = useState("");
   const [mostrarAdicionar, setMostrarAdicionar] = useState(false);
+  // Módulo Música
+  const [musicaView, setMusicaView] = useState("escalas"); // escalas | musicas | cifras
+  const [escalas, setEscalas] = useState([]);
+  const [musicas, setMusicas] = useState([]);
+  const [cifras, setCifras] = useState([]);
+  const [novaEscala, setNovaEscala] = useState({ data: "", hora: "", culto: "", funcoes: {} });
+  const [novaMusica, setNovaMusica] = useState({ titulo: "", artista: "", tom: "", link: "" });
+  const [novaCifra, setNovaCifra] = useState({ titulo: "", artista: "", tom: "", conteudo: "", link: "", arquivo: "" });
+  const [escalaSelecionada, setEscalaSelecionada] = useState(null);
+  const [musicaSelecionada, setMusicaSelecionada] = useState(null);
   const [showCompletarCadastro, setShowCompletarCadastro] = useState(false);
   const [completarForm, setCompletarForm] = useState({});
   const [completarPulado, setCompletarPulado] = useState(false);
@@ -565,6 +575,19 @@ export default function FamiliaAliancaApp() {
       setDizimistas(lista);
     });
 
+    // Módulo Música
+    const unsubEscalas = onSnapshot(collection(db, "escalas"), snap => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => b.data?.localeCompare(a.data));
+      setEscalas(lista);
+    });
+    const unsubMusicas = onSnapshot(collection(db, "musicas"), snap => {
+      setMusicas(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => a.titulo?.localeCompare(b.titulo)));
+    });
+    const unsubCifras = onSnapshot(collection(db, "cifras"), snap => {
+      setCifras(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => a.titulo?.localeCompare(b.titulo)));
+    });
+
     const unsubBannerJejum = onSnapshot(doc(db, "config", "bannerJejum"), (snap) => {
       if (snap.exists()) setBannerJejum(snap.data());
     });
@@ -610,7 +633,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
       clearInterval(heartbeat);
       removerPresenca();
       window.removeEventListener("beforeunload", removerPresenca);
@@ -2293,6 +2316,45 @@ export default function FamiliaAliancaApp() {
                             ))}
                           </>
                         )}
+                        {/* Próxima escala */}
+                        {(() => {
+                          const hoje = new Date().toISOString().split("T")[0];
+                          const proximaEscala = escalas
+                            .filter(e => e.ministerio === min && e.data >= hoje)
+                            .sort((a, b) => a.data.localeCompare(b.data))[0];
+                          if (!proximaEscala) return null;
+                          const meuInstrumento = Object.entries(proximaEscala.funcoes || {}).find(([, email]) => email === user?.email);
+                          return (
+                            <div style={{ marginTop: 10 }}>
+                              <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>📋 Próxima Escala</div>
+                              <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, padding: "12px 14px" }}>
+                                <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 2 }}>{proximaEscala.culto}</div>
+                                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 8 }}>{new Date(proximaEscala.data + "T12:00").toLocaleDateString("pt-BR")} {proximaEscala.hora && `• ${proximaEscala.hora}`}</div>
+                                {meuInstrumento ? (
+                                  <div style={{ background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.25)", borderRadius: 8, padding: "6px 12px", fontSize: 12, color: "#c9a84c", marginBottom: 8 }}>
+                                    🎵 Você está escalado como: <strong>{meuInstrumento[0]}</strong>
+                                  </div>
+                                ) : (
+                                  <div style={{ fontSize: 12, color: T.textFaint, marginBottom: 8 }}>Você não está escalado para este culto</div>
+                                )}
+                                {/* Músicas da escala */}
+                                {(proximaEscala.musicas || []).length > 0 && (
+                                  <>
+                                    <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>Músicas do culto:</div>
+                                    {(proximaEscala.musicas || []).map((mid, i) => {
+                                      const mus = musicas.find(x => x.id === mid);
+                                      return mus ? (
+                                        <div key={i} style={{ fontSize: 12, color: T.text, padding: "4px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
+                                          🎶 {mus.titulo} {mus.tom && <span style={{ color: T.textSub }}>• {mus.tom}</span>}
+                                        </div>
+                                      ) : null;
+                                    })}
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
                         {avisosMin.length === 0 && (
                           <div style={{ fontSize: 12, color: T.textFaint, textAlign: "center", padding: "8px 0" }}>Nenhum aviso do ministério ainda</div>
                         )}
@@ -2363,9 +2425,9 @@ export default function FamiliaAliancaApp() {
 
             {/* Tabs do líder */}
             <div style={S.adminTabs}>
-              {["membros-min", "avisos-min", "eventos-min"].map(t => (
+              {["membros-min", "avisos-min", "eventos-min", "musica-min"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ "membros-min": "👥 Membros", "avisos-min": "📢 Avisos", "eventos-min": "📅 Eventos" }[t]}
+                  {{ "membros-min": "👥 Membros", "avisos-min": "📢 Avisos", "eventos-min": "📅 Eventos", "musica-min": "🎵 Música" }[t]}
                 </button>
               ))}
             </div>
@@ -2545,10 +2607,264 @@ export default function FamiliaAliancaApp() {
                 }}>📅 Adicionar Evento</button>
               </div>
             )}
-          </div>
-        )}
 
-        {/* ══ ADMIN ══ */}
+            {/* ── MÓDULO MÚSICA ── */}
+            {adminTab === "musica-min" && (() => {
+              const INSTRUMENTOS = ["Vocal","Violão","Guitarra","Baixo","Bateria","Teclado","Backing Vocal"];
+              const membrosMin = membros.filter(m => m.ministerios?.includes(ministerioLider));
+
+              return (
+                <div style={{ padding: "0 16px" }}>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>🎵 Módulo Música</div>
+                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>Gerencie escalas, músicas e cifras do ministério</div>
+
+                  {/* Sub-nav */}
+                  <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", scrollbarWidth: "none" }}>
+                    {[{ id: "escalas", label: "📋 Escalas" }, { id: "musicas", label: "🎶 Músicas" }, { id: "cifras", label: "🎸 Cifras" }].map(v => (
+                      <button key={v.id} onClick={() => setMusicaView(v.id)}
+                        style={{ flexShrink: 0, padding: "8px 16px", border: `1px solid ${musicaView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: musicaView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: musicaView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: musicaView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                        {v.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* ── ESCALAS ── */}
+                  {musicaView === "escalas" && (
+                    <>
+                      {escalaSelecionada ? (
+                        /* Detalhe da escala */
+                        <div>
+                          <button onClick={() => setEscalaSelecionada(null)}
+                            style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 13, fontFamily: "Georgia,serif", marginBottom: 12 }}>← Voltar</button>
+                          <div style={{ background: T.card, border: "1px solid rgba(201,168,76,.3)", borderRadius: 16, overflow: "hidden", marginBottom: 14 }}>
+                            <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "8px 16px" }}>
+                              <div style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{escalaSelecionada.culto}</div>
+                              <div style={{ fontSize: 11, color: "#080810" }}>{escalaSelecionada.data} {escalaSelecionada.hora && `• ${escalaSelecionada.hora}`}</div>
+                            </div>
+                            <div style={{ padding: "14px 16px" }}>
+                              {INSTRUMENTOS.map(inst => {
+                                const membroId = escalaSelecionada.funcoes?.[inst];
+                                const membro = membros.find(m => m.email === membroId);
+                                return (
+                                  <div key={inst} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
+                                    <div style={{ width: 90, fontSize: 12, color: T.textSub, fontWeight: "bold" }}>{inst}</div>
+                                    <select style={{ ...S.select, marginBottom: 0, flex: 1, padding: "6px 10px", fontSize: 12 }}
+                                      value={membroId || ""}
+                                      onChange={async e => {
+                                        const novasFuncoes = { ...escalaSelecionada.funcoes, [inst]: e.target.value };
+                                        await updateDoc(doc(db, "escalas", escalaSelecionada.id), { funcoes: novasFuncoes });
+                                        setEscalaSelecionada({ ...escalaSelecionada, funcoes: novasFuncoes });
+                                      }}>
+                                      <option value="">— Não escalado —</option>
+                                      {membrosMin.map(m => <option key={m.email} value={m.email}>{m.nome}</option>)}
+                                    </select>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          {/* Músicas desta escala */}
+                          <div style={{ fontSize: 11, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 }}>Músicas desta escala</div>
+                          {(escalaSelecionada.musicas || []).length === 0 ? (
+                            <div style={{ fontSize: 12, color: T.textFaint, marginBottom: 10 }}>Nenhuma música adicionada</div>
+                          ) : (escalaSelecionada.musicas || []).map((mid, i) => {
+                            const m = musicas.find(x => x.id === mid);
+                            return m ? (
+                              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, marginBottom: 6 }}>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.titulo}</div>
+                                  <div style={{ fontSize: 11, color: T.textSub }}>{m.artista} {m.tom && `• Tom: ${m.tom}`}</div>
+                                </div>
+                                <button onClick={async () => {
+                                  const novas = (escalaSelecionada.musicas || []).filter(x => x !== mid);
+                                  await updateDoc(doc(db, "escalas", escalaSelecionada.id), { musicas: novas });
+                                  setEscalaSelecionada({ ...escalaSelecionada, musicas: novas });
+                                }} style={S.delBtn}>✕</button>
+                              </div>
+                            ) : null;
+                          })}
+                          <select style={{ ...S.select, marginBottom: 0 }} value="" onChange={async e => {
+                            if (!e.target.value) return;
+                            const novas = [...(escalaSelecionada.musicas || []), e.target.value];
+                            await updateDoc(doc(db, "escalas", escalaSelecionada.id), { musicas: novas });
+                            setEscalaSelecionada({ ...escalaSelecionada, musicas: novas });
+                          }}>
+                            <option value="">+ Adicionar música à escala...</option>
+                            {musicas.filter(m => !(escalaSelecionada.musicas || []).includes(m.id)).map(m => (
+                              <option key={m.id} value={m.id}>{m.titulo} — {m.artista}</option>
+                            ))}
+                          </select>
+                          <button style={{ ...S.delBtn, width: "100%", marginTop: 12, padding: "10px 0", fontSize: 13 }}
+                            onClick={async () => { if (window.confirm("Excluir esta escala?")) { await deleteDoc(doc(db, "escalas", escalaSelecionada.id)); setEscalaSelecionada(null); showToast("🗑️ Escala removida!"); } }}>
+                            🗑️ Excluir Escala
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Nova escala */}
+                          <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
+                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>➕ Nova Escala</div>
+                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="Nome do culto (Ex: Culto Domingo 10h)"
+                              value={novaEscala.culto} onChange={e => setNovaEscala({ ...novaEscala, culto: e.target.value })} />
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <input type="date" style={{ ...S.input, marginBottom: 0, flex: 1 }}
+                                value={novaEscala.data} onChange={e => setNovaEscala({ ...novaEscala, data: e.target.value })} />
+                              <input style={{ ...S.input, marginBottom: 0, flex: 1 }} placeholder="Horário"
+                                value={novaEscala.hora} onChange={e => setNovaEscala({ ...novaEscala, hora: e.target.value })} />
+                            </div>
+                            <button style={{ ...S.saveBtn, marginTop: 10 }} onClick={async () => {
+                              if (!novaEscala.culto || !novaEscala.data) { showToast("⚠️ Preencha o culto e a data!"); return; }
+                              const ref = await addDoc(collection(db, "escalas"), { ...novaEscala, ministerio: ministerioLider, funcoes: {}, musicas: [], criadoEm: new Date().toISOString() });
+                              setNovaEscala({ data: "", hora: "", culto: "", funcoes: {} });
+                              showToast("✅ Escala criada!");
+                            }}>📋 Criar Escala</button>
+                          </div>
+                          {/* Lista de escalas */}
+                          {escalas.filter(e => e.ministerio === ministerioLider).map(e => (
+                            <div key={e.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 8, cursor: "pointer" }}
+                              onClick={() => setEscalaSelecionada(e)}>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{e.culto}</div>
+                                <div style={{ fontSize: 12, color: T.textSub }}>{new Date(e.data + "T12:00").toLocaleDateString("pt-BR")} {e.hora && `• ${e.hora}`}</div>
+                                <div style={{ fontSize: 11, color: T.textFaint, marginTop: 2 }}>
+                                  {Object.values(e.funcoes || {}).filter(Boolean).length} escalado(s) • {(e.musicas || []).length} música(s)
+                                </div>
+                              </div>
+                              <div style={{ color: T.gold, fontSize: 20 }}>›</div>
+                            </div>
+                          ))}
+                          {escalas.filter(e => e.ministerio === ministerioLider).length === 0 && (
+                            <div style={{ textAlign: "center", padding: "24px 0", color: T.textSub, fontSize: 13 }}>
+                              <div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>Nenhuma escala criada ainda
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  {/* ── MÚSICAS ── */}
+                  {musicaView === "musicas" && (
+                    <>
+                      <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
+                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>➕ Nova Música</div>
+                        <input style={{ ...S.input, marginBottom: 8 }} placeholder="Título da música *"
+                          value={novaMusica.titulo} onChange={e => setNovaMusica({ ...novaMusica, titulo: e.target.value })} />
+                        <input style={{ ...S.input, marginBottom: 8 }} placeholder="Artista/Banda"
+                          value={novaMusica.artista} onChange={e => setNovaMusica({ ...novaMusica, artista: e.target.value })} />
+                        <input style={{ ...S.input, marginBottom: 8 }} placeholder="Tom (Ex: Dó, Ré, Mi...)"
+                          value={novaMusica.tom} onChange={e => setNovaMusica({ ...novaMusica, tom: e.target.value })} />
+                        <input style={{ ...S.input, marginBottom: 0 }} placeholder="Link (YouTube, Spotify...)"
+                          value={novaMusica.link} onChange={e => setNovaMusica({ ...novaMusica, link: e.target.value })} />
+                        <button style={{ ...S.saveBtn, marginTop: 10 }} onClick={async () => {
+                          if (!novaMusica.titulo) { showToast("⚠️ Informe o título!"); return; }
+                          await addDoc(collection(db, "musicas"), { ...novaMusica, ministerio: ministerioLider, criadoEm: new Date().toISOString() });
+                          setNovaMusica({ titulo: "", artista: "", tom: "", link: "" });
+                          showToast("✅ Música adicionada!");
+                        }}>🎶 Adicionar Música</button>
+                      </div>
+                      {musicas.filter(m => m.ministerio === ministerioLider).map(m => (
+                        <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 8 }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{m.titulo}</div>
+                            <div style={{ fontSize: 12, color: T.textSub }}>{m.artista} {m.tom && `• Tom: ${m.tom}`}</div>
+                          </div>
+                          <div style={{ display: "flex", gap: 6 }}>
+                            {m.link && <button onClick={() => window.open(m.link, "_blank")}
+                              style={{ background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, padding: "6px 10px", fontSize: 13, cursor: "pointer", color: T.gold }}>▶</button>}
+                            <button style={S.delBtn} onClick={async () => { if (window.confirm("Excluir música?")) { await deleteDoc(doc(db, "musicas", m.id)); showToast("🗑️ Removida!"); } }}>🗑️</button>
+                          </div>
+                        </div>
+                      ))}
+                      {musicas.filter(m => m.ministerio === ministerioLider).length === 0 && (
+                        <div style={{ textAlign: "center", padding: "24px 0", color: T.textSub, fontSize: 13 }}>
+                          <div style={{ fontSize: 32, marginBottom: 8 }}>🎶</div>Nenhuma música cadastrada
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* ── CIFRAS ── */}
+                  {musicaView === "cifras" && (
+                    <>
+                      {musicaSelecionada ? (
+                        <div>
+                          <button onClick={() => setMusicaSelecionada(null)}
+                            style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 13, fontFamily: "Georgia,serif", marginBottom: 12 }}>← Voltar</button>
+                          <div style={{ background: T.card, border: "1px solid rgba(201,168,76,.3)", borderRadius: 16, overflow: "hidden", marginBottom: 14 }}>
+                            <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "8px 16px" }}>
+                              <div style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{musicaSelecionada.titulo}</div>
+                              <div style={{ fontSize: 11, color: "#080810" }}>{musicaSelecionada.artista} {musicaSelecionada.tom && `• Tom: ${musicaSelecionada.tom}`}</div>
+                            </div>
+                            <div style={{ padding: "14px 16px" }}>
+                              {musicaSelecionada.link && (
+                                <button onClick={() => window.open(musicaSelecionada.link, "_blank")}
+                                  style={{ ...S.saveBtn, background: "#1a56db", marginBottom: 12 }}>🔗 Abrir Link</button>
+                              )}
+                              {musicaSelecionada.arquivo && (
+                                <button onClick={() => window.open(musicaSelecionada.arquivo, "_blank")}
+                                  style={{ ...S.saveBtn, background: "#dc2626", marginBottom: 12 }}>📄 Abrir PDF/Imagem</button>
+                              )}
+                              {musicaSelecionada.conteudo && (
+                                <pre style={{ fontSize: 12, color: T.text, lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 10, padding: "12px" }}>
+                                  {musicaSelecionada.conteudo}
+                                </pre>
+                              )}
+                            </div>
+                          </div>
+                          <button style={S.delBtn} onClick={async () => {
+                            if (window.confirm("Excluir cifra?")) { await deleteDoc(doc(db, "cifras", musicaSelecionada.id)); setMusicaSelecionada(null); showToast("🗑️ Removida!"); }
+                          }}>🗑️ Excluir Cifra</button>
+                        </div>
+                      ) : (
+                        <>
+                          <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
+                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>➕ Nova Cifra</div>
+                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="Título *"
+                              value={novaCifra.titulo} onChange={e => setNovaCifra({ ...novaCifra, titulo: e.target.value })} />
+                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="Artista"
+                              value={novaCifra.artista} onChange={e => setNovaCifra({ ...novaCifra, artista: e.target.value })} />
+                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="Tom (Ex: Ré, Mi, Sol...)"
+                              value={novaCifra.tom} onChange={e => setNovaCifra({ ...novaCifra, tom: e.target.value })} />
+                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="🔗 Link (Cifra Club, Ultimate Guitar...)"
+                              value={novaCifra.link} onChange={e => setNovaCifra({ ...novaCifra, link: e.target.value })} />
+                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="📄 URL do PDF ou imagem (ibb.co, drive...)"
+                              value={novaCifra.arquivo} onChange={e => setNovaCifra({ ...novaCifra, arquivo: e.target.value })} />
+                            <textarea style={{ ...S.textarea, minHeight: 120, fontFamily: "monospace", fontSize: 12 }}
+                              placeholder={"Ou digite a cifra aqui:\n\nAm         G\nQuando eu louvar..."}
+                              value={novaCifra.conteudo} onChange={e => setNovaCifra({ ...novaCifra, conteudo: e.target.value })} />
+                            <button style={S.saveBtn} onClick={async () => {
+                              if (!novaCifra.titulo) { showToast("⚠️ Informe o título!"); return; }
+                              await addDoc(collection(db, "cifras"), { ...novaCifra, ministerio: ministerioLider, criadoEm: new Date().toISOString() });
+                              setNovaCifra({ titulo: "", artista: "", tom: "", conteudo: "", link: "", arquivo: "" });
+                              showToast("✅ Cifra salva!");
+                            }}>🎸 Salvar Cifra</button>
+                          </div>
+                          {cifras.filter(c => c.ministerio === ministerioLider).map(c => (
+                            <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #8b5cf6", borderRadius: 12, marginBottom: 8, cursor: "pointer" }}
+                              onClick={() => setMusicaSelecionada(c)}>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{c.titulo}</div>
+                                <div style={{ fontSize: 12, color: T.textSub }}>{c.artista} {c.tom && `• Tom: ${c.tom}`}</div>
+                                <div style={{ fontSize: 11, color: T.textFaint, marginTop: 2 }}>
+                                  {c.link ? "🔗 Link" : ""} {c.arquivo ? "📄 PDF/Img" : ""} {c.conteudo ? "📝 Cifra" : ""}
+                                </div>
+                              </div>
+                              <div style={{ color: "#8b5cf6", fontSize: 20 }}>›</div>
+                            </div>
+                          ))}
+                          {cifras.filter(c => c.ministerio === ministerioLider).length === 0 && (
+                            <div style={{ textAlign: "center", padding: "24px 0", color: T.textSub, fontSize: 13 }}>
+                              <div style={{ fontSize: 32, marginBottom: 8 }}>🎸</div>Nenhuma cifra cadastrada
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })()}
         {tab === "admin" && isAdmin && (
           <div style={{ animation: "slideUp .4s ease" }}>
             <div style={S.adminHeader}>
