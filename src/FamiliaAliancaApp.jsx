@@ -284,10 +284,8 @@ export default function FamiliaAliancaApp() {
   const [escalas, setEscalas] = useState([]);
   const [musicas, setMusicas] = useState([]);
   const [cifras, setCifras] = useState([]);
-  const [novaEscala, setNovaEscala] = useState({ data: "", hora: "", culto: "", funcoes: {} });
   const [novaMusica, setNovaMusica] = useState({ titulo: "", artista: "", tom: "", link: "" });
   const [novaCifra, setNovaCifra] = useState({ titulo: "", artista: "", tom: "", conteudo: "", link: "", arquivo: "" });
-  const [escalaSelecionada, setEscalaSelecionada] = useState(null);
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
   const [showCompletarCadastro, setShowCompletarCadastro] = useState(false);
   const [completarForm, setCompletarForm] = useState({});
@@ -3037,7 +3035,6 @@ export default function FamiliaAliancaApp() {
 
             {/* ── MÓDULO MÚSICA ── */}
             {adminTab === "musica-min" && (() => {
-              const membrosMin = membros.filter(m => m.ministerios?.includes(ministerioLider));
 
               return (
                 <div style={{ padding: "0 16px" }}>
