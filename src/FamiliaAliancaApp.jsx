@@ -43,6 +43,27 @@ const MINISTERIOS = [
   { id: 7, nome: "MOVE — Jovens", icon: "🔥", desc: "Um movimento de jovens apaixonados por Deus, transformando vidas e gerações.", cor: "#f97316" },
 ];
 
+// Extrai ID do YouTube de qualquer formato de URL
+const getYouTubeId = (url) => {
+  if (!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+};
+
+// Extrai ID do Spotify de qualquer formato de URL
+const getSpotifyId = (url) => {
+  if (!url) return null;
+  const m = url.match(/spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
+  return m ? { type: m[1], id: m[2] } : null;
+};
+
 const ESTUDOS_FIXOS = [
   {
     id: "f1", nivel: "iniciante", fixo: true,
@@ -2386,18 +2407,26 @@ export default function FamiliaAliancaApp() {
                                       {musicasEscala.map((mus, i) => {
                                         const cifra = cifras.find(c => c.titulo?.toLowerCase() === mus.titulo?.toLowerCase() || c.artista?.toLowerCase() === mus.artista?.toLowerCase());
                                         return (
-                                          <div key={i} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
-                                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: cifra ? 8 : 0 }}>
+                                          <div key={i} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, marginBottom: 8, overflow: "hidden" }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", marginBottom: cifra ? 0 : 0 }}>
                                               <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>🎵</div>
                                               <div style={{ flex: 1 }}>
                                                 <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{mus.titulo}</div>
                                                 <div style={{ fontSize: 11, color: T.textSub }}>{mus.artista} {mus.tom && <span style={{ color: "#c9a84c" }}>• Tom: {mus.tom}</span>}</div>
                                               </div>
-                                              {mus.link && (
+                                              {mus.link && !getYouTubeId(mus.link) && !getSpotifyId(mus.link) && (
                                                 <button onClick={() => window.open(mus.link, "_blank")}
                                                   style={{ background: "#1a56db", border: "none", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#fff", cursor: "pointer" }}>▶</button>
                                               )}
                                             </div>
+                                            {/* YouTube embed */}
+                                            {getYouTubeId(mus.link) && (
+                                              <iframe width="100%" height="160" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />
+                                            )}
+                                            {/* Spotify embed */}
+                                            {getSpotifyId(mus.link) && (
+                                              <iframe src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />
+                                            )}
                                             {/* Cifra desta música */}
                                             {cifra && (
                                               <div style={{ borderTop: `1px solid ${T.cardBorder}`, paddingTop: 8 }}>
@@ -3062,8 +3091,19 @@ export default function FamiliaAliancaApp() {
                           value={novaMusica.artista} onChange={e => setNovaMusica({ ...novaMusica, artista: e.target.value })} />
                         <input style={{ ...S.input, marginBottom: 8 }} placeholder="Tom (Ex: Dó, Ré, Mi...)"
                           value={novaMusica.tom} onChange={e => setNovaMusica({ ...novaMusica, tom: e.target.value })} />
-                        <input style={{ ...S.input, marginBottom: 0 }} placeholder="Link (YouTube, Spotify...)"
+                        <input style={{ ...S.input, marginBottom: 0 }} placeholder="🔗 Link YouTube ou Spotify"
                           value={novaMusica.link} onChange={e => setNovaMusica({ ...novaMusica, link: e.target.value })} />
+                        {/* Preview do link */}
+                        {novaMusica.link && getYouTubeId(novaMusica.link) && (
+                          <div style={{ marginTop: 8, borderRadius: 10, overflow: "hidden" }}>
+                            <iframe width="100%" height="160" src={`https://www.youtube.com/embed/${getYouTubeId(novaMusica.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />
+                          </div>
+                        )}
+                        {novaMusica.link && getSpotifyId(novaMusica.link) && (
+                          <div style={{ marginTop: 8, borderRadius: 10, overflow: "hidden" }}>
+                            <iframe src={`https://open.spotify.com/embed/${getSpotifyId(novaMusica.link).type}/${getSpotifyId(novaMusica.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />
+                          </div>
+                        )}
                         <button style={{ ...S.saveBtn, marginTop: 10 }} onClick={async () => {
                           if (!novaMusica.titulo) { showToast("⚠️ Informe o título!"); return; }
                           await addDoc(collection(db, "musicas"), { ...novaMusica, ministerio: ministerioLider, criadoEm: new Date().toISOString() });
@@ -3071,19 +3111,38 @@ export default function FamiliaAliancaApp() {
                           showToast("✅ Música adicionada!");
                         }}>🎶 Adicionar Música</button>
                       </div>
-                      {musicas.filter(m => m.ministerio === ministerioLider).map(m => (
-                        <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 8 }}>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{m.titulo}</div>
-                            <div style={{ fontSize: 12, color: T.textSub }}>{m.artista} {m.tom && `• Tom: ${m.tom}`}</div>
+                      {musicas.filter(m => m.ministerio === ministerioLider).map(m => {
+                        const ytId = getYouTubeId(m.link);
+                        const spId = getSpotifyId(m.link);
+                        return (
+                          <div key={m.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 10, overflow: "hidden" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px" }}>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{m.titulo}</div>
+                                <div style={{ fontSize: 12, color: T.textSub }}>{m.artista} {m.tom && <span style={{ color: "#c9a84c" }}>• Tom: {m.tom}</span>}</div>
+                              </div>
+                              <button style={S.delBtn} onClick={async () => { if (window.confirm("Excluir música?")) { await deleteDoc(doc(db, "musicas", m.id)); showToast("🗑️ Removida!"); } }}>🗑️</button>
+                            </div>
+                            {/* YouTube embed */}
+                            {ytId && (
+                              <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${ytId}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />
+                            )}
+                            {/* Spotify embed */}
+                            {spId && (
+                              <iframe src={`https://open.spotify.com/embed/${spId.type}/${spId.id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />
+                            )}
+                            {/* Link externo se não for YT nem Spotify */}
+                            {m.link && !ytId && !spId && (
+                              <div style={{ padding: "0 14px 12px" }}>
+                                <button onClick={() => window.open(m.link, "_blank")}
+                                  style={{ width: "100%", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: T.gold, cursor: "pointer" }}>
+                                  🔗 Abrir Link
+                                </button>
+                              </div>
+                            )}
                           </div>
-                          <div style={{ display: "flex", gap: 6 }}>
-                            {m.link && <button onClick={() => window.open(m.link, "_blank")}
-                              style={{ background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, padding: "6px 10px", fontSize: 13, cursor: "pointer", color: T.gold }}>▶</button>}
-                            <button style={S.delBtn} onClick={async () => { if (window.confirm("Excluir música?")) { await deleteDoc(doc(db, "musicas", m.id)); showToast("🗑️ Removida!"); } }}>🗑️</button>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       {musicas.filter(m => m.ministerio === ministerioLider).length === 0 && (
                         <div style={{ textAlign: "center", padding: "24px 0", color: T.textSub, fontSize: 13 }}>
                           <div style={{ fontSize: 32, marginBottom: 8 }}>🎶</div>Nenhuma música cadastrada
@@ -3136,8 +3195,11 @@ export default function FamiliaAliancaApp() {
                               value={novaCifra.tom} onChange={e => setNovaCifra({ ...novaCifra, tom: e.target.value })} />
                             <input style={{ ...S.input, marginBottom: 8 }} placeholder="🔗 Link (Cifra Club, Ultimate Guitar...)"
                               value={novaCifra.link} onChange={e => setNovaCifra({ ...novaCifra, link: e.target.value })} />
-                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="📄 URL do PDF ou imagem (ibb.co, drive...)"
+                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="📄 URL do PDF (Google Drive, ibb.co, Dropbox...)"
                               value={novaCifra.arquivo} onChange={e => setNovaCifra({ ...novaCifra, arquivo: e.target.value })} />
+                            <div style={{ background: "rgba(201,168,76,.05)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 11, color: T.textFaint, lineHeight: 1.6 }}>
+                              💡 Para PDF: faça upload no Google Drive ou ibb.co e cole o link direto aqui.
+                            </div>
                             <textarea style={{ ...S.textarea, minHeight: 120, fontFamily: "monospace", fontSize: 12 }}
                               placeholder={"Ou digite a cifra aqui:\n\nAm         G\nQuando eu louvar..."}
                               value={novaCifra.conteudo} onChange={e => setNovaCifra({ ...novaCifra, conteudo: e.target.value })} />
