@@ -2329,36 +2329,112 @@ export default function FamiliaAliancaApp() {
                           if (!proximaEscala) return null;
                           const meuDadosEscala = proximaEscala.membrosEscalados?.[user?.email];
                           const meuInstrumento = meuDadosEscala || Object.entries(proximaEscala.funcoes || {}).find(([, email]) => email === user?.email);
+                          const musicasEscala = (proximaEscala.musicas || []).map(mid => musicas.find(x => x.id === mid)).filter(Boolean);
+                          const todosEscalados = Object.entries(proximaEscala.membrosEscalados || {});
+
                           return (
                             <div style={{ marginTop: 10 }}>
                               <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>📋 Próxima Escala</div>
-                              <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, padding: "12px 14px" }}>
-                                <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 2 }}>{proximaEscala.culto}</div>
-                                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 8 }}>{new Date(proximaEscala.data + "T12:00").toLocaleDateString("pt-BR")} {proximaEscala.hora && `• ${proximaEscala.hora}`}</div>
-                                {meuInstrumento ? (
-                                  <div style={{ background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.25)", borderRadius: 8, padding: "6px 12px", fontSize: 12, color: "#c9a84c", marginBottom: 8 }}>
-                                    🎵 Você está escalado
-                                    {meuDadosEscala?.funcoes?.length > 0 && <span> — {meuDadosEscala.funcoes.join(", ")}</span>}
-                                    {meuDadosEscala?.instrumentos?.length > 0 && <span> 🎸 {meuDadosEscala.instrumentos.join(", ")}</span>}
-                                    {meuDadosEscala?.obs && <div style={{ marginTop: 3, color: T.textSub }}>{meuDadosEscala.obs}</div>}
-                                  </div>
-                                ) : (
-                                  <div style={{ fontSize: 12, color: T.textFaint, marginBottom: 8 }}>Você não está escalado para este culto</div>
-                                )}
-                                {/* Músicas da escala */}
-                                {(proximaEscala.musicas || []).length > 0 && (
-                                  <>
-                                    <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>Músicas do culto:</div>
-                                    {(proximaEscala.musicas || []).map((mid, i) => {
-                                      const mus = musicas.find(x => x.id === mid);
-                                      return mus ? (
-                                        <div key={i} style={{ fontSize: 12, color: T.text, padding: "4px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
-                                          🎶 {mus.titulo} {mus.tom && <span style={{ color: T.textSub }}>• {mus.tom}</span>}
+
+                              {/* Header da escala */}
+                              <div style={{ background: darkMode ? "linear-gradient(135deg,#0a1a3a,#050d1f)" : "linear-gradient(135deg,#f5f0e8,#ede4d0)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 14, overflow: "hidden", marginBottom: 10 }}>
+                                <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "7px 14px" }}>
+                                  <div style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{proximaEscala.culto}</div>
+                                  <div style={{ fontSize: 11, color: "#080810" }}>{new Date(proximaEscala.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })} {proximaEscala.hora && `• ${proximaEscala.hora}`}</div>
+                                </div>
+                                <div style={{ padding: "12px 14px" }}>
+                                  {/* Status do membro */}
+                                  {meuInstrumento ? (
+                                    <div style={{ background: "rgba(34,197,94,.1)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 8, padding: "8px 12px", marginBottom: 10 }}>
+                                      <div style={{ fontSize: 12, fontWeight: "bold", color: "#22c55e", marginBottom: 3 }}>✅ Você está escalado!</div>
+                                      {meuDadosEscala?.funcoes?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🎤 {meuDadosEscala.funcoes.join(", ")}</div>}
+                                      {meuDadosEscala?.instrumentos?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🎸 {meuDadosEscala.instrumentos.join(", ")}</div>}
+                                      {meuDadosEscala?.obs && <div style={{ fontSize: 12, color: "#c9a84c", marginTop: 4, fontStyle: "italic" }}>"{meuDadosEscala.obs}"</div>}
+                                    </div>
+                                  ) : (
+                                    <div style={{ background: "rgba(150,150,150,.08)", border: `1px solid ${T.cardBorder}`, borderRadius: 8, padding: "8px 12px", marginBottom: 10, fontSize: 12, color: T.textFaint }}>
+                                      Você não está escalado para este culto
+                                    </div>
+                                  )}
+
+                                  {/* Todos os escalados */}
+                                  {todosEscalados.length > 0 && (
+                                    <div style={{ marginBottom: 12 }}>
+                                      <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>👥 Equipe escalada</div>
+                                      {todosEscalados.map(([email, dados]) => (
+                                        <div key={email} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
+                                          <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
+                                            {dados.nome?.charAt(0).toUpperCase()}
+                                          </div>
+                                          <div style={{ flex: 1 }}>
+                                            <div style={{ fontSize: 12, fontWeight: email === user?.email ? "bold" : "normal", color: email === user?.email ? "#c9a84c" : T.text }}>
+                                              {dados.nome} {email === user?.email && "(você)"}
+                                            </div>
+                                            <div style={{ fontSize: 10, color: T.textSub }}>
+                                              {dados.funcoes?.join(", ")} {dados.instrumentos?.length > 0 && `• 🎸 ${dados.instrumentos.join(", ")}`}
+                                            </div>
+                                          </div>
                                         </div>
-                                      ) : null;
-                                    })}
-                                  </>
-                                )}
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {/* Músicas da escala */}
+                                  {musicasEscala.length > 0 && (
+                                    <div style={{ marginBottom: 8 }}>
+                                      <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas do culto</div>
+                                      {musicasEscala.map((mus, i) => {
+                                        const cifra = cifras.find(c => c.titulo?.toLowerCase() === mus.titulo?.toLowerCase() || c.artista?.toLowerCase() === mus.artista?.toLowerCase());
+                                        return (
+                                          <div key={i} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: cifra ? 8 : 0 }}>
+                                              <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>🎵</div>
+                                              <div style={{ flex: 1 }}>
+                                                <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{mus.titulo}</div>
+                                                <div style={{ fontSize: 11, color: T.textSub }}>{mus.artista} {mus.tom && <span style={{ color: "#c9a84c" }}>• Tom: {mus.tom}</span>}</div>
+                                              </div>
+                                              {mus.link && (
+                                                <button onClick={() => window.open(mus.link, "_blank")}
+                                                  style={{ background: "#1a56db", border: "none", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#fff", cursor: "pointer" }}>▶</button>
+                                              )}
+                                            </div>
+                                            {/* Cifra desta música */}
+                                            {cifra && (
+                                              <div style={{ borderTop: `1px solid ${T.cardBorder}`, paddingTop: 8 }}>
+                                                <div style={{ fontSize: 11, color: "#8b5cf6", marginBottom: 6 }}>🎸 Cifra disponível</div>
+                                                <div style={{ display: "flex", gap: 6 }}>
+                                                  {cifra.link && (
+                                                    <button onClick={() => window.open(cifra.link, "_blank")}
+                                                      style={{ flex: 1, background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>
+                                                      🔗 Abrir Link
+                                                    </button>
+                                                  )}
+                                                  {cifra.arquivo && (
+                                                    <button onClick={() => window.open(cifra.arquivo, "_blank")}
+                                                      style={{ flex: 1, background: "rgba(220,38,38,.1)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#f87171", cursor: "pointer" }}>
+                                                      📄 PDF/Imagem
+                                                    </button>
+                                                  )}
+                                                  {cifra.conteudo && (
+                                                    <button onClick={() => setMusicaSelecionada(cifra)}
+                                                      style={{ flex: 1, background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>
+                                                      📝 Ver Cifra
+                                                    </button>
+                                                  )}
+                                                </div>
+                                                {musicaSelecionada?.id === cifra.id && (
+                                                  <pre style={{ marginTop: 8, fontSize: 11, color: T.text, lineHeight: 1.7, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 8, padding: "10px" }}>
+                                                    {cifra.conteudo}
+                                                  </pre>
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           );
