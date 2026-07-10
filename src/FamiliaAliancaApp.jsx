@@ -2327,7 +2327,8 @@ export default function FamiliaAliancaApp() {
                             .filter(e => e.ministerio === min && e.data >= hoje)
                             .sort((a, b) => a.data.localeCompare(b.data))[0];
                           if (!proximaEscala) return null;
-                          const meuInstrumento = Object.entries(proximaEscala.funcoes || {}).find(([, email]) => email === user?.email);
+                          const meuDadosEscala = proximaEscala.membrosEscalados?.[user?.email];
+                          const meuInstrumento = meuDadosEscala || Object.entries(proximaEscala.funcoes || {}).find(([, email]) => email === user?.email);
                           return (
                             <div style={{ marginTop: 10 }}>
                               <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>📋 Próxima Escala</div>
@@ -2336,7 +2337,10 @@ export default function FamiliaAliancaApp() {
                                 <div style={{ fontSize: 12, color: T.textSub, marginBottom: 8 }}>{new Date(proximaEscala.data + "T12:00").toLocaleDateString("pt-BR")} {proximaEscala.hora && `• ${proximaEscala.hora}`}</div>
                                 {meuInstrumento ? (
                                   <div style={{ background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.25)", borderRadius: 8, padding: "6px 12px", fontSize: 12, color: "#c9a84c", marginBottom: 8 }}>
-                                    🎵 Você está escalado como: <strong>{meuInstrumento[0]}</strong>
+                                    🎵 Você está escalado
+                                    {meuDadosEscala?.funcoes?.length > 0 && <span> — {meuDadosEscala.funcoes.join(", ")}</span>}
+                                    {meuDadosEscala?.instrumentos?.length > 0 && <span> 🎸 {meuDadosEscala.instrumentos.join(", ")}</span>}
+                                    {meuDadosEscala?.obs && <div style={{ marginTop: 3, color: T.textSub }}>{meuDadosEscala.obs}</div>}
                                   </div>
                                 ) : (
                                   <div style={{ fontSize: 12, color: T.textFaint, marginBottom: 8 }}>Você não está escalado para este culto</div>
@@ -2852,27 +2856,74 @@ export default function FamiliaAliancaApp() {
                           <div style={{ background: T.card, border: "1px solid rgba(201,168,76,.3)", borderRadius: 16, overflow: "hidden", marginBottom: 14 }}>
                             <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "8px 16px" }}>
                               <div style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{escalaSelecionada.culto}</div>
-                              <div style={{ fontSize: 11, color: "#080810" }}>{escalaSelecionada.data} {escalaSelecionada.hora && `• ${escalaSelecionada.hora}`}</div>
+                              <div style={{ fontSize: 11, color: "#080810" }}>{new Date(escalaSelecionada.data + "T12:00").toLocaleDateString("pt-BR")} {escalaSelecionada.hora && `• ${escalaSelecionada.hora}`}</div>
                             </div>
                             <div style={{ padding: "14px 16px" }}>
-                              {INSTRUMENTOS.map(inst => {
-                                const membroId = escalaSelecionada.funcoes?.[inst];
+
+                              {/* Membros do ministério com suas funções */}
+                              <div style={{ fontSize: 11, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>👥 Membros na Escala</div>
+                              {membrosMin.map(m => {
+                                const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
+                                const perfil = m[perfilKey];
+                                const escalado = escalaSelecionada.membrosEscalados?.[m.email];
+
                                 return (
-                                  <div key={inst} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
-                                    <div style={{ width: 90, fontSize: 12, color: T.textSub, fontWeight: "bold" }}>{inst}</div>
-                                    <select style={{ ...S.select, marginBottom: 0, flex: 1, padding: "6px 10px", fontSize: 12 }}
-                                      value={membroId || ""}
-                                      onChange={async e => {
-                                        const novasFuncoes = { ...escalaSelecionada.funcoes, [inst]: e.target.value };
-                                        await updateDoc(doc(db, "escalas", escalaSelecionada.id), { funcoes: novasFuncoes });
-                                        setEscalaSelecionada({ ...escalaSelecionada, funcoes: novasFuncoes });
-                                      }}>
-                                      <option value="">— Não escalado —</option>
-                                      {membrosMin.map(m => <option key={m.email} value={m.email}>{m.nome}</option>)}
-                                    </select>
+                                  <div key={m.email} style={{ padding: "10px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: escalado ? 6 : 0 }}>
+                                      <div style={{ width: 32, height: 32, borderRadius: "50%", background: escalado ? "rgba(34,197,94,.15)" : "rgba(201,168,76,.1)", border: `1px solid ${escalado ? "rgba(34,197,94,.4)" : "rgba(201,168,76,.25)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: escalado ? "#22c55e" : "#c9a84c", flexShrink: 0 }}>
+                                        {m.nome?.charAt(0).toUpperCase()}
+                                      </div>
+                                      <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                                        {perfil && (
+                                          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 3 }}>
+                                            {(perfil.funcoes || []).map(f => <span key={f} style={{ fontSize: 10, color: "#c9a84c", background: "rgba(201,168,76,.1)", borderRadius: 10, padding: "1px 6px" }}>🎤 {f}</span>)}
+                                            {(perfil.instrumentos || []).map(i => <span key={i} style={{ fontSize: 10, color: "#a78bfa", background: "rgba(139,92,246,.1)", borderRadius: 10, padding: "1px 6px" }}>🎸 {i}</span>)}
+                                          </div>
+                                        )}
+                                      </div>
+                                      {/* Toggle escalar */}
+                                      <div onClick={async () => {
+                                        const novos = { ...(escalaSelecionada.membrosEscalados || {}) };
+                                        if (escalado) delete novos[m.email];
+                                        else novos[m.email] = { nome: m.nome, funcoes: perfil?.funcoes || [], instrumentos: perfil?.instrumentos || [] };
+                                        await updateDoc(doc(db, "escalas", escalaSelecionada.id), { membrosEscalados: novos });
+                                        setEscalaSelecionada({ ...escalaSelecionada, membrosEscalados: novos });
+                                      }} style={{ width: 46, height: 26, borderRadius: 13, background: escalado ? "#22c55e" : "rgba(150,150,150,.3)", cursor: "pointer", position: "relative", transition: "background .2s", flexShrink: 0 }}>
+                                        <div style={{ position: "absolute", top: 3, left: escalado ? 23 : 3, width: 20, height: 20, borderRadius: "50%", background: "#fff", transition: "left .2s", boxShadow: "0 1px 4px rgba(0,0,0,.3)" }} />
+                                      </div>
+                                    </div>
+
+                                    {/* Função na escala quando escalado */}
+                                    {escalado && (
+                                      <div style={{ marginLeft: 42, marginTop: 4 }}>
+                                        <input style={{ ...S.input, marginBottom: 0, fontSize: 12, padding: "6px 10px" }}
+                                          placeholder="Observação (Ex: Ministrar no 1º louvor...)"
+                                          value={escalado.obs || ""}
+                                          onChange={async e => {
+                                            const novos = { ...escalaSelecionada.membrosEscalados, [m.email]: { ...escalado, obs: e.target.value } };
+                                            await updateDoc(doc(db, "escalas", escalaSelecionada.id), { membrosEscalados: novos });
+                                            setEscalaSelecionada({ ...escalaSelecionada, membrosEscalados: novos });
+                                          }} />
+                                      </div>
+                                    )}
                                   </div>
                                 );
                               })}
+
+                              {/* Resumo escalados */}
+                              {Object.keys(escalaSelecionada.membrosEscalados || {}).length > 0 && (
+                                <div style={{ background: "rgba(34,197,94,.06)", border: "1px solid rgba(34,197,94,.2)", borderRadius: 10, padding: "10px 12px", marginTop: 14 }}>
+                                  <div style={{ fontSize: 11, color: "#22c55e", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>✅ {Object.keys(escalaSelecionada.membrosEscalados).length} escalado(s)</div>
+                                  {Object.entries(escalaSelecionada.membrosEscalados).map(([email, dados]) => (
+                                    <div key={email} style={{ fontSize: 12, color: T.textSub, marginBottom: 3 }}>
+                                      • {dados.nome}
+                                      {dados.funcoes?.length > 0 && <span style={{ color: "#c9a84c" }}> — {dados.funcoes.join(", ")}</span>}
+                                      {dados.instrumentos?.length > 0 && <span style={{ color: "#a78bfa" }}> 🎸 {dados.instrumentos.join(", ")}</span>}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                           {/* Músicas desta escala */}
@@ -2916,8 +2967,24 @@ export default function FamiliaAliancaApp() {
                           {/* Nova escala */}
                           <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
                             <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>➕ Nova Escala</div>
-                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="Nome do culto (Ex: Culto Domingo 10h)"
-                              value={novaEscala.culto} onChange={e => setNovaEscala({ ...novaEscala, culto: e.target.value })} />
+
+                            {/* Vincular a evento existente ou criar nome próprio */}
+                            <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>Vincular a evento da agenda (opcional)</div>
+                            <select style={{ ...S.select, marginBottom: 8 }}
+                              value={novaEscala.eventoId || ""}
+                              onChange={e => {
+                                const ev = agenda.find(a => a.id === e.target.value);
+                                if (ev) setNovaEscala({ ...novaEscala, eventoId: ev.id, culto: ev.titulo, data: ev.data, hora: ev.hora || "" });
+                                else setNovaEscala({ ...novaEscala, eventoId: "", culto: "", data: "", hora: "" });
+                              }}>
+                              <option value="">— Ou preencha manualmente abaixo —</option>
+                              {agenda.sort((a, b) => a.data?.localeCompare(b.data)).map(ev => (
+                                <option key={ev.id} value={ev.id}>{ev.titulo} — {new Date(ev.data + "T12:00").toLocaleDateString("pt-BR")}</option>
+                              ))}
+                            </select>
+
+                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="Nome da escala (Ex: Culto Domingo 10h)"
+                              value={novaEscala.culto} onChange={e => setNovaEscala({ ...novaEscala, culto: e.target.value, eventoId: "" })} />
                             <div style={{ display: "flex", gap: 8 }}>
                               <input type="date" style={{ ...S.input, marginBottom: 0, flex: 1 }}
                                 value={novaEscala.data} onChange={e => setNovaEscala({ ...novaEscala, data: e.target.value })} />
@@ -2925,9 +2992,9 @@ export default function FamiliaAliancaApp() {
                                 value={novaEscala.hora} onChange={e => setNovaEscala({ ...novaEscala, hora: e.target.value })} />
                             </div>
                             <button style={{ ...S.saveBtn, marginTop: 10 }} onClick={async () => {
-                              if (!novaEscala.culto || !novaEscala.data) { showToast("⚠️ Preencha o culto e a data!"); return; }
-                              await addDoc(collection(db, "escalas"), { ...novaEscala, ministerio: ministerioLider, funcoes: {}, musicas: [], criadoEm: new Date().toISOString() });
-                              setNovaEscala({ data: "", hora: "", culto: "", funcoes: {} });
+                              if (!novaEscala.culto || !novaEscala.data) { showToast("⚠️ Preencha o nome e a data!"); return; }
+                              await addDoc(collection(db, "escalas"), { ...novaEscala, ministerio: ministerioLider, membrosEscalados: {}, musicas: [], criadoEm: new Date().toISOString() });
+                              setNovaEscala({ data: "", hora: "", culto: "", eventoId: "", funcoes: {} });
                               showToast("✅ Escala criada!");
                             }}>📋 Criar Escala</button>
                           </div>
@@ -2939,7 +3006,7 @@ export default function FamiliaAliancaApp() {
                                 <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{e.culto}</div>
                                 <div style={{ fontSize: 12, color: T.textSub }}>{new Date(e.data + "T12:00").toLocaleDateString("pt-BR")} {e.hora && `• ${e.hora}`}</div>
                                 <div style={{ fontSize: 11, color: T.textFaint, marginTop: 2 }}>
-                                  {Object.values(e.funcoes || {}).filter(Boolean).length} escalado(s) • {(e.musicas || []).length} música(s)
+                                  {Object.keys(e.membrosEscalados || e.funcoes || {}).filter(Boolean).length} escalado(s) • {(e.musicas || []).length} música(s)
                                 </div>
                               </div>
                               <div style={{ color: T.gold, fontSize: 20 }}>›</div>
