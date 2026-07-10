@@ -2928,10 +2928,43 @@ export default function FamiliaAliancaApp() {
             {adminTab === "lideres" && (
               <div style={{ padding: "0 16px" }}>
                 <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>🏛️ Gerenciar Líderes</div>
-                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 20 }}>Defina quais membros são líderes e qual ministério cada um gerencia</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Defina quais membros são líderes e qual ministério cada um gerencia</div>
 
-                {/* Lista de membros com toggle de líder */}
-                {membros.filter(m => !m.admin).map(m => (
+                {/* Campo de busca */}
+                <input style={{ ...S.input, marginBottom: 16 }}
+                  placeholder="🔍 Buscar membro por nome ou e-mail..."
+                  value={buscaMembro}
+                  onChange={e => setBuscaMembro(e.target.value)} />
+
+                {/* Líderes ativos no topo */}
+                {membros.filter(m => m.lider && !m.admin).length > 0 && (
+                  <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 12, padding: "12px 14px", marginBottom: 16 }}>
+                    <div style={{ fontSize: 11, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Líderes ativos ({membros.filter(m => m.lider && !m.admin).length})</div>
+                    {membros.filter(m => m.lider && m.ministerioLider && !m.admin).map(m => (
+                      <div key={m.id} style={{ fontSize: 12, color: T.textSub, marginBottom: 4, display: "flex", justifyContent: "space-between" }}>
+                        <span>{m.nome}</span>
+                        <span style={{ color: T.gold }}>{m.ministerioLider}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Contador */}
+                {buscaMembro.trim() && (
+                  <div style={{ fontSize: 11, color: T.textFaint, marginBottom: 10 }}>
+                    {membros.filter(m => !m.admin && (m.nome?.toLowerCase().includes(buscaMembro.toLowerCase()) || m.email?.toLowerCase().includes(buscaMembro.toLowerCase()))).length} resultado(s)
+                  </div>
+                )}
+
+                {/* Lista de membros */}
+                {membros
+                  .filter(m => !m.admin)
+                  .filter(m => !buscaMembro.trim() ||
+                    m.nome?.toLowerCase().includes(buscaMembro.toLowerCase()) ||
+                    m.email?.toLowerCase().includes(buscaMembro.toLowerCase())
+                  )
+                  .sort((a, b) => a.nome?.localeCompare(b.nome))
+                  .map(m => (
                   <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: m.lider ? 10 : 0 }}>
                       <div style={{ width: 38, height: 38, borderRadius: "50%", background: m.lider ? "rgba(201,168,76,.2)" : T.card, border: `1px solid ${m.lider ? "#c9a84c" : T.cardBorder}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: "bold", color: m.lider ? "#c9a84c" : T.textSub, flexShrink: 0 }}>
@@ -2979,19 +3012,6 @@ export default function FamiliaAliancaApp() {
                     )}
                   </div>
                 ))}
-
-                {/* Resumo de líderes */}
-                {membros.filter(m => m.lider).length > 0 && (
-                  <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 12, padding: "12px 14px", marginTop: 8 }}>
-                    <div style={{ fontSize: 11, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Líderes ativos ({membros.filter(m => m.lider).length})</div>
-                    {membros.filter(m => m.lider && m.ministerioLider).map(m => (
-                      <div key={m.id} style={{ fontSize: 12, color: T.textSub, marginBottom: 4, display: "flex", justifyContent: "space-between" }}>
-                        <span>{m.nome}</span>
-                        <span style={{ color: T.gold }}>{m.ministerioLider}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
 
