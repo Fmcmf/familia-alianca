@@ -271,6 +271,8 @@ export default function FamiliaAliancaApp() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLider, setIsLider] = useState(false);
   const [ministerioLider, setMinisterioLider] = useState(null);
+  const [buscaAddMin, setBuscaAddMin] = useState("");
+  const [mostrarAdicionar, setMostrarAdicionar] = useState(false);
   const [showCompletarCadastro, setShowCompletarCadastro] = useState(false);
   const [completarForm, setCompletarForm] = useState({});
   const [completarPulado, setCompletarPulado] = useState(false);
@@ -2285,8 +2287,6 @@ export default function FamiliaAliancaApp() {
             {adminTab === "membros-min" && (() => {
               const membrosMin = membros.filter(m => m.ministerios?.includes(ministerioLider));
               const membrosForaMin = membros.filter(m => !m.ministerios?.includes(ministerioLider) && !m.admin);
-              const [buscaAddMin, setBuscaAddMin] = React.useState("");
-              const [mostrarAdicionar, setMostrarAdicionar] = React.useState(false);
 
               const addMembro = async (m) => {
                 const mins = m.ministerios || [];
