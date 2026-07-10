@@ -2282,32 +2282,104 @@ export default function FamiliaAliancaApp() {
             </div>
 
             {/* Membros do Ministério */}
-            {adminTab === "membros-min" && (
-              <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>👥 Membros — {ministerioLider}</div>
-                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Membros cadastrados no seu ministério</div>
-                {membros.filter(m => m.ministerios?.includes(ministerioLider)).length === 0 ? (
-                  <div style={{ ...S.card, textAlign: "center", padding: "28px 0" }}>
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>👥</div>
-                    <div style={{ fontSize: 13, color: T.textSub }}>Nenhum membro neste ministério ainda</div>
+            {adminTab === "membros-min" && (() => {
+              const membrosMin = membros.filter(m => m.ministerios?.includes(ministerioLider));
+              const membrosForaMin = membros.filter(m => !m.ministerios?.includes(ministerioLider) && !m.admin);
+              const [buscaAddMin, setBuscaAddMin] = React.useState("");
+              const [mostrarAdicionar, setMostrarAdicionar] = React.useState(false);
+
+              const addMembro = async (m) => {
+                const mins = m.ministerios || [];
+                if (!mins.includes(ministerioLider)) {
+                  await updateDoc(doc(db, "membros", m.email), { ministerios: [...mins, ministerioLider] });
+                  showToast(`✅ ${m.nome} adicionado ao ministério!`);
+                }
+              };
+
+              const removerMembro = async (m) => {
+                const mins = (m.ministerios || []).filter(mn => mn !== ministerioLider);
+                await updateDoc(doc(db, "membros", m.email), { ministerios: mins });
+                showToast(`↩️ ${m.nome} removido do ministério`);
+              };
+
+              return (
+                <div style={{ padding: "0 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                    <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold }}>👥 Membros — {ministerioLider}</div>
+                    <span style={{ fontSize: 12, color: T.textSub }}>{membrosMin.length} membro(s)</span>
                   </div>
-                ) : membros.filter(m => m.ministerios?.includes(ministerioLider)).map(m => (
-                  <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>
-                      {m.nome?.charAt(0).toUpperCase()}
+                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Gerencie os membros do seu ministério</div>
+
+                  {/* Botão adicionar */}
+                  <button style={{ ...S.saveBtn, marginBottom: 16 }}
+                    onClick={() => setMostrarAdicionar(v => !v)}>
+                    {mostrarAdicionar ? "✕ Fechar busca" : "➕ Adicionar membro"}
+                  </button>
+
+                  {/* Busca para adicionar */}
+                  {mostrarAdicionar && (
+                    <div style={{ marginBottom: 16 }}>
+                      <input style={{ ...S.input, marginBottom: 8 }}
+                        placeholder="🔍 Buscar membro para adicionar..."
+                        value={buscaAddMin}
+                        onChange={e => setBuscaAddMin(e.target.value)} />
+                      {buscaAddMin.trim().length > 1 && (
+                        <div style={{ background: darkMode ? "#07112a" : "#fff", border: `1px solid ${T.cardBorder}`, borderRadius: 12, overflow: "hidden" }}>
+                          {membrosForaMin
+                            .filter(m => m.nome?.toLowerCase().includes(buscaAddMin.toLowerCase()) || m.email?.toLowerCase().includes(buscaAddMin.toLowerCase()))
+                            .slice(0, 8)
+                            .map(m => (
+                              <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${T.cardBorder}` }}>
+                                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
+                                  {m.nome?.charAt(0).toUpperCase()}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                                  <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
+                                </div>
+                                <button onClick={() => { addMembro(m); setBuscaAddMin(""); }}
+                                  style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                                  + Adicionar
+                                </button>
+                              </div>
+                            ))}
+                          {membrosForaMin.filter(m => m.nome?.toLowerCase().includes(buscaAddMin.toLowerCase())).length === 0 && (
+                            <div style={{ padding: "12px 14px", fontSize: 13, color: T.textSub }}>Nenhum membro encontrado</div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
-                      <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
+                  )}
+
+                  {/* Lista de membros do ministério */}
+                  {membrosMin.length === 0 ? (
+                    <div style={{ ...S.card, textAlign: "center", padding: "28px 0", marginLeft: 0, marginRight: 0 }}>
+                      <div style={{ fontSize: 32, marginBottom: 8 }}>👥</div>
+                      <div style={{ fontSize: 13, color: T.textSub }}>Nenhum membro neste ministério ainda</div>
+                      <div style={{ fontSize: 12, color: T.textFaint, marginTop: 4 }}>Use o botão acima para adicionar</div>
                     </div>
-                    {m.celular && (
-                      <button onClick={() => window.open(`https://wa.me/55${m.celular.replace(/\D/g, "")}`, "_blank")}
-                        style={{ background: "#25d366", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>💬</button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                  ) : membrosMin.map(m => (
+                    <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>
+                        {m.nome?.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                        <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
+                      </div>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        {m.celular && (
+                          <button onClick={() => window.open(`https://wa.me/55${m.celular.replace(/\D/g, "")}`, "_blank")}
+                            style={{ background: "#25d366", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>💬</button>
+                        )}
+                        <button onClick={() => { if (window.confirm(`Remover ${m.nome} do ministério?`)) removerMembro(m); }}
+                          style={S.delBtn}>🗑️</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
 
             {/* Avisos do Ministério */}
             {adminTab === "avisos-min" && (
