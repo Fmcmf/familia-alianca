@@ -2644,7 +2644,6 @@ export default function FamiliaAliancaApp() {
                             <div style={{ padding: "14px 16px" }}>
                               {INSTRUMENTOS.map(inst => {
                                 const membroId = escalaSelecionada.funcoes?.[inst];
-                                const membro = membros.find(m => m.email === membroId);
                                 return (
                                   <div key={inst} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
                                     <div style={{ width: 90, fontSize: 12, color: T.textSub, fontWeight: "bold" }}>{inst}</div>
@@ -2714,7 +2713,7 @@ export default function FamiliaAliancaApp() {
                             </div>
                             <button style={{ ...S.saveBtn, marginTop: 10 }} onClick={async () => {
                               if (!novaEscala.culto || !novaEscala.data) { showToast("⚠️ Preencha o culto e a data!"); return; }
-                              const ref = await addDoc(collection(db, "escalas"), { ...novaEscala, ministerio: ministerioLider, funcoes: {}, musicas: [], criadoEm: new Date().toISOString() });
+                              await addDoc(collection(db, "escalas"), { ...novaEscala, ministerio: ministerioLider, funcoes: {}, musicas: [], criadoEm: new Date().toISOString() });
                               setNovaEscala({ data: "", hora: "", culto: "", funcoes: {} });
                               showToast("✅ Escala criada!");
                             }}>📋 Criar Escala</button>
