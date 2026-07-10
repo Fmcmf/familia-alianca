@@ -269,6 +269,8 @@ export default function FamiliaAliancaApp() {
   const [tab, setTab] = useState("home");
   const [user, setUser] = useState(null); // eslint-disable-line no-unused-vars
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLider, setIsLider] = useState(false);
+  const [ministerioLider, setMinisterioLider] = useState(null);
   const [showCompletarCadastro, setShowCompletarCadastro] = useState(false);
   const [completarForm, setCompletarForm] = useState({});
   const [completarPulado, setCompletarPulado] = useState(false);
@@ -637,7 +639,16 @@ export default function FamiliaAliancaApp() {
       const snap = await getDoc(doc(db, "membros", loginForm.email));
       if (!snap.exists() || snap.data().senha !== loginForm.senha) { setLoginErro("E-mail ou senha incorretos."); return; }
       const u = { id: loginForm.email, ...snap.data() };
-      store.set(SK.user, u); setUser(u); setIsAdmin(u.admin || false); setScreen("app");
+      store.set(SK.user, u); setUser(u); setIsAdmin(u.admin || false);
+      // Detectar líder
+      if (u.lider && u.ministerioLider) {
+        setIsLider(true);
+        setMinisterioLider(u.ministerioLider);
+      } else {
+        setIsLider(false);
+        setMinisterioLider(null);
+      }
+      setScreen("app");
       // Verificar se cadastro está incompleto
       const cadastroCompleto = u.celular && u.sexo && u.estadoCivil && u.dataNascimento;
       if (!cadastroCompleto) {
@@ -690,7 +701,7 @@ export default function FamiliaAliancaApp() {
     }
   };
 
-  const handleLogout = () => { store.set(SK.user, null); setUser(null); setIsAdmin(false); setScreen("login"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
+  const handleLogout = () => { store.set(SK.user, null); setUser(null); setIsAdmin(false); setIsLider(false); setMinisterioLider(null); setScreen("login"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
 
   // ── AGENDA ──
   const salvarEvento = async () => {
@@ -957,7 +968,7 @@ export default function FamiliaAliancaApp() {
     { id: "voluntario", icon: "🤲", label: "Servir" },
     { id: "mais", icon: "⋯", label: "Mais" },
     { id: "perfil", icon: "👤", label: "Perfil" },
-    ...(isAdmin ? [{ id: "admin", icon: "⚙️", label: "Admin" }] : []),
+    ...(isAdmin || isLider ? [{ id: "admin", icon: isAdmin ? "⚙️" : "🏛️", label: isAdmin ? "Admin" : "Líder" }] : []),
   ];
 
   // próximos eventos
@@ -2253,6 +2264,124 @@ export default function FamiliaAliancaApp() {
           </div>
         )}
 
+        {/* ══ PAINEL LÍDER ══ */}
+        {tab === "admin" && isLider && !isAdmin && (
+          <div style={{ animation: "slideUp .4s ease" }}>
+            <div style={S.adminHeader}>
+              <div style={S.adminTitle}>🏛️ Painel do Líder</div>
+              <div style={{ fontSize: 12, color: T.textSub, marginTop: 4 }}>Ministério: <span style={{ color: T.gold, fontWeight: "bold" }}>{ministerioLider}</span></div>
+            </div>
+
+            {/* Tabs do líder */}
+            <div style={S.adminTabs}>
+              {["membros-min", "avisos-min", "eventos-min"].map(t => (
+                <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
+                  {{ "membros-min": "👥 Membros", "avisos-min": "📢 Avisos", "eventos-min": "📅 Eventos" }[t]}
+                </button>
+              ))}
+            </div>
+
+            {/* Membros do Ministério */}
+            {adminTab === "membros-min" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>👥 Membros — {ministerioLider}</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Membros cadastrados no seu ministério</div>
+                {membros.filter(m => m.ministerios?.includes(ministerioLider)).length === 0 ? (
+                  <div style={{ ...S.card, textAlign: "center", padding: "28px 0" }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>👥</div>
+                    <div style={{ fontSize: 13, color: T.textSub }}>Nenhum membro neste ministério ainda</div>
+                  </div>
+                ) : membros.filter(m => m.ministerios?.includes(ministerioLider)).map(m => (
+                  <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>
+                      {m.nome?.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                      <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
+                    </div>
+                    {m.celular && (
+                      <button onClick={() => window.open(`https://wa.me/55${m.celular.replace(/\D/g, "")}`, "_blank")}
+                        style={{ background: "#25d366", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>💬</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Avisos do Ministério */}
+            {adminTab === "avisos-min" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>📢 Avisos — {ministerioLider}</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Publique avisos para o seu ministério</div>
+                <label style={S.label}>Título *</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Título do aviso..."
+                  value={novoAviso.titulo} onChange={e => setNovoAviso({ ...novoAviso, titulo: e.target.value })} />
+                <label style={S.label}>Mensagem *</label>
+                <textarea style={{ ...S.textarea, minHeight: 100 }} placeholder="Escreva o aviso..."
+                  value={novoAviso.texto} onChange={e => setNovoAviso({ ...novoAviso, texto: e.target.value })} />
+                <button style={S.saveBtn} onClick={async () => {
+                  if (!novoAviso.titulo || !novoAviso.texto) { showToast("⚠️ Preencha título e mensagem!"); return; }
+                  await addDoc(collection(db, "avisos"), {
+                    ...novoAviso, tipo: "info",
+                    ministerio: ministerioLider,
+                    data: new Date().toISOString().split("T")[0]
+                  });
+                  setNovoAviso({ titulo: "", texto: "", tipo: "info" });
+                  showToast("✅ Aviso publicado!");
+                }}>📢 Publicar Aviso</button>
+                {/* Lista de avisos do ministério */}
+                {avisos.filter(a => a.ministerio === ministerioLider).length > 0 && (
+                  <>
+                    <div style={{ fontSize: 12, color: T.gold, marginTop: 20, marginBottom: 10, letterSpacing: 2, textTransform: "uppercase" }}>Avisos publicados</div>
+                    {avisos.filter(a => a.ministerio === ministerioLider).map(av => (
+                      <div key={av.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 8, display: "flex", gap: 10 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold }}>{av.titulo}</div>
+                          <div style={{ fontSize: 12, color: T.textSub }}>{av.texto}</div>
+                        </div>
+                        <button style={S.delBtn} onClick={async () => {
+                          if (window.confirm("Excluir aviso?")) { await deleteDoc(doc(db, "avisos", av.id)); showToast("🗑️ Removido!"); }
+                        }}>🗑️</button>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Eventos do Ministério */}
+            {adminTab === "eventos-min" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>📅 Eventos — {ministerioLider}</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Adicione eventos do seu ministério na agenda</div>
+                <label style={S.label}>Título do evento *</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Ensaio do Ministério de Música"
+                  value={novoEvento.titulo} onChange={e => setNovoEvento({ ...novoEvento, titulo: e.target.value })} />
+                <label style={S.label}>Data *</label>
+                <input type="date" style={{ ...S.input, marginBottom: 0 }}
+                  value={novoEvento.data} onChange={e => setNovoEvento({ ...novoEvento, data: e.target.value })} />
+                <label style={S.label}>Horário</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: 19h00"
+                  value={novoEvento.hora} onChange={e => setNovoEvento({ ...novoEvento, hora: e.target.value })} />
+                <label style={S.label}>Local</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Sala de Ensaio"
+                  value={novoEvento.local} onChange={e => setNovoEvento({ ...novoEvento, local: e.target.value })} />
+                <button style={S.saveBtn} onClick={async () => {
+                  if (!novoEvento.titulo || !novoEvento.data) { showToast("⚠️ Preencha título e data!"); return; }
+                  await addDoc(collection(db, "agenda"), {
+                    ...novoEvento, tipo: "culto",
+                    ministerio: ministerioLider,
+                    criadoPor: user?.nome || "Líder"
+                  });
+                  setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto", descricao: "" });
+                  showToast("✅ Evento adicionado!");
+                }}>📅 Adicionar Evento</button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ══ ADMIN ══ */}
         {tab === "admin" && isAdmin && (
           <div style={{ animation: "slideUp .4s ease" }}>
@@ -2260,9 +2389,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "devocional", "avisos", "estudos", "banner", "financeiro", "jejum", "video", "aovivo", "membros"].map(t => (
+              {["agenda", "palavra", "devocional", "avisos", "estudos", "banner", "financeiro", "lideres", "jejum", "video", "aovivo", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", financeiro: "💰 Finanças", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", financeiro: "💰 Finanças", lideres: "🏛️ Líderes", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
@@ -2791,6 +2920,77 @@ export default function FamiliaAliancaApp() {
                         showToast("🗑️ Banner removido!");
                       }
                     }}>🗑️ Remover Banner</button>
+                )}
+              </div>
+            )}
+
+            {/* Admin: Líderes */}
+            {adminTab === "lideres" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>🏛️ Gerenciar Líderes</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 20 }}>Defina quais membros são líderes e qual ministério cada um gerencia</div>
+
+                {/* Lista de membros com toggle de líder */}
+                {membros.filter(m => !m.admin).map(m => (
+                  <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: m.lider ? 10 : 0 }}>
+                      <div style={{ width: 38, height: 38, borderRadius: "50%", background: m.lider ? "rgba(201,168,76,.2)" : T.card, border: `1px solid ${m.lider ? "#c9a84c" : T.cardBorder}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: "bold", color: m.lider ? "#c9a84c" : T.textSub, flexShrink: 0 }}>
+                        {m.nome?.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                        <div style={{ fontSize: 11, color: T.textSub }}>{m.email}</div>
+                        {m.lider && m.ministerioLider && (
+                          <div style={{ fontSize: 11, color: "#c9a84c", marginTop: 2 }}>🏛️ Líder de {m.ministerioLider}</div>
+                        )}
+                      </div>
+                      {/* Toggle líder */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 11, color: T.textSub }}>{m.lider ? "Líder" : "Membro"}</span>
+                        <div onClick={async () => {
+                          const novoLider = !m.lider;
+                          await updateDoc(doc(db, "membros", m.email), {
+                            lider: novoLider,
+                            ministerioLider: novoLider ? (m.ministerioLider || "") : ""
+                          });
+                          showToast(novoLider ? `✅ ${m.nome} é agora líder!` : `↩️ ${m.nome} voltou a ser membro`);
+                        }} style={{ width: 46, height: 26, borderRadius: 13, background: m.lider ? "#c9a84c" : "rgba(150,150,150,.3)", cursor: "pointer", position: "relative", transition: "background .2s", flexShrink: 0 }}>
+                          <div style={{ position: "absolute", top: 3, left: m.lider ? 23 : 3, width: 20, height: 20, borderRadius: "50%", background: "#fff", transition: "left .2s", boxShadow: "0 1px 4px rgba(0,0,0,.3)" }} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Seletor de ministério quando é líder */}
+                    {m.lider && (
+                      <div style={{ paddingTop: 8, borderTop: `1px solid ${T.cardBorder}` }}>
+                        <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>Ministério que lidera:</div>
+                        <select style={{ ...S.select, marginBottom: 0 }}
+                          value={m.ministerioLider || ""}
+                          onChange={async e => {
+                            await updateDoc(doc(db, "membros", m.email), { ministerioLider: e.target.value });
+                            showToast(`✅ Ministério atualizado!`);
+                          }}>
+                          <option value="">Selecione...</option>
+                          {MINISTERIOS.map(min => (
+                            <option key={min.id} value={min.nome}>{min.icon} {min.nome}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* Resumo de líderes */}
+                {membros.filter(m => m.lider).length > 0 && (
+                  <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 12, padding: "12px 14px", marginTop: 8 }}>
+                    <div style={{ fontSize: 11, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Líderes ativos ({membros.filter(m => m.lider).length})</div>
+                    {membros.filter(m => m.lider && m.ministerioLider).map(m => (
+                      <div key={m.id} style={{ fontSize: 12, color: T.textSub, marginBottom: 4, display: "flex", justifyContent: "space-between" }}>
+                        <span>{m.nome}</span>
+                        <span style={{ color: T.gold }}>{m.ministerioLider}</span>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             )}
