@@ -2242,6 +2242,67 @@ export default function FamiliaAliancaApp() {
               </div>
             ))}
 
+            {/* ── SEU MINISTÉRIO ── */}
+            {user?.ministerios?.length > 0 && (
+              <div style={{ marginTop: 20, marginBottom: 8 }}>
+                <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 12 }}>🏛️ Seu Ministério</div>
+                {user.ministerios.map((min, i) => {
+                  const minData = MINISTERIOS.find(m => m.nome === min);
+                  // Avisos do ministério
+                  const avisosMin = avisos.filter(a => a.ministerio === min);
+                  // Líder do ministério
+                  const liderMin = membros.find(m => m.lider && m.ministerioLider === min);
+                  return (
+                    <div key={i} style={{ background: darkMode ? "rgba(201,168,76,.06)" : "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.25)", borderRadius: 16, overflow: "hidden", marginBottom: 12 }}>
+                      {/* Header */}
+                      <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "8px 16px", display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 18 }}>{minData?.icon || "🏛️"}</span>
+                        <span style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{min}</span>
+                      </div>
+                      <div style={{ padding: "14px 16px" }}>
+                        {/* Descrição */}
+                        {minData?.desc && (
+                          <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.6, marginBottom: 12 }}>{minData.desc}</div>
+                        )}
+                        {/* Líder */}
+                        {liderMin && (
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: T.card, borderRadius: 10, marginBottom: 12 }}>
+                            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
+                              {liderMin.nome?.charAt(0).toUpperCase()}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 11, color: T.textFaint, textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>Líder</div>
+                              <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{liderMin.nome}</div>
+                            </div>
+                            {liderMin.celular && (
+                              <button onClick={() => window.open(`https://wa.me/55${liderMin.celular.replace(/\D/g, "")}`, "_blank")}
+                                style={{ background: "#25d366", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>💬</button>
+                            )}
+                          </div>
+                        )}
+                        {/* Avisos do ministério */}
+                        {avisosMin.length > 0 && (
+                          <>
+                            <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>📢 Avisos do grupo</div>
+                            {avisosMin.slice(0, 3).map(av => (
+                              <div key={av.id} style={{ padding: "10px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 10, marginBottom: 6 }}>
+                                <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{av.titulo}</div>
+                                <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5 }}>{av.texto}</div>
+                                <div style={{ fontSize: 10, color: T.textFaint, marginTop: 4 }}>{av.data}</div>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                        {avisosMin.length === 0 && (
+                          <div style={{ fontSize: 12, color: T.textFaint, textAlign: "center", padding: "8px 0" }}>Nenhum aviso do ministério ainda</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Formulário edição */}
             <div style={{ fontSize: 13, fontWeight: "bold", color: "#c9a84c", marginTop: 20, marginBottom: 12 }}>
               ✏️ {(!user?.celular || !user?.sexo) ? "Complete" : "Edite"} seus dados
@@ -2317,7 +2378,14 @@ export default function FamiliaAliancaApp() {
               const addMembro = async (m) => {
                 const mins = m.ministerios || [];
                 if (!mins.includes(ministerioLider)) {
-                  await updateDoc(doc(db, "membros", m.email), { ministerios: [...mins, ministerioLider] });
+                  const novosMins = [...mins, ministerioLider];
+                  await updateDoc(doc(db, "membros", m.email), { ministerios: novosMins });
+                  // Se for o usuário logado, atualizar o store
+                  if (user?.email === m.email) {
+                    const novoUser = { ...user, ministerios: novosMins };
+                    store.set(SK.user, novoUser);
+                    setUser(novoUser);
+                  }
                   showToast(`✅ ${m.nome} adicionado ao ministério!`);
                 }
               };
