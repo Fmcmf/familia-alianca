@@ -430,7 +430,33 @@ export default function FamiliaAliancaApp() {
   useEffect(() => {
     setTimeout(() => {
       const u = store.get(SK.user, null);
-      if (u) { setUser(u); setIsAdmin(u.admin || false); setScreen("app"); } // eslint-disable-line no-unused-vars
+      if (u) {
+        setUser(u);
+        setIsAdmin(u.admin || false);
+        // Restaurar estado de líder
+        if (u.lider && u.ministerioLider) {
+          setIsLider(true);
+          setMinisterioLider(u.ministerioLider);
+        }
+        // Buscar dados frescos do Firestore para garantir lider/ministerio atualizado
+        if (u.email && u.email !== "ALIANCA") {
+          getDoc(doc(db, "membros", u.email)).then(snap => {
+            if (snap.exists()) {
+              const dadosFrescos = { id: u.email, ...snap.data() };
+              store.set(SK.user, dadosFrescos);
+              setUser(dadosFrescos);
+              if (dadosFrescos.lider && dadosFrescos.ministerioLider) {
+                setIsLider(true);
+                setMinisterioLider(dadosFrescos.ministerioLider);
+              } else {
+                setIsLider(false);
+                setMinisterioLider(null);
+              }
+            }
+          }).catch(() => {});
+        }
+        setScreen("app");
+      } // eslint-disable-line no-unused-vars
       else setScreen("login");
     }, 2200);
 
