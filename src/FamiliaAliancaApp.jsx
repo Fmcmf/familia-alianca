@@ -2607,13 +2607,13 @@ export default function FamiliaAliancaApp() {
                 }}>📅 Adicionar Evento</button>
 
                 {/* Lista de eventos criados pelo líder */}
-                {agenda.filter(e => e.ministerio === ministerioLider).length > 0 && (
+                {agenda.filter(e => e.ministerio === ministerioLider && !e.funcoes).length > 0 && (
                   <>
                     <div style={{ fontSize: 12, color: T.gold, marginTop: 24, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>
-                      Eventos do meu ministério ({agenda.filter(e => e.ministerio === ministerioLider).length})
+                      Eventos do meu ministério ({agenda.filter(e => e.ministerio === ministerioLider && !e.funcoes).length})
                     </div>
                     {agenda
-                      .filter(e => e.ministerio === ministerioLider)
+                      .filter(e => e.ministerio === ministerioLider && !e.funcoes)
                       .sort((a, b) => a.data?.localeCompare(b.data))
                       .map(e => (
                         <div key={e.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12 }}>
