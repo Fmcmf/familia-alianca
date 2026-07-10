@@ -277,6 +277,8 @@ export default function FamiliaAliancaApp() {
   const [membroParaAdicionar, setMembroParaAdicionar] = useState(null);
   const [eventoModo, setEventoModo] = useState("novo"); // novo | buscar
   const [buscaAgenda, setBuscaAgenda] = useState("");
+  const [eventoEscalaAberto, setEventoEscalaAberto] = useState(null); // evento selecionado para montar escala
+  const [categoriaEscala, setCategoriaEscala] = useState(null); // categoria selecionada na escala
   // Módulo Música
   const [musicaView, setMusicaView] = useState("escalas"); // escalas | musicas | cifras
   const [escalas, setEscalas] = useState([]);
@@ -2747,159 +2749,291 @@ export default function FamiliaAliancaApp() {
             )}
 
             {/* Eventos do Ministério */}
-            {adminTab === "eventos-min" && (
-              <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>📅 Eventos — {ministerioLider}</div>
-                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>Crie um evento próprio ou vincule um evento da agenda da igreja</div>
+            {adminTab === "eventos-min" && (() => {
+              const membrosMin = membros.filter(m => m.ministerios?.includes(ministerioLider));
+              const CATEGORIAS = ["Vocal/Ministro(a)", "Soprano", "Contralto", "Tenor", "Backing Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado"];
 
-                {/* Seletor de modo */}
-                <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                  {[{ id: "novo", label: "➕ Novo Evento" }, { id: "buscar", label: "🔍 Buscar na Agenda" }].map(m => (
-                    <button key={m.id} onClick={() => setEventoModo(m.id)}
-                      style={{ flex: 1, padding: "9px 0", border: `1px solid ${eventoModo === m.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: eventoModo === m.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: eventoModo === m.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: eventoModo === m.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
+              // Retorna membros que têm aquela função ou instrumento
+              const membrosPorCategoria = (cat) => {
+                return membrosMin.filter(m => {
+                  const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
+                  const perfil = m[perfilKey];
+                  if (!perfil) return false;
+                  const todasFuncoes = [...(perfil.funcoes || []), ...(perfil.instrumentos || [])];
+                  return todasFuncoes.some(f => f.toLowerCase().includes(cat.split("/")[0].toLowerCase()) || cat.toLowerCase().includes(f.toLowerCase()));
+                });
+              };
 
-                {/* ── NOVO EVENTO PRÓPRIO ── */}
-                {eventoModo === "novo" && (
-                  <>
-                    <label style={S.label}>Título do evento *</label>
-                    <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Ensaio do Ministério de Música"
-                      value={novoEvento.titulo} onChange={e => setNovoEvento({ ...novoEvento, titulo: e.target.value })} />
-                    <label style={S.label}>Data *</label>
-                    <input type="date" style={{ ...S.input, marginBottom: 0 }}
-                      value={novoEvento.data} onChange={e => setNovoEvento({ ...novoEvento, data: e.target.value })} />
-                    <label style={S.label}>Horário</label>
-                    <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: 19h00"
-                      value={novoEvento.hora} onChange={e => setNovoEvento({ ...novoEvento, hora: e.target.value })} />
-                    <label style={S.label}>Local</label>
-                    <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Sala de Ensaio"
-                      value={novoEvento.local} onChange={e => setNovoEvento({ ...novoEvento, local: e.target.value })} />
-                    <button style={S.saveBtn} onClick={async () => {
-                      if (!novoEvento.titulo || !novoEvento.data) { showToast("⚠️ Preencha título e data!"); return; }
-                      await addDoc(collection(db, "agenda"), {
-                        ...novoEvento, tipo: "culto",
-                        ministerio: ministerioLider,
-                        criadoPor: user?.nome || "Líder"
-                      });
-                      setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto", descricao: "" });
-                      showToast("✅ Evento adicionado!");
-                    }}>📅 Adicionar Evento</button>
-                  </>
-                )}
+              // Eventos deste ministério (próprios + vinculados)
+              const eventosMin = [
+                ...agenda.filter(e => e.ministerio === ministerioLider && !e.funcoes),
+                ...agenda.filter(e => e.ministeriosVinculados?.includes(ministerioLider))
+              ].sort((a, b) => a.data?.localeCompare(b.data));
 
-                {/* ── BUSCAR NA AGENDA DA IGREJA ── */}
-                {eventoModo === "buscar" && (
-                  <>
-                    <div style={{ background: "rgba(59,130,246,.06)", border: "1px solid rgba(59,130,246,.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#60a5fa" }}>
-                      ℹ️ Selecione um evento da agenda da igreja para vincular ao seu ministério. Ele já aparecerá na tela principal do app.
+              // Buscar ou criar escala para um evento
+              const escalaDoEvento = (eventoId) => escalas.find(e => e.eventoId === eventoId || e.eventoRef === eventoId);
+
+              if (eventoEscalaAberto) {
+                // ── TELA DE MONTAGEM DA ESCALA ──
+                const escala = escalaDoEvento(eventoEscalaAberto.id);
+                const escalados = escala?.membrosEscalados || {};
+
+                return (
+                  <div style={{ padding: "0 16px" }}>
+                    <button onClick={() => { setEventoEscalaAberto(null); setCategoriaEscala(null); }}
+                      style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 13, fontFamily: "Georgia,serif", marginBottom: 12 }}>← Voltar aos eventos</button>
+
+                    {/* Header do evento */}
+                    <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", borderRadius: "14px 14px 0 0", padding: "10px 16px" }}>
+                      <div style={{ fontSize: 14, fontWeight: "bold", color: "#080810" }}>{eventoEscalaAberto.titulo}</div>
+                      <div style={{ fontSize: 11, color: "#080810" }}>{new Date(eventoEscalaAberto.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })} {eventoEscalaAberto.hora && `• ${eventoEscalaAberto.hora}`}</div>
                     </div>
-                    <input style={{ ...S.input, marginBottom: 12 }}
-                      placeholder="🔍 Buscar evento por nome..."
-                      value={buscaAgenda}
-                      onChange={e => setBuscaAgenda(e.target.value)} />
+                    <div style={{ background: T.card, border: `1px solid rgba(201,168,76,.3)`, borderTop: "none", borderRadius: "0 0 14px 14px", padding: "14px 16px", marginBottom: 14 }}>
 
-                    {/* Lista de eventos da agenda (excluindo os já do ministério) */}
-                    {agenda
-                      .filter(e => !e.ministerio || e.ministerio !== ministerioLider)
-                      .filter(e => !buscaAgenda.trim() || e.titulo?.toLowerCase().includes(buscaAgenda.toLowerCase()))
-                      .sort((a, b) => a.data?.localeCompare(b.data))
-                      .map(e => {
-                        const jaVinculado = e.ministeriosVinculados?.includes(ministerioLider);
-                        return (
-                          <div key={e.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${jaVinculado ? "rgba(34,197,94,.3)" : T.cardBorder}`, borderLeft: `3px solid ${jaVinculado ? "#22c55e" : "#c9a84c"}`, borderRadius: 12, marginBottom: 8 }}>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{e.titulo}</div>
-                              <div style={{ fontSize: 11, color: T.textSub }}>
-                                {new Date(e.data + "T12:00").toLocaleDateString("pt-BR")}
-                                {e.hora && ` • ${e.hora}`}
-                                {e.local && ` • ${e.local}`}
+                      {/* Resumo escalados */}
+                      {Object.keys(escalados).length > 0 && (
+                        <div style={{ background: "rgba(34,197,94,.06)", border: "1px solid rgba(34,197,94,.2)", borderRadius: 10, padding: "10px 12px", marginBottom: 14 }}>
+                          <div style={{ fontSize: 11, color: "#22c55e", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>✅ {Object.keys(escalados).length} escalado(s)</div>
+                          {Object.entries(escalados).map(([email, dados]) => (
+                            <div key={email} style={{ fontSize: 12, color: T.textSub, marginBottom: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span>• {dados.nome}</span>
+                              <div style={{ display: "flex", gap: 4 }}>
+                                {dados.funcoes?.map(f => <span key={f} style={{ fontSize: 10, color: "#c9a84c", background: "rgba(201,168,76,.1)", borderRadius: 10, padding: "1px 6px" }}>{f}</span>)}
+                                {dados.instrumentos?.map(i => <span key={i} style={{ fontSize: 10, color: "#a78bfa", background: "rgba(139,92,246,.1)", borderRadius: 10, padding: "1px 6px" }}>🎸{i}</span>)}
                               </div>
                             </div>
-                            {jaVinculado ? (
-                              <div style={{ display: "flex", gap: 6 }}>
-                                <span style={{ fontSize: 11, color: "#22c55e", background: "rgba(34,197,94,.1)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 20, padding: "4px 10px" }}>✓ Vinculado</span>
-                                <button style={S.delBtn} onClick={async () => {
-                                  const novosVinc = (e.ministeriosVinculados || []).filter(m => m !== ministerioLider);
-                                  await updateDoc(doc(db, "agenda", e.id), { ministeriosVinculados: novosVinc });
-                                  showToast("↩️ Vínculo removido!");
-                                }}>×</button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Grid de categorias */}
+                      <div style={{ fontSize: 12, color: T.textSub, marginBottom: 10 }}>Selecione uma categoria para escalar:</div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
+                        {CATEGORIAS.map(cat => {
+                          const disponiveis = membrosPorCategoria(cat);
+                          const escaladosNaCat = Object.values(escalados).filter(d =>
+                            [...(d.funcoes || []), ...(d.instrumentos || [])].some(f => f.toLowerCase().includes(cat.split("/")[0].toLowerCase()) || cat.toLowerCase().includes(f.toLowerCase()))
+                          );
+                          if (disponiveis.length === 0) return null;
+                          return (
+                            <button key={cat} onClick={() => setCategoriaEscala(categoriaEscala === cat ? null : cat)}
+                              style={{ padding: "10px 12px", border: `1px solid ${categoriaEscala === cat ? "#c9a84c" : escaladosNaCat.length > 0 ? "rgba(34,197,94,.4)" : T.cardBorder}`, borderRadius: 12, background: categoriaEscala === cat ? "rgba(201,168,76,.15)" : escaladosNaCat.length > 0 ? "rgba(34,197,94,.06)" : T.card, cursor: "pointer", textAlign: "left", fontFamily: "Georgia,serif" }}>
+                              <div style={{ fontSize: 12, fontWeight: "bold", color: categoriaEscala === cat ? "#c9a84c" : T.text }}>{cat}</div>
+                              <div style={{ fontSize: 10, color: T.textFaint }}>
+                                {escaladosNaCat.length > 0 ? `✅ ${escaladosNaCat.length} escalado(s)` : `${disponiveis.length} disponível(is)`}
                               </div>
-                            ) : (
-                              <button onClick={async () => {
-                                const novosVinc = [...(e.ministeriosVinculados || []), ministerioLider];
-                                await updateDoc(doc(db, "agenda", e.id), { ministeriosVinculados: novosVinc });
-                                showToast(`✅ Evento vinculado ao ${ministerioLider}!`);
-                              }} style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif", flexShrink: 0 }}>
-                                + Vincular
-                              </button>
-                            )}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Lista de membros da categoria selecionada */}
+                      {categoriaEscala && (
+                        <div style={{ background: "rgba(201,168,76,.04)", border: `1px solid rgba(201,168,76,.2)`, borderRadius: 12, padding: "12px 14px" }}>
+                          <div style={{ fontSize: 12, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>🎵 {categoriaEscala}</div>
+                          {membrosPorCategoria(categoriaEscala).map(m => {
+                            const escalado = escalados[m.email];
+                            return (
+                              <div key={m.email} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
+                                <div style={{ width: 34, height: 34, borderRadius: "50%", background: escalado ? "rgba(34,197,94,.15)" : "rgba(201,168,76,.1)", border: `1px solid ${escalado ? "rgba(34,197,94,.4)" : "rgba(201,168,76,.25)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", color: escalado ? "#22c55e" : "#c9a84c", flexShrink: 0 }}>
+                                  {m.nome?.charAt(0).toUpperCase()}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                                  {(() => {
+                                    const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
+                                    const perfil = m[perfilKey];
+                                    return perfil && (
+                                      <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginTop: 2 }}>
+                                        {(perfil.funcoes || []).map(f => <span key={f} style={{ fontSize: 10, color: "#c9a84c", background: "rgba(201,168,76,.1)", borderRadius: 10, padding: "1px 5px" }}>🎤{f}</span>)}
+                                        {(perfil.instrumentos || []).map(i => <span key={i} style={{ fontSize: 10, color: "#a78bfa", background: "rgba(139,92,246,.1)", borderRadius: 10, padding: "1px 5px" }}>🎸{i}</span>)}
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                                <div onClick={async () => {
+                                  const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
+                                  const perfil = m[perfilKey];
+                                  const novos = { ...escalados };
+                                  if (escalado) delete novos[m.email];
+                                  else novos[m.email] = { nome: m.nome, funcoes: perfil?.funcoes || [], instrumentos: perfil?.instrumentos || [] };
+
+                                  if (escala) {
+                                    await updateDoc(doc(db, "escalas", escala.id), { membrosEscalados: novos });
+                                  } else {
+                                    await addDoc(collection(db, "escalas"), {
+                                      eventoId: eventoEscalaAberto.id,
+                                      eventoRef: eventoEscalaAberto.id,
+                                      culto: eventoEscalaAberto.titulo,
+                                      data: eventoEscalaAberto.data,
+                                      hora: eventoEscalaAberto.hora || "",
+                                      ministerio: ministerioLider,
+                                      membrosEscalados: novos,
+                                      musicas: [],
+                                      criadoEm: new Date().toISOString()
+                                    });
+                                  }
+                                  showToast(escalado ? `↩️ ${m.nome} removido` : `✅ ${m.nome} escalado!`);
+                                }} style={{ width: 46, height: 26, borderRadius: 13, background: escalado ? "#22c55e" : "rgba(150,150,150,.3)", cursor: "pointer", position: "relative", transition: "background .2s", flexShrink: 0 }}>
+                                  <div style={{ position: "absolute", top: 3, left: escalado ? 23 : 3, width: 20, height: 20, borderRadius: "50%", background: "#fff", transition: "left .2s", boxShadow: "0 1px 4px rgba(0,0,0,.3)" }} />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Músicas do evento */}
+                      {escala && (
+                        <div style={{ marginTop: 16 }}>
+                          <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas</div>
+                          {(escala.musicas || []).map((mid, i) => {
+                            const mus = musicas.find(x => x.id === mid);
+                            return mus ? (
+                              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
+                                <span style={{ fontSize: 12, color: T.text, flex: 1 }}>🎵 {mus.titulo} <span style={{ color: T.textSub }}>— {mus.artista}</span> {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>}</span>
+                                <button onClick={async () => {
+                                  const novas = (escala.musicas || []).filter(x => x !== mid);
+                                  await updateDoc(doc(db, "escalas", escala.id), { musicas: novas });
+                                }} style={S.delBtn}>✕</button>
+                              </div>
+                            ) : null;
+                          })}
+                          <select style={{ ...S.select, marginTop: 8 }} value="" onChange={async e => {
+                            if (!e.target.value || !escala) return;
+                            const novas = [...(escala.musicas || []), e.target.value];
+                            await updateDoc(doc(db, "escalas", escala.id), { musicas: novas });
+                          }}>
+                            <option value="">+ Adicionar música...</option>
+                            {musicas.filter(m => !(escala.musicas || []).includes(m.id)).map(m => (
+                              <option key={m.id} value={m.id}>{m.titulo} — {m.artista}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div style={{ padding: "0 16px" }}>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>📅 Eventos — {ministerioLider}</div>
+                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>Crie um evento próprio ou vincule um evento da agenda da igreja</div>
+
+                  {/* Seletor de modo */}
+                  <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                    {[{ id: "novo", label: "➕ Novo Evento" }, { id: "buscar", label: "🔍 Buscar na Agenda" }].map(m => (
+                      <button key={m.id} onClick={() => setEventoModo(m.id)}
+                        style={{ flex: 1, padding: "9px 0", border: `1px solid ${eventoModo === m.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: eventoModo === m.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: eventoModo === m.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: eventoModo === m.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {eventoModo === "novo" && (
+                    <>
+                      <label style={S.label}>Título do evento *</label>
+                      <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Ensaio do Ministério de Música"
+                        value={novoEvento.titulo} onChange={e => setNovoEvento({ ...novoEvento, titulo: e.target.value })} />
+                      <label style={S.label}>Data *</label>
+                      <input type="date" style={{ ...S.input, marginBottom: 0 }}
+                        value={novoEvento.data} onChange={e => setNovoEvento({ ...novoEvento, data: e.target.value })} />
+                      <label style={S.label}>Horário</label>
+                      <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: 19h00"
+                        value={novoEvento.hora} onChange={e => setNovoEvento({ ...novoEvento, hora: e.target.value })} />
+                      <label style={S.label}>Local</label>
+                      <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Sala de Ensaio"
+                        value={novoEvento.local} onChange={e => setNovoEvento({ ...novoEvento, local: e.target.value })} />
+                      <button style={S.saveBtn} onClick={async () => {
+                        if (!novoEvento.titulo || !novoEvento.data) { showToast("⚠️ Preencha título e data!"); return; }
+                        await addDoc(collection(db, "agenda"), { ...novoEvento, tipo: "culto", ministerio: ministerioLider, criadoPor: user?.nome || "Líder" });
+                        setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto", descricao: "" });
+                        showToast("✅ Evento adicionado!");
+                      }}>📅 Adicionar Evento</button>
+                    </>
+                  )}
+
+                  {eventoModo === "buscar" && (
+                    <>
+                      <div style={{ background: "rgba(59,130,246,.06)", border: "1px solid rgba(59,130,246,.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#60a5fa" }}>
+                        ℹ️ Selecione um evento da agenda para vincular ao seu ministério.
+                      </div>
+                      <input style={{ ...S.input, marginBottom: 12 }} placeholder="🔍 Buscar evento..."
+                        value={buscaAgenda} onChange={e => setBuscaAgenda(e.target.value)} />
+                      {agenda.filter(e => !buscaAgenda.trim() || e.titulo?.toLowerCase().includes(buscaAgenda.toLowerCase()))
+                        .filter(e => !e.ministerio || e.ministerio !== ministerioLider)
+                        .sort((a, b) => a.data?.localeCompare(b.data)).map(e => {
+                          const jaVinculado = e.ministeriosVinculados?.includes(ministerioLider);
+                          return (
+                            <div key={e.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: T.card, border: `1px solid ${jaVinculado ? "rgba(34,197,94,.3)" : T.cardBorder}`, borderLeft: `3px solid ${jaVinculado ? "#22c55e" : "#c9a84c"}`, borderRadius: 12, marginBottom: 8 }}>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{e.titulo}</div>
+                                <div style={{ fontSize: 11, color: T.textSub }}>{new Date(e.data + "T12:00").toLocaleDateString("pt-BR")}{e.hora && ` • ${e.hora}`}</div>
+                              </div>
+                              {jaVinculado ? (
+                                <div style={{ display: "flex", gap: 6 }}>
+                                  <span style={{ fontSize: 11, color: "#22c55e", background: "rgba(34,197,94,.1)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 20, padding: "4px 10px" }}>✓ Vinculado</span>
+                                  <button style={S.delBtn} onClick={async () => {
+                                    const novosVinc = (e.ministeriosVinculados || []).filter(m => m !== ministerioLider);
+                                    await updateDoc(doc(db, "agenda", e.id), { ministeriosVinculados: novosVinc });
+                                    showToast("↩️ Vínculo removido!");
+                                  }}>×</button>
+                                </div>
+                              ) : (
+                                <button onClick={async () => {
+                                  const novosVinc = [...(e.ministeriosVinculados || []), ministerioLider];
+                                  await updateDoc(doc(db, "agenda", e.id), { ministeriosVinculados: novosVinc });
+                                  showToast(`✅ Evento vinculado!`);
+                                }} style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                                  + Vincular
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                    </>
+                  )}
+
+                  {/* Lista de todos os eventos do ministério com botão "Montar Escala" */}
+                  {eventosMin.length > 0 && (
+                    <>
+                      <div style={{ fontSize: 12, color: T.gold, marginTop: 20, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>
+                        Eventos ({eventosMin.length})
+                      </div>
+                      {eventosMin.map(e => {
+                        const escala = escalaDoEvento(e.id);
+                        const qtdEscalados = Object.keys(escala?.membrosEscalados || {}).length;
+                        return (
+                          <div key={e.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "12px 14px", marginBottom: 10 }}>
+                            <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{e.titulo}</div>
+                                <div style={{ fontSize: 11, color: T.textSub }}>{new Date(e.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}{e.hora && ` • ${e.hora}`}</div>
+                                {qtdEscalados > 0 && <div style={{ fontSize: 11, color: "#22c55e", marginTop: 3 }}>✅ {qtdEscalados} escalado(s)</div>}
+                              </div>
+                              {e.ministerio === ministerioLider && (
+                                <button style={S.delBtn} onClick={async () => {
+                                  if (window.confirm("Excluir este evento?")) {
+                                    await deleteDoc(doc(db, "agenda", e.id));
+                                    showToast("🗑️ Evento removido!");
+                                  }
+                                }}>🗑️</button>
+                              )}
+                            </div>
+                            <button onClick={() => { setEventoEscalaAberto(e); setCategoriaEscala(null); }}
+                              style={{ width: "100%", padding: "9px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 10, fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                              📋 {qtdEscalados > 0 ? "Ver/Editar Escala" : "Montar Escala"}
+                            </button>
                           </div>
                         );
                       })}
-                    {agenda.filter(e => !buscaAgenda.trim() || e.titulo?.toLowerCase().includes(buscaAgenda.toLowerCase())).length === 0 && (
-                      <div style={{ textAlign: "center", padding: "24px 0", color: T.textSub, fontSize: 13 }}>
-                        <div style={{ fontSize: 28, marginBottom: 8 }}>📅</div>Nenhum evento encontrado
-                      </div>
-                    )}
-                  </>
-                )}
+                    </>
+                  )}
+                </div>
+              );
+            })()}
 
-                {/* Lista de eventos criados pelo líder */}
-                {agenda.filter(e => e.ministerio === ministerioLider && !e.funcoes).length > 0 && (
-                  <>
-                    <div style={{ fontSize: 12, color: T.gold, marginTop: 24, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>
-                      Eventos próprios ({agenda.filter(e => e.ministerio === ministerioLider && !e.funcoes).length})
-                    </div>
-                    {agenda
-                      .filter(e => e.ministerio === ministerioLider && !e.funcoes)
-                      .sort((a, b) => a.data?.localeCompare(b.data))
-                      .map(e => (
-                        <div key={e.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12 }}>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{e.titulo}</div>
-                            <div style={{ fontSize: 12, color: T.textSub }}>
-                              {new Date(e.data + "T12:00").toLocaleDateString("pt-BR")}
-                              {e.hora && ` • ${e.hora}`}
-                              {e.local && ` • ${e.local}`}
-                            </div>
-                          </div>
-                          <button style={S.delBtn} onClick={async () => {
-                            if (window.confirm("Excluir este evento?")) {
-                              await deleteDoc(doc(db, "agenda", e.id));
-                              showToast("🗑️ Evento removido!");
-                            }
-                          }}>🗑️</button>
-                        </div>
-                      ))}
-                  </>
-                )}
-
-                {/* Eventos vinculados da agenda da igreja */}
-                {agenda.filter(e => e.ministeriosVinculados?.includes(ministerioLider)).length > 0 && (
-                  <>
-                    <div style={{ fontSize: 12, color: "#60a5fa", marginTop: 16, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>
-                      🔗 Eventos vinculados ({agenda.filter(e => e.ministeriosVinculados?.includes(ministerioLider)).length})
-                    </div>
-                    {agenda.filter(e => e.ministeriosVinculados?.includes(ministerioLider)).map(e => (
-                      <div key={e.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 8, display: "flex", alignItems: "center", gap: 12, borderLeft: "3px solid #3b82f6" }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{e.titulo}</div>
-                          <div style={{ fontSize: 11, color: T.textSub }}>{new Date(e.data + "T12:00").toLocaleDateString("pt-BR")}{e.hora && ` • ${e.hora}`}</div>
-                        </div>
-                        <button style={{ ...S.delBtn, fontSize: 11 }} onClick={async () => {
-                          const novosVinc = (e.ministeriosVinculados || []).filter(m => m !== ministerioLider);
-                          await updateDoc(doc(db, "agenda", e.id), { ministeriosVinculados: novosVinc });
-                          showToast("↩️ Vínculo removido!");
-                        }}>× Desvincular</button>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
-            )}
 
             {/* ── MÓDULO MÚSICA ── */}
             {adminTab === "musica-min" && (() => {
@@ -2912,190 +3046,13 @@ export default function FamiliaAliancaApp() {
 
                   {/* Sub-nav */}
                   <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", scrollbarWidth: "none" }}>
-                    {[{ id: "escalas", label: "📋 Escalas" }, { id: "musicas", label: "🎶 Músicas" }, { id: "cifras", label: "🎸 Cifras" }].map(v => (
+                    {[{ id: "musicas", label: "🎶 Músicas" }, { id: "cifras", label: "🎸 Cifras" }].map(v => (
                       <button key={v.id} onClick={() => setMusicaView(v.id)}
                         style={{ flexShrink: 0, padding: "8px 16px", border: `1px solid ${musicaView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: musicaView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: musicaView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: musicaView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                         {v.label}
                       </button>
                     ))}
                   </div>
-
-                  {/* ── ESCALAS ── */}
-                  {musicaView === "escalas" && (
-                    <>
-                      {escalaSelecionada ? (
-                        /* Detalhe da escala */
-                        <div>
-                          <button onClick={() => setEscalaSelecionada(null)}
-                            style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 13, fontFamily: "Georgia,serif", marginBottom: 12 }}>← Voltar</button>
-                          <div style={{ background: T.card, border: "1px solid rgba(201,168,76,.3)", borderRadius: 16, overflow: "hidden", marginBottom: 14 }}>
-                            <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "8px 16px" }}>
-                              <div style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{escalaSelecionada.culto}</div>
-                              <div style={{ fontSize: 11, color: "#080810" }}>{new Date(escalaSelecionada.data + "T12:00").toLocaleDateString("pt-BR")} {escalaSelecionada.hora && `• ${escalaSelecionada.hora}`}</div>
-                            </div>
-                            <div style={{ padding: "14px 16px" }}>
-
-                              {/* Membros do ministério com suas funções */}
-                              <div style={{ fontSize: 11, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>👥 Membros na Escala</div>
-                              {membrosMin.map(m => {
-                                const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
-                                const perfil = m[perfilKey];
-                                const escalado = escalaSelecionada.membrosEscalados?.[m.email];
-
-                                return (
-                                  <div key={m.email} style={{ padding: "10px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: escalado ? 6 : 0 }}>
-                                      <div style={{ width: 32, height: 32, borderRadius: "50%", background: escalado ? "rgba(34,197,94,.15)" : "rgba(201,168,76,.1)", border: `1px solid ${escalado ? "rgba(34,197,94,.4)" : "rgba(201,168,76,.25)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: escalado ? "#22c55e" : "#c9a84c", flexShrink: 0 }}>
-                                        {m.nome?.charAt(0).toUpperCase()}
-                                      </div>
-                                      <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
-                                        {perfil && (
-                                          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 3 }}>
-                                            {(perfil.funcoes || []).map(f => <span key={f} style={{ fontSize: 10, color: "#c9a84c", background: "rgba(201,168,76,.1)", borderRadius: 10, padding: "1px 6px" }}>🎤 {f}</span>)}
-                                            {(perfil.instrumentos || []).map(i => <span key={i} style={{ fontSize: 10, color: "#a78bfa", background: "rgba(139,92,246,.1)", borderRadius: 10, padding: "1px 6px" }}>🎸 {i}</span>)}
-                                          </div>
-                                        )}
-                                      </div>
-                                      {/* Toggle escalar */}
-                                      <div onClick={async () => {
-                                        const novos = { ...(escalaSelecionada.membrosEscalados || {}) };
-                                        if (escalado) delete novos[m.email];
-                                        else novos[m.email] = { nome: m.nome, funcoes: perfil?.funcoes || [], instrumentos: perfil?.instrumentos || [] };
-                                        await updateDoc(doc(db, "escalas", escalaSelecionada.id), { membrosEscalados: novos });
-                                        setEscalaSelecionada({ ...escalaSelecionada, membrosEscalados: novos });
-                                      }} style={{ width: 46, height: 26, borderRadius: 13, background: escalado ? "#22c55e" : "rgba(150,150,150,.3)", cursor: "pointer", position: "relative", transition: "background .2s", flexShrink: 0 }}>
-                                        <div style={{ position: "absolute", top: 3, left: escalado ? 23 : 3, width: 20, height: 20, borderRadius: "50%", background: "#fff", transition: "left .2s", boxShadow: "0 1px 4px rgba(0,0,0,.3)" }} />
-                                      </div>
-                                    </div>
-
-                                    {/* Função na escala quando escalado */}
-                                    {escalado && (
-                                      <div style={{ marginLeft: 42, marginTop: 4 }}>
-                                        <input style={{ ...S.input, marginBottom: 0, fontSize: 12, padding: "6px 10px" }}
-                                          placeholder="Observação (Ex: Ministrar no 1º louvor...)"
-                                          value={escalado.obs || ""}
-                                          onChange={async e => {
-                                            const novos = { ...escalaSelecionada.membrosEscalados, [m.email]: { ...escalado, obs: e.target.value } };
-                                            await updateDoc(doc(db, "escalas", escalaSelecionada.id), { membrosEscalados: novos });
-                                            setEscalaSelecionada({ ...escalaSelecionada, membrosEscalados: novos });
-                                          }} />
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })}
-
-                              {/* Resumo escalados */}
-                              {Object.keys(escalaSelecionada.membrosEscalados || {}).length > 0 && (
-                                <div style={{ background: "rgba(34,197,94,.06)", border: "1px solid rgba(34,197,94,.2)", borderRadius: 10, padding: "10px 12px", marginTop: 14 }}>
-                                  <div style={{ fontSize: 11, color: "#22c55e", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>✅ {Object.keys(escalaSelecionada.membrosEscalados).length} escalado(s)</div>
-                                  {Object.entries(escalaSelecionada.membrosEscalados).map(([email, dados]) => (
-                                    <div key={email} style={{ fontSize: 12, color: T.textSub, marginBottom: 3 }}>
-                                      • {dados.nome}
-                                      {dados.funcoes?.length > 0 && <span style={{ color: "#c9a84c" }}> — {dados.funcoes.join(", ")}</span>}
-                                      {dados.instrumentos?.length > 0 && <span style={{ color: "#a78bfa" }}> 🎸 {dados.instrumentos.join(", ")}</span>}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          {/* Músicas desta escala */}
-                          <div style={{ fontSize: 11, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 }}>Músicas desta escala</div>
-                          {(escalaSelecionada.musicas || []).length === 0 ? (
-                            <div style={{ fontSize: 12, color: T.textFaint, marginBottom: 10 }}>Nenhuma música adicionada</div>
-                          ) : (escalaSelecionada.musicas || []).map((mid, i) => {
-                            const m = musicas.find(x => x.id === mid);
-                            return m ? (
-                              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, marginBottom: 6 }}>
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.titulo}</div>
-                                  <div style={{ fontSize: 11, color: T.textSub }}>{m.artista} {m.tom && `• Tom: ${m.tom}`}</div>
-                                </div>
-                                <button onClick={async () => {
-                                  const novas = (escalaSelecionada.musicas || []).filter(x => x !== mid);
-                                  await updateDoc(doc(db, "escalas", escalaSelecionada.id), { musicas: novas });
-                                  setEscalaSelecionada({ ...escalaSelecionada, musicas: novas });
-                                }} style={S.delBtn}>✕</button>
-                              </div>
-                            ) : null;
-                          })}
-                          <select style={{ ...S.select, marginBottom: 0 }} value="" onChange={async e => {
-                            if (!e.target.value) return;
-                            const novas = [...(escalaSelecionada.musicas || []), e.target.value];
-                            await updateDoc(doc(db, "escalas", escalaSelecionada.id), { musicas: novas });
-                            setEscalaSelecionada({ ...escalaSelecionada, musicas: novas });
-                          }}>
-                            <option value="">+ Adicionar música à escala...</option>
-                            {musicas.filter(m => !(escalaSelecionada.musicas || []).includes(m.id)).map(m => (
-                              <option key={m.id} value={m.id}>{m.titulo} — {m.artista}</option>
-                            ))}
-                          </select>
-                          <button style={{ ...S.delBtn, width: "100%", marginTop: 12, padding: "10px 0", fontSize: 13 }}
-                            onClick={async () => { if (window.confirm("Excluir esta escala?")) { await deleteDoc(doc(db, "escalas", escalaSelecionada.id)); setEscalaSelecionada(null); showToast("🗑️ Escala removida!"); } }}>
-                            🗑️ Excluir Escala
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          {/* Nova escala */}
-                          <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
-                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>➕ Nova Escala</div>
-
-                            {/* Vincular a evento existente ou criar nome próprio */}
-                            <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>Vincular a evento da agenda (opcional)</div>
-                            <select style={{ ...S.select, marginBottom: 8 }}
-                              value={novaEscala.eventoId || ""}
-                              onChange={e => {
-                                const ev = agenda.find(a => a.id === e.target.value);
-                                if (ev) setNovaEscala({ ...novaEscala, eventoId: ev.id, culto: ev.titulo, data: ev.data, hora: ev.hora || "" });
-                                else setNovaEscala({ ...novaEscala, eventoId: "", culto: "", data: "", hora: "" });
-                              }}>
-                              <option value="">— Ou preencha manualmente abaixo —</option>
-                              {agenda.sort((a, b) => a.data?.localeCompare(b.data)).map(ev => (
-                                <option key={ev.id} value={ev.id}>{ev.titulo} — {new Date(ev.data + "T12:00").toLocaleDateString("pt-BR")}</option>
-                              ))}
-                            </select>
-
-                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="Nome da escala (Ex: Culto Domingo 10h)"
-                              value={novaEscala.culto} onChange={e => setNovaEscala({ ...novaEscala, culto: e.target.value, eventoId: "" })} />
-                            <div style={{ display: "flex", gap: 8 }}>
-                              <input type="date" style={{ ...S.input, marginBottom: 0, flex: 1 }}
-                                value={novaEscala.data} onChange={e => setNovaEscala({ ...novaEscala, data: e.target.value })} />
-                              <input style={{ ...S.input, marginBottom: 0, flex: 1 }} placeholder="Horário"
-                                value={novaEscala.hora} onChange={e => setNovaEscala({ ...novaEscala, hora: e.target.value })} />
-                            </div>
-                            <button style={{ ...S.saveBtn, marginTop: 10 }} onClick={async () => {
-                              if (!novaEscala.culto || !novaEscala.data) { showToast("⚠️ Preencha o nome e a data!"); return; }
-                              await addDoc(collection(db, "escalas"), { ...novaEscala, ministerio: ministerioLider, membrosEscalados: {}, musicas: [], criadoEm: new Date().toISOString() });
-                              setNovaEscala({ data: "", hora: "", culto: "", eventoId: "", funcoes: {} });
-                              showToast("✅ Escala criada!");
-                            }}>📋 Criar Escala</button>
-                          </div>
-                          {/* Lista de escalas */}
-                          {escalas.filter(e => e.ministerio === ministerioLider).map(e => (
-                            <div key={e.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 8, cursor: "pointer" }}
-                              onClick={() => setEscalaSelecionada(e)}>
-                              <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{e.culto}</div>
-                                <div style={{ fontSize: 12, color: T.textSub }}>{new Date(e.data + "T12:00").toLocaleDateString("pt-BR")} {e.hora && `• ${e.hora}`}</div>
-                                <div style={{ fontSize: 11, color: T.textFaint, marginTop: 2 }}>
-                                  {Object.keys(e.membrosEscalados || e.funcoes || {}).filter(Boolean).length} escalado(s) • {(e.musicas || []).length} música(s)
-                                </div>
-                              </div>
-                              <div style={{ color: T.gold, fontSize: 20 }}>›</div>
-                            </div>
-                          ))}
-                          {escalas.filter(e => e.ministerio === ministerioLider).length === 0 && (
-                            <div style={{ textAlign: "center", padding: "24px 0", color: T.textSub, fontSize: 13 }}>
-                              <div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>Nenhuma escala criada ainda
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </>
-                  )}
 
                   {/* ── MÚSICAS ── */}
                   {musicaView === "musicas" && (
