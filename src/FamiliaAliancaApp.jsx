@@ -2865,6 +2865,9 @@ export default function FamiliaAliancaApp() {
                 </div>
               );
             })()}
+          </div>
+        )}
+
         {tab === "admin" && isAdmin && (
           <div style={{ animation: "slideUp .4s ease" }}>
             <div style={S.adminHeader}>
