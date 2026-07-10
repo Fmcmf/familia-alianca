@@ -273,6 +273,8 @@ export default function FamiliaAliancaApp() {
   const [ministerioLider, setMinisterioLider] = useState(null);
   const [buscaAddMin, setBuscaAddMin] = useState("");
   const [mostrarAdicionar, setMostrarAdicionar] = useState(false);
+  const [perfilMusical, setPerfilMusical] = useState({ funcoes: [], instrumentos: [] });
+  const [membroParaAdicionar, setMembroParaAdicionar] = useState(null);
   // Módulo Música
   const [musicaView, setMusicaView] = useState("escalas"); // escalas | musicas | cifras
   const [escalas, setEscalas] = useState([]);
@@ -2441,13 +2443,20 @@ export default function FamiliaAliancaApp() {
                 const mins = m.ministerios || [];
                 if (!mins.includes(ministerioLider)) {
                   const novosMins = [...mins, ministerioLider];
-                  await updateDoc(doc(db, "membros", m.email), { ministerios: novosMins });
-                  // Se for o usuário logado, atualizar o store
+                  // Salvar perfil musical do membro neste ministério
+                  const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
+                  await updateDoc(doc(db, "membros", m.email), {
+                    ministerios: novosMins,
+                    [perfilKey]: perfilMusical
+                  });
                   if (user?.email === m.email) {
                     const novoUser = { ...user, ministerios: novosMins };
                     store.set(SK.user, novoUser);
                     setUser(novoUser);
                   }
+                  setMembroParaAdicionar(null);
+                  setPerfilMusical({ funcoes: [], instrumentos: [] });
+                  setMostrarAdicionar(false);
                   showToast(`✅ ${m.nome} adicionado ao ministério!`);
                 }
               };
@@ -2475,33 +2484,96 @@ export default function FamiliaAliancaApp() {
                   {/* Busca para adicionar */}
                   {mostrarAdicionar && (
                     <div style={{ marginBottom: 16 }}>
-                      <input style={{ ...S.input, marginBottom: 8 }}
-                        placeholder="🔍 Buscar membro para adicionar..."
-                        value={buscaAddMin}
-                        onChange={e => setBuscaAddMin(e.target.value)} />
-                      {buscaAddMin.trim().length > 1 && (
-                        <div style={{ background: darkMode ? "#07112a" : "#fff", border: `1px solid ${T.cardBorder}`, borderRadius: 12, overflow: "hidden" }}>
-                          {membrosForaMin
-                            .filter(m => m.nome?.toLowerCase().includes(buscaAddMin.toLowerCase()) || m.email?.toLowerCase().includes(buscaAddMin.toLowerCase()))
-                            .slice(0, 8)
-                            .map(m => (
-                              <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${T.cardBorder}` }}>
-                                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
-                                  {m.nome?.charAt(0).toUpperCase()}
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
-                                  <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
-                                </div>
-                                <button onClick={() => { addMembro(m); setBuscaAddMin(""); }}
-                                  style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}>
-                                  + Adicionar
-                                </button>
-                              </div>
-                            ))}
-                          {membrosForaMin.filter(m => m.nome?.toLowerCase().includes(buscaAddMin.toLowerCase())).length === 0 && (
-                            <div style={{ padding: "12px 14px", fontSize: 13, color: T.textSub }}>Nenhum membro encontrado</div>
+                      {!membroParaAdicionar ? (
+                        <>
+                          <input style={{ ...S.input, marginBottom: 8 }}
+                            placeholder="🔍 Buscar membro para adicionar..."
+                            value={buscaAddMin}
+                            onChange={e => setBuscaAddMin(e.target.value)} />
+                          {buscaAddMin.trim().length > 1 && (
+                            <div style={{ background: darkMode ? "#07112a" : "#fff", border: `1px solid ${T.cardBorder}`, borderRadius: 12, overflow: "hidden" }}>
+                              {membrosForaMin
+                                .filter(m => m.nome?.toLowerCase().includes(buscaAddMin.toLowerCase()) || m.email?.toLowerCase().includes(buscaAddMin.toLowerCase()))
+                                .slice(0, 8)
+                                .map(m => (
+                                  <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${T.cardBorder}` }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
+                                      {m.nome?.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                      <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                                      <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
+                                    </div>
+                                    <button onClick={() => { setMembroParaAdicionar(m); setBuscaAddMin(""); setPerfilMusical({ funcoes: [], instrumentos: [] }); }}
+                                      style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                                      Selecionar
+                                    </button>
+                                  </div>
+                                ))}
+                              {membrosForaMin.filter(m => m.nome?.toLowerCase().includes(buscaAddMin.toLowerCase())).length === 0 && (
+                                <div style={{ padding: "12px 14px", fontSize: 13, color: T.textSub }}>Nenhum membro encontrado</div>
+                              )}
+                            </div>
                           )}
+                        </>
+                      ) : (
+                        /* Formulário de perfil musical */
+                        <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px" }}>
+                          {/* Header membro selecionado */}
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, paddingBottom: 12, borderBottom: `1px solid ${T.cardBorder}` }}>
+                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: "bold", color: "#c9a84c" }}>
+                              {membroParaAdicionar.nome?.charAt(0).toUpperCase()}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{membroParaAdicionar.nome}</div>
+                              <div style={{ fontSize: 11, color: T.textSub }}>Definindo perfil musical</div>
+                            </div>
+                            <button onClick={() => setMembroParaAdicionar(null)}
+                              style={{ background: "none", border: "none", color: T.textFaint, cursor: "pointer", fontSize: 18 }}>×</button>
+                          </div>
+
+                          {/* Função vocal */}
+                          <div style={{ marginBottom: 14 }}>
+                            <div style={{ fontSize: 12, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎤 Função Vocal</div>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                              {["Ministro(a)", "Soprano", "Contralto", "Tenor", "Barítono"].map(f => (
+                                <button key={f} onClick={() => {
+                                  const atual = perfilMusical.funcoes;
+                                  setPerfilMusical({ ...perfilMusical, funcoes: atual.includes(f) ? atual.filter(x => x !== f) : [...atual, f] });
+                                }} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${perfilMusical.funcoes.includes(f) ? "#c9a84c" : T.cardBorder}`, background: perfilMusical.funcoes.includes(f) ? "rgba(201,168,76,.2)" : "transparent", color: perfilMusical.funcoes.includes(f) ? "#c9a84c" : T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: perfilMusical.funcoes.includes(f) ? "bold" : "normal" }}>
+                                  {f}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Instrumento */}
+                          <div style={{ marginBottom: 16 }}>
+                            <div style={{ fontSize: 12, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎸 Instrumento(s)</div>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                              {["Violão", "Teclado", "Bateria", "Baixo", "Guitarra", "Flauta", "Violino", "Percussão"].map(i => (
+                                <button key={i} onClick={() => {
+                                  const atual = perfilMusical.instrumentos;
+                                  setPerfilMusical({ ...perfilMusical, instrumentos: atual.includes(i) ? atual.filter(x => x !== i) : [...atual, i] });
+                                }} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${perfilMusical.instrumentos.includes(i) ? "#8b5cf6" : T.cardBorder}`, background: perfilMusical.instrumentos.includes(i) ? "rgba(139,92,246,.2)" : "transparent", color: perfilMusical.instrumentos.includes(i) ? "#a78bfa" : T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: perfilMusical.instrumentos.includes(i) ? "bold" : "normal" }}>
+                                  {i}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Resumo selecionado */}
+                          {(perfilMusical.funcoes.length > 0 || perfilMusical.instrumentos.length > 0) && (
+                            <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 10, padding: "8px 12px", marginBottom: 12, fontSize: 12, color: T.textSub }}>
+                              {perfilMusical.funcoes.length > 0 && <div>🎤 {perfilMusical.funcoes.join(", ")}</div>}
+                              {perfilMusical.instrumentos.length > 0 && <div>🎸 {perfilMusical.instrumentos.join(", ")}</div>}
+                            </div>
+                          )}
+
+                          <button onClick={() => addMembro(membroParaAdicionar)}
+                            style={{ ...S.saveBtn, marginTop: 0 }}>
+                            ✅ Confirmar e Adicionar
+                          </button>
                         </div>
                       )}
                     </div>
@@ -2514,14 +2586,27 @@ export default function FamiliaAliancaApp() {
                       <div style={{ fontSize: 13, color: T.textSub }}>Nenhum membro neste ministério ainda</div>
                       <div style={{ fontSize: 12, color: T.textFaint, marginTop: 4 }}>Use o botão acima para adicionar</div>
                     </div>
-                  ) : membrosMin.map(m => (
-                    <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "center", gap: 12 }}>
+                  ) : membrosMin.map(m => {
+                    const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
+                    const perfil = m[perfilKey];
+                    return (
+                    <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12 }}>
                       <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>
                         {m.nome?.charAt(0).toUpperCase()}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
                         <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
+                        {perfil && (perfil.funcoes?.length > 0 || perfil.instrumentos?.length > 0) && (
+                          <div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 4 }}>
+                            {(perfil.funcoes || []).map(f => (
+                              <span key={f} style={{ fontSize: 10, background: "rgba(201,168,76,.15)", color: "#c9a84c", border: "1px solid rgba(201,168,76,.3)", borderRadius: 20, padding: "2px 8px" }}>🎤 {f}</span>
+                            ))}
+                            {(perfil.instrumentos || []).map(i => (
+                              <span key={i} style={{ fontSize: 10, background: "rgba(139,92,246,.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,.3)", borderRadius: 20, padding: "2px 8px" }}>🎸 {i}</span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div style={{ display: "flex", gap: 6 }}>
                         {m.celular && (
@@ -2532,7 +2617,8 @@ export default function FamiliaAliancaApp() {
                           style={S.delBtn}>🗑️</button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })()}
