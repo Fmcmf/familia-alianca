@@ -316,7 +316,10 @@ export default function FamiliaAliancaApp() {
   const [novoLancamento, setNovoLancamento] = useState({ tipo: "entrada", categoria: "Dízimo", descricao: "", valor: "", data: new Date().toISOString().split("T")[0] });
   const [finPeriodo, setFinPeriodo] = useState(new Date().toISOString().slice(0, 7));
   const [finView, setFinView] = useState("dashboard"); // dashboard | lancamentos | novo | dizimistas
-  const [relatorioVisivel, setRelatorioVisivel] = useState(null); // null | { titulo, conteudo }
+  const [ultimaVisita, setUltimaVisita] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("fa_ultima_visita") || "{}"); }
+    catch { return {}; }
+  }); // null | { titulo, conteudo }
   const [dizimistas, setDizimistas] = useState([]);
   const [novoDizimo, setNovoDizimo] = useState({ membroNome: "", membroEmail: "", valor: "", data: new Date().toISOString().split("T")[0], formaPagamento: "pix" });
   const [buscaDizimista, setBuscaDizimista] = useState("");
@@ -710,6 +713,13 @@ export default function FamiliaAliancaApp() {
         setMinisterioLider(null);
       }
       setScreen("app");
+      // Inicializar última visita se for primeira vez
+      if (!localStorage.getItem("fa_ultima_visita")) {
+        const agora = new Date().toISOString();
+        const inicial = { home: agora, biblia: agora, devocional: agora, mais: agora, oracao: agora };
+        localStorage.setItem("fa_ultima_visita", JSON.stringify(inicial));
+        setUltimaVisita(inicial);
+      }
       // Verificar se cadastro está incompleto
       const cadastroCompleto = u.celular && u.sexo && u.estadoCivil && u.dataNascimento;
       if (!cadastroCompleto) {
@@ -762,7 +772,32 @@ export default function FamiliaAliancaApp() {
     }
   };
 
-  const handleLogout = () => { store.set(SK.user, null); setUser(null); setIsAdmin(false); setIsLider(false); setMinisterioLider(null); setScreen("login"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
+  const marcarVisto = (abaId) => {
+    const nova = { ...ultimaVisita, [abaId]: new Date().toISOString() };
+    setUltimaVisita(nova);
+    try { localStorage.setItem("fa_ultima_visita", JSON.stringify(nova)); } catch {}
+  };
+
+  // Verifica se há conteúdo novo desde última visita — funciona em tempo real
+  const temNovo = (abaId) => {
+    if (tab === abaId) return false; // já está na aba, não mostra
+    const ultima = ultimaVisita[abaId];
+    if (!ultima) return false;
+    const dt = new Date(ultima);
+    switch (abaId) {
+      case "home":
+        return avisos.some(a => a.data && new Date(a.data) > dt) ||
+               (bannerHome?.atualizado && new Date(bannerHome.atualizado) > dt);
+      case "biblia":
+        return estudos.some(e => e.criadoEm && new Date(e.criadoEm) > dt);
+      case "devocional":
+        return devocional?.criadoEm && new Date(devocional.criadoEm) > dt;
+      case "mais":
+        return avisos.some(a => a.data && new Date(a.data) > dt);
+      default:
+        return false;
+    }
+  }; store.set(SK.user, null); setUser(null); setIsAdmin(false); setIsLider(false); setMinisterioLider(null); setScreen("login"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
 
   // ── AGENDA ──
   const salvarEvento = async () => {
@@ -3468,7 +3503,8 @@ export default function FamiliaAliancaApp() {
                   }
                   await setDoc(doc(db, "config", "devocional"), {
                     ...novoDevocional,
-                    data: new Date().toISOString().split("T")[0]
+                    data: new Date().toISOString().split("T")[0],
+                    criadoEm: new Date().toISOString()
                   });
                   setNovoDevocional({ titulo: "", versiculo: "", referencia: "", palavra: "", aplicacao: "", oracao: "" });
                   showToast("✅ Devocional publicado!");
@@ -4653,10 +4689,16 @@ export default function FamiliaAliancaApp() {
         {TABS.map(t => (
           <button key={t.id} style={S.navBtn(tab === t.id)} onClick={() => {
             setTab(t.id);
+            marcarVisto(t.id);
             setMinisterioAtivo(null);
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}>
-            <span style={S.navIcon}>{t.icon}</span>
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <span style={S.navIcon}>{t.icon}</span>
+              {tab !== t.id && temNovo(t.id) && (
+                <span style={{ position: "absolute", top: -2, right: -4, width: 8, height: 8, borderRadius: "50%", background: "#22c55e", border: "1.5px solid " + (darkMode ? "#03060f" : "#f5f5f5"), display: "block" }} />
+              )}
+            </div>
             {t.label}
           </button>
         ))}
