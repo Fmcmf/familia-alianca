@@ -15,7 +15,7 @@ const YOUTUBE_CHANNEL = "familiaaliancapiracicaba";
 const WHATSAPP_PASTOR = "5519997218590";
 const PIX_KEY = "13.327.600/0001-00";
 
-const ENDERECO = "Rua Armando Longatti, nº 45 - Vila Industrial - Piracicaba/SP";
+const ENDERECO = "Rua Armando Longatti, nº 45 - Jardim São Vicente - Piracicaba/SP";
 const MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Rua+Armando+Longatti+45+Vila+Industrial+Piracicaba+SP";
 
 const HORARIOS_CULTO = [
@@ -2124,7 +2124,7 @@ export default function FamiliaAliancaApp() {
                 <div style={{ fontSize: 20, marginTop: 2 }}>📍</div>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>Rua Armando Longatti, nº 45</div>
-                  <div style={{ fontSize: 13, color: T.textSub }}>Vila Industrial — Piracicaba/SP</div>
+                  <div style={{ fontSize: 13, color: T.textSub }}>Jardim São Vicente — Piracicaba/SP</div>
                 </div>
               </div>
               <div style={{ borderRadius: 10, overflow: "hidden", marginBottom: 12, border: "1px solid " + T.cardBorder }}>
