@@ -797,7 +797,9 @@ export default function FamiliaAliancaApp() {
       default:
         return false;
     }
-  }; store.set(SK.user, null); setUser(null); setIsAdmin(false); setIsLider(false); setMinisterioLider(null); setScreen("login"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
+  };
+
+  const handleLogout = () => { store.set(SK.user, null); setUser(null); setIsAdmin(false); setIsLider(false); setMinisterioLider(null); setScreen("login"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
 
   // ── AGENDA ──
   const salvarEvento = async () => {
