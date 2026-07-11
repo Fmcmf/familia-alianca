@@ -319,7 +319,8 @@ export default function FamiliaAliancaApp() {
   const [ultimaVisita, setUltimaVisita] = useState(() => {
     try { return JSON.parse(localStorage.getItem("fa_ultima_visita") || "{}"); }
     catch { return {}; }
-  }); // null | { titulo, conteudo }
+  });
+  const [relatorioVisivel, setRelatorioVisivel] = useState(null);
   const [dizimistas, setDizimistas] = useState([]);
   const [novoDizimo, setNovoDizimo] = useState({ membroNome: "", membroEmail: "", valor: "", data: new Date().toISOString().split("T")[0], formaPagamento: "pix" });
   const [buscaDizimista, setBuscaDizimista] = useState("");
