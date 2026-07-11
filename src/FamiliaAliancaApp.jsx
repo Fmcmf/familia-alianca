@@ -2780,7 +2780,11 @@ export default function FamiliaAliancaApp() {
               ].sort((a, b) => a.data?.localeCompare(b.data));
 
               // Buscar ou criar escala para um evento
-              const escalaDoEvento = (eventoId) => escalas.find(e => e.eventoId === eventoId || e.eventoRef === eventoId);
+              const escalaDoEvento = (eventoId) => escalas.find(e =>
+                e.ministerio === ministerioLider &&
+                eventoId &&
+                (e.eventoId === eventoId || e.eventoRef === eventoId)
+              );
 
               if (eventoEscalaAberto) {
                 // ── TELA DE MONTAGEM DA ESCALA ──
