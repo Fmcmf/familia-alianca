@@ -43,27 +43,6 @@ const MINISTERIOS = [
   { id: 7, nome: "MOVE — Jovens", icon: "🔥", desc: "Um movimento de jovens apaixonados por Deus, transformando vidas e gerações.", cor: "#f97316" },
 ];
 
-// Extrai ID do YouTube de qualquer formato de URL
-const getYouTubeId = (url) => {
-  if (!url) return null;
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
-  ];
-  for (const p of patterns) {
-    const m = url.match(p);
-    if (m) return m[1];
-  }
-  return null;
-};
-
-// Extrai ID do Spotify de qualquer formato de URL
-const getSpotifyId = (url) => {
-  if (!url) return null;
-  const m = url.match(/spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
-  return m ? { type: m[1], id: m[2] } : null;
-};
-
 const ESTUDOS_FIXOS = [
   {
     id: "f1", nivel: "iniciante", fixo: true,
@@ -679,6 +658,12 @@ export default function FamiliaAliancaApp() {
     if (!url) return null;
     const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/)([a-zA-Z0-9_-]{11})/);
     return match ? match[1] : null;
+  };
+
+  const getSpotifyId = (url) => {
+    if (!url) return null;
+    const m = url.match(/spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
+    return m ? { type: m[1], id: m[2] } : null;
   };
 
   // ── AUTH ──
@@ -1548,7 +1533,7 @@ export default function FamiliaAliancaApp() {
                 </div>
                 {aoVivo.url && getYouTubeId(aoVivo.url) && (
                   <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, background: "#000" }}>
-                    <iframe
+                    <iframe title="Video player"
                       style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
                       src={`https://www.youtube.com/embed/${getYouTubeId(aoVivo.url)}?autoplay=1`}
                       title="Ao Vivo"
@@ -1594,9 +1579,9 @@ export default function FamiliaAliancaApp() {
                     <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 10 }}>{ultimoVideo.titulo}</div>
                   )}
                   <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid " + T.cardBorder }}>
-                    <iframe
+                    <iframe title="Video player"
                       width="100%" height="200"
-                      src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`}
+                      title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`}
                       title="Último Culto"
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -2107,7 +2092,7 @@ export default function FamiliaAliancaApp() {
                 </div>
               </div>
               <div style={{ borderRadius: 10, overflow: "hidden", marginBottom: 12, border: "1px solid " + T.cardBorder }}>
-                <iframe
+                <iframe title="Video player"
                   title="Localização Igreja Família Aliança"
                   width="100%" height="180"
                   style={{ border: 0, display: "block" }}
@@ -2421,11 +2406,11 @@ export default function FamiliaAliancaApp() {
                                             </div>
                                             {/* YouTube embed */}
                                             {getYouTubeId(mus.link) && (
-                                              <iframe width="100%" height="160" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />
+                                              <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />
                                             )}
                                             {/* Spotify embed */}
                                             {getSpotifyId(mus.link) && (
-                                              <iframe src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />
+                                              <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />
                                             )}
                                             {/* Cifra desta música */}
                                             {cifra && (
@@ -3096,12 +3081,12 @@ export default function FamiliaAliancaApp() {
                         {/* Preview do link */}
                         {novaMusica.link && getYouTubeId(novaMusica.link) && (
                           <div style={{ marginTop: 8, borderRadius: 10, overflow: "hidden" }}>
-                            <iframe width="100%" height="160" src={`https://www.youtube.com/embed/${getYouTubeId(novaMusica.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />
+                            <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(novaMusica.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />
                           </div>
                         )}
                         {novaMusica.link && getSpotifyId(novaMusica.link) && (
                           <div style={{ marginTop: 8, borderRadius: 10, overflow: "hidden" }}>
-                            <iframe src={`https://open.spotify.com/embed/${getSpotifyId(novaMusica.link).type}/${getSpotifyId(novaMusica.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />
+                            <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(novaMusica.link).type}/${getSpotifyId(novaMusica.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />
                           </div>
                         )}
                         <button style={{ ...S.saveBtn, marginTop: 10 }} onClick={async () => {
@@ -3125,11 +3110,11 @@ export default function FamiliaAliancaApp() {
                             </div>
                             {/* YouTube embed */}
                             {ytId && (
-                              <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${ytId}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />
+                              <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${ytId}`} frameBorder="0" allowFullScreen style={{ display: "block" }}  title="Video player"/>
                             )}
                             {/* Spotify embed */}
                             {spId && (
-                              <iframe src={`https://open.spotify.com/embed/${spId.type}/${spId.id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />
+                              <iframe src={`https://open.spotify.com/embed/${spId.type}/${spId.id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }}  title="Video player"/>
                             )}
                             {/* Link externo se não for YT nem Spotify */}
                             {m.link && !ytId && !spId && (
@@ -4424,8 +4409,8 @@ export default function FamiliaAliancaApp() {
                   onChange={e => setUltimoVideo(v => ({ ...v, data: e.target.value }))} />
                 {ultimoVideo?.url && getYouTubeId(ultimoVideo.url) && (
                   <div style={{ borderRadius: 12, overflow: "hidden", margin: "14px 0", border: "1px solid " + T.cardBorder }}>
-                    <iframe width="100%" height="180"
-                      src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`}
+                    <iframe title="Video player" width="100%" height="180"
+                      title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`}
                       title="Preview" frameBorder="0" allowFullScreen style={{ display: "block" }} />
                   </div>
                 )}
