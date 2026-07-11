@@ -3030,10 +3030,22 @@ export default function FamiliaAliancaApp() {
                                 }}>🗑️</button>
                               )}
                             </div>
-                            <button onClick={() => { setEventoEscalaAberto(e); setCategoriaEscala(null); }}
-                              style={{ width: "100%", padding: "9px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 10, fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}>
-                              📋 {qtdEscalados > 0 ? "Ver/Editar Escala" : "Montar Escala"}
-                            </button>
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <button onClick={() => { setEventoEscalaAberto(e); setCategoriaEscala(null); }}
+                                style={{ flex: 1, padding: "9px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 10, fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                                📋 {qtdEscalados > 0 ? "Ver/Editar Escala" : "Montar Escala"}
+                              </button>
+                              {escala && (
+                                <button onClick={async () => {
+                                  if (window.confirm("Excluir a escala deste evento? Os escalados serão removidos.")) {
+                                    await deleteDoc(doc(db, "escalas", escala.id));
+                                    showToast("🗑️ Escala removida!");
+                                  }
+                                }} style={{ padding: "9px 12px", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 10, color: "#ef4444", fontSize: 13, cursor: "pointer" }}>
+                                  🗑️
+                                </button>
+                              )}
+                            </div>
                           </div>
                         );
                       })}
