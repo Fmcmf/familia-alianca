@@ -1533,10 +1533,9 @@ export default function FamiliaAliancaApp() {
                 </div>
                 {aoVivo.url && getYouTubeId(aoVivo.url) && (
                   <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, background: "#000" }}>
-                    <iframe title="Video player"
+                    <iframe title="Ao Vivo"
                       style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
                       src={`https://www.youtube.com/embed/${getYouTubeId(aoVivo.url)}?autoplay=1`}
-                      title="Ao Vivo"
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -1579,10 +1578,9 @@ export default function FamiliaAliancaApp() {
                     <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 10 }}>{ultimoVideo.titulo}</div>
                   )}
                   <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid " + T.cardBorder }}>
-                    <iframe title="Video player"
+                    <iframe title="Último Culto"
                       width="100%" height="200"
-                      title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`}
-                      title="Último Culto"
+                      src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`}
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -2092,8 +2090,7 @@ export default function FamiliaAliancaApp() {
                 </div>
               </div>
               <div style={{ borderRadius: 10, overflow: "hidden", marginBottom: 12, border: "1px solid " + T.cardBorder }}>
-                <iframe title="Video player"
-                  title="Localização Igreja Família Aliança"
+                <iframe title="Localização Igreja Família Aliança"
                   width="100%" height="180"
                   style={{ border: 0, display: "block" }}
                   loading="lazy"
@@ -4409,9 +4406,8 @@ export default function FamiliaAliancaApp() {
                   onChange={e => setUltimoVideo(v => ({ ...v, data: e.target.value }))} />
                 {ultimoVideo?.url && getYouTubeId(ultimoVideo.url) && (
                   <div style={{ borderRadius: 12, overflow: "hidden", margin: "14px 0", border: "1px solid " + T.cardBorder }}>
-                    <iframe title="Video player" width="100%" height="180"
-                      title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`}
-                      title="Preview" frameBorder="0" allowFullScreen style={{ display: "block" }} />
+                    <iframe title="Preview" width="100%" height="180"
+                      src={`https://www.youtube.com/embed/${getYouTubeId(ultimoVideo.url)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />
                   </div>
                 )}
                 <button style={S.saveBtn} onClick={async () => {
