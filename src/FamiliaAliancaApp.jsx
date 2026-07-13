@@ -1288,25 +1288,34 @@ export default function FamiliaAliancaApp() {
   // ── RENDER APP ──
   return (
     <div style={S.app}>
-      {/* ── MODAL PDF INLINE ── */}
+      {/* ── MODAL PDF/IMAGEM INLINE ── */}
       {pdfAberto && (
         <div style={{ position: "fixed", inset: 0, zIndex: 3000, background: "#000", display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", background: "#1a1a2e", borderBottom: "1px solid rgba(255,255,255,.1)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", background: "#1a1a2e", borderBottom: "1px solid rgba(255,255,255,.1)", flexShrink: 0 }}>
             <button onClick={() => setPdfAberto(null)}
-              style={{ background: "rgba(239,68,68,.15)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 8, padding: "6px 14px", color: "#f87171", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+              style={{ background: "rgba(239,68,68,.15)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 8, padding: "6px 14px", color: "#f87171", fontSize: 13, cursor: "pointer" }}>
               ✕ Fechar
             </button>
-            <div style={{ fontSize: 13, color: "#fff", flex: 1 }}>📄 Visualizando Cifra</div>
-            <button onClick={() => window.open(pdfAberto, "_blank")}
-              style={{ background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, padding: "6px 14px", color: "#c9a84c", fontSize: 12, cursor: "pointer" }}>
-              ↗ Abrir
-            </button>
+            <div style={{ fontSize: 13, color: "#fff", flex: 1 }}>📄 Cifra</div>
           </div>
-          <iframe
-            title="PDF Viewer"
-            src={pdfAberto}
-            style={{ flex: 1, border: "none", width: "100%", height: "100%" }}
-          />
+          <div style={{ flex: 1, overflow: "auto", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: 8 }}>
+            {/* Cloudinary converte PDF para imagem automaticamente */}
+            <img
+              src={pdfAberto.includes("cloudinary.com")
+                ? pdfAberto
+                    .replace("/raw/upload/", "/image/upload/")
+                    .replace(".pdf", ".jpg")
+                : pdfAberto}
+              alt="Cifra"
+              style={{ width: "100%", maxWidth: 800, borderRadius: 8, display: "block" }}
+              onError={e => {
+                // Se falhar, tenta PNG
+                if (!e.target.src.includes(".png")) {
+                  e.target.src = e.target.src.replace(".jpg", ".png");
+                }
+              }}
+            />
+          </div>
         </div>
       )}
 
@@ -2709,10 +2718,6 @@ export default function FamiliaAliancaApp() {
                                                   {cifraMusica.arquivo && (
                                                     <button onClick={() => {
                                                       let url = cifraMusica.arquivo;
-                                                      // Corrigir URL do PDF Cloudinary
-                                                      if (url && url.includes("cloudinary.com") && url.includes("/image/upload/")) {
-                                                        url = url.replace("/image/upload/", "/raw/upload/");
-                                                      }
                                                       setPdfAberto(pdfAberto === url ? null : url);
                                                     }}
                                                       style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>
