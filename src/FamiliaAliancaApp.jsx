@@ -485,6 +485,7 @@ export default function FamiliaAliancaApp() {
   const [novaMusica, setNovaMusica] = useState({ titulo: "", artista: "", tom: "", link: "" });
   const [novaCifra, setNovaCifra] = useState({ titulo: "", artista: "", tom: "", conteudo: "", link: "", arquivo: "" });
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
+  const [pdfAberto, setPdfAberto] = useState(null); // URL do PDF aberto inline
   const [showCompletarCadastro, setShowCompletarCadastro] = useState(false);
   const [completarForm, setCompletarForm] = useState({});
   const [completarPulado, setCompletarPulado] = useState(false);
@@ -1286,6 +1287,28 @@ export default function FamiliaAliancaApp() {
   // ── RENDER APP ──
   return (
     <div style={S.app}>
+      {/* ── MODAL PDF INLINE ── */}
+      {pdfAberto && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 3000, background: "#000", display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", background: "#1a1a2e", borderBottom: "1px solid rgba(255,255,255,.1)" }}>
+            <button onClick={() => setPdfAberto(null)}
+              style={{ background: "rgba(239,68,68,.15)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 8, padding: "6px 14px", color: "#f87171", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+              ✕ Fechar
+            </button>
+            <div style={{ fontSize: 13, color: "#fff", flex: 1 }}>📄 Visualizando Cifra</div>
+            <button onClick={() => window.open(pdfAberto, "_blank")}
+              style={{ background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, padding: "6px 14px", color: "#c9a84c", fontSize: 12, cursor: "pointer" }}>
+              ↗ Abrir
+            </button>
+          </div>
+          <iframe
+            title="PDF Viewer"
+            src={pdfAberto}
+            style={{ flex: 1, border: "none", width: "100%", height: "100%" }}
+          />
+        </div>
+      )}
+
       <div style={S.bg} />
 
       {/* ── MODAL RELATÓRIO ── */}
@@ -2685,9 +2708,8 @@ export default function FamiliaAliancaApp() {
                                                   {cifraMusica.arquivo && (
                                                     <button onClick={() => {
                                                       let url = cifraMusica.arquivo;
-                                                      // Usar Google Docs Viewer para abrir PDF de qualquer origem
-                                                      if (url.includes(".pdf")) url = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=false`;
-                                                      window.open(url, "_blank");
+                                                      // Abrir PDF inline no app
+                                                      setPdfAberto(pdfAberto === url ? null : url);
                                                     }}
                                                       style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>
                                                       📄 Abrir PDF
@@ -2719,9 +2741,8 @@ export default function FamiliaAliancaApp() {
                                                 {vsMusica.arquivo && !vsMusica.tipo?.includes("audio") && (
                                                   <button onClick={() => {
                                                     let url = vsMusica.arquivo;
-                                                    // Usar Google Docs Viewer para abrir PDF de qualquer origem
-                                                      if (url.includes(".pdf")) url = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=false`;
-                                                    window.open(url, "_blank");
+                                                    // Abrir PDF inline no app
+                                                      setPdfAberto(pdfAberto === url ? null : url);
                                                   }}
                                                     style={{ width: "100%", background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#a78bfa", cursor: "pointer" }}>
                                                     📁 Abrir Arquivo
@@ -3653,7 +3674,7 @@ export default function FamiliaAliancaApp() {
                             <div style={{ padding: "0 14px 12px" }}>
                               <button onClick={() => {
                                                   let url = v.arquivo;
-                                                  if (url && url.includes(".pdf")) url = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=false`;
+                                                  setPdfAberto(pdfAberto === url ? null : url); return;
                                                   window.open(url, "_blank");
                                                 }}
                                 style={{ width: "100%", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#a78bfa", cursor: "pointer" }}>
