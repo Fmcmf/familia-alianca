@@ -2631,7 +2631,12 @@ export default function FamiliaAliancaApp() {
                                     <div style={{ marginBottom: 8 }}>
                                       <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas do culto</div>
                                       {musicasEscala.map((mus, i) => {
-                                        const cifra = cifras.find(c => c.titulo?.toLowerCase() === mus.titulo?.toLowerCase() || c.artista?.toLowerCase() === mus.artista?.toLowerCase());
+                                        const cifra = cifras.find(c => {
+                                          const tituloMatch = c.titulo?.toLowerCase().trim() === mus.titulo?.toLowerCase().trim();
+                                          const artistaMatch = c.artista?.toLowerCase().trim() === mus.artista?.toLowerCase().trim();
+                                          // Busca por título igual OU título+artista similar
+                                          return tituloMatch || (artistaMatch && c.titulo?.toLowerCase().includes(mus.titulo?.toLowerCase()?.split(" ")[0]));
+                                        });
                                         return (
                                           <div key={i} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, marginBottom: 8, overflow: "hidden" }}>
                                             <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", marginBottom: cifra ? 0 : 0 }}>
@@ -2689,6 +2694,48 @@ export default function FamiliaAliancaApp() {
                                       })}
                                     </div>
                                   )}
+
+                                  {/* Cifras do ministério */}
+                                  {(() => {
+                                    const cifrasMin = cifras.filter(c => c.ministerio === min);
+                                    if (cifrasMin.length === 0) return null;
+                                    return (
+                                      <div style={{ marginTop: 10 }}>
+                                        <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎸 Cifras do Ministério</div>
+                                        {cifrasMin.map(c => (
+                                          <div key={c.id} style={{ background: T.card, border: `1px solid rgba(139,92,246,.2)`, borderLeft: "3px solid #8b5cf6", borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
+                                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 6 }}>{c.titulo}</div>
+                                            {c.artista && <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>{c.artista} {c.tom && <span style={{ color: "#c9a84c" }}>• Tom: {c.tom}</span>}</div>}
+                                            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                              {c.link && (
+                                                <button onClick={() => window.open(c.link, "_blank")}
+                                                  style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>
+                                                  🔗 Link
+                                                </button>
+                                              )}
+                                              {c.arquivo && (
+                                                <button onClick={() => window.open(c.arquivo, "_blank")}
+                                                  style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.1)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#f87171", cursor: "pointer" }}>
+                                                  📄 PDF
+                                                </button>
+                                              )}
+                                              {c.conteudo && (
+                                                <button onClick={() => setMusicaSelecionada(musicaSelecionada?.id === c.id ? null : c)}
+                                                  style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>
+                                                  📝 Ver Cifra
+                                                </button>
+                                              )}
+                                            </div>
+                                            {musicaSelecionada?.id === c.id && c.conteudo && (
+                                              <pre style={{ marginTop: 8, fontSize: 11, color: T.text, lineHeight: 1.7, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 8, padding: "10px" }}>
+                                                {c.conteudo}
+                                              </pre>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    );
+                                  })()}
 
                                   {/* VS do ministério */}
                                   {(() => {
