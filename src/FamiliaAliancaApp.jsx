@@ -13,6 +13,7 @@ const uploadCloudinary = async (file, onProgress) => {
   fd.append("file", file);
   fd.append("upload_preset", CLOUDINARY_PRESET);
   fd.append("resource_type", "auto");
+  fd.append("access_mode", "public");
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", CLOUDINARY_URL);
@@ -2708,7 +2709,10 @@ export default function FamiliaAliancaApp() {
                                                   {cifraMusica.arquivo && (
                                                     <button onClick={() => {
                                                       let url = cifraMusica.arquivo;
-                                                      // Abrir PDF inline no app
+                                                      // Corrigir URL do PDF Cloudinary
+                                                      if (url && url.includes("cloudinary.com") && url.includes("/image/upload/")) {
+                                                        url = url.replace("/image/upload/", "/raw/upload/");
+                                                      }
                                                       setPdfAberto(pdfAberto === url ? null : url);
                                                     }}
                                                       style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>
