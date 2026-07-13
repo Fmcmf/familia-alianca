@@ -44,196 +44,263 @@ const MINISTERIOS = [
 ];
 
 const ESTUDOS_FIXOS = [
+  // ══ INICIANTES ══
   {
     id: "f1", nivel: "iniciante", fixo: true,
-    titulo: "Quem é Jesus?",
-    versiculo: "João 14:6 — \"Eu sou o caminho, a verdade e a vida.\"",
-    texto: "Conhecer Jesus é o primeiro e mais importante passo da caminhada cristã. Mas quem é Jesus, de verdade?\n\nEle não é apenas um personagem histórico, um filósofo, ou um bom exemplo de vida. Jesus é o Filho eterno de Deus, que deixou a glória dos céus, tomou forma humana e veio ao mundo com uma missão: nos reconciliar com o Pai.\n\n**Jesus, totalmente Deus e totalmente homem**\n\nUma das grandes verdades da fé cristã é que Jesus é ao mesmo tempo plenamente Deus e plenamente humano. Como humano, Ele sentiu fome, cansaço, tristeza e dor. Em João 11:35, vemos Jesus chorar diante do túmulo de Lázaro, Ele se comove com a nossa dor. Mas como Deus, Ele ordenou que Lázaro saísse do túmulo, e ele saiu.\n\nEssa união entre o divino e o humano é o coração do evangelho: Deus desceu até nós para que pudéssemos subir até Ele.\n\n**Jesus como Caminho**\n\nAntes de Jesus, havia um abismo entre a humanidade e Deus causado pelo pecado. Nenhuma religião, esforço humano ou bondade pessoal seria capaz de atravessar esse abismo. Jesus disse: \"Eu sou o caminho\", não um caminho entre outros, mas o único. Por meio da Sua morte na cruz e da Sua ressurreição, Ele abriu uma porta que estava permanentemente fechada.\n\nPaulo escreve em Romanos 5:8: \"Mas Deus demonstra o seu amor por nós: Cristo morreu em nosso favor quando ainda éramos pecadores.\" Não esperou que fôssemos bons o suficiente. Veio até nós do jeito que éramos.\n\n**Jesus como Verdade**\n\nVivemos em um mundo repleto de opiniões, relativismo e mentiras. Em meio a tudo isso, Jesus se apresenta como a Verdade, não uma verdade entre outras, mas a realidade última sobre Deus, sobre o ser humano e sobre o propósito da vida.\n\nConhecer Jesus é como acender uma luz num quarto escuro. As coisas que pareciam confusas começam a fazer sentido. Quem somos, por que existimos, para onde vamos, tudo isso se clarifica quando encontramos Aquele que é a Verdade.\n\nEm João 8:32, Jesus diz: \"Conhecereis a verdade, e a verdade vos libertará.\" A verdade de Jesus não nos aprisiona com regras, ela nos liberta de tudo que nos mantinha escravizados: o medo, a culpa, a vergonha e a morte.\n\n**Jesus como Vida**\n\nJesus declarou em João 10:10: \"Eu vim para que tenham vida, e a tenham em abundância.\" Ele não veio para nos dar uma religião cheia de obrigações, mas vida, vida verdadeira, com propósito, alegria e esperança eterna.\n\nEssa vida começa aqui e agora, quando abrimos o coração para Ele. E se estende pela eternidade, pois Jesus venceu a morte. Sua ressurreição é a garantia de que nós também ressuscitaremos.\n\n**Um encontro pessoal**\n\nO mais importante não é apenas saber sobre Jesus, é conhecê-Lo pessoalmente. Ele não é uma ideia ou uma doutrina. É uma Pessoa que nos convida a um relacionamento real, diário e transformador.\n\nEm Apocalipse 3:20, Ele diz: \"Estou à porta e bato. Se alguém ouvir a minha voz e abrir a porta, entrarei e cearei com ele, e ele comigo.\" O convite está aberto. A porta está sendo batida. A resposta é nossa.",
+    titulo: "Quem é Deus?",
+    versiculo: "Êxodo 34:6 — "O Senhor, o Senhor, Deus compassivo e misericordioso, tardio em irar-se e grande em amor e fidelidade."",
+    texto: "Conhecer Deus é a maior aventura da existência humana. Mas quem é Ele, de verdade?\n\n**Deus é o Criador de tudo**\n\nO primeiro versículo da Bíblia declara: 'No princípio, Deus criou os céus e a terra' (Gênesis 1:1). Deus não foi criado — Ele existe por Si mesmo, sem começo e sem fim. Tudo o que existe — o universo, a vida, o tempo — veio à existência por Sua vontade e poder.\n\nIsso significa que você não é um acidente. Você foi criado por um Deus pessoal que o conhece pelo nome, que contou os seus cabelos (Mateus 10:30) e que o amou antes mesmo de você existir.\n\n**Deus é santo e justo**\n\nA palavra 'santo' significa separado, puro, sem mácula. Deus não pode conviver com o pecado — não porque seja intolerante, mas porque Sua natureza é luz pura, e trevas não podem existir onde há luz (1 João 1:5). A justiça de Deus garante que o bem será recompensado e o mal será julgado.\n\n**Deus é amor**\n\nMas Deus não é apenas santo e justo — Ele é amor (1 João 4:8). Não apenas que Deus ama, mas que Deus É amor. Seu amor não depende do nosso comportamento. Ele amou o mundo de tal maneira que deu Seu único Filho para que todo aquele que nEle crê não pereça (João 3:16).\n\n**Deus é pessoal**\n\nDeus não é uma força impessoal ou uma energia cósmica. Ele pensa, sente, age e se comunica. Ele ouve orações, responde, se alegra com Seus filhos e chora com eles. Jesus revelou que podemos chamá-Lo de 'Pai' — a maior prova de que Deus deseja um relacionamento íntimo e real conosco.\n\n**Como conhecer a Deus?**\n\nDeus se revelou de três formas principais: na criação (Salmos 19:1), nas Escrituras (2 Timóteo 3:16) e em Jesus Cristo, que é 'o resplendor da glória de Deus e a expressão exata do seu ser' (Hebreus 1:3). Conhecer Jesus é conhecer o Pai.",
     referencias: [
-      "João 1:1-14 — A Palavra se fez carne e habitou entre nós",
-      "Colossenses 1:15-20 — Jesus, imagem do Deus invisível e primogênito de toda a criação",
-      "Filipenses 2:5-11 — Jesus, que era Deus, assumiu a forma de servo",
-      "Hebreus 1:1-4 — Deus nos falou por meio do Seu Filho",
-      "1 João 5:11-12 — Quem tem o Filho tem a vida",
-      "Romanos 5:8 — Cristo morreu por nós quando ainda éramos pecadores",
-      "João 11:25-26 — Eu sou a ressurreição e a vida",
+      "Gênesis 1:1 — No princípio, Deus criou os céus e a terra",
+      "1 João 4:7-8 — Deus é amor",
+      "Salmos 139:1-18 — Deus nos conhece completamente",
+      "João 1:18 — Jesus revelou o Pai",
+      "Êxodo 3:14 — Eu Sou o que Sou — o nome de Deus",
+      "Isaías 40:28 — O Senhor é o Deus eterno, criador dos confins da terra",
     ],
     perguntas: [
-      "O que significa para você, pessoalmente, dizer que Jesus é o seu caminho?",
-      "Como a verdade de Jesus tem transformado ou pode transformar suas decisões diárias?",
-      "De que forma você tem experimentado a vida abundante que Jesus promete? O que ainda te impede de vivê-la plenamente?",
-      "Qual aspecto da pessoa de Jesus mais te impressiona: Ele como Deus, como humano, ou como Salvador? Por quê?"
+      "Qual atributo de Deus — amor, santidade, poder, onisciência — mais te impressiona? Por quê?",
+      "Como a ideia de que Deus é pessoal e não apenas uma força muda sua forma de se relacionar com Ele?",
+      "Você já sentiu a presença de Deus em alguma situação da sua vida? Como foi?",
+      "O que significa para você saber que Deus te conhece completamente e ainda assim te ama?",
     ],
-    oracao: "Senhor Jesus, obrigado por ser meu caminho, minha verdade e minha vida. Obrigado por ter deixado a glória dos céus por mim, por ter carregado meus pecados na cruz e por ter ressuscitado para que eu possa ter vida eterna. Quero Te conhecer cada dia mais profundamente, não apenas saber sobre Ti, mas ter um relacionamento real contigo. Abre meu coração, transforma minha mente e que minha vida reflita a Tua presença em tudo que eu faço. Amém."
+    oracao: "Senhor Deus, Tu és maior do que posso compreender, e ainda assim Te revelas para mim. Obrigado por ser um Deus pessoal, que me criou, me conhece e me ama com amor eterno. Quero conhecer-Te cada vez mais — não apenas saber sobre Ti, mas Te encontrar de verdade. Revela-Te a mim através da Tua Palavra e do Teu Espírito. Amém."
   },
   {
     id: "f2", nivel: "iniciante", fixo: true,
+    titulo: "Quem é Jesus?",
+    versiculo: "João 14:6 — "Eu sou o caminho, a verdade e a vida. Ninguém vem ao Pai, a não ser por mim."",
+    texto: "Jesus de Nazaré é a figura mais influente da história humana. Mas quem Ele é, de fato?\n\n**Jesus é Deus encarnado**\n\nA grande afirmação do cristianismo é que o eterno Filho de Deus tomou natureza humana e nasceu de uma virgem chamada Maria. João 1:1-14 declara: 'No princípio era o Verbo... e o Verbo se fez carne'. Jesus não é apenas um grande mestre ou profeta — Ele é Deus que veio ao nosso encontro.\n\nEle demonstrou isso em Sua vida: perdoando pecados (algo que só Deus pode fazer), acalmando tempestades, ressuscitando mortos e revelando o caráter exato do Pai.\n\n**Jesus como Caminho**\n\nAntes de Jesus, havia um abismo entre a humanidade pecadora e o Deus santo. Nenhum esforço humano conseguia atravessá-lo. Jesus veio ser esse caminho — não uma filosofia ou método, mas uma Pessoa. Ele disse 'Eu sou o caminho', não 'Eu mostro o caminho'. O acesso a Deus passa por Jesus.\n\n**Jesus como Verdade**\n\nEm um mundo cheio de relativismo, Jesus se apresenta como a Verdade absoluta. Conhecê-Lo é conhecer a realidade sobre Deus, sobre o ser humano, sobre o propósito da vida e sobre o destino eterno. Ele disse: 'E conhecereis a verdade, e a verdade vos libertará' (João 8:32).\n\n**Jesus como Vida**\n\nJesus não veio apenas nos dar regras, mas vida — vida em abundância (João 10:10). Essa vida começa no novo nascimento, continua na caminhada diária com Ele e se completa na eternidade. A ressurreição de Jesus é a garantia de que a morte não tem a última palavra.\n\n**Um encontro pessoal**\n\nO mais importante não é saber sobre Jesus, mas conhecê-Lo pessoalmente. Ele ainda bate à porta: 'Estou à porta e bato. Se alguém ouvir a minha voz e abrir a porta, entrarei' (Apocalipse 3:20). O convite é aberto.",
+    referencias: [
+      "João 1:1-14 — O Verbo se fez carne",
+      "Filipenses 2:5-11 — Jesus, que sendo Deus, assumiu forma de servo",
+      "Colossenses 1:15-20 — Jesus, imagem do Deus invisível",
+      "Hebreus 1:1-4 — Deus nos falou pelo Filho",
+      "1 Coríntios 15:3-4 — Morte e ressurreição de Cristo",
+      "Romanos 5:8 — Cristo morreu por nós quando ainda éramos pecadores",
+    ],
+    perguntas: [
+      "O que significa para você dizer que Jesus é o seu caminho, verdade e vida?",
+      "Como a ideia de que Jesus é Deus encarnado muda sua visão sobre quem Ele é?",
+      "De que forma você tem experimentado a vida abundante que Jesus promete?",
+      "Existe algo que te impede de entregar sua vida completamente a Jesus?",
+    ],
+    oracao: "Senhor Jesus, obrigado por ser meu caminho, minha verdade e minha vida. Obrigado por ter deixado a glória dos céus por mim, por ter morrido no meu lugar e por ter ressuscitado para que eu possa ter vida eterna. Quero Te conhecer cada dia mais profundamente. Toma o controle da minha vida. Amém."
+  },
+  {
+    id: "f3", nivel: "iniciante", fixo: true,
     titulo: "O que é Graça?",
-    versiculo: "Efésios 2:8-9 — \"Porque pela graça sois salvos, por meio da fé, e isso não vem de vós; é dom de Deus.\"",
-    texto: "A graça é um dos conceitos mais belos, mais libertadores e mais mal compreendidos da fé cristã. Entendê-la corretamente muda tudo na nossa caminhada com Deus.\n\n**O que graça significa?**\n\nGraça, no grego original do Novo Testamento, é a palavra \"charis\", favor imerecido, presente não conquistado. Em termos simples: graça é Deus nos dando o que não merecemos, enquanto misericórdia é Deus não nos dando o que merecemos.\n\nNão somos salvos porque somos bons. Não somos amados porque nos esforçamos o suficiente. Somos salvos e amados porque Deus é gracioso, e essa graça é um presente, não um prêmio.\n\n**Por que precisamos da graça?**\n\nA Bíblia é clara: \"Todos pecaram e estão destituídos da glória de Deus\" (Romanos 3:23). O pecado criou uma separação entre nós e Deus que nenhum esforço humano pode superar. Não importa quão boas sejam nossas ações, nossa bondade nunca seria suficiente para nos tornar justos diante de um Deus santo.\n\nÉ como tentar atravessar o oceano a nado. Alguns nadariam mais longe que outros, mas ninguém chegaria ao outro lado. Só a graça de Deus, que nos alcança onde estamos, é capaz de nos levar onde precisamos ir.\n\n**A graça em ação: a cruz**\n\nA maior demonstração da graça de Deus é a cruz de Jesus Cristo. Deus, que não precisava de nada, escolheu enviar Seu próprio Filho para morrer no lugar de pecadores. Paulo escreve em Romanos 5:8: \"Mas Deus demonstra o seu amor por nós: Cristo morreu em nosso favor quando ainda éramos pecadores.\"\n\nNão quando nos arrependemos. Não quando melhoramos. Quando ainda éramos pecadores. Isso é graça.\n\n**Graça não é permissão para pecar**\n\nUm equívoco comum é pensar que a graça dá liberdade para viver como quisermos. Paulo responde isso diretamente em Romanos 6:1-2: \"Que diremos, então? Permaneceremos no pecado para que a graça se multiplique? De modo nenhum!\"\n\nA graça nos transforma de dentro para fora. Quando entendemos profundamente o que foi feito por nós, o desejo natural é viver de forma que honre esse amor. A graça não nos dá permissão para pecar, ela nos dá poder para não pecar.\n\n**Graça para o dia a dia**\n\nA graça não é apenas para o momento da salvação. Ela sustenta toda a nossa caminhada. Hebreus 4:16 nos convida: \"Aproximemo-nos, portanto, com confiança do trono da graça, a fim de recebermos misericórdia e encontrarmos graça que nos ajude no momento da necessidade.\"\n\nCada dia trazemos falhas, fraquezas e erros. Mas há um trono de graça, não de julgamento, ao qual podemos nos aproximar com confiança. Deus não nos recebe com decepção, mas com misericórdia renovada a cada manhã (Lamentações 3:22-23).\n\n**Vivendo como pessoas de graça**\n\nQuem recebe graça é chamado a demonstrá-la. Jesus disse no Sermão do Monte: \"Bem-aventurados os misericordiosos, porque eles alcançarão misericórdia.\" A graça que recebemos não é para ser guardada, é para ser derramada sobre as pessoas ao nosso redor: no perdão que concedemos, na paciência que exercemos e no amor que oferecemos mesmo quando não é merecido.",
+    versiculo: "Efésios 2:8-9 — "Porque pela graça sois salvos, por meio da fé, e isso não vem de vós; é dom de Deus."",
+    texto: "A graça é um dos conceitos mais libertadores da fé cristã. Entendê-la muda tudo.\n\n**Graça: favor imerecido**\n\nA palavra grega 'charis' significa favor imerecido, presente não conquistado. Graça não é Deus nos dando o que merecemos — isso seria justiça. Graça é Deus nos dando exatamente o oposto do que merecemos: perdão, amor, adoção e vida eterna.\n\n**Por que precisamos da graça?**\n\nTodos pecamos — 'Todos pecaram e estão destituídos da glória de Deus' (Romanos 3:23). O pecado criou uma separação entre nós e Deus que nenhum esforço humano pode superar. Religiões tentam ensinar como ganhar o favor divino, mas o evangelho diz que Deus já tomou a iniciativa.\n\n**A graça em ação: a cruz**\n\nA maior demonstração da graça foi a cruz. Deus enviou Seu Filho para morrer no lugar de pecadores. Paulo escreve: 'Cristo morreu em nosso favor quando ainda éramos pecadores' (Romanos 5:8). Não quando melhoramos. Quando ainda estávamos perdidos. Isso é graça pura.\n\n**Graça não é permissão para pecar**\n\nUm erro comum é pensar que graça dá liberdade para viver como quisermos. Paulo responde: 'De modo nenhum!' (Romanos 6:1-2). A graça nos transforma de dentro para fora. Quando entendemos o que foi feito por nós, o desejo natural é honrar esse amor.\n\n**Graça para o dia a dia**\n\nA graça não é apenas para o momento da salvação. Ela sustenta toda a caminhada. Hebreus 4:16 nos convida a nos aproximar com confiança 'do trono da graça, a fim de recebermos misericórdia e encontrarmos graça que nos ajude no momento da necessidade'. A cada manhã, as misericórdias de Deus se renovam (Lamentações 3:22-23).",
     referencias: [
-      "Romanos 3:21-26 — A justiça de Deus mediante a fé em Jesus Cristo",
+      "Romanos 3:21-26 — A justiça de Deus pela fé em Cristo",
       "Romanos 5:1-8 — Justificados pela fé, temos paz com Deus",
-      "Romanos 6:1-14 — A graça não é licença para pecar",
-      "Tito 2:11-14 — A graça de Deus que nos ensina a viver retamente",
-      "Hebreus 4:14-16 — O trono da graça ao qual nos aproximamos com confiança",
-      "Lamentações 3:22-23 — As misericórdias de Deus se renovam a cada manhã",
+      "Tito 2:11-14 — A graça de Deus nos ensina a viver retamente",
+      "Hebreus 4:14-16 — O trono da graça",
       "2 Coríntios 12:9 — A minha graça é suficiente para ti",
+      "Lamentações 3:22-23 — As misericórdias se renovam a cada manhã",
     ],
     perguntas: [
-      "Você já tentou merecer o amor de Deus através de boas obras ou comportamento? Como isso te fez sentir?",
-      "De que forma entender que a salvação é completamente pela graça muda sua relação com Deus?",
-      "Como você pode demonstrar graça às pessoas ao seu redor esta semana, especialmente àquelas que não a merecem?",
-      "Existe algo em sua vida que te faz sentir indigno da graça de Deus? O que a Bíblia diz sobre isso?"
+      "Você já tentou merecer o amor de Deus? Como isso te fez sentir?",
+      "De que forma entender que a salvação é pela graça muda sua relação com Deus?",
+      "Como você pode demonstrar graça às pessoas ao seu redor esta semana?",
+      "Existe algo que te faz sentir indigno da graça de Deus? O que a Bíblia diz sobre isso?",
     ],
-    oracao: "Pai celestial, obrigado pela Tua graça que me salva, me sustenta e me transforma. Que eu nunca tome esse presente como garantido, mas que viva cada dia maravilhado com o fato de que Tu me amaste enquanto eu ainda era pecador. Liberta-me de tentar ganhar o Teu amor através do meu esforço, e ajuda-me a descansar na graça que já foi dada. Que eu seja, para as pessoas ao meu redor, um reflexo dessa mesma graça que recebi. Em nome de Jesus, amém."
+    oracao: "Pai, obrigado pela Tua graça que me salva, sustenta e transforma. Que eu nunca tome esse presente como garantido. Liberta-me de tentar ganhar o Teu amor pelo meu esforço, e ajuda-me a descansar na graça que já foi dada. Que eu seja, para os outros, um reflexo dessa mesma graça. Em nome de Jesus, amém."
   },
   {
-    id: "f3", nivel: "avancado", fixo: true,
-    titulo: "A Armadura de Deus",
-    versiculo: "Efésios 6:11 — \"Revesti-vos de toda a armadura de Deus, para que possais ficar firmes contra as ciladas do diabo.\"",
-    texto: "A vida cristã não é um passeio tranquilo, é uma batalha espiritual real. E Deus não nos deixou desarmados.\n\nPaulo escreve aos Efésios a partir de uma prisão romana, acorrentado a um soldado. Olhando para a armadura daquele guerreiro, o apóstolo inspirado pelo Espírito Santo descreve a proteção espiritual que Deus nos proveu. Cada peça tem um significado profundo e uma aplicação prática para a nossa vida.\n\n**A natureza da batalha**\n\nAntes de descrever a armadura, Paulo nos diz contra quem lutamos: \"Porque não temos que lutar contra a carne e o sangue, mas contra os principados, contra as potestades, contra os príncipes das trevas deste século, contra as hostes espirituais da maldade nos lugares celestiais\" (Efésios 6:12).\n\nNosso inimigo não é de carne e osso. Por isso, armas físicas não resolvem batalhas espirituais. Precisamos de armas espirituais, e Deus as proveu completamente.\n\n**1. Cinto da Verdade**\n\nO cinto era a peça fundamental da armadura romana, sustentava todas as outras e protegia os órgãos vitais. A verdade de Deus é nosso fundamento. Em um mundo onde tudo é relativo e as mentiras são constantes, nos manter ancorados na Palavra de Deus nos protege do engano.\n\nO diabo é chamado de \"pai da mentira\" (João 8:44). Sua estratégia principal é distorcer a verdade, sobre Deus, sobre nós mesmos e sobre o mundo. Conhecer a Palavra é nossa proteção contra esse engano.\n\n**2. Couraça da Justiça**\n\nA couraça protegia o coração e os pulmões, órgãos vitais. A justiça que nos protege não é a nossa própria, é a justiça de Cristo aplicada à nossa vida. Quando o inimigo nos acusa, lembramos que estamos vestidos com a justiça de Jesus.\n\nIsso não significa que vivemos sem cuidado moral. Significa que nossa segurança não está na nossa perfeição, mas na obra completa de Cristo. \"Não há, pois, agora condenação alguma para os que estão em Cristo Jesus\" (Romanos 8:1).\n\n**3. Calçado do Evangelho**\n\nO soldado romano usava sandálias com pregos na sola para ter firmeza no terreno de batalha. O evangelho nos dá firmeza, sabemos onde estamos e para onde vamos. E ao caminhar, levamos boas novas onde quer que pisemos.\n\nEstar calçado com o evangelho também significa estar pronto para compartilhar a fé. Não somos chamados apenas a nos defender, somos chamados a avançar.\n\n**4. Escudo da Fé**\n\nO escudo romano, o \"scutum\", era grande o suficiente para cobrir o corpo inteiro e podia ser interligado com os de outros soldados, formando uma parede impenetrável. A fé nos protege dos \"dardos inflamados do maligno\", as dúvidas, os medos, as acusações e as tentações.\n\nFé não é ausência de dúvida, é escolher confiar em Deus mesmo quando não entendemos. É dizer \"Deus é fiel\" quando as circunstâncias dizem o contrário.\n\n**5. Capacete da Salvação**\n\nO capacete protege a mente, o centro do pensamento, da vontade e das emoções. Saber que somos salvos, que nossa identidade está segura em Cristo, nos protege dos ataques mentais do inimigo.\n\nPaulo escreve em Romanos 12:2: \"Transformai-vos pela renovação da vossa mente.\" A batalha começa na mente. Pensamentos que se alinham com a verdade de Deus produzem vida; pensamentos contrários produzem destruição.\n\n**6. Espada do Espírito**\n\nDas seis peças da armadura, apenas a espada é ofensiva. É a Palavra de Deus, nossa única arma de ataque. Jesus a usou no deserto: cada tentação de Satanás foi respondida com \"Está escrito...\" (Mateus 4:1-11).\n\nConhecer a Escritura de memória nos dá acesso a essa espada em qualquer momento. Não precisamos de um livro em mãos, precisamos da Palavra guardada no coração.\n\n**7. A oração, o combustível da batalha**\n\nDepois de descrever a armadura, Paulo acrescenta: \"Orando em todo o tempo com toda oração e súplica no Espírito\" (Efésios 6:18). A oração não é uma peça da armadura, é o que dá vida a toda ela. Sem oração, a armadura está vestida, mas o guerreiro está fraco.",
+    id: "f4", nivel: "iniciante", fixo: true,
+    titulo: "O Espírito Santo",
+    versiculo: "João 14:16-17 — "Eu pedirei ao Pai, e ele vos dará outro Consolador para estar convosco para sempre: o Espírito da verdade."",
+    texto: "O Espírito Santo é frequentemente o membro da Trindade menos compreendido. Muitos cristãos vivem como se Ele não existisse. Mas Ele é essencial para a vida cristã.\n\n**Quem é o Espírito Santo?**\n\nO Espírito Santo não é uma força, uma energia ou uma influência — Ele é uma Pessoa divina, a terceira Pessoa da Santíssima Trindade. Ele pensa (Romanos 8:27), sente (Efésios 4:30), age (Atos 13:2) e pode ser contrariado (Atos 5:3). Ele é co-igual e co-eterno com o Pai e o Filho.\n\n**O que o Espírito Santo faz?**\n\nSua obra é ampla e essencial. Ele convence de pecado (João 16:8), opera o novo nascimento (João 3:5-8), habita no crente como templo (1 Coríntios 6:19), guia para a verdade (João 16:13), intercede por nós (Romanos 8:26-27), distribui dons espirituais (1 Coríntios 12) e produz frutos na vida do crente (Gálatas 5:22-23).\n\n**O fruto do Espírito**\n\nGálatas 5:22-23 lista o fruto do Espírito: amor, alegria, paz, longanimidade, benignidade, bondade, fidelidade, mansidão e domínio próprio. Não são conquistas do nosso esforço, mas resultado natural de uma vida rendida ao Espírito.\n\n**Como ser cheio do Espírito Santo?**\n\nEfésios 5:18 ordena: 'Sede cheios do Espírito'. É um mandamento, não uma opção. Ser cheio do Espírito significa ser controlado por Ele — rendering nossa vontade à Sua direção. Isso acontece através da rendição diária, da oração, da Palavra e da obediência.",
     referencias: [
-      "Efésios 6:10-18 — A descrição completa da armadura de Deus",
-      "2 Coríntios 10:3-5 — As armas da nossa guerra não são carnais",
-      "Romanos 8:1 — Nenhuma condenação para os que estão em Cristo",
-      "Mateus 4:1-11 — Jesus usando a Palavra contra as tentações de Satanás",
-      "1 Pedro 5:8-9 — Sede sóbrios e vigilantes; o diabo anda em derredor",
-      "Tiago 4:7 — Resisti ao diabo e ele fugirá de vós",
-      "João 8:44 — O diabo é pai da mentira",
-      "Romanos 12:2 — Transformai-vos pela renovação da vossa mente",
+      "João 14:16-26 — A promessa do Consolador",
+      "Atos 2:1-4 — A descida do Espírito Santo em Pentecostes",
+      "Romanos 8:1-17 — Vida no Espírito",
+      "1 Coríntios 12 — Os dons do Espírito",
+      "Gálatas 5:16-25 — Fruto do Espírito x obras da carne",
+      "Efésios 5:18 — Sede cheios do Espírito",
     ],
     perguntas: [
-      "Qual peça da armadura você sente que está mais fraca na sua vida agora? O que você pode fazer para fortalecê-la?",
-      "Como o conhecimento das Escrituras tem sido uma \"espada\" nas batalhas que você enfrenta no dia a dia?",
-      "De que forma a certeza da sua salvação influencia a forma como você enfrenta os ataques do inimigo contra sua mente?",
-      "Como a oração se conecta com o uso de cada peça da armadura? Você tem uma vida de oração que sustenta sua batalha espiritual?"
+      "Qual aspecto da obra do Espírito Santo mais te surpreende ou impressiona?",
+      "Como você percebe a presença e a ação do Espírito Santo na sua vida?",
+      "Quais frutos do Espírito você sente que estão crescendo em você? Quais precisam crescer mais?",
+      "O que seria diferente na sua vida se você estivesse completamente rendido ao Espírito Santo?",
     ],
-    oracao: "Senhor Deus, me revisto hoje de toda a Tua armadura. Cingo-me com a verdade da Tua Palavra. Visto a couraça da justiça de Cristo. Calço-me com o evangelho da paz. Levanto o escudo da fé contra todo dardo do inimigo. Coloco o capacete da salvação sobre minha mente. E empunho a espada do Espírito, que é a Tua Palavra. Que eu possa estar firme neste dia, não na minha própria força, mas no poder do Teu nome. Em nome de Jesus, amém."
+    oracao: "Espírito Santo, obrigado por habitar em mim e por nunca me abandonar. Perdoa as vezes em que Te ignorei ou Te entristeço. Quero ser cheio de Ti — que Tu controles meus pensamentos, palavras e ações. Produz em mim o Teu fruto e usa-me segundo Tua vontade. Amém."
   },
   {
-    id: "f4", nivel: "avancado", fixo: true,
-    titulo: "Vida de Oração",
-    versiculo: "Lucas 18:1 — \"Era preciso orar sempre e nunca esmorecer.\"",
-    texto: "A oração é o respirar da alma cristã. Sem ela, nossa vida espiritual se enfraquece gradualmente, muitas vezes sem que percebamos, até que nos encontramos distantes de Deus, secos por dentro, sem força para as batalhas da vida.\n\nMas o que é oração, de verdade? E como desenvolvemos uma vida de oração genuína e transformadora?\n\n**Oração é relacionamento, não religião**\n\nO maior equívoco sobre oração é tratá-la como uma obrigação religiosa, uma lista de pedidos que enviamos a um Deus distante na esperança de que atenda. Mas a oração, na sua essência, é conversa com o Pai que nos ama.\n\nJesus chamou Deus de \"Abba\", uma palavra aramaica íntima, equivalente a \"Papai\". Essa intimidade não era exclusiva de Jesus: Paulo escreve em Gálatas 4:6 que o Espírito Santo clama em nós esse mesmo \"Abba, Pai\". Somos convidados à mesma intimidade.\n\nDeus quer ouvir tudo, não apenas os pedidos formais. Suas alegrias, seus medos, suas dúvidas, sua gratidão, sua raiva, sua confusão. Os Salmos são cheios de clamores honestos, às vezes quase desesperados. Deus não se assusta com nossa honestidade.\n\n**Jesus, o modelo de oração**\n\nSe existe alguém que não precisava orar, era Jesus, o próprio Filho de Deus. E ainda assim, os evangelhos mostram que Ele orava constantemente:\n\nAntes de grandes decisões: \"Naqueles dias, Jesus foi ao monte orar, e passou a noite em oração a Deus. Quando amanheceu, chamou os seus discípulos\" (Lucas 6:12-13).\nEm momentos de angústia: No Getsêmani, suando como gotas de sangue, Ele orou: \"Pai, se quiseres, passa de mim este cálice; todavia, não se faça a minha vontade, mas a tua\" (Lucas 22:42).\nEm meio à multidão e na solidão: Marcos registra que Ele se levantava antes do amanhecer para orar (Marcos 1:35).\n\nSe o Filho de Deus priorizava a oração dessa forma, quanto mais nós precisamos dela?\n\n**O Pai Nosso, uma escola de oração**\n\nQuando os discípulos pediram a Jesus \"Ensina-nos a orar\", Ele não deu uma aula teológica, deu um modelo (Lucas 11:1-4). O Pai Nosso não é uma oração para ser recitada mecanicamente, mas uma estrutura que nos guia:\n\n**\"Pai nosso, que estás nos céus\"**, Acesso e intimidade. Podemos chamar o Criador do universo de Pai.\n\n**\"Santificado seja o Teu nome\"**, Adoração em primeiro lugar. Antes de pedir, reconhecemos quem Deus é.\n\n**\"Venha o Teu reino\"**, Alinhamento com os propósitos de Deus, não os nossos.\n\n**\"O pão nosso de cada dia nos dá hoje\"**, Dependência diária. Reconhecemos que tudo vem Dele.\n\n**\"Perdoa-nos as nossas dívidas\"**, Confissão honesta e recebimento do perdão.\n\n**\"Livra-nos do mal\"**, Proteção espiritual.\n\n**A oração que transforma**\n\nUma das verdades mais libertadoras sobre oração é que ela transforma principalmente quem ora, não apenas as circunstâncias. Muitas vezes não mudamos a situação quando oramos, mas somos transformados para enfrentá-la.\n\nA oração alinha nossa vontade com a de Deus. Começa com nossos desejos e pedidos, mas quando persistimos em presença de Deus, algo acontece: nossa perspectiva muda, nossos desejos são purificados, nossa paz aumenta mesmo sem resposta imediata.\n\nFilipenses 4:6-7 captura isso lindamente: \"Não andeis ansiosos de coisa alguma; antes, em tudo fazei conhecidas as vossas petições a Deus em oração e súplica, com ações de graças; e a paz de Deus, que excede todo o entendimento, guardará os vossos corações e os vossos pensamentos em Cristo Jesus.\"\n\nA promessa não é que a situação mudará. É que a paz de Deus guardará nossos corações.\n\n**Cultivando uma vida de oração**\n\nTenha um tempo fixo: Não precisa ser longo no início. Dez minutos consistentes valem mais do que uma hora esporádica.\n\nEncontre um lugar: Jesus falava sobre entrar no seu quarto e fechar a porta. Um lugar associado à oração ajuda a criar o hábito.\n\nUse a Palavra como base: Ore sobre o que leu nas Escrituras. A Bíblia nos diz o que Deus quer ouvir; a oração é nossa resposta.\n\nSeja honesto: Não use linguagem religiosa que não seja sua. Fale com Deus como fala com alguém que ama profundamente.\n\nPersevere: Lucas 18 conta a parábola da viúva persistente. Jesus a ensinou para mostrar que \"era preciso orar sempre e nunca esmorecer\". Nem toda oração é respondida imediatamente, mas toda oração sincera é ouvida.",
+    id: "f5", nivel: "iniciante", fixo: true,
+    titulo: "A Bíblia: Palavra de Deus",
+    versiculo: "2 Timóteo 3:16-17 — "Toda a Escritura é inspirada por Deus e útil para o ensino, para a repreensão, para a correção e para a instrução na justiça."",
+    texto: "A Bíblia é o livro mais vendido, mais traduzido e mais influente da história. Mas o que a torna única?\n\n**A Bíblia é Palavra de Deus**\n\nA afirmação central é que a Bíblia não é apenas um livro humano sobre Deus — é o próprio Deus falando através de seres humanos. 'Toda a Escritura é inspirada por Deus' (2 Timóteo 3:16). A palavra 'inspirada' em grego é 'theopneustos' — literalmente 'soprada por Deus'.\n\nIsso não significa que os autores foram robôs. Cada escritor expressou sua personalidade, seu estilo e seu contexto. Mas o Espírito Santo os guiou de tal forma que as palavras resultantes são ao mesmo tempo humanas e divinas.\n\n**O que a Bíblia contém?**\n\nA Bíblia é composta por 66 livros, escritos por cerca de 40 autores, ao longo de aproximadamente 1.500 anos. Apesar dessa diversidade, apresenta uma unidade notável — a história da redenção da humanidade por Deus, culminando em Jesus Cristo.\n\n**Para que serve a Bíblia?**\n\nPaulo diz que ela é útil para: ensino (aprender a verdade), repreensão (ser corrigido quando erra), correção (voltar ao caminho certo) e instrução na justiça (aprender a viver santamente). O objetivo final é que o homem de Deus seja 'perfeito e plenamente capacitado' (2 Timóteo 3:17).\n\n**Como ler a Bíblia?**\n\nNão existe fórmula mágica, mas algumas práticas ajudam: comece com os Evangelhos (Mateus, Marcos, Lucas ou João), leia regularmente mesmo que pouco, peça ao Espírito Santo que abra sua mente, anote o que aprendeu e aplique na vida. A Palavra de Deus é 'viva e eficaz' (Hebreus 4:12) — ela transforma quem a recebe com fé.",
     referencias: [
-      "Mateus 6:5-15 — O Pai Nosso e os princípios da oração segundo Jesus",
+      "2 Timóteo 3:14-17 — Toda Escritura é inspirada por Deus",
+      "2 Pedro 1:20-21 — Nenhuma profecia é de interpretação pessoal",
+      "Hebreus 4:12 — A Palavra de Deus é viva e eficaz",
+      "Salmos 119:105 — Lâmpada para os meus pés é a Tua palavra",
+      "Salmos 19:7-11 — A perfeição da lei do Senhor",
+      "Mateus 5:17-18 — Jesus e o cumprimento das Escrituras",
+    ],
+    perguntas: [
+      "Como você descreve sua relação atual com a leitura da Bíblia? É regular, esporádica ou quase inexistente?",
+      "Qual passagem bíblica já impactou sua vida de forma significativa? Por quê?",
+      "O que te impede de ler a Bíblia com mais regularidade? Como pode superar isso?",
+      "De que forma a Palavra de Deus tem servido como lâmpada para seus pés em decisões difíceis?",
+    ],
+    oracao: "Pai, obrigado pela Tua Palavra — um tesouro inestimável. Perdoa-me pelas vezes que a negligenciei. Abre meu coração e minha mente para recebê-la com fé. Que Tua Palavra seja minha meditação dia e noite, e que ela me transforme à imagem de Cristo. Amém."
+  },
+  {
+    id: "f6", nivel: "iniciante", fixo: true,
+    titulo: "Oração: Conversando com Deus",
+    versiculo: "Filipenses 4:6-7 — "Não andeis ansiosos de coisa alguma; antes, em tudo fazei conhecidas as vossas petições a Deus em oração e súplica."",
+    texto: "A oração é o respirar da alma. Sem ela, a vida espiritual sufoca gradualmente — muitas vezes sem que percebamos.\n\n**O que é oração?**\n\nOração não é um ritual religioso ou uma lista de pedidos enviada a um Deus distante. É conversa com o Pai que nos ama. Jesus chamou Deus de 'Abba' — Papai — e nos convidou para essa mesma intimidade (Romanos 8:15). Deus quer ouvir tudo: alegrias, medos, dúvidas, gratidão.\n\n**Jesus e a oração**\n\nSe alguém não precisava orar, era Jesus — o Filho de Deus. E ainda assim Ele orava constantemente: antes de decisões (Lucas 6:12-13), em momentos de angústia (Lucas 22:42), madrugadas inteiras (Marcos 1:35). Se Jesus priorizava a oração, quanto mais nós precisamos?\n\n**O Pai Nosso como modelo**\n\nQuando os discípulos pediram 'Ensina-nos a orar', Jesus deu um modelo (Lucas 11:1-4). O Pai Nosso não é uma oração para ser recitada mecanicamente, mas uma estrutura que nos guia: adoração ('Santificado seja o Teu nome'), alinhamento ('Venha o Teu reino'), dependência ('O pão nosso de cada dia nos dá hoje'), confissão ('Perdoa-nos') e proteção ('Livra-nos do mal').\n\n**A oração que transforma**\n\nA oração transforma principalmente quem ora, não apenas as circunstâncias. Ela alinha nossa vontade com a de Deus. Filipenses 4:6-7 promete que a paz que excede todo entendimento guardará nossos corações — não necessariamente mudando a situação, mas transformando nossa perspectiva.\n\n**Cultivando o hábito**\n\nNão existe segredo: comece. Dez minutos consistentes valem mais que uma hora esporádica. Encontre um lugar, estabeleça um horário, use a Palavra como base e seja honesto. Deus não se assusta com nossa honestidade.",
+    referencias: [
+      "Mateus 6:5-15 — O Pai Nosso e os princípios da oração",
       "Lucas 18:1-8 — A parábola da viúva persistente",
-      "Filipenses 4:6-7 — A paz de Deus que excede todo o entendimento",
-      "Salmos 62:8 — Derramai o vosso coração diante dele",
+      "Filipenses 4:6-7 — A paz de Deus que excede todo entendimento",
       "1 Tessalonicenses 5:17 — Orai sem cessar",
       "Tiago 5:16 — A oração do justo tem grande poder",
-      "Romanos 8:26-27 — O Espírito intercede por nós com gemidos inexprimíveis",
-      "Marcos 1:35 — Jesus se levantava de madrugada para orar",
+      "Romanos 8:26-27 — O Espírito intercede por nós",
     ],
     perguntas: [
-      "Qual é o maior obstáculo na sua vida de oração atualmente? Como você pode endereçar esse obstáculo?",
-      "Você ora principalmente com pedidos, ou sua oração inclui adoração, confissão, gratidão e intercessão?",
-      "Você já viveu uma experiência em que a oração não mudou a circunstância, mas mudou você? Compartilhe.",
-      "O que você aprenderia sobre Deus se passasse os próximos 30 dias com um tempo fixo de oração diária?"
+      "Como você descreveria sua vida de oração atualmente? O que gostaria que fosse diferente?",
+      "Você ora principalmente com pedidos ou também inclui adoração, gratidão e confissão?",
+      "Você já viveu uma experiência em que a oração não mudou a circunstância, mas mudou você?",
+      "O que você poderia fazer essa semana para tornar a oração uma prioridade maior?",
     ],
-    oracao: "Pai, que maravilha é poder Te chamar de Pai! Obrigado por me convidar a essa intimidade, a conversar contigo a qualquer hora, em qualquer lugar, sobre qualquer coisa. Perdoa-me pelas vezes que tratei a oração como obrigação em vez de privilégio. Ensinai-me a orar como Jesus orava, com persistência, com honestidade, com total dependência de Ti. Que a oração se torne o respirar da minha alma, tão natural quanto o ar que respiro. Em nome de Jesus, amém."
+    oracao: "Pai, que maravilha é poder Te chamar de Pai! Obrigado por me convidar a essa intimidade. Perdoa as vezes que tratei a oração como obrigação em vez de privilégio. Ensina-me a orar com persistência, honestidade e dependência total de Ti. Que a oração seja o respirar da minha alma. Amém."
+  },
+
+  // ══ AVANÇADOS ══
+  {
+    id: "f7", nivel: "avancado", fixo: true,
+    titulo: "A Santíssima Trindade",
+    versiculo: "Mateus 28:19 — "Ide, portanto, fazei discípulos de todas as nações, batizando-os em nome do Pai, e do Filho, e do Espírito Santo."",
+    texto: "A Trindade é a doutrina central e mais distintiva do cristianismo. É também um dos maiores mistérios da fé.\n\n**O que é a Trindade?**\n\nA doutrina afirma que existe um único Deus que subsiste eternamente em três Pessoas distintas: Pai, Filho e Espírito Santo. Cada Pessoa é plenamente Deus, mas não existem três deuses — existe um único Deus em três Pessoas.\n\nIsso não é uma contradição matemática (1+1+1=3), mas uma realidade ontológica única (1x1x1=1): uma essência, três subsistências.\n\n**Evidências bíblicas**\n\nEmbora a palavra 'Trindade' não apareça na Bíblia, a realidade está presente em toda ela. No batismo de Jesus, as três Pessoas aparecem simultaneamente (Mateus 3:16-17). A Grande Comissão batiza 'em nome' (singular) do Pai, Filho e Espírito Santo. Paulo fecha 2 Coríntios 13:14 com a bênção trinitária. João 1:1 identifica o Verbo como Deus, mas distinto do Pai.\n\n**As relações intratrinitárias**\n\nO Pai gera o Filho eternamente (Salmos 2:7; João 1:14). O Filho é eternamente gerado pelo Pai. O Espírito procede do Pai e do Filho (João 15:26). Essas relações não implicam inferioridade — são relacionamentos de amor eterno dentro da divindade.\n\n**Por que isso importa?**\n\nA Trindade revela que o amor não é algo que Deus desenvolveu na criação, mas a natureza eterna de Deus. Antes de criar qualquer coisa, havia amor perfeito entre as três Pessoas. Somos convidados a participar dessa comunhão de amor (João 17:21-23). A Igreja, como comunidade de amor, reflete a natureza trinitária de Deus.",
+    referencias: [
+      "Mateus 3:16-17 — As três Pessoas no batismo de Jesus",
+      "João 1:1-18 — O Verbo, que era Deus",
+      "João 17:20-23 — A unidade trinitária como modelo para a Igreja",
+      "2 Coríntios 13:14 — A bênção trinitária",
+      "Gênesis 1:26 — 'Façamos o homem à nossa imagem'",
+      "Deuteronômio 6:4 — 'O Senhor nosso Deus é o único Senhor'",
+    ],
+    perguntas: [
+      "Como a doutrina da Trindade distingue o cristianismo de outras religiões monoteístas?",
+      "De que forma a ideia de que Deus é amor eterno entre três Pessoas muda sua compreensão da natureza de Deus?",
+      "Como a unidade na diversidade da Trindade pode ser um modelo para a Igreja e para os relacionamentos?",
+      "Qual aspecto da Trindade você acha mais desafiador de compreender? Como você lida com esse mistério?",
+    ],
+    oracao: "Pai, Filho e Espírito Santo — único Deus em três Pessoas — obrigado por me revelar Tua natureza e por me convidar a participar da Tua comunhão de amor. Que a minha vida reflita a unidade e o amor que existe em Ti. Que eu nunca reduza Tua grandeza à minha pequena compreensão. Amém."
+  },
+  {
+    id: "f8", nivel: "avancado", fixo: true,
+    titulo: "Justificação pela Fé",
+    versiculo: "Romanos 3:28 — "Porque concluímos que o homem é justificado pela fé, independentemente das obras da lei."",
+    texto: "A justificação pela fé foi o coração da Reforma Protestante e continua sendo o artigo pelo qual a Igreja está de pé ou cai.\n\n**O que é justificação?**\n\nJustificação é um ato forense — uma declaração legal. Quando Deus justifica o pecador, Ele o declara justo diante de Seu tribunal, não com base no desempenho do pecador, mas com base na perfeita obediência de Cristo imputada a ele pela fé.\n\nA distinção crucial: Deus não nos justifica porque somos justos — Ele nos declara justos por causa de Cristo. Nossa justificação é externa a nós (extra nos), assentada na obra acabada de Jesus.\n\n**Justificação vs. Santificação**\n\nJustificação é instantânea e completa: acontece no momento da fé e é permanente. Santificação é progressiva e contínua: é o processo de ser transformado à imagem de Cristo ao longo da vida. Misturar os dois é uma das maiores fontes de confusão espiritual.\n\n**Somente pela fé (Sola Fide)**\n\nPaulo é enfático: a justificação é 'pela fé, independentemente das obras da lei' (Romanos 3:28). Não é pela fé mais as obras. Não é pela fé mais os sacramentos. É pela fé somente — mas essa fé genuína sempre produz obras (Tiago 2:17).\n\n**A dupla imputação**\n\nA doutrina envolve duas imputações: nossos pecados foram imputados a Cristo na cruz (Ele carregou nossa culpa), e a justiça de Cristo é imputada a nós pela fé (recebemos Seu registro perfeito). Paulo chama isso de 'a troca maravilhosa': 'Aquele que não conheceu pecado, Deus o fez pecado por nós, para que nos tornássemos, nele, justiça de Deus' (2 Coríntios 5:21).",
+    referencias: [
+      "Romanos 3:21-31 — A justiça de Deus revelada pela fé",
+      "Romanos 4:1-8 — Abraão foi justificado pela fé",
+      "Gálatas 2:15-21 — Justificados pela fé em Cristo",
+      "2 Coríntios 5:21 — A troca maravilhosa",
+      "Filipenses 3:8-9 — A justiça que vem pela fé em Cristo",
+      "Tiago 2:14-26 — A fé sem obras é morta",
+    ],
+    perguntas: [
+      "Como você distingue justificação de santificação na sua vida prática?",
+      "De que formas você tende a buscar ser justificado pelas suas obras em vez de descansar na obra de Cristo?",
+      "Como a ideia de que sua posição diante de Deus não depende do seu desempenho afeta sua paz interior?",
+      "Por que Tiago diz que a fé sem obras é morta, se Paulo diz que somos justificados pela fé independente das obras?",
+    ],
+    oracao: "Senhor, que maravilha é ser declarado justo não pelo que faço, mas pelo que Cristo fez! Guarda-me de tentar ganhar o que já foi dado gratuitamente. Que essa certeza me liberte do medo e me motive a viver de maneira que honre esse presente precioso. Em nome de Jesus, amém."
+  },
+  {
+    id: "f9", nivel: "avancado", fixo: true,
+    titulo: "A Armadura de Deus",
+    versiculo: "Efésios 6:11 — "Revesti-vos de toda a armadura de Deus, para que possais ficar firmes contra as ciladas do diabo."",
+    texto: "A vida cristã é uma batalha espiritual real. Deus não nos deixou desarmados.\n\n**A natureza da batalha**\n\nPaulo é claro: 'Não temos que lutar contra a carne e o sangue, mas contra os principados, contra as potestades, contra os príncipes das trevas deste século' (Efésios 6:12). Nosso inimigo é espiritual, portanto nossas armas também devem ser espirituais.\n\n**1. Cinto da Verdade**\n\nO cinto sustentava todas as outras peças e protegia os órgãos vitais. A verdade de Deus é nosso fundamento. O diabo é 'pai da mentira' (João 8:44) — sua estratégia é distorcer a verdade sobre Deus e sobre nós. Conhecer a Palavra nos protege do engano.\n\n**2. Couraça da Justiça**\n\nA couraça protegia o coração. A justiça de Cristo imputada a nós protege nosso coração das acusações do inimigo. 'Não há, pois, agora condenação alguma para os que estão em Cristo Jesus' (Romanos 8:1).\n\n**3. Calçado do Evangelho**\n\nO soldado romano usava sandálias com pregos para firmeza no campo de batalha. O evangelho nos dá firmeza e nos prepara para avançar, levando boas novas onde formos.\n\n**4. Escudo da Fé**\n\nO escudo romano, o 'scutum', era grande e podia ser interligado com outros, formando parede impenetrável. A fé apaga os 'dardos inflamados do maligno' — dúvidas, medos, acusações.\n\n**5. Capacete da Salvação**\n\nProtege a mente. Saber que somos salvos, que nossa identidade está segura em Cristo, nos protege dos ataques mentais do inimigo.\n\n**6. Espada do Espírito**\n\nA única arma ofensiva. É a Palavra de Deus. Jesus a usou no deserto: 'Está escrito...' (Mateus 4:1-11). Conhecer as Escrituras de memória nos dá acesso a essa espada a qualquer momento.\n\n**A oração como combustível**\n\nApós descrever a armadura, Paulo acrescenta: 'Orando em todo tempo' (Efésios 6:18). A oração é o que dá vida a toda a armadura.",
+    referencias: [
+      "Efésios 6:10-20 — A armadura de Deus completa",
+      "2 Coríntios 10:3-5 — As armas da nossa guerra não são carnais",
+      "Romanos 8:1 — Nenhuma condenação para os que estão em Cristo",
+      "Mateus 4:1-11 — Jesus usando a Palavra contra Satanás",
+      "1 Pedro 5:8-9 — Sede sóbrios e vigilantes",
+      "Tiago 4:7 — Resisti ao diabo e ele fugirá",
+    ],
+    perguntas: [
+      "Qual peça da armadura você sente que está mais fraca na sua vida agora?",
+      "Como o conhecimento das Escrituras tem sido uma espada nas batalhas que você enfrenta?",
+      "Como a certeza da sua salvação influencia a forma como você enfrenta os ataques do inimigo?",
+      "De que maneira a oração se conecta com o uso de cada peça da armadura?",
+    ],
+    oracao: "Senhor, me revisto hoje de toda a Tua armadura. Cingo-me com a verdade, visto a couraça da justiça, calço-me com o evangelho, levanto o escudo da fé, coloco o capacete da salvação e empunho a espada do Espírito. Que eu possa estar firme não na minha força, mas no poder do Teu nome. Amém."
+  },
+  {
+    id: "f10", nivel: "avancado", fixo: true,
+    titulo: "Sofrimento e Fé",
+    versiculo: "Romanos 8:18 — "Porque para mim tenho por certo que os sofrimentos do tempo presente não podem ser comparados com a glória que em nós há de ser revelada."",
+    texto: "Uma das perguntas mais difíceis da vida cristã é: por que Deus permite o sofrimento? Não há resposta simples, mas a Bíblia oferece perspectivas profundas.\n\n**O sofrimento é real**\n\nO cristianismo não nega a realidade da dor. Jesus chorou diante do túmulo de Lázaro (João 11:35). Os Salmos estão cheios de lamento. O Livro de Jó é inteiramente dedicado ao sofrimento. Deus não pede que fingamos que está tudo bem quando não está.\n\n**Tipos de sofrimento**\n\nNem todo sofrimento tem a mesma origem. Há sofrimento consequência do pecado (nossas escolhas têm resultados), sofrimento por viver em um mundo caído (doenças, desastres), sofrimento pelo nome de Cristo (perseguição), e sofrimento cujo propósito não compreendemos — como no caso de Jó.\n\n**O que o sofrimento produz**\n\nPaulo escreve que 'a tribulação produz perseverança; a perseverança, experiência; a experiência, esperança' (Romanos 5:3-4). Pedro diz que o fogo da provação purifica a fé 'mais preciosa do que o ouro' (1 Pedro 1:6-7). O sofrimento, quando recebido com fé, tem poder transformador.\n\n**Deus sofreu conosco**\n\nA maior resposta cristã ao sofrimento não é uma explicação filosófica, mas uma Pessoa: Jesus. Deus entrou no sofrimento humano. Ele foi tentado, traído, abandonado, torturado e morreu. Hebreus 4:15 diz que temos um sumo sacerdote 'que foi tentado em tudo como nós'. Ele entende.\n\n**A perspectiva eterna**\n\nPaulo chama suas provações — que incluíam prisão, açoites e naufrágio — de 'leve e momentânea tribulação' comparada 'à eterna e excessiva glória' (2 Coríntios 4:17). A perspectiva eterna não elimina a dor, mas transforma como nos relacionamos com ela.",
+    referencias: [
+      "Romanos 5:3-5 — A tribulação produz perseverança",
+      "1 Pedro 1:6-7 — A prova da fé mais preciosa que ouro",
+      "2 Coríntios 4:16-18 — A glória eterna supera a tribulação presente",
+      "Jó 1-2; 38-42 — A história de Jó e a resposta de Deus",
+      "Hebreus 4:14-16 — Jesus, sumo sacerdote que entende nossa fraqueza",
+      "João 11:32-35 — Jesus chora com Maria",
+    ],
+    perguntas: [
+      "Como você tem respondido ao sofrimento na sua vida — com fuga, amargura, resignação ou fé?",
+      "O sofrimento que você já viveu contribuiu de alguma forma para o seu crescimento espiritual?",
+      "Como a ideia de que Jesus sofreu e entende sua dor impacta sua relação com Ele nos momentos difíceis?",
+      "De que forma a perspectiva eterna muda como você vê seus problemas presentes?",
+    ],
+    oracao: "Senhor, há momentos em que a dor parece maior do que a esperança. Mas Tu és o Deus que entrou no sofrimento por amor a nós. Ajuda-me a confiar em Ti mesmo quando não entendo. Que minha fé seja purificada no fogo da provação e que eu possa dizer, no final, que valerá a pena. Amém."
+  },
+  {
+    id: "f11", nivel: "avancado", fixo: true,
+    titulo: "A Igreja: Corpo de Cristo",
+    versiculo: "Efésios 1:22-23 — "E sujeitou todas as coisas debaixo dos seus pés e sobre todas as coisas o constituiu cabeça da Igreja, que é o seu corpo."",
+    texto: "A Igreja não é um prédio, um evento ou uma instituição religiosa. Ela é o povo de Deus, o corpo de Cristo, a comunidade do Reino.\n\n**A identidade da Igreja**\n\nO Novo Testamento usa diversas imagens para descrever a Igreja: corpo (1 Coríntios 12), noiva (Efésios 5:25-27), templo (Efésios 2:19-22), família (Efésios 2:19), rebanho (João 10:16). Cada imagem revela uma dimensão: unidade na diversidade, intimidade com Cristo, presença do Espírito, pertencimento mútuo, dependência do Pastor.\n\n**A missão da Igreja**\n\nJesus definiu a missão em Mateus 28:19-20: ir, fazer discípulos, batizar, ensinar. Atos 2:42-47 mostra a Igreja primitiva vivendo isso: ensinamento apostólico, comunhão, partir do pão, orações, generosidade, testemunho. A missão é ao mesmo tempo externa (evangelização) e interna (edificação).\n\n**Os dons no corpo**\n\n1 Coríntios 12 ensina que o Espírito distribui dons a cada membro, 'como lhe apraz', para o bem comum. Não existe membro sem dom e não existe dom sem responsabilidade. A saúde do corpo depende de que cada parte funcione.\n\n**A importância da comunhão local**\n\nHebreus 10:24-25 exorta a não 'deixarmos de congregar-nos'. A vida cristã não é um esporte individual. Precisamos de comunidade para crescer, para ser responsabilizados, para servir e para ser servidos. A Igreja local é o contexto normal do discipulado.\n\n**A Igreja imperfeita**\n\nA Igreja é santa e ao mesmo tempo pecadora. É a noiva de Cristo e um hospital de almas necessitadas. Não devemos idolatrar a Igreja nem desprezá-la. Devemos amá-la como Cristo a amou — 'entregando-se por ela' (Efésios 5:25).",
+    referencias: [
+      "Efésios 2:19-22 — A Igreja como templo santo",
+      "1 Coríntios 12:12-31 — O corpo e seus membros",
+      "Atos 2:42-47 — A Igreja primitiva em ação",
+      "Mateus 16:18 — Sobre esta pedra edificarei a minha Igreja",
+      "Efésios 5:25-27 — Cristo amou a Igreja",
+      "Hebreus 10:24-25 — Não abandones a assembleia",
+    ],
+    perguntas: [
+      "Como você tem se relacionado com a Igreja local — como consumidor ou como participante ativo?",
+      "Qual dom espiritual você acredita ter recebido? Como está usando para o bem da comunidade?",
+      "Como você lida com as imperfeições e decepções dentro da Igreja?",
+      "O que significa para você ser parte do corpo de Cristo em termos práticos no seu dia a dia?",
+    ],
+    oracao: "Senhor, obrigado pela Igreja — imperfeita, mas Tua. Perdoa-me pelas vezes em que a critiquei sem a amar, em que recebi sem dar, em que estive presente sem me comprometer. Que eu ame a Igreja como Tu a amaste — com entrega e perseverança. Amém."
+  },
+  {
+    id: "f12", nivel: "avancado", fixo: true,
+    titulo: "Vida de Oração Profunda",
+    versiculo: "Lucas 18:1 — "Era preciso orar sempre e nunca esmorecer."",
+    texto: "Há uma diferença entre orar e ter uma vida de oração. A oração é um ato; a vida de oração é uma postura permanente de dependência de Deus.\n\n**Oração como relacionamento**\n\nA oração não é uma técnica espiritual — é o exercício de um relacionamento. Assim como qualquer relacionamento profundo exige tempo, honestidade e presença, a oração aprofunda nossa intimidade com Deus. Jesus não nos ensinou sobre Deus apenas — Ele nos ensinou a falar com o Pai.\n\n**As dimensões da oração**\n\nUma vida de oração madura abrange múltiplas dimensões. A adoração (contemplar quem Deus é) precede a petição. A confissão (honestidade sobre nossos pecados e fraquezas) purifica o canal. A intercessão (orar pelos outros) nos tira do centro. A petição (apresentar nossas necessidades) expressa confiança. A escuta (silêncio diante de Deus) permite que Ele fale.\n\n**Oração e Palavra**\n\nA oração e a Palavra são inseparáveis. A Bíblia nos diz o que Deus pensa; a oração é nossa resposta. Orar sobre o que acabamos de ler é um dos métodos mais poderosos de aprofundar a vida de oração. Os Salmos são o maior livro de orações já escrito.\n\n**Perseverança na oração**\n\nJesus contou a parábola da viúva persistente (Lucas 18:1-8) para ensinar que 'era preciso orar sempre e nunca esmorecer'. A resposta a Deus nem sempre é imediata — às vezes Ele nos convida a persistir, não porque precise ser persuadido, mas porque o processo de perseverar nos transforma.\n\n**Oração contemplativa**\n\nAlém da oração verbal, existe a dimensão contemplativa — estar simplesmente na presença de Deus, sem palavras. Salmos 46:10 diz: 'Aquietai-vos e sabei que eu sou Deus'. Em um mundo acelerado, aprender a quietude diante de Deus é uma das disciplinas mais desafiadoras e mais transformadoras.",
+    referencias: [
+      "Lucas 18:1-8 — A parábola da viúva persistente",
+      "Filipenses 4:6-7 — Não andeis ansiosos; orai",
+      "Romanos 8:26-27 — O Espírito intercede por nós",
+      "Salmos 46:10 — Aquietai-vos e sabei que eu sou Deus",
+      "1 Reis 19:11-13 — Deus na voz mansa e delicada",
+      "Mateus 6:5-13 — O ensino de Jesus sobre a oração",
+    ],
+    perguntas: [
+      "Qual é o maior obstáculo na sua vida de oração atualmente? Como pode endereçá-lo?",
+      "Você ora principalmente com petições, ou sua oração inclui adoração, confissão, intercessão e escuta?",
+      "Como a oração tem transformado você, não apenas suas circunstâncias?",
+      "O que aconteceria na sua vida se você passasse os próximos 30 dias com um tempo fixo de oração diária?",
+    ],
+    oracao: "Pai, Tu és o Deus que ouve. Obrigado por me convidar a essa conversa eterna. Quero ir além das orações ocasionais para uma vida de oração — uma postura permanente de dependência e comunhão. Ensina-me a adorar, confessar, interceder, pedir e escutar. Em nome de Jesus, amém."
   },
 ];
 
-const DICIONARIO_BIBLICO = [
-  { letra: "A", termos: [
-    { termo: "Abba", definicao: "Palavra aramaica que significa 'Pai' ou 'Papai', usada por Jesus ao se dirigir a Deus (Marcos 14:36) e pelos cristãos como expressão de intimidade filial com Deus (Romanos 8:15; Gálatas 4:6). Revela o relacionamento de confiança e amor entre o crente e Deus." },
-    { termo: "Aliança", definicao: "Acordo solene estabelecido por Deus com a humanidade. As principais alianças bíblicas são: com Noé (Gênesis 9), com Abraão (Gênesis 15 e 17), com Moisés/Israel (Êxodo 19-24), com Davi (2 Samuel 7) e a Nova Aliança em Cristo (Jeremias 31:31-34; Lucas 22:20). Cada aliança envolve promessas, obrigações e sinais." },
-    { termo: "Aleluia", definicao: "Expressão hebraica que significa 'Louvai ao Senhor' (Hallelu = louvai; Jah = forma abreviada de YHWH). Aparece especialmente nos Salmos 111-118 e 146-150, e no Novo Testamento em Apocalipse 19:1-6. É um grito de adoração e celebração a Deus." },
-    { termo: "Amém", definicao: "Palavra hebraica que expressa concordância, confirmação e fidelidade, derivada da raiz 'aman' (ser firme, fiel). Jesus a usava no início de declarações ('Em verdade vos digo') para enfatizar autoridade. Na liturgia cristã é usada para confirmar orações e declarações." },
-    { termo: "Anjo", definicao: "Ser espiritual criado por Deus para servi-Lo e executar Seus propósitos. A palavra significa 'mensageiro'. Os anjos adoram a Deus (Isaías 6), protegem os fiéis (Salmos 91:11), anunciam revelações (Lucas 1:26-38) e executam julgamentos divinos. São seres poderosos mas criados, não devem ser adorados (Apocalipse 22:8-9)." },
-    { termo: "Apóstolo", definicao: "Do grego 'apostolos', significa 'enviado'. Refere-se primariamente aos doze discípulos escolhidos por Jesus (Mateus 10:1-4) e a Paulo (Gálatas 1:1). Os critérios apostólicos incluíam ter visto o Senhor ressuscitado e ter sido diretamente comissionado por Ele. Fundaram a Igreja e suas cartas formam o Novo Testamento." },
-    { termo: "Arrependimento", definicao: "Do grego 'metanoia', significa mudança de mente e direção. É a resposta inicial ao evangelho (Atos 2:38), envolvendo reconhecimento do pecado, tristeza genuína e mudança de comportamento. Não é mera emoção, mas transformação profunda da orientação da vida, voltando-se de si mesmo e do pecado para Deus." },
-    { termo: "Ascensão", definicao: "Subida de Jesus ao céu após Sua ressurreição, quarenta dias depois da Páscoa (Atos 1:9-11). Marca o fim de Seu ministério terreno visível e o início de Seu reinado à direita do Pai (Salmos 110:1). É garantia da vinda do Espírito Santo e da Sua segunda vinda." },
-  ]},
-  { letra: "B", termos: [
-    { termo: "Batismo", definicao: "Sacramento cristão de iniciação que simboliza morte para o pecado e ressurreição para uma nova vida em Cristo (Romanos 6:3-4). Realizado em água, em nome da Trindade (Mateus 28:19). Representa publicamente a fé do crente, a obra purificadora de Cristo e a entrada na comunidade cristã." },
-    { termo: "Bênção", definicao: "Favor e graça de Deus derramados sobre uma pessoa ou comunidade. No AT, bênção frequentemente envolvia prosperidade, saúde e descendência (Deuteronômio 28:1-14). No NT, as maiores bênçãos são espirituais: perdão, adoção, o Espírito Santo e a vida eterna (Efésios 1:3). Deus é a fonte de toda bênção." },
-    { termo: "Bíblia", definicao: "Do grego 'biblia' (livros). A Palavra de Deus composta por 66 livros (39 no Antigo Testamento e 27 no Novo Testamento), escrita por aproximadamente 40 autores ao longo de 1.500 anos, sob inspiração divina (2 Timóteo 3:16-17). É a autoridade suprema para a fé e prática cristã." },
-    { termo: "Buscar a Deus", definicao: "Disposição ativa de se aproximar de Deus através da oração, meditação na Palavra e obediência. As Escrituras prometem que quem busca a Deus com todo o coração O encontrará (Jeremias 29:13; Mateus 7:7-8). É atitude essencial da vida espiritual e pressupõe fé em Sua existência e bondade (Hebreus 11:6)." },
-  ]},
-  { letra: "C", termos: [
-    { termo: "Carne", definicao: "No NT, especialmente em Paulo, 'carne' (grego: 'sarx') refere-se à natureza humana caída e sua tendência ao pecado (Romanos 7:18; Gálatas 5:19-21). Não se refere ao corpo físico em si, mas à orientação egoísta e rebelde que se opõe ao Espírito. O cristão é chamado a 'mortificar' as obras da carne (Colossenses 3:5)." },
-    { termo: "Conversão", definicao: "Processo pelo qual uma pessoa se volta de sua vida de pecado e independência para Deus, através do arrependimento e da fé em Jesus Cristo. Envolve uma transformação radical da orientação da vida, sendo descrita como 'novo nascimento' (João 3:3-8) e 'nova criação' (2 Coríntios 5:17)." },
-    { termo: "Cruz", definicao: "Instrumento de execução romana que se tornou o símbolo central do cristianismo. Na cruz, Jesus morreu como substituto pelos pecadores, satisfazendo a justiça de Deus e abrindo o caminho da reconciliação (Colossenses 2:14). Paulo a chama de 'poder de Deus' e 'sabedoria de Deus' (1 Coríntios 1:18-25). Para o cristão, carregar a cruz significa abnegação e seguimento a Jesus (Marcos 8:34)." },
-    { termo: "Cristão", definicao: "Seguidor de Jesus Cristo. O termo foi usado pela primeira vez em Antioquia (Atos 11:26). Designa alguém que creu no evangelho, foi salvo pela graça e vive sob o senhorio de Cristo. O cristão é chamado a imitar Cristo em amor, serviço e santidade." },
-    { termo: "Comunhão", definicao: "Do grego 'koinonia', significa participação, parceria e compartilhamento. Refere-se ao relacionamento íntimo dos crentes entre si e com Deus (1 João 1:3-7). A comunhão cristã envolve partilha de bens, oração, ensino e a Ceia do Senhor (Atos 2:42). É sinal distintivo da vida da Igreja." },
-  ]},
-  { letra: "D", termos: [
-    { termo: "Decálogo", definicao: "As Dez Palavras (ou Dez Mandamentos) dadas por Deus a Moisés no Sinai (Êxodo 20:1-17; Deuteronômio 5:6-21). Dividem-se em deveres para com Deus (1-4) e para com o próximo (5-10). Jesus as resumiu em dois mandamentos: amar a Deus e amar ao próximo (Mateus 22:37-40)." },
-    { termo: "Dízimo", definicao: "Décima parte dos rendimentos dedicada a Deus. Praticado antes da Lei (Abraão em Gênesis 14:20; Jacó em Gênesis 28:22), institutionalizado na Lei Mosaica (Levítico 27:30-32) e reafirmado no NT como princípio de generosidade (2 Coríntios 9:6-7). Expressa reconhecimento de que tudo pertence a Deus." },
-    { termo: "Doutrina", definicao: "Conjunto de ensinamentos teológicos que formam as crenças fundamentais da fé cristã. Inclui doutrinas sobre Deus (Teologia), a Bíblia (Bibliologia), o ser humano (Antropologia), o pecado (Hamartiologia), Cristo (Cristologia), a salvação (Soteriologia), o Espírito Santo (Pneumatologia) e as últimas coisas (Escatologia)." },
-  ]},
-  { letra: "E", termos: [
-    { termo: "Eleição", definicao: "Doutrina bíblica que afirma que Deus, em Sua soberania e graça, escolheu pessoas para a salvação antes da fundação do mundo (Efésios 1:4-5; Romanos 8:29-30). Não se baseia em mérito humano previsto, mas na vontade soberana de Deus. Tem como objetivo a glorificação de Deus e a santidade do eleito." },
-    { termo: "Encarnação", definicao: "Doutrina fundamental que afirma que o eterno Filho de Deus tomou sobre Si a natureza humana, tornando-se o homem Jesus de Nazaré (João 1:14). É o mistério central do cristianismo. Jesus é plenamente Deus e plenamente homem, sem mistura ou confusão de naturezas (Concílio de Calcedônia, 451 d.C.)." },
-    { termo: "Espírito Santo", definicao: "A terceira Pessoa da Santíssima Trindade, co-igual e co-eterno com o Pai e o Filho. Prometido por Jesus (João 14:16-17), derramado em Pentecostes (Atos 2). Suas obras incluem: convicção de pecado (João 16:8), novo nascimento (João 3:5-8), habitação no crente (1 Coríntios 6:19), santificação, dons espirituais e intercessão (Romanos 8:26)." },
-    { termo: "Evangelho", definicao: "Do grego 'euangelion', boas novas. É a mensagem central do cristianismo: que Jesus Cristo morreu pelos nossos pecados, foi sepultado e ressuscitou ao terceiro dia, segundo as Escrituras (1 Coríntios 15:3-4). É o poder de Deus para a salvação de todo aquele que crê (Romanos 1:16)." },
-    { termo: "Expiação", definicao: "A obra de Cristo na cruz pela qual o pecado é coberto e o pecador é reconciliado com Deus. Envolve propiciação (satisfação da ira de Deus), redenção (libertação do cativeiro do pecado) e reconciliação (restauração do relacionamento com Deus). É exclusiva e suficiente (Hebreus 10:10-14)." },
-  ]},
-  { letra: "F", termos: [
-    { termo: "Fé", definicao: "Do grego 'pistis', convicção e confiança. Hebreus 11:1 define fé como 'certeza das coisas que se esperam e prova das coisas que não se veem'. A fé salvadora envolve: conhecimento (notitia) do evangelho, concordância intelectual (assensus) e confiança pessoal (fiducia) em Cristo. É dom de Deus (Efésios 2:8) e sem ela é impossível agradar a Deus (Hebreus 11:6)." },
-    { termo: "Fruto do Espírito", definicao: "As nove qualidades que o Espírito Santo produz no crente: amor, alegria, paz, longanimidade, benignidade, bondade, fidelidade, mansidão e domínio próprio (Gálatas 5:22-23). São manifestações do caráter de Cristo sendo formado no crente, em contraste com as obras da carne. O fruto cresce gradualmente através da rendição ao Espírito." },
-  ]},
-  { letra: "G", termos: [
-    { termo: "Glória", definicao: "A manifestação da presença e perfeições de Deus. No AT, a glória (hebraico: 'kabod') frequentemente aparecia como luz ou nuvem luminosa (Êxodo 24:17; 1 Reis 8:11). No NT, a glória de Deus brilha plenamente no rosto de Jesus Cristo (2 Coríntios 4:6). Os cristãos são chamados a glorificar a Deus em tudo (1 Coríntios 10:31) e participarão da glória eterna (Romanos 8:18)." },
-    { termo: "Graça", definicao: "Do grego 'charis', favor imerecido. É o amor de Deus em ação a favor de quem não o merece. A salvação é inteiramente pela graça (Efésios 2:8-9), não por obras. Paulo a contrapõe à lei como princípio de relacionamento com Deus (Romanos 6:14). A graça não é apenas perdão do passado, mas poder para o presente e esperança para o futuro (2 Coríntios 12:9)." },
-  ]},
-  { letra: "H", termos: [
-    { termo: "Heresia", definicao: "Ensinamento que se desvia das doutrinas fundamentais da fé cristã, especialmente as definidas nas grandes confissões e concílios da Igreja. As heresias do NT incluíam negação da ressurreição (1 Coríntios 15:12), falsos evangelhos (Gálatas 1:6-9) e negação da encarnação (1 João 4:2-3). Paulo e João advertem seriamente contra elas." },
-    { termo: "Humildade", definicao: "Virtude cristã que envolve o reconhecimento correto de si mesmo diante de Deus e dos outros. Jesus é o modelo supremo de humildade (Filipenses 2:5-8). Não é auto-depreciação, mas ausência de orgulho e disposição para servir. Deus resiste ao soberbo, mas dá graça ao humilde (Tiago 4:6; 1 Pedro 5:5)." },
-  ]},
-  { letra: "I", termos: [
-    { termo: "Igreja", definicao: "Do grego 'ekklesia', assembleia dos chamados. É o corpo de Cristo (1 Coríntios 12:27), composto por todos os que verdadeiramente creram nEle. A Igreja universal é invisível; a local é a reunião visível de crentes em um lugar. Seus quatro atributos clássicos são: una, santa, católica (universal) e apostólica. Sua missão é adorar, edificar, evangelizar e servir." },
-    { termo: "Inspiração", definicao: "Doutrina que afirma que as Escrituras foram escritas por autores humanos sob a orientação do Espírito Santo, de modo que as palavras resultantes são a Palavra de Deus (2 Timóteo 3:16; 2 Pedro 1:21). Isso garante sua autoridade, inerrância e suficiência. Os autores escreveram com seus estilos e personalidades, mas foram 'soprados' pelo Espírito." },
-    { termo: "Intercessão", definicao: "Oração em favor de outros. Cristo é o supremo intercessor, vivendo para sempre interceder pelos Seus (Hebreus 7:25; Romanos 8:34). O Espírito Santo também intercede por nós (Romanos 8:26-27). Os cristãos são chamados a interceder uns pelos outros (1 Timóteo 2:1-2; Tiago 5:16)." },
-  ]},
-  { letra: "J", termos: [
-    { termo: "Justificação", definicao: "Ato forense pelo qual Deus declara o pecador justo com base na obra de Cristo, recebida pela fé (Romanos 3:24-26; 5:1). É a imputação da justiça de Cristo ao crente. É instantânea, completa e permanente — não baseada no desempenho do crente, mas na perfeita obediência de Cristo. Lutero a chamou de 'o artigo pelo qual a Igreja está de pé ou cai'." },
-    { termo: "Juízo", definicao: "Avaliação divina de pessoas e ações. A Bíblia fala de um juízo futuro e universal (Hebreus 9:27; Apocalipse 20:11-15) onde todos darão conta a Deus. Para o crente, o juízo de condenação já passou (João 5:24), mas haverá avaliação das obras (2 Coríntios 5:10). Para o incrédulo, o juízo resultará em condenação eterna." },
-  ]},
-  { letra: "M", termos: [
-    { termo: "Messias", definicao: "Palavra hebraica que significa 'o Ungido' (equivalente grego: Cristo). No AT, reis, sacerdotes e profetas eram ungidos para seus ofícios. O Messias prometido seria o Ungido por excelência, cumprindo os três ofícios (Profeta, Sacerdote e Rei). Jesus é o Messias prometido, confessado por Pedro (Mateus 16:16) e reconhecido progressivamente pelos discípulos." },
-    { termo: "Misericórdia", definicao: "Atributo de Deus que o move a não dar às pessoas o que merecem por seus pecados. Junto com a graça (dar o que não merecemos), compõe o amor ativo de Deus. As misericórdias do Senhor se renovam a cada manhã (Lamentações 3:22-23). Jesus é descrito como 'misericordioso e fiel sumo sacerdote' (Hebreus 2:17)." },
-    { termo: "Milagre", definicao: "Intervenção sobrenatural de Deus na ordem natural das coisas para Seus propósitos. Os milagres bíblicos servem para autenticar mensageiros divinos (Hebreus 2:3-4), demonstrar compaixão, revelar a glória de Deus e anunciar o Reino. Os maiores milagres são a Encarnação e a Ressurreição. Deus permanece soberano sobre Sua criação." },
-  ]},
-  { letra: "N", termos: [
-    { termo: "Novo Nascimento", definicao: "Expressão usada por Jesus em João 3:3-8 para descrever a regeneração — a obra do Espírito Santo que torna uma pessoa nova criatura em Cristo. É necessário para ver e entrar no Reino de Deus. Não é iniciativa humana, mas divina: 'os quais não nasceram do sangue... mas de Deus' (João 1:13)." },
-    { termo: "Nova Criação", definicao: "Em 2 Coríntios 5:17, Paulo declara que quem está em Cristo é nova criação, onde as coisas velhas passaram e tudo se tornou novo. Refere-se tanto à transformação individual do crente quanto à renovação cósmica final prometida (Apocalipse 21:1-5; Romanos 8:19-23). É a meta da redenção." },
-  ]},
-  { letra: "O", termos: [
-    { termo: "Oração", definicao: "Comunicação pessoal com Deus, envolvendo adoração, confissão, ação de graças e súplica (Filipenses 4:6). Jesus ensinou sobre a oração no Pai Nosso (Mateus 6:9-13) e praticou-a regularmente. A oração pressupõe a realidade de Deus, Sua atenção aos crentes e Seu poder de agir. O Espírito nos ajuda a orar (Romanos 8:26)." },
-    { termo: "Obediência", definicao: "Resposta positiva à vontade de Deus revelada em Sua Palavra. Jesus é o modelo supremo de obediência (Filipenses 2:8; Hebreus 5:8). A obediência cristã não é legalismo, mas resposta de amor à graça recebida (João 14:15). Nasce da fé e é capacitada pelo Espírito, sendo distinta da obediência legal que busca merecer a salvação." },
-  ]},
-  { letra: "P", termos: [
-    { termo: "Pecado", definicao: "Qualquer pensamento, palavra, ação ou omissão que viola o caráter e a lei de Deus (1 João 3:4). Entrou no mundo por Adão (Romanos 5:12) e afetou toda a humanidade. O pecado separa o ser humano de Deus (Isaías 59:2) e traz morte (Romanos 6:23). Somente o sangue de Cristo purifica de todo pecado (1 João 1:7)." },
-    { termo: "Perdão", definicao: "Ato divino pelo qual Deus remove a culpa e a penalidade do pecado do crente, baseado na morte expiatória de Cristo. É gratuito (Romanos 3:24), completo (Colossenses 2:13-14) e permanente. O cristão também é chamado a perdoar os outros como Deus o perdoou em Cristo (Efésios 4:32; Colossenses 3:13)." },
-    { termo: "Profecia", definicao: "Comunicação da mensagem de Deus, seja para o presente (fortalecer, exortar, consolar — 1 Coríntios 14:3) ou para revelar o futuro. Os profetas do AT foram os portadores da Palavra de Deus para Israel. No NT, a profecia é um dom espiritual. As profecias messiânicas do AT foram cumpridas em Jesus Cristo." },
-    { termo: "Propiciação", definicao: "Obra de Cristo que satisfaz a justa ira de Deus contra o pecado. Em 1 João 2:2, Jesus é chamado de 'propiciação pelos nossos pecados'. Deus, em Seu amor, enviou Seu Filho para ser a propiciação (Romanos 3:25). Isso distingue o cristianismo: não é o ser humano que aplaca a ira de Deus, mas o próprio Deus que provê a propiciação." },
-  ]},
-  { letra: "R", termos: [
-    { termo: "Redenção", definicao: "Libertação mediante pagamento de preço. Cristo nos redimiu do pecado e de sua condenação pelo preço de Seu próprio sangue (1 Pedro 1:18-19; Efésios 1:7). A metáfora vem do mercado de escravos: o escravo é comprado e libertado. Somos libertos para pertencer a Deus e servi-Lo em liberdade." },
-    { termo: "Regeneração", definicao: "Obra sobrenatural do Espírito Santo pela qual o ser humano morto em pecado recebe nova vida espiritual (Tito 3:5; João 3:5-8; Ezequiel 36:26-27). Precede logicamente a fé e o arrependimento, pois o ser humano em seu estado natural não pode vir a Deus (João 6:44; 1 Coríntios 2:14). É iniciativa exclusivamente divina." },
-    { termo: "Ressurreição", definicao: "A ressurreição corporal de Jesus Cristo no terceiro dia após Sua morte é o fato central do cristianismo (1 Coríntios 15:14-17). Demonstra a aceitação do sacrifício de Cristo pelo Pai, a derrota da morte e a garantia da ressurreição dos crentes. Jesus ressuscitou com um corpo glorificado e real, como primícias dos que dormem (1 Coríntios 15:20)." },
-    { termo: "Revelação", definicao: "A auto-comunicação de Deus à humanidade. A revelação geral é acessível a todos através da criação e da consciência (Romanos 1:19-20; 2:14-15). A revelação especial é a comunicação específica de Deus em palavras e atos, culminando em Jesus Cristo (Hebreus 1:1-2) e preservada nas Escrituras." },
-  ]},
-  { letra: "S", termos: [
-    { termo: "Sacramento", definicao: "Ritos ordenados por Cristo que envolvem elementos físicos e prometem graça divina. As igrejas protestantes reconhecem dois: Batismo e Ceia do Senhor. São sinais visíveis da graça invisível, meios pelos quais Deus confirma e sela Suas promessas aos crentes. São acompanhados de Palavra e fé para serem eficazes." },
-    { termo: "Salvação", definicao: "A obra completa de Deus pela qual o pecador é libertado da culpa, do poder e eventualmente da presença do pecado. Envolve eleição (eterno propósito de Deus), chamado, regeneração, fé, arrependimento, justificação, adoção, santificação e glorificação. É inteiramente de Deus, pela graça, mediante a fé em Cristo." },
-    { termo: "Santidade", definicao: "Atributo central de Deus que denota Sua perfeita pureza moral e Sua separação de tudo que é impuro (Isaías 6:3). Para o crente, santidade significa ser separado para Deus e conformado ao caráter de Cristo (1 Pedro 1:15-16). É ao mesmo tempo posicional (somos santos em Cristo) e progressiva (tornamo-nos santificados pela obra do Espírito)." },
-    { termo: "Santificação", definicao: "Processo pelo qual o crente é progressivamente transformado à imagem de Cristo pelo Espírito Santo (2 Coríntios 3:18). É distinta da justificação (declaração de justiça) por ser progressiva e contínua. Envolve a cooperação do crente (Filipenses 2:12-13) e o uso dos meios de graça: Palavra, oração, comunhão e disciplinas espirituais." },
-    { termo: "Soberania de Deus", definicao: "O domínio absoluto de Deus sobre toda a criação, história e destino humano. Deus governa todas as coisas segundo o conselho de Sua vontade (Efésios 1:11; Daniel 4:35). A soberania de Deus é fundamento da confiança cristã: nada está fora do Seu controle. Ela não elimina a responsabilidade humana, mas é o alicerce da esperança e da oração." },
-  ]},
-  { letra: "T", termos: [
-    { termo: "Tentação", definicao: "Solicitação ao mal, podendo vir do mundo, da carne ou do diabo. Deus não tenta ninguém (Tiago 1:13), mas permite tentações para provar e fortalecer a fé (Tiago 1:2-4). Jesus foi tentado em tudo como nós, mas sem pecado (Hebreus 4:15), e proveu caminho de escape para cada tentação (1 Coríntios 10:13). Resistir ao diabo faz com que ele fuja (Tiago 4:7)." },
-    { termo: "Trindade", definicao: "Doutrina central do cristianismo que afirma que o único Deus existe eternamente em três Pessoas distintas — Pai, Filho e Espírito Santo — co-iguais e co-eternos, com uma essência e três subsistências. Não é uma contradição (um Deus em três deuses), mas mistério. Evidências: Mateus 28:19; 2 Coríntios 13:14; João 1:1; 14:16-17." },
-  ]},
-  { letra: "V", termos: [
-    { termo: "Vida Eterna", definicao: "Não apenas existência sem fim, mas qualidade de vida que começa aqui e agora no relacionamento com Deus (João 17:3). É o maior presente de Deus ao crente (João 3:16; Romanos 6:23). Envolve a ressurreição corporal, a visão beatífica (ver a Deus face a face) e a perfeita comunhão com Deus e Seu povo para sempre." },
-    { termo: "Vontade de Deus", definicao: "Os propósitos e desejos de Deus. Distingue-se entre a vontade decretiva (tudo o que Deus determina que aconteça — infalível) e a vontade preceptiva (o que Deus ordena e deseja moralmente — pode ser desobedecida). O cristão é chamado a discernir e fazer a vontade de Deus (Romanos 12:2; Efésios 5:17)." },
-  ]},
-];
 
 const CONTATOS = {
   endereco: ENDERECO,
