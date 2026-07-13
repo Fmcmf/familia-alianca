@@ -2631,15 +2631,31 @@ export default function FamiliaAliancaApp() {
                                     <div style={{ marginBottom: 8 }}>
                                       <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas do culto</div>
                                       {musicasEscala.map((mus, i) => {
-                                        const cifra = cifras.find(c => {
-                                          const tituloMatch = c.titulo?.toLowerCase().trim() === mus.titulo?.toLowerCase().trim();
-                                          const artistaMatch = c.artista?.toLowerCase().trim() === mus.artista?.toLowerCase().trim();
-                                          // Busca por título igual OU título+artista similar
-                                          return tituloMatch || (artistaMatch && c.titulo?.toLowerCase().includes(mus.titulo?.toLowerCase()?.split(" ")[0]));
-                                        });
+                                        // Busca cifra desta música
+                                        const cifraMusica = cifras.find(c =>
+                                          c.ministerio === min && (
+                                            c.titulo?.toLowerCase().trim() === mus.titulo?.toLowerCase().trim() ||
+                                            c.titulo?.toLowerCase().includes(mus.titulo?.toLowerCase()?.split(" ")[0]) ||
+                                            mus.titulo?.toLowerCase().includes(c.titulo?.toLowerCase()?.split(" ")[0])
+                                          )
+                                        );
+                                        // Busca VS desta música
+                                        const vsMusica = vsItems.find(v =>
+                                          v.ministerio === min && (
+                                            v.titulo?.toLowerCase().trim() === mus.titulo?.toLowerCase().trim() ||
+                                            v.titulo?.toLowerCase().includes(mus.titulo?.toLowerCase()?.split(" ")[0]) ||
+                                            mus.titulo?.toLowerCase().includes(v.titulo?.toLowerCase()?.split(" ")[0])
+                                          )
+                                        );
+                                        // Se não achou por título, pega todos do ministério para a última música
+                                        const todasCifras = i === musicasEscala.length - 1
+                                          ? cifras.filter(c => c.ministerio === min && !musicasEscala.some((m, j) => j < i && cifras.find(cc => cc.id === c.id && (cc.titulo?.toLowerCase().includes(m.titulo?.toLowerCase()?.split(" ")[0])))))
+                                          : [];
+
                                         return (
-                                          <div key={i} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, marginBottom: 8, overflow: "hidden" }}>
-                                            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", marginBottom: cifra ? 0 : 0 }}>
+                                          <div key={i} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, marginBottom: 10, overflow: "hidden" }}>
+                                            {/* Header música */}
+                                            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px" }}>
                                               <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>🎵</div>
                                               <div style={{ flex: 1 }}>
                                                 <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{mus.titulo}</div>
@@ -2650,42 +2666,67 @@ export default function FamiliaAliancaApp() {
                                                   style={{ background: "#1a56db", border: "none", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#fff", cursor: "pointer" }}>▶</button>
                                               )}
                                             </div>
-                                            {/* YouTube embed */}
+                                            {/* YouTube */}
                                             {getYouTubeId(mus.link) && (
                                               <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />
                                             )}
-                                            {/* Spotify embed */}
+                                            {/* Spotify */}
                                             {getSpotifyId(mus.link) && (
                                               <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />
                                             )}
                                             {/* Cifra desta música */}
-                                            {cifra && (
-                                              <div style={{ borderTop: `1px solid ${T.cardBorder}`, paddingTop: 8 }}>
-                                                <div style={{ fontSize: 11, color: "#8b5cf6", marginBottom: 6 }}>🎸 Cifra disponível</div>
-                                                <div style={{ display: "flex", gap: 6 }}>
-                                                  {cifra.link && (
-                                                    <button onClick={() => window.open(cifra.link, "_blank")}
-                                                      style={{ flex: 1, background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>
-                                                      🔗 Abrir Link
+                                            {cifraMusica && (
+                                              <div style={{ borderTop: `1px solid ${T.cardBorder}`, padding: "10px 12px" }}>
+                                                <div style={{ fontSize: 11, color: "#8b5cf6", fontWeight: "bold", marginBottom: 8 }}>🎸 Cifra — {cifraMusica.titulo} {cifraMusica.tom && <span style={{ color: "#c9a84c" }}>• {cifraMusica.tom}</span>}</div>
+                                                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                                  {cifraMusica.link && (
+                                                    <button onClick={() => window.open(cifraMusica.link, "_blank")}
+                                                      style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>
+                                                      🔗 Ver Cifra
                                                     </button>
                                                   )}
-                                                  {cifra.arquivo && (
-                                                    <button onClick={() => window.open(cifra.arquivo, "_blank")}
-                                                      style={{ flex: 1, background: "rgba(220,38,38,.1)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#f87171", cursor: "pointer" }}>
-                                                      📄 PDF/Imagem
+                                                  {cifraMusica.arquivo && (
+                                                    <button onClick={() => {
+                                                      let url = cifraMusica.arquivo;
+                                                      if (url.includes("cloudinary.com")) url = url.replace("/upload/", "/upload/fl_attachment:false/");
+                                                      window.open(url, "_blank");
+                                                    }}
+                                                      style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>
+                                                      📄 Abrir PDF
                                                     </button>
                                                   )}
-                                                  {cifra.conteudo && (
-                                                    <button onClick={() => setMusicaSelecionada(cifra)}
-                                                      style={{ flex: 1, background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>
-                                                      📝 Ver Cifra
+                                                  {cifraMusica.conteudo && (
+                                                    <button onClick={() => setMusicaSelecionada(musicaSelecionada?.id === cifraMusica.id ? null : cifraMusica)}
+                                                      style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>
+                                                      📝 {musicaSelecionada?.id === cifraMusica.id ? "Fechar" : "Ver Cifra"}
                                                     </button>
                                                   )}
                                                 </div>
-                                                {musicaSelecionada?.id === cifra.id && (
-                                                  <pre style={{ marginTop: 8, fontSize: 11, color: T.text, lineHeight: 1.7, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 8, padding: "10px" }}>
-                                                    {cifra.conteudo}
+                                                {musicaSelecionada?.id === cifraMusica.id && cifraMusica.conteudo && (
+                                                  <pre style={{ marginTop: 8, fontSize: 11, color: T.text, lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 8, padding: "12px", overflowX: "auto" }}>
+                                                    {cifraMusica.conteudo}
                                                   </pre>
+                                                )}
+                                              </div>
+                                            )}
+                                            {/* VS desta música */}
+                                            {vsMusica && (
+                                              <div style={{ borderTop: `1px solid ${T.cardBorder}`, padding: "10px 12px" }}>
+                                                <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: "bold", marginBottom: 8 }}>🎧 VS — {vsMusica.titulo}</div>
+                                                {vsMusica.arquivo && vsMusica.tipo?.includes("audio") && (
+                                                  <audio controls style={{ width: "100%", borderRadius: 8 }}>
+                                                    <source src={vsMusica.arquivo} type={vsMusica.tipo} />
+                                                  </audio>
+                                                )}
+                                                {vsMusica.arquivo && !vsMusica.tipo?.includes("audio") && (
+                                                  <button onClick={() => {
+                                                    let url = vsMusica.arquivo;
+                                                    if (url.includes("cloudinary.com")) url = url.replace("/upload/", "/upload/fl_attachment:false/");
+                                                    window.open(url, "_blank");
+                                                  }}
+                                                    style={{ width: "100%", background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#a78bfa", cursor: "pointer" }}>
+                                                    📁 Abrir Arquivo
+                                                  </button>
                                                 )}
                                               </div>
                                             )}
@@ -2695,45 +2736,30 @@ export default function FamiliaAliancaApp() {
                                     </div>
                                   )}
 
-                                  {/* Cifras do ministério — só para escalados */}
+                                  {/* Cifras sem música vinculada — só para escalados */}
                                   {meuInstrumento && (() => {
-                                    const cifrasMin = cifras.filter(c => c.ministerio === min);
-                                    if (cifrasMin.length === 0) return null;
+                                    const cifrasSemMusica = cifras.filter(c =>
+                                      c.ministerio === min &&
+                                      !musicasEscala.some(mus =>
+                                        c.titulo?.toLowerCase().trim() === mus.titulo?.toLowerCase().trim() ||
+                                        c.titulo?.toLowerCase().includes(mus.titulo?.toLowerCase()?.split(" ")[0]) ||
+                                        mus.titulo?.toLowerCase().includes(c.titulo?.toLowerCase()?.split(" ")[0])
+                                      )
+                                    );
+                                    if (cifrasSemMusica.length === 0) return null;
                                     return (
-                                      <div style={{ marginTop: 10 }}>
-                                        <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎸 Cifras do Ministério</div>
-                                        {cifrasMin.map(c => (
+                                      <div style={{ marginTop: 8 }}>
+                                        <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎸 Outras Cifras</div>
+                                        {cifrasSemMusica.map(c => (
                                           <div key={c.id} style={{ background: T.card, border: `1px solid rgba(139,92,246,.2)`, borderLeft: "3px solid #8b5cf6", borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
-                                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 6 }}>{c.titulo}</div>
-                                            {c.artista && <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>{c.artista} {c.tom && <span style={{ color: "#c9a84c" }}>• Tom: {c.tom}</span>}</div>}
+                                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 6 }}>{c.titulo} {c.tom && <span style={{ color: "#c9a84c", fontSize: 11 }}>• {c.tom}</span>}</div>
                                             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                                              {c.link && (
-                                                <button onClick={() => window.open(c.link, "_blank")}
-                                                  style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>
-                                                  🔗 Link
-                                                </button>
-                                              )}
-                                              {c.arquivo && (
-                                                <button onClick={() => {
-                                                  let url = c.arquivo;
-                                                  if (url.includes("cloudinary.com") && !url.includes("/fl_attachment")) {
-                                                    url = url.replace("/upload/", "/upload/fl_attachment:false/");
-                                                  }
-                                                  window.open(url, "_blank");
-                                                }}
-                                                  style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.1)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#f87171", cursor: "pointer" }}>
-                                                  📄 PDF
-                                                </button>
-                                              )}
-                                              {c.conteudo && (
-                                                <button onClick={() => setMusicaSelecionada(musicaSelecionada?.id === c.id ? null : c)}
-                                                  style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>
-                                                  📝 Ver Cifra
-                                                </button>
-                                              )}
+                                              {c.link && <button onClick={() => window.open(c.link, "_blank")} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.4)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>🔗 Ver Cifra</button>}
+                                              {c.arquivo && <button onClick={() => { let url = c.arquivo; if (url.includes("cloudinary.com")) url = url.replace("/upload/", "/upload/fl_attachment:false/"); window.open(url, "_blank"); }} style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.4)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>📄 Abrir PDF</button>}
+                                              {c.conteudo && <button onClick={() => setMusicaSelecionada(musicaSelecionada?.id === c.id ? null : c)} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.4)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>📝 Ver Cifra</button>}
                                             </div>
                                             {musicaSelecionada?.id === c.id && c.conteudo && (
-                                              <pre style={{ marginTop: 8, fontSize: 11, color: T.text, lineHeight: 1.7, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 8, padding: "10px" }}>
+                                              <pre style={{ marginTop: 8, fontSize: 11, color: T.text, lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 8, padding: "12px" }}>
                                                 {c.conteudo}
                                               </pre>
                                             )}
@@ -2743,19 +2769,24 @@ export default function FamiliaAliancaApp() {
                                     );
                                   })()}
 
-                                  {/* VS do ministério — só para escalados */}
+                                  {/* VS sem música vinculada — só para escalados */}
                                   {meuInstrumento && (() => {
-                                    const vsMin = vsItems.filter(v => v.ministerio === min);
-                                    if (vsMin.length === 0) return null;
+                                    const vsSemMusica = vsItems.filter(v =>
+                                      v.ministerio === min &&
+                                      !musicasEscala.some(mus =>
+                                        v.titulo?.toLowerCase().trim() === mus.titulo?.toLowerCase().trim() ||
+                                        v.titulo?.toLowerCase().includes(mus.titulo?.toLowerCase()?.split(" ")[0]) ||
+                                        mus.titulo?.toLowerCase().includes(v.titulo?.toLowerCase()?.split(" ")[0])
+                                      )
+                                    );
+                                    if (vsSemMusica.length === 0) return null;
                                     return (
-                                      <div style={{ marginTop: 10 }}>
-                                        <div style={{ fontSize: 11, color: "#a78bfa", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎧 VS — Referências de Áudio</div>
-                                        {vsMin.map(v => (
-                                          <div key={v.id} style={{ background: T.card, border: `1px solid rgba(139,92,246,.25)`, borderLeft: "3px solid #8b5cf6", borderRadius: 10, marginBottom: 8, overflow: "hidden" }}>
+                                      <div style={{ marginTop: 8 }}>
+                                        <div style={{ fontSize: 11, color: "#a78bfa", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎧 Outros VS</div>
+                                        {vsSemMusica.map(v => (
+                                          <div key={v.id} style={{ background: T.card, border: `1px solid rgba(139,92,246,.2)`, borderLeft: "3px solid #8b5cf6", borderRadius: 10, marginBottom: 8, overflow: "hidden" }}>
                                             <div style={{ padding: "10px 12px" }}>
-                                              <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>
-                                                {v.tipo?.includes("audio") ? "🎵" : v.tipo?.includes("pdf") ? "📄" : "📁"} {v.titulo}
-                                              </div>
+                                              <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{v.tipo?.includes("audio") ? "🎵" : "📁"} {v.titulo}</div>
                                               {v.artista && <div style={{ fontSize: 11, color: T.textSub }}>{v.artista}</div>}
                                             </div>
                                             {v.arquivo && v.tipo?.includes("audio") && (
@@ -2763,18 +2794,6 @@ export default function FamiliaAliancaApp() {
                                                 <audio controls style={{ width: "100%", borderRadius: 8 }}>
                                                   <source src={v.arquivo} type={v.tipo} />
                                                 </audio>
-                                              </div>
-                                            )}
-                                            {v.arquivo && !v.tipo?.includes("audio") && (
-                                              <div style={{ padding: "0 12px 10px" }}>
-                                                <button onClick={() => {
-                                                  let url = v.arquivo;
-                                                  if (url && url.includes("cloudinary.com")) url = url.replace("/upload/", "/upload/fl_attachment:false/");
-                                                  window.open(url, "_blank");
-                                                }}
-                                                  style={{ width: "100%", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.25)", borderRadius: 8, padding: "7px 0", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>
-                                                  📄 Abrir Arquivo
-                                                </button>
                                               </div>
                                             )}
                                           </div>
