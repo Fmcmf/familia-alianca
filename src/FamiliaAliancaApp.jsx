@@ -3674,8 +3674,7 @@ export default function FamiliaAliancaApp() {
                             <div style={{ padding: "0 14px 12px" }}>
                               <button onClick={() => {
                                                   let url = v.arquivo;
-                                                  setPdfAberto(pdfAberto === url ? null : url); return;
-                                                  window.open(url, "_blank");
+                                                  setPdfAberto(pdfAberto === url ? null : url);
                                                 }}
                                 style={{ width: "100%", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#a78bfa", cursor: "pointer" }}>
                                 📄 Abrir Arquivo
