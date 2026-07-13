@@ -3,6 +3,34 @@ import { db, messaging, solicitarPermissaoNotificacao, onMessage } from "./fireb
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
 
+// ─── CLOUDINARY CONFIG ──────────────────────────────────────────────────────
+const CLOUDINARY_CLOUD = "trmdo2jy";
+const CLOUDINARY_PRESET = "familia_alianca";
+const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/upload`;
+
+const uploadCloudinary = async (file, onProgress) => {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("upload_preset", CLOUDINARY_PRESET);
+  fd.append("resource_type", "auto");
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", CLOUDINARY_URL);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (data.secure_url) resolve(data.secure_url);
+        else reject(new Error(data.error?.message || "Upload falhou"));
+      } catch { reject(new Error("Resposta inválida")); }
+    };
+    xhr.onerror = () => reject(new Error("Erro de conexão"));
+    xhr.send(fd);
+  });
+};
+
 // ─── EMAILJS CONFIG ─────────────────────────────────────────── v1.1 ───────
 const ONESIGNAL_APP_ID = "10ba1be7-f0bc-4c2d-bb2e-e9a02d4235f1";
 const ONESIGNAL_API_KEY = "os_v2_app_cc5bxz7qxrgc3ozo5gqc2qrv6fvhavzuxthuwrubrn6h6e6hhl7llhqjzm642hcawtwg2341hscb4t6xdvqjwptkzb1665spna4xk3a";
@@ -447,6 +475,10 @@ export default function FamiliaAliancaApp() {
   const [categoriaEscala, setCategoriaEscala] = useState(null); // categoria selecionada na escala
   // Módulo Música
   const [musicaView, setMusicaView] = useState("escalas"); // escalas | musicas | cifras
+  const [vsItems, setVsItems] = useState([]);
+  const [novoVs, setNovoVs] = useState({ titulo: "", artista: "", link: "", arquivo: "" });
+  const [uploadProgress, setUploadProgress] = useState(null); // null | 0-100
+  const [uploadando, setUploadando] = useState(false);
   const [escalas, setEscalas] = useState([]);
   const [musicas, setMusicas] = useState([]);
   const [cifras, setCifras] = useState([]);
@@ -766,6 +798,9 @@ export default function FamiliaAliancaApp() {
     const unsubCifras = onSnapshot(collection(db, "cifras"), snap => {
       setCifras(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => a.titulo?.localeCompare(b.titulo)));
     });
+    const unsubVs = onSnapshot(collection(db, "vs"), snap => {
+      setVsItems(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => a.titulo?.localeCompare(b.titulo)));
+    });
 
     const unsubBannerJejum = onSnapshot(doc(db, "config", "bannerJejum"), (snap) => {
       if (snap.exists()) setBannerJejum(snap.data());
@@ -812,7 +847,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
       clearInterval(heartbeat);
       removerPresenca();
       window.removeEventListener("beforeunload", removerPresenca);
@@ -2654,6 +2689,42 @@ export default function FamiliaAliancaApp() {
                                       })}
                                     </div>
                                   )}
+
+                                  {/* VS do ministério */}
+                                  {(() => {
+                                    const vsMin = vsItems.filter(v => v.ministerio === min);
+                                    if (vsMin.length === 0) return null;
+                                    return (
+                                      <div style={{ marginTop: 10 }}>
+                                        <div style={{ fontSize: 11, color: "#a78bfa", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎧 VS — Referências de Áudio</div>
+                                        {vsMin.map(v => (
+                                          <div key={v.id} style={{ background: T.card, border: `1px solid rgba(139,92,246,.25)`, borderLeft: "3px solid #8b5cf6", borderRadius: 10, marginBottom: 8, overflow: "hidden" }}>
+                                            <div style={{ padding: "10px 12px" }}>
+                                              <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>
+                                                {v.tipo?.includes("audio") ? "🎵" : v.tipo?.includes("pdf") ? "📄" : "📁"} {v.titulo}
+                                              </div>
+                                              {v.artista && <div style={{ fontSize: 11, color: T.textSub }}>{v.artista}</div>}
+                                            </div>
+                                            {v.arquivo && v.tipo?.includes("audio") && (
+                                              <div style={{ padding: "0 12px 10px" }}>
+                                                <audio controls style={{ width: "100%", borderRadius: 8 }}>
+                                                  <source src={v.arquivo} type={v.tipo} />
+                                                </audio>
+                                              </div>
+                                            )}
+                                            {v.arquivo && !v.tipo?.includes("audio") && (
+                                              <div style={{ padding: "0 12px 10px" }}>
+                                                <button onClick={() => window.open(v.arquivo, "_blank")}
+                                                  style={{ width: "100%", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.25)", borderRadius: 8, padding: "7px 0", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>
+                                                  📄 Abrir Arquivo
+                                                </button>
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    );
+                                  })()}
                                 </div>
                               </div>
                             </div>
@@ -3279,7 +3350,7 @@ export default function FamiliaAliancaApp() {
 
                   {/* Sub-nav */}
                   <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", scrollbarWidth: "none" }}>
-                    {[{ id: "musicas", label: "🎶 Músicas" }, { id: "cifras", label: "🎸 Cifras" }].map(v => (
+                    {[{ id: "musicas", label: "🎶 Músicas" }, { id: "cifras", label: "🎸 Cifras" }, { id: "vs", label: "🎧 VS" }].map(v => (
                       <button key={v.id} onClick={() => setMusicaView(v.id)}
                         style={{ flexShrink: 0, padding: "8px 16px", border: `1px solid ${musicaView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: musicaView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: musicaView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: musicaView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                         {v.label}
@@ -3402,11 +3473,36 @@ export default function FamiliaAliancaApp() {
                               value={novaCifra.tom} onChange={e => setNovaCifra({ ...novaCifra, tom: e.target.value })} />
                             <input style={{ ...S.input, marginBottom: 8 }} placeholder="🔗 Link (Cifra Club, Ultimate Guitar...)"
                               value={novaCifra.link} onChange={e => setNovaCifra({ ...novaCifra, link: e.target.value })} />
-                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="📄 URL do PDF (Google Drive, ibb.co, Dropbox...)"
-                              value={novaCifra.arquivo} onChange={e => setNovaCifra({ ...novaCifra, arquivo: e.target.value })} />
-                            <div style={{ background: "rgba(201,168,76,.05)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 11, color: T.textFaint, lineHeight: 1.6 }}>
-                              💡 Para PDF: faça upload no Google Drive ou ibb.co e cole o link direto aqui.
-                            </div>
+
+                            {/* Upload de PDF */}
+                            <label style={{ display: "block", cursor: "pointer", marginBottom: 8 }}>
+                              <div style={{ border: `2px dashed ${novaCifra.arquivo ? "rgba(34,197,94,.4)" : "rgba(201,168,76,.3)"}`, borderRadius: 10, padding: "12px 14px", textAlign: "center", background: novaCifra.arquivo ? "rgba(34,197,94,.04)" : "rgba(201,168,76,.03)" }}>
+                                {uploadando ? (
+                                  <>
+                                    <div style={{ fontSize: 12, color: "#a78bfa", marginBottom: 6 }}>Enviando... {uploadProgress}%</div>
+                                    <div style={{ background: "rgba(139,92,246,.2)", borderRadius: 20, height: 5, overflow: "hidden" }}>
+                                      <div style={{ background: "#8b5cf6", height: "100%", width: `${uploadProgress}%`, transition: "width .3s", borderRadius: 20 }} />
+                                    </div>
+                                  </>
+                                ) : novaCifra.arquivo ? (
+                                  <div style={{ fontSize: 12, color: "#22c55e" }}>✅ PDF enviado — clique para trocar</div>
+                                ) : (
+                                  <div style={{ fontSize: 12, color: T.textSub }}>📄 Toque para fazer upload de PDF/imagem</div>
+                                )}
+                              </div>
+                              <input type="file" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" style={{ display: "none" }}
+                                onChange={async e => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  setUploadando(true); setUploadProgress(0);
+                                  try {
+                                    const url = await uploadCloudinary(file, setUploadProgress);
+                                    setNovaCifra(c => ({ ...c, arquivo: url }));
+                                    showToast("✅ Arquivo enviado!");
+                                  } catch (err) { showToast("❌ " + err.message); }
+                                  finally { setUploadando(false); setUploadProgress(null); }
+                                }} />
+                            </label>
                             <textarea style={{ ...S.textarea, minHeight: 120, fontFamily: "monospace", fontSize: 12 }}
                               placeholder={"Ou digite a cifra aqui:\n\nAm         G\nQuando eu louvar..."}
                               value={novaCifra.conteudo} onChange={e => setNovaCifra({ ...novaCifra, conteudo: e.target.value })} />
@@ -3437,6 +3533,122 @@ export default function FamiliaAliancaApp() {
                           )}
                         </>
                       )}
+                    </>
+                  )}
+
+                  {/* ── VS (Voz e Som) ── */}
+                  {musicaView === "vs" && (
+                    <>
+                      <div style={{ background: "rgba(139,92,246,.06)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#a78bfa" }}>
+                        🎧 Faça upload de áudios MP3/WAV ou PDFs direto do seu dispositivo para os músicos do ministério.
+                      </div>
+
+                      {/* Formulário */}
+                      <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
+                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>➕ Novo VS</div>
+
+                        <input style={{ ...S.input, marginBottom: 8 }} placeholder="Título *"
+                          value={novoVs.titulo} onChange={e => setNovoVs({ ...novoVs, titulo: e.target.value })} />
+                        <input style={{ ...S.input, marginBottom: 12 }} placeholder="Artista/Banda (opcional)"
+                          value={novoVs.artista} onChange={e => setNovoVs({ ...novoVs, artista: e.target.value })} />
+
+                        {/* Upload de arquivo */}
+                        <label style={{ display: "block", cursor: "pointer" }}>
+                          <div style={{ border: `2px dashed ${uploadando ? "#a78bfa" : "rgba(139,92,246,.4)"}`, borderRadius: 12, padding: "20px 16px", textAlign: "center", background: "rgba(139,92,246,.04)", transition: "all .2s" }}>
+                            {uploadando ? (
+                              <>
+                                <div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div>
+                                <div style={{ fontSize: 13, color: "#a78bfa", marginBottom: 8 }}>Enviando... {uploadProgress}%</div>
+                                <div style={{ background: "rgba(139,92,246,.2)", borderRadius: 20, height: 6, overflow: "hidden" }}>
+                                  <div style={{ background: "#8b5cf6", height: "100%", width: `${uploadProgress}%`, transition: "width .3s", borderRadius: 20 }} />
+                                </div>
+                              </>
+                            ) : novoVs.arquivo ? (
+                              <>
+                                <div style={{ fontSize: 28, marginBottom: 6 }}>✅</div>
+                                <div style={{ fontSize: 12, color: "#22c55e", wordBreak: "break-all" }}>Arquivo enviado!</div>
+                                <div style={{ fontSize: 11, color: T.textFaint, marginTop: 4 }}>Clique para trocar</div>
+                              </>
+                            ) : (
+                              <>
+                                <div style={{ fontSize: 32, marginBottom: 8 }}>📁</div>
+                                <div style={{ fontSize: 13, color: "#a78bfa", marginBottom: 4 }}>Toque para selecionar arquivo</div>
+                                <div style={{ fontSize: 11, color: T.textFaint }}>MP3, WAV, PDF, DOC, TXT</div>
+                              </>
+                            )}
+                          </div>
+                          <input type="file" accept=".mp3,.wav,.ogg,.pdf,.doc,.docx,.txt" style={{ display: "none" }}
+                            onChange={async e => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              if (file.size > 50 * 1024 * 1024) { showToast("⚠️ Arquivo muito grande! Máx 50MB"); return; }
+                              setUploadando(true);
+                              setUploadProgress(0);
+                              try {
+                                const url = await uploadCloudinary(file, setUploadProgress);
+                                setNovoVs(v => ({ ...v, arquivo: url, tipo: file.type }));
+                                showToast("✅ Arquivo enviado!");
+                              } catch (err) {
+                                showToast("❌ Erro no upload: " + err.message);
+                              } finally {
+                                setUploadando(false);
+                                setUploadProgress(null);
+                              }
+                            }} />
+                        </label>
+
+                        <button style={{ ...S.saveBtn, marginTop: 12, opacity: (!novoVs.titulo || uploadando) ? 0.5 : 1 }}
+                          disabled={!novoVs.titulo || uploadando}
+                          onClick={async () => {
+                            if (!novoVs.titulo) { showToast("⚠️ Informe o título!"); return; }
+                            if (!novoVs.arquivo) { showToast("⚠️ Selecione um arquivo!"); return; }
+                            await addDoc(collection(db, "vs"), { ...novoVs, ministerio: ministerioLider, criadoEm: new Date().toISOString() });
+                            setNovoVs({ titulo: "", artista: "", arquivo: "", tipo: "" });
+                            showToast("✅ VS adicionado!");
+                          }}>🎧 Publicar VS</button>
+                      </div>
+
+                      {/* Lista de VS */}
+                      {vsItems.filter(v => v.ministerio === ministerioLider).length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "24px 0", color: T.textSub, fontSize: 13 }}>
+                          <div style={{ fontSize: 32, marginBottom: 8 }}>🎧</div>Nenhum VS cadastrado
+                        </div>
+                      ) : vsItems.filter(v => v.ministerio === ministerioLider).map(v => (
+                        <div key={v.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #8b5cf6", borderRadius: 12, marginBottom: 10, overflow: "hidden" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px" }}>
+                            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(139,92,246,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
+                              {v.tipo?.includes("audio") ? "🎵" : v.tipo?.includes("pdf") ? "📄" : "📁"}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{v.titulo}</div>
+                              {v.artista && <div style={{ fontSize: 12, color: T.textSub }}>{v.artista}</div>}
+                            </div>
+                            <button style={S.delBtn} onClick={async () => {
+                              if (window.confirm("Excluir este VS?")) {
+                                await deleteDoc(doc(db, "vs", v.id));
+                                showToast("🗑️ Removido!");
+                              }
+                            }}>🗑️</button>
+                          </div>
+                          {/* Player de áudio */}
+                          {v.arquivo && v.tipo?.includes("audio") && (
+                            <div style={{ padding: "0 14px 12px" }}>
+                              <audio controls style={{ width: "100%", borderRadius: 8 }}>
+                                <source src={v.arquivo} type={v.tipo} />
+                              </audio>
+                            </div>
+                          )}
+                          {/* PDF/Doc */}
+                          {v.arquivo && !v.tipo?.includes("audio") && (
+                            <div style={{ padding: "0 14px 12px" }}>
+                              <button onClick={() => window.open(v.arquivo, "_blank")}
+                                style={{ width: "100%", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#a78bfa", cursor: "pointer" }}>
+                                📄 Abrir Arquivo
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </>
                   )}
                 </div>
