@@ -2714,7 +2714,14 @@ export default function FamiliaAliancaApp() {
                                                 </button>
                                               )}
                                               {c.arquivo && (
-                                                <button onClick={() => window.open(c.arquivo, "_blank")}
+                                                <button onClick={() => {
+                                                  // Força abertura de PDF do Cloudinary no browser
+                                                  let url = c.arquivo;
+                                                  if (url.includes("cloudinary.com") && !url.includes("/fl_attachment")) {
+                                                    url = url.replace("/upload/", "/upload/fl_attachment:false/");
+                                                  }
+                                                  window.open(url, "_blank");
+                                                }}
                                                   style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.1)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "6px 0", fontSize: 11, color: "#f87171", cursor: "pointer" }}>
                                                   📄 PDF
                                                 </button>
@@ -2761,7 +2768,11 @@ export default function FamiliaAliancaApp() {
                                             )}
                                             {v.arquivo && !v.tipo?.includes("audio") && (
                                               <div style={{ padding: "0 12px 10px" }}>
-                                                <button onClick={() => window.open(v.arquivo, "_blank")}
+                                                <button onClick={() => {
+                                                  let url = v.arquivo;
+                                                  if (url && url.includes("cloudinary.com")) url = url.replace("/upload/", "/upload/fl_attachment:false/");
+                                                  window.open(url, "_blank");
+                                                }}
                                                   style={{ width: "100%", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.25)", borderRadius: 8, padding: "7px 0", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>
                                                   📄 Abrir Arquivo
                                                 </button>
@@ -3688,7 +3699,11 @@ export default function FamiliaAliancaApp() {
                           {/* PDF/Doc */}
                           {v.arquivo && !v.tipo?.includes("audio") && (
                             <div style={{ padding: "0 14px 12px" }}>
-                              <button onClick={() => window.open(v.arquivo, "_blank")}
+                              <button onClick={() => {
+                                                  let url = v.arquivo;
+                                                  if (url && url.includes("cloudinary.com")) url = url.replace("/upload/", "/upload/fl_attachment:false/");
+                                                  window.open(url, "_blank");
+                                                }}
                                 style={{ width: "100%", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#a78bfa", cursor: "pointer" }}>
                                 📄 Abrir Arquivo
                               </button>
