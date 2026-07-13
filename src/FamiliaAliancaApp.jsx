@@ -2695,8 +2695,8 @@ export default function FamiliaAliancaApp() {
                                     </div>
                                   )}
 
-                                  {/* Cifras do ministério */}
-                                  {(() => {
+                                  {/* Cifras do ministério — só para escalados */}
+                                  {meuInstrumento && (() => {
                                     const cifrasMin = cifras.filter(c => c.ministerio === min);
                                     if (cifrasMin.length === 0) return null;
                                     return (
@@ -2715,7 +2715,6 @@ export default function FamiliaAliancaApp() {
                                               )}
                                               {c.arquivo && (
                                                 <button onClick={() => {
-                                                  // Força abertura de PDF do Cloudinary no browser
                                                   let url = c.arquivo;
                                                   if (url.includes("cloudinary.com") && !url.includes("/fl_attachment")) {
                                                     url = url.replace("/upload/", "/upload/fl_attachment:false/");
@@ -2744,8 +2743,8 @@ export default function FamiliaAliancaApp() {
                                     );
                                   })()}
 
-                                  {/* VS do ministério */}
-                                  {(() => {
+                                  {/* VS do ministério — só para escalados */}
+                                  {meuInstrumento && (() => {
                                     const vsMin = vsItems.filter(v => v.ministerio === min);
                                     if (vsMin.length === 0) return null;
                                     return (
