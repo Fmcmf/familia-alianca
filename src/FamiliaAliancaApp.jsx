@@ -518,6 +518,11 @@ export default function FamiliaAliancaApp() {
   const [oracao, setOracao] = useState({ nome: "", pedido: "" });
   const [adminTab, setAdminTab] = useState("agenda");
   const [novoEvento, setNovoEvento] = useState({ titulo: "", data: "", hora: "", local: "", tipo: "culto" });
+  const [tiposCustom, setTiposCustom] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("fa_tipos_evento") || "[]"); }
+    catch { return []; }
+  });
+  const [novoTipo, setNovoTipo] = useState("");
   const [novaPalavra, setNovaPalavra] = useState({ titulo: "", texto: "", referencia: "", video: "" });
   const [editandoEvento, setEditandoEvento] = useState(null);
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -3477,7 +3482,54 @@ export default function FamiliaAliancaApp() {
                   <option value="oracao">Reunião de Oração</option>
                   <option value="kids">Kids</option>
                   <option value="music">Music</option>
+                  {tiposCustom.map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
                 </select>
+
+                {/* Adicionar novo tipo */}
+                <div style={{ display: "flex", gap: 8, marginTop: 8, marginBottom: 0 }}>
+                  <input style={{ ...S.input, marginBottom: 0, flex: 1 }}
+                    placeholder="+ Novo tipo de evento..."
+                    value={novoTipo}
+                    onChange={e => setNovoTipo(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && novoTipo.trim()) {
+                        const novos = [...tiposCustom, novoTipo.trim()];
+                        setTiposCustom(novos);
+                        localStorage.setItem("fa_tipos_evento", JSON.stringify(novos));
+                        setNovoEvento({ ...novoEvento, tipo: novoTipo.trim() });
+                        setNovoTipo("");
+                        showToast("✅ Tipo adicionado!");
+                      }
+                    }} />
+                  <button onClick={() => {
+                    if (!novoTipo.trim()) return;
+                    const novos = [...tiposCustom, novoTipo.trim()];
+                    setTiposCustom(novos);
+                    localStorage.setItem("fa_tipos_evento", JSON.stringify(novos));
+                    setNovoEvento({ ...novoEvento, tipo: novoTipo.trim() });
+                    setNovoTipo("");
+                    showToast("✅ Tipo adicionado!");
+                  }} style={{ padding: "0 14px", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 10, color: T.gold, fontSize: 18, cursor: "pointer", flexShrink: 0 }}>+</button>
+                </div>
+
+                {/* Lista de tipos customizados com opção de remover */}
+                {tiposCustom.length > 0 && (
+                  <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {tiposCustom.map(t => (
+                      <div key={t} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 20, padding: "3px 10px 3px 12px" }}>
+                        <span style={{ fontSize: 12, color: T.textSub }}>{t}</span>
+                        <button onClick={() => {
+                          const novos = tiposCustom.filter(x => x !== t);
+                          setTiposCustom(novos);
+                          localStorage.setItem("fa_tipos_evento", JSON.stringify(novos));
+                          if (novoEvento.tipo === t) setNovoEvento({ ...novoEvento, tipo: "culto" });
+                        }} style={{ background: "none", border: "none", color: T.textFaint, cursor: "pointer", fontSize: 14, lineHeight: 1, padding: "0 2px" }}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <button style={S.saveBtn} onClick={salvarEvento}>
                   {editandoEvento ? "💾 Atualizar Evento" : "➕ Adicionar Evento"}
                 </button>
