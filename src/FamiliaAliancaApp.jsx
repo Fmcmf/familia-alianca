@@ -2604,8 +2604,8 @@ export default function FamiliaAliancaApp() {
                                     </div>
                                   )}
 
-                                  {/* Todos os escalados */}
-                                  {todosEscalados.length > 0 && (
+                                  {/* Todos os escalados — só para quem está na escala */}
+                                  {meuInstrumento && todosEscalados.length > 0 && (
                                     <div style={{ marginBottom: 12 }}>
                                       <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>👥 Equipe escalada</div>
                                       {todosEscalados.map(([email, dados]) => (
@@ -2626,8 +2626,8 @@ export default function FamiliaAliancaApp() {
                                     </div>
                                   )}
 
-                                  {/* Músicas da escala */}
-                                  {musicasEscala.length > 0 && (
+                                  {/* Músicas da escala — só para quem está escalado */}
+                                  {meuInstrumento && musicasEscala.length > 0 && (
                                     <div style={{ marginBottom: 8 }}>
                                       <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas do culto</div>
                                       {musicasEscala.map((mus, i) => {
