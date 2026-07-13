@@ -2685,7 +2685,8 @@ export default function FamiliaAliancaApp() {
                                                   {cifraMusica.arquivo && (
                                                     <button onClick={() => {
                                                       let url = cifraMusica.arquivo;
-                                                      if (url.includes("cloudinary.com")) url = url.includes(".pdf") ? url.replace("/image/upload/", "/raw/upload/") : url;
+                                                      // Usar Google Docs Viewer para abrir PDF de qualquer origem
+                                                      if (url.includes(".pdf")) url = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=false`;
                                                       window.open(url, "_blank");
                                                     }}
                                                       style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>
@@ -2718,7 +2719,8 @@ export default function FamiliaAliancaApp() {
                                                 {vsMusica.arquivo && !vsMusica.tipo?.includes("audio") && (
                                                   <button onClick={() => {
                                                     let url = vsMusica.arquivo;
-                                                    if (url.includes("cloudinary.com")) url = url.includes(".pdf") ? url.replace("/image/upload/", "/raw/upload/") : url;
+                                                    // Usar Google Docs Viewer para abrir PDF de qualquer origem
+                                                      if (url.includes(".pdf")) url = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=false`;
                                                     window.open(url, "_blank");
                                                   }}
                                                     style={{ width: "100%", background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#a78bfa", cursor: "pointer" }}>
@@ -3651,7 +3653,7 @@ export default function FamiliaAliancaApp() {
                             <div style={{ padding: "0 14px 12px" }}>
                               <button onClick={() => {
                                                   let url = v.arquivo;
-                                                  if (url && url.includes("cloudinary.com")) url = url.includes(".pdf") ? url.replace("/image/upload/", "/raw/upload/") : url;
+                                                  if (url && url.includes(".pdf")) url = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=false`;
                                                   window.open(url, "_blank");
                                                 }}
                                 style={{ width: "100%", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#a78bfa", cursor: "pointer" }}>
