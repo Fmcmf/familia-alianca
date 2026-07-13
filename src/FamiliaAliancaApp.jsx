@@ -2648,9 +2648,6 @@ export default function FamiliaAliancaApp() {
                                           )
                                         );
                                         // Se não achou por título, pega todos do ministério para a última música
-                                        const todasCifras = i === musicasEscala.length - 1
-                                          ? cifras.filter(c => c.ministerio === min && !musicasEscala.some((m, j) => j < i && cifras.find(cc => cc.id === c.id && (cc.titulo?.toLowerCase().includes(m.titulo?.toLowerCase()?.split(" ")[0])))))
-                                          : [];
 
                                         return (
                                           <div key={i} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, marginBottom: 10, overflow: "hidden" }}>
