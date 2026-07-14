@@ -1272,7 +1272,6 @@ export default function FamiliaAliancaApp() {
   const membroEscalado = user && !isAdmin && !isLider && escalas.some(e =>
     e.data >= hoje2 && e.membrosEscalados?.[user.email]
   );
-  const ministerioDoMembro = user?.ministerios?.[0] || null;
 
   const TABS = [
     { id: "home", icon: "🏠", label: "Início" },
