@@ -1267,6 +1267,13 @@ export default function FamiliaAliancaApp() {
   );
 
   // ── NAVEGAÇÃO TABS ──
+  // Verificar se membro está escalado em alguma escala futura
+  const hoje2 = new Date().toISOString().split("T")[0];
+  const membroEscalado = user && !isAdmin && !isLider && escalas.some(e =>
+    e.data >= hoje2 && e.membrosEscalados?.[user.email]
+  );
+  const ministerioDoMembro = user?.ministerios?.[0] || null;
+
   const TABS = [
     { id: "home", icon: "🏠", label: "Início" },
     { id: "biblia", icon: "📖", label: "Bíblia" },
@@ -1275,6 +1282,7 @@ export default function FamiliaAliancaApp() {
     { id: "voluntario", icon: "🤲", label: "Servir" },
     { id: "mais", icon: "⋯", label: "Mais" },
     { id: "perfil", icon: "👤", label: "Perfil" },
+    ...(membroEscalado ? [{ id: "meumin", icon: "⛪", label: "Meu Min." }] : []),
     ...(isAdmin || isLider ? [{ id: "admin", icon: isAdmin ? "⚙️" : "🏛️", label: isAdmin ? "Admin" : "Líder" }] : []),
   ];
 
@@ -2511,6 +2519,187 @@ export default function FamiliaAliancaApp() {
           </div>
         )}
 
+        {/* ══ MEU MINISTÉRIO ══ */}
+        {tab === "meumin" && (
+          <div style={{ animation: "slideUp .4s ease", paddingBottom: 20 }}>
+            <div style={{ padding: "16px 16px 8px" }}>
+              <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 4 }}>⛪ Meu Ministério</div>
+            </div>
+            {user?.ministerios?.map(min => {
+              const minData = MINISTERIOS.find(m => m.nome === min);
+              const liderMin = membros.find(m => m.lider && m.ministerioLider === min);
+              const avisosMin = avisos.filter(a => a.ministerio === min);
+              const hoje3 = new Date().toISOString().split("T")[0];
+              const proximaEscala = escalas.filter(e => e.ministerio === min && e.data >= hoje3).sort((a, b) => a.data.localeCompare(b.data))[0];
+              const meuDadosEscala = proximaEscala?.membrosEscalados?.[user?.email];
+              const musicasEscala = (proximaEscala?.musicas || []).map(mid => musicas.find(x => x.id === mid)).filter(Boolean);
+              const todosEscalados = Object.entries(proximaEscala?.membrosEscalados || {});
+
+              return (
+                <div key={min} style={{ margin: "0 16px 16px", background: darkMode ? "rgba(201,168,76,.04)" : "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 18, overflow: "hidden" }}>
+                  {/* Header ministério */}
+                  <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: 20 }}>{minData?.icon || "⛪"}</span>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: "bold", color: "#080810" }}>{min}</div>
+                      {minData?.desc && <div style={{ fontSize: 11, color: "#080810", opacity: 0.7 }}>{minData.desc}</div>}
+                    </div>
+                  </div>
+                  <div style={{ padding: "14px 16px" }}>
+                    {/* Líder */}
+                    {liderMin && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: T.card, borderRadius: 10, marginBottom: 14 }}>
+                        <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", color: "#c9a84c" }}>
+                          {liderMin.nome?.charAt(0).toUpperCase()}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 10, color: T.textFaint, textTransform: "uppercase", letterSpacing: 1 }}>Líder</div>
+                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{liderMin.nome}</div>
+                        </div>
+                        {liderMin.celular && (
+                          <button onClick={() => window.open(`https://wa.me/55${liderMin.celular.replace(/\D/g, "")}`, "_blank")}
+                            style={{ background: "#25d366", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>💬</button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Avisos */}
+                    {avisosMin.length > 0 && (
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>📢 Avisos</div>
+                        {avisosMin.slice(0, 3).map(av => (
+                          <div key={av.id} style={{ padding: "10px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 10, marginBottom: 6 }}>
+                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{av.titulo}</div>
+                            <div style={{ fontSize: 12, color: T.textSub }}>{av.texto}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Próxima escala */}
+                    {proximaEscala && (
+                      <div>
+                        <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>📋 Próxima Escala</div>
+                        <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, overflow: "hidden", marginBottom: 10 }}>
+                          <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "7px 14px" }}>
+                            <div style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{proximaEscala.culto}</div>
+                            <div style={{ fontSize: 11, color: "#080810" }}>{new Date(proximaEscala.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })} {proximaEscala.hora && `• ${proximaEscala.hora}`}</div>
+                          </div>
+                          <div style={{ padding: "12px 14px" }}>
+                            {/* Status */}
+                            {meuDadosEscala ? (
+                              <div style={{ background: "rgba(34,197,94,.1)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 8, padding: "8px 12px", marginBottom: 10 }}>
+                                <div style={{ fontSize: 12, fontWeight: "bold", color: "#22c55e", marginBottom: 2 }}>✅ Você está escalado!</div>
+                                {meuDadosEscala.funcoes?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🎤 {meuDadosEscala.funcoes.join(", ")}</div>}
+                                {meuDadosEscala.instrumentos?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🎸 {meuDadosEscala.instrumentos.join(", ")}</div>}
+                                {meuDadosEscala.obs && <div style={{ fontSize: 12, color: "#c9a84c", marginTop: 4, fontStyle: "italic" }}>"{meuDadosEscala.obs}"</div>}
+                              </div>
+                            ) : (
+                              <div style={{ background: "rgba(150,150,150,.08)", border: `1px solid ${T.cardBorder}`, borderRadius: 8, padding: "8px 12px", marginBottom: 10, fontSize: 12, color: T.textFaint }}>
+                                Você não está escalado para este culto
+                              </div>
+                            )}
+
+                            {/* Equipe — só para escalados */}
+                            {meuDadosEscala && todosEscalados.length > 0 && (
+                              <div style={{ marginBottom: 12 }}>
+                                <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>👥 Equipe</div>
+                                {todosEscalados.map(([email, dados]) => (
+                                  <div key={email} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
+                                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
+                                      {dados.nome?.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                      <div style={{ fontSize: 12, fontWeight: email === user?.email ? "bold" : "normal", color: email === user?.email ? "#c9a84c" : T.text }}>
+                                        {dados.nome} {email === user?.email && "(você)"}
+                                      </div>
+                                      <div style={{ fontSize: 10, color: T.textSub }}>{dados.funcoes?.join(", ")}{dados.instrumentos?.length > 0 && ` • 🎸 ${dados.instrumentos.join(", ")}`}</div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Músicas — só para escalados */}
+                            {meuDadosEscala && musicasEscala.length > 0 && (
+                              <div style={{ marginBottom: 10 }}>
+                                <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas do Culto</div>
+                                {musicasEscala.map((mus, i) => (
+                                  <div key={i} style={{ background: darkMode ? "rgba(0,0,0,.2)" : "rgba(0,0,0,.04)", borderRadius: 12, marginBottom: 8, overflow: "hidden" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px" }}>
+                                      <span style={{ fontSize: 16 }}>🎵</span>
+                                      <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{mus.titulo}</div>
+                                        <div style={{ fontSize: 11, color: T.textSub }}>{mus.artista} {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>}</div>
+                                      </div>
+                                    </div>
+                                    {getYouTubeId(mus.link) && <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />}
+                                    {getSpotifyId(mus.link) && <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Cifras — só para escalados */}
+                            {meuDadosEscala && (() => {
+                              const cifrasMin = cifras.filter(c => c.ministerio === min);
+                              if (cifrasMin.length === 0) return null;
+                              return (
+                                <div style={{ marginBottom: 10 }}>
+                                  <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎸 Cifras</div>
+                                  {cifrasMin.map(c => (
+                                    <div key={c.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
+                                      <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 6 }}>{c.titulo} {c.tom && <span style={{ color: "#c9a84c", fontSize: 11 }}>• {c.tom}</span>}</div>
+                                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                        {c.link && <button onClick={() => window.open(c.link, "_blank")} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>🔗 Cifra</button>}
+                                        {c.arquivo && <button onClick={() => setPdfAberto(pdfAberto === c.arquivo ? null : c.arquivo)} style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>📄 PDF</button>}
+                                        {c.conteudo && <button onClick={() => setMusicaSelecionada(musicaSelecionada?.id === c.id ? null : c)} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>📝 Ver</button>}
+                                      </div>
+                                      {musicaSelecionada?.id === c.id && c.conteudo && (
+                                        <pre style={{ marginTop: 8, fontSize: 11, color: T.text, lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 8, padding: "10px" }}>{c.conteudo}</pre>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })()}
+
+                            {/* VS — só para escalados */}
+                            {meuDadosEscala && (() => {
+                              const vsMin = vsItems.filter(v => v.ministerio === min);
+                              if (vsMin.length === 0) return null;
+                              return (
+                                <div>
+                                  <div style={{ fontSize: 11, color: "#a78bfa", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎧 VS</div>
+                                  {vsMin.map(v => (
+                                    <div key={v.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, marginBottom: 8, overflow: "hidden" }}>
+                                      <div style={{ padding: "10px 12px" }}>
+                                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{v.tipo?.includes("audio") ? "🎵" : "📁"} {v.titulo}</div>
+                                        {v.artista && <div style={{ fontSize: 11, color: T.textSub }}>{v.artista}</div>}
+                                      </div>
+                                      {v.arquivo && v.tipo?.includes("audio") && (
+                                        <div style={{ padding: "0 12px 10px" }}>
+                                          <audio controls style={{ width: "100%", borderRadius: 8 }}>
+                                            <source src={v.arquivo} type={v.tipo} />
+                                          </audio>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* ══ PERFIL ══ */}
         {tab === "perfil" && (
           <div style={{ padding: "0 16px 24px", animation: "slideUp .4s ease" }}>
@@ -2548,237 +2737,6 @@ export default function FamiliaAliancaApp() {
                 </div>
               </div>
             ))}
-
-            {/* ── SEU MINISTÉRIO ── */}
-            {user?.ministerios?.length > 0 && (
-              <div style={{ marginTop: 20, marginBottom: 8 }}>
-                <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 12 }}>🏛️ Seu Ministério</div>
-                {user.ministerios.map((min, i) => {
-                  const minData = MINISTERIOS.find(m => m.nome === min);
-                  // Avisos do ministério
-                  const avisosMin = avisos.filter(a => a.ministerio === min);
-                  // Líder do ministério
-                  const liderMin = membros.find(m => m.lider && m.ministerioLider === min);
-                  return (
-                    <div key={i} style={{ background: darkMode ? "rgba(201,168,76,.06)" : "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.25)", borderRadius: 16, overflow: "hidden", marginBottom: 12 }}>
-                      {/* Header */}
-                      <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "8px 16px", display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ fontSize: 18 }}>{minData?.icon || "🏛️"}</span>
-                        <span style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{min}</span>
-                      </div>
-                      <div style={{ padding: "14px 16px" }}>
-                        {/* Descrição */}
-                        {minData?.desc && (
-                          <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.6, marginBottom: 12 }}>{minData.desc}</div>
-                        )}
-                        {/* Líder */}
-                        {liderMin && (
-                          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: T.card, borderRadius: 10, marginBottom: 12 }}>
-                            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
-                              {liderMin.nome?.charAt(0).toUpperCase()}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: 11, color: T.textFaint, textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>Líder</div>
-                              <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{liderMin.nome}</div>
-                            </div>
-                            {liderMin.celular && (
-                              <button onClick={() => window.open(`https://wa.me/55${liderMin.celular.replace(/\D/g, "")}`, "_blank")}
-                                style={{ background: "#25d366", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>💬</button>
-                            )}
-                          </div>
-                        )}
-                        {/* Avisos do ministério */}
-                        {avisosMin.length > 0 && (
-                          <>
-                            <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>📢 Avisos do grupo</div>
-                            {avisosMin.slice(0, 3).map(av => (
-                              <div key={av.id} style={{ padding: "10px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 10, marginBottom: 6 }}>
-                                <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{av.titulo}</div>
-                                <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5 }}>{av.texto}</div>
-                                <div style={{ fontSize: 10, color: T.textFaint, marginTop: 4 }}>{av.data}</div>
-                              </div>
-                            ))}
-                          </>
-                        )}
-                        {/* Próxima escala */}
-                        {(() => {
-                          const hoje = new Date().toISOString().split("T")[0];
-                          const proximaEscala = escalas
-                            .filter(e => e.ministerio === min && e.data >= hoje)
-                            .sort((a, b) => a.data.localeCompare(b.data))[0];
-                          if (!proximaEscala) return null;
-                          const meuDadosEscala = proximaEscala.membrosEscalados?.[user?.email];
-                          const meuInstrumento = meuDadosEscala || Object.entries(proximaEscala.funcoes || {}).find(([, email]) => email === user?.email);
-                          const musicasEscala = (proximaEscala.musicas || []).map(mid => musicas.find(x => x.id === mid)).filter(Boolean);
-                          const todosEscalados = Object.entries(proximaEscala.membrosEscalados || {});
-
-                          return (
-                            <div style={{ marginTop: 10 }}>
-                              <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>📋 Próxima Escala</div>
-
-                              {/* Header da escala */}
-                              <div style={{ background: darkMode ? "linear-gradient(135deg,#0a1a3a,#050d1f)" : "linear-gradient(135deg,#f5f0e8,#ede4d0)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 14, overflow: "hidden", marginBottom: 10 }}>
-                                <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "7px 14px" }}>
-                                  <div style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{proximaEscala.culto}</div>
-                                  <div style={{ fontSize: 11, color: "#080810" }}>{new Date(proximaEscala.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })} {proximaEscala.hora && `• ${proximaEscala.hora}`}</div>
-                                </div>
-                                <div style={{ padding: "12px 14px" }}>
-                                  {/* Status do membro */}
-                                  {meuInstrumento ? (
-                                    <div style={{ background: "rgba(34,197,94,.1)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 8, padding: "8px 12px", marginBottom: 10 }}>
-                                      <div style={{ fontSize: 12, fontWeight: "bold", color: "#22c55e", marginBottom: 3 }}>✅ Você está escalado!</div>
-                                      {meuDadosEscala?.funcoes?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🎤 {meuDadosEscala.funcoes.join(", ")}</div>}
-                                      {meuDadosEscala?.instrumentos?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🎸 {meuDadosEscala.instrumentos.join(", ")}</div>}
-                                      {meuDadosEscala?.obs && <div style={{ fontSize: 12, color: "#c9a84c", marginTop: 4, fontStyle: "italic" }}>"{meuDadosEscala.obs}"</div>}
-                                    </div>
-                                  ) : (
-                                    <div style={{ background: "rgba(150,150,150,.08)", border: `1px solid ${T.cardBorder}`, borderRadius: 8, padding: "8px 12px", marginBottom: 10, fontSize: 12, color: T.textFaint }}>
-                                      Você não está escalado para este culto
-                                    </div>
-                                  )}
-
-                                  {/* Todos os escalados — só para quem está na escala */}
-                                  {meuInstrumento && todosEscalados.length > 0 && (
-                                    <div style={{ marginBottom: 12 }}>
-                                      <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>👥 Equipe escalada</div>
-                                      {todosEscalados.map(([email, dados]) => (
-                                        <div key={email} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
-                                          <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
-                                            {dados.nome?.charAt(0).toUpperCase()}
-                                          </div>
-                                          <div style={{ flex: 1 }}>
-                                            <div style={{ fontSize: 12, fontWeight: email === user?.email ? "bold" : "normal", color: email === user?.email ? "#c9a84c" : T.text }}>
-                                              {dados.nome} {email === user?.email && "(você)"}
-                                            </div>
-                                            <div style={{ fontSize: 10, color: T.textSub }}>
-                                              {dados.funcoes?.join(", ")} {dados.instrumentos?.length > 0 && `• 🎸 ${dados.instrumentos.join(", ")}`}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-
-                                  {/* Músicas da escala — só para quem está escalado */}
-                                  {meuInstrumento && musicasEscala.length > 0 && (
-                                    <div style={{ marginBottom: 8 }}>
-                                      <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas do culto</div>
-                                      {musicasEscala.map((mus, i) => {
-                                        // Busca cifra desta música
-                                        const cifraMusica = cifras.find(c =>
-                                          c.ministerio === min && (
-                                            c.titulo?.toLowerCase().trim() === mus.titulo?.toLowerCase().trim() ||
-                                            c.titulo?.toLowerCase().includes(mus.titulo?.toLowerCase()?.split(" ")[0]) ||
-                                            mus.titulo?.toLowerCase().includes(c.titulo?.toLowerCase()?.split(" ")[0])
-                                          )
-                                        );
-                                        // Busca VS desta música
-                                        const vsMusica = vsItems.find(v =>
-                                          v.ministerio === min && (
-                                            v.titulo?.toLowerCase().trim() === mus.titulo?.toLowerCase().trim() ||
-                                            v.titulo?.toLowerCase().includes(mus.titulo?.toLowerCase()?.split(" ")[0]) ||
-                                            mus.titulo?.toLowerCase().includes(v.titulo?.toLowerCase()?.split(" ")[0])
-                                          )
-                                        );
-                                        // Se não achou por título, pega todos do ministério para a última música
-
-                                        return (
-                                          <div key={i} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, marginBottom: 10, overflow: "hidden" }}>
-                                            {/* Header música */}
-                                            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px" }}>
-                                              <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>🎵</div>
-                                              <div style={{ flex: 1 }}>
-                                                <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{mus.titulo}</div>
-                                                <div style={{ fontSize: 11, color: T.textSub }}>{mus.artista} {mus.tom && <span style={{ color: "#c9a84c" }}>• Tom: {mus.tom}</span>}</div>
-                                              </div>
-                                              {mus.link && !getYouTubeId(mus.link) && !getSpotifyId(mus.link) && (
-                                                <button onClick={() => window.open(mus.link, "_blank")}
-                                                  style={{ background: "#1a56db", border: "none", borderRadius: 8, padding: "5px 10px", fontSize: 11, color: "#fff", cursor: "pointer" }}>▶</button>
-                                              )}
-                                            </div>
-                                            {/* YouTube */}
-                                            {getYouTubeId(mus.link) && (
-                                              <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />
-                                            )}
-                                            {/* Spotify */}
-                                            {getSpotifyId(mus.link) && (
-                                              <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />
-                                            )}
-                                            {/* Cifra desta música */}
-                                            {cifraMusica && (
-                                              <div style={{ borderTop: `1px solid ${T.cardBorder}`, padding: "10px 12px" }}>
-                                                <div style={{ fontSize: 11, color: "#8b5cf6", fontWeight: "bold", marginBottom: 8 }}>🎸 Cifra — {cifraMusica.titulo} {cifraMusica.tom && <span style={{ color: "#c9a84c" }}>• {cifraMusica.tom}</span>}</div>
-                                                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                                                  {cifraMusica.link && (
-                                                    <button onClick={() => window.open(cifraMusica.link, "_blank")}
-                                                      style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>
-                                                      🔗 Ver Cifra
-                                                    </button>
-                                                  )}
-                                                  {cifraMusica.arquivo && (
-                                                    <button onClick={() => {
-                                                      let url = cifraMusica.arquivo;
-                                                      setPdfAberto(pdfAberto === url ? null : url);
-                                                    }}
-                                                      style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>
-                                                      📄 Abrir PDF
-                                                    </button>
-                                                  )}
-                                                  {cifraMusica.conteudo && (
-                                                    <button onClick={() => setMusicaSelecionada(musicaSelecionada?.id === cifraMusica.id ? null : cifraMusica)}
-                                                      style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>
-                                                      📝 {musicaSelecionada?.id === cifraMusica.id ? "Fechar" : "Ver Cifra"}
-                                                    </button>
-                                                  )}
-                                                </div>
-                                                {musicaSelecionada?.id === cifraMusica.id && cifraMusica.conteudo && (
-                                                  <pre style={{ marginTop: 8, fontSize: 11, color: T.text, lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 8, padding: "12px", overflowX: "auto" }}>
-                                                    {cifraMusica.conteudo}
-                                                  </pre>
-                                                )}
-                                              </div>
-                                            )}
-                                            {/* VS desta música */}
-                                            {vsMusica && (
-                                              <div style={{ borderTop: `1px solid ${T.cardBorder}`, padding: "10px 12px" }}>
-                                                <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: "bold", marginBottom: 8 }}>🎧 VS — {vsMusica.titulo}</div>
-                                                {vsMusica.arquivo && vsMusica.tipo?.includes("audio") && (
-                                                  <audio controls style={{ width: "100%", borderRadius: 8 }}>
-                                                    <source src={vsMusica.arquivo} type={vsMusica.tipo} />
-                                                  </audio>
-                                                )}
-                                                {vsMusica.arquivo && !vsMusica.tipo?.includes("audio") && (
-                                                  <button onClick={() => {
-                                                    let url = vsMusica.arquivo;
-                                                    // Abrir PDF inline no app
-                                                      setPdfAberto(pdfAberto === url ? null : url);
-                                                  }}
-                                                    style={{ width: "100%", background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.4)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#a78bfa", cursor: "pointer" }}>
-                                                    📁 Abrir Arquivo
-                                                  </button>
-                                                )}
-                                              </div>
-                                            )}
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  )}
-
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })()}
-                        {avisosMin.length === 0 && (
-                          <div style={{ fontSize: 12, color: T.textFaint, textAlign: "center", padding: "8px 0" }}>Nenhum aviso do ministério ainda</div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
 
             {/* Formulário edição */}
             <div style={{ fontSize: 13, fontWeight: "bold", color: "#c9a84c", marginTop: 20, marginBottom: 12 }}>
