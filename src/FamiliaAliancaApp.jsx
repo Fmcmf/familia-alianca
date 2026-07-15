@@ -476,6 +476,8 @@ export default function FamiliaAliancaApp() {
   // Categorias dinâmicas (ministérios não-musicais, ex: Mídia)
   const [categoriasEquipe, setCategoriasEquipe] = useState([]);
   const [novaCategoriaNome, setNovaCategoriaNome] = useState("");
+  const [categoriaEditando, setCategoriaEditando] = useState(null); // categoria sendo renomeada
+  const [categoriaEditNome, setCategoriaEditNome] = useState("");
   const [perfilCategorias, setPerfilCategorias] = useState({ categorias: [] });
   // Módulo Arquivos (Mídia)
   const [arquivosMidia, setArquivosMidia] = useState([]);
@@ -3013,6 +3015,36 @@ export default function FamiliaAliancaApp() {
                 showToast(`✅ Categoria "${nome}" criada!`);
               };
 
+              const editarCategoria = async (cat) => {
+                const novoNome = categoriaEditNome.trim();
+                if (!novoNome) { showToast("⚠️ Informe o novo nome!"); return; }
+                if (novoNome !== cat.nome && categoriasMin.some(c => c.nome.toLowerCase() === novoNome.toLowerCase())) { showToast("⚠️ Já existe uma categoria com esse nome!"); return; }
+                await updateDoc(doc(db, "categoriasEquipe", cat.id), { nome: novoNome });
+                // Propaga o novo nome para os membros que já tinham essa categoria atribuída
+                const afetados = membrosMin.filter(m => m[perfilKey]?.categorias?.includes(cat.nome));
+                for (const m of afetados) {
+                  const novasCats = m[perfilKey].categorias.map(c => c === cat.nome ? novoNome : c);
+                  await updateDoc(doc(db, "membros", m.email), { [perfilKey]: { categorias: novasCats } });
+                }
+                setCategoriaEditando(null);
+                setCategoriaEditNome("");
+                showToast(`✅ Categoria renomeada para "${novoNome}"!`);
+              };
+
+              const excluirCategoria = async (cat) => {
+                const afetados = membrosMin.filter(m => m[perfilKey]?.categorias?.includes(cat.nome));
+                const msg = afetados.length > 0
+                  ? `Excluir "${cat.nome}"? ${afetados.length} membro(s) perderão essa categoria.`
+                  : `Excluir a categoria "${cat.nome}"?`;
+                if (!window.confirm(msg)) return;
+                await deleteDoc(doc(db, "categoriasEquipe", cat.id));
+                for (const m of afetados) {
+                  const novasCats = m[perfilKey].categorias.filter(c => c !== cat.nome);
+                  await updateDoc(doc(db, "membros", m.email), { [perfilKey]: { categorias: novasCats } });
+                }
+                showToast(`🗑️ Categoria "${cat.nome}" excluída!`);
+              };
+
               return (
                 <div style={{ padding: "0 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
@@ -3028,7 +3060,21 @@ export default function FamiliaAliancaApp() {
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
                         {categoriasMin.length === 0 && <span style={{ fontSize: 12, color: T.textFaint }}>Nenhuma categoria criada ainda</span>}
                         {categoriasMin.map(c => (
-                          <span key={c.id} style={{ fontSize: 11, background: "rgba(6,182,212,.12)", color: "#22d3ee", border: "1px solid rgba(6,182,212,.3)", borderRadius: 20, padding: "4px 10px" }}>{c.nome}</span>
+                          categoriaEditando === c.id ? (
+                            <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                              <input autoFocus style={{ ...S.input, marginBottom: 0, width: 120, padding: "4px 8px", fontSize: 11 }}
+                                value={categoriaEditNome} onChange={e => setCategoriaEditNome(e.target.value)}
+                                onKeyDown={e => { if (e.key === "Enter") editarCategoria(c); if (e.key === "Escape") setCategoriaEditando(null); }} />
+                              <button onClick={() => editarCategoria(c)} style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "4px 8px", fontSize: 11, color: "#4ade80", cursor: "pointer" }}>✓</button>
+                              <button onClick={() => setCategoriaEditando(null)} style={{ background: "rgba(150,150,150,.15)", border: `1px solid ${T.cardBorder}`, borderRadius: 6, padding: "4px 8px", fontSize: 11, color: T.textSub, cursor: "pointer" }}>✕</button>
+                            </div>
+                          ) : (
+                            <span key={c.id} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, background: "rgba(6,182,212,.12)", color: "#22d3ee", border: "1px solid rgba(6,182,212,.3)", borderRadius: 20, padding: "4px 6px 4px 10px" }}>
+                              {c.nome}
+                              <button onClick={() => { setCategoriaEditando(c.id); setCategoriaEditNome(c.nome); }} style={{ background: "none", border: "none", color: "#22d3ee", cursor: "pointer", fontSize: 11, padding: 0 }}>✏️</button>
+                              <button onClick={() => excluirCategoria(c)} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", fontSize: 11, padding: 0 }}>🗑️</button>
+                            </span>
+                          )
                         ))}
                       </div>
                       <div style={{ display: "flex", gap: 8 }}>
