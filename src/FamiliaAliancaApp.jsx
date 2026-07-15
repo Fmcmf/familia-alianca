@@ -2873,7 +2873,7 @@ export default function FamiliaAliancaApp() {
                                     </div>
                                   )}
 
-                                  {pregacoesDoMin.length > 0 && (
+                                  {pregacoesDoMin.length > 0 && meuDadosEscala.categorias?.includes("Letra") && (
                                     <div style={{ marginTop: 10 }}>
                                       <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>📜 Pregação</div>
                                       {pregacoesDoMin.map(p => (
