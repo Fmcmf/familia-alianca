@@ -877,20 +877,26 @@ export default function FamiliaAliancaApp() {
     return m ? { type: m[1], id: m[2] } : null;
   };
 
-  const baixarArquivo = (url, nomeArquivo) => {
+  const baixarArquivo = async (url, nomeArquivo) => {
     if (!url) return;
-    // Insere fl_attachment na URL do Cloudinary para forçar o download em vez de abrir no navegador
-    const urlDownload = url.includes("/upload/") && !url.includes("fl_attachment")
-      ? url.replace("/upload/", "/upload/fl_attachment/")
-      : url;
-    const a = document.createElement("a");
-    a.href = urlDownload;
-    a.download = nomeArquivo || "arquivo";
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+      // Baixa o arquivo como blob (mesma rota que já funciona para "Ver/Abrir") e força o download local,
+      // sem depender do fl_attachment do Cloudinary (bloqueado por segurança para PDF/ZIP)
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Falha ao buscar arquivo");
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = nomeArquivo || "arquivo";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    } catch (err) {
+      // Fallback: se o download via blob falhar (ex: CORS), abre o arquivo em nova aba
+      window.open(url, "_blank");
+    }
   };
 
   // ── AUTH ──
