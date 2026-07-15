@@ -877,6 +877,22 @@ export default function FamiliaAliancaApp() {
     return m ? { type: m[1], id: m[2] } : null;
   };
 
+  const baixarArquivo = (url, nomeArquivo) => {
+    if (!url) return;
+    // Insere fl_attachment na URL do Cloudinary para forçar o download em vez de abrir no navegador
+    const urlDownload = url.includes("/upload/") && !url.includes("fl_attachment")
+      ? url.replace("/upload/", "/upload/fl_attachment/")
+      : url;
+    const a = document.createElement("a");
+    a.href = urlDownload;
+    a.download = nomeArquivo || "arquivo";
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   // ── AUTH ──
   const handleLogin = async () => {
     if (loginForm.modo === "cadastro") {
@@ -2633,6 +2649,7 @@ export default function FamiliaAliancaApp() {
                                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                                     {c.link && <button onClick={() => window.open(c.link, "_blank")} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>🔗 Cifra</button>}
                                     {c.arquivo && <button onClick={() => setPdfAberto(pdfAberto === c.arquivo ? null : c.arquivo)} style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>📄 PDF</button>}
+                                    {c.arquivo && <button onClick={() => baixarArquivo(c.arquivo, c.titulo)} style={{ flex: 1, minWidth: 80, background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#4ade80", cursor: "pointer" }}>⬇️ Baixar</button>}
                                     {c.conteudo && <button onClick={() => setMusicaSelecionada(musicaSelecionada?.id === c.id ? null : c)} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>📝 Ver</button>}
                                   </div>
                                   {musicaSelecionada?.id === c.id && c.conteudo && (
@@ -2652,6 +2669,12 @@ export default function FamiliaAliancaApp() {
                                       <audio controls style={{ width: "100%", borderRadius: 8 }}>
                                         <source src={v.arquivo} type={v.tipo} />
                                       </audio>
+                                    </div>
+                                  )}
+                                  {v.arquivo && (
+                                    <div style={{ padding: "0 12px 10px" }}>
+                                      <button onClick={() => baixarArquivo(v.arquivo, v.titulo)}
+                                        style={{ width: "100%", background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#4ade80", cursor: "pointer" }}>⬇️ Baixar</button>
                                     </div>
                                   )}
                                 </div>
@@ -2712,6 +2735,7 @@ export default function FamiliaAliancaApp() {
                                           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                                             {c.link && <button onClick={() => window.open(c.link, "_blank")} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>🔗 Cifra</button>}
                                             {c.arquivo && <button onClick={() => setPdfAberto(pdfAberto === c.arquivo ? null : c.arquivo)} style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>📄 PDF</button>}
+                                            {c.arquivo && <button onClick={() => baixarArquivo(c.arquivo, c.titulo)} style={{ flex: 1, minWidth: 80, background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#4ade80", cursor: "pointer" }}>⬇️ Baixar</button>}
                                             {c.conteudo && <button onClick={() => setMusicaSelecionada(musicaSelecionada?.id === c.id ? null : c)} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>📝 Ver</button>}
                                           </div>
                                           {musicaSelecionada?.id === c.id && c.conteudo && (
@@ -2735,6 +2759,12 @@ export default function FamiliaAliancaApp() {
                                               <audio controls style={{ width: "100%", borderRadius: 8 }}>
                                                 <source src={v.arquivo} type={v.tipo} />
                                               </audio>
+                                            </div>
+                                          )}
+                                          {v.arquivo && (
+                                            <div style={{ padding: "0 12px 10px" }}>
+                                              <button onClick={() => baixarArquivo(v.arquivo, v.titulo)}
+                                                style={{ width: "100%", background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#4ade80", cursor: "pointer" }}>⬇️ Baixar</button>
                                             </div>
                                           )}
                                         </div>
@@ -3503,6 +3533,10 @@ export default function FamiliaAliancaApp() {
                                 <button onClick={() => window.open(musicaSelecionada.arquivo, "_blank")}
                                   style={{ ...S.saveBtn, background: "#dc2626", marginBottom: 12 }}>📄 Abrir PDF/Imagem</button>
                               )}
+                              {musicaSelecionada.arquivo && (
+                                <button onClick={() => baixarArquivo(musicaSelecionada.arquivo, musicaSelecionada.titulo)}
+                                  style={{ ...S.saveBtn, background: "#16a34a", marginBottom: 12 }}>⬇️ Baixar PDF/Imagem</button>
+                              )}
                               {musicaSelecionada.conteudo && (
                                 <pre style={{ fontSize: 12, color: T.text, lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 10, padding: "12px" }}>
                                   {musicaSelecionada.conteudo}
@@ -3716,6 +3750,14 @@ export default function FamiliaAliancaApp() {
                                                 }}
                                 style={{ width: "100%", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#a78bfa", cursor: "pointer" }}>
                                 📄 Abrir Arquivo
+                              </button>
+                            </div>
+                          )}
+                          {v.arquivo && (
+                            <div style={{ padding: "0 14px 12px" }}>
+                              <button onClick={() => baixarArquivo(v.arquivo, v.titulo)}
+                                style={{ width: "100%", background: "rgba(34,197,94,.1)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#4ade80", cursor: "pointer" }}>
+                                ⬇️ Baixar
                               </button>
                             </div>
                           )}
