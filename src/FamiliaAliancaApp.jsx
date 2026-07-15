@@ -877,26 +877,36 @@ export default function FamiliaAliancaApp() {
     return m ? { type: m[1], id: m[2] } : null;
   };
 
-  const baixarArquivo = async (url, nomeArquivo) => {
+  const baixarArquivo = (url, nomeArquivo) => {
     if (!url) return;
-    try {
-      // Baixa o arquivo como blob (mesma rota que já funciona para "Ver/Abrir") e força o download local,
-      // sem depender do fl_attachment do Cloudinary (bloqueado por segurança para PDF/ZIP)
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Falha ao buscar arquivo");
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = nomeArquivo || "arquivo";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-    } catch (err) {
-      // Fallback: se o download via blob falhar (ex: CORS), abre o arquivo em nova aba
-      window.open(url, "_blank");
-    }
+    // Reserva uma aba já no clique (síncrono), para o navegador não bloquear como pop-up
+    // caso a gente precise navegar para ela depois de uma etapa assíncrona (fetch)
+    const abaReserva = window.open("", "_blank");
+    fetch(url)
+      .then(response => {
+        if (!response.ok) throw new Error("Falha ao buscar arquivo");
+        return response.blob();
+      })
+      .then(blob => {
+        // Conseguiu baixar como dado: força o download local e fecha a aba de reserva (não precisamos dela)
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = nomeArquivo || "arquivo";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        if (abaReserva) abaReserva.close();
+      })
+      .catch(() => {
+        // Fetch falhou (ex: CORS). Usa a aba já aberta para tentar o link direto com fl_attachment
+        const urlDownload = url.includes("/upload/") && !url.includes("fl_attachment")
+          ? url.replace("/upload/", "/upload/fl_attachment/")
+          : url;
+        if (abaReserva) abaReserva.location.href = urlDownload;
+        else window.location.href = urlDownload;
+      });
   };
 
   // ── AUTH ──
