@@ -2848,6 +2848,46 @@ export default function FamiliaAliancaApp() {
                                 ))}
                               </div>
                             )}
+                            {/* Arquivos e Pregação — para membros escalados no Ministério da Mídia */}
+                            {meuDadosEscala && min === "Mídia" && (() => {
+                              const arquivosDoMin = arquivosMidia.filter(a => a.ministerio === min);
+                              const hojeMembro = new Date().toISOString().split("T")[0];
+                              const pregacoesDoMin = pregacoes.filter(p => !p.data || p.data >= hojeMembro).sort((a, b) => (a.data || "").localeCompare(b.data || ""));
+                              return (
+                                <>
+                                  {arquivosDoMin.length > 0 && (
+                                    <div style={{ marginTop: 10 }}>
+                                      <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🖼️ Arquivos (Telão)</div>
+                                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                                        {arquivosDoMin.map(a => (
+                                          <div key={a.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, overflow: "hidden" }}>
+                                            <img src={a.arquivo} alt={a.titulo} style={{ width: "100%", height: 90, objectFit: "cover", display: "block" }} />
+                                            <div style={{ padding: "6px 8px" }}>
+                                              <div style={{ fontSize: 10, fontWeight: "bold", color: T.text, marginBottom: 6 }}>{a.titulo}</div>
+                                              <button onClick={() => baixarArquivo(a.arquivo, a.titulo)}
+                                                style={{ width: "100%", background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "4px 0", fontSize: 10, fontWeight: "bold", color: "#4ade80", cursor: "pointer" }}>⬇️ Baixar</button>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {pregacoesDoMin.length > 0 && (
+                                    <div style={{ marginTop: 10 }}>
+                                      <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>📜 Pregação</div>
+                                      {pregacoesDoMin.map(p => (
+                                        <div key={p.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, padding: "8px 12px", marginBottom: 6 }}>
+                                          <div style={{ fontSize: 12, fontWeight: "bold", color: T.text }}>{p.titulo}</div>
+                                          {p.data && <div style={{ fontSize: 10, color: T.textSub, marginBottom: 4 }}>{new Date(p.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</div>}
+                                          {p.versiculos && <div style={{ fontSize: 11, color: T.textSub, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{p.versiculos}</div>}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
