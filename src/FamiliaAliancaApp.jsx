@@ -473,6 +473,17 @@ export default function FamiliaAliancaApp() {
   const [buscaAgenda, setBuscaAgenda] = useState("");
   const [eventoEscalaAberto, setEventoEscalaAberto] = useState(null); // evento selecionado para montar escala
   const [categoriaEscala, setCategoriaEscala] = useState(null); // categoria selecionada na escala
+  // Categorias dinâmicas (ministérios não-musicais, ex: Mídia)
+  const [categoriasEquipe, setCategoriasEquipe] = useState([]);
+  const [novaCategoriaNome, setNovaCategoriaNome] = useState("");
+  const [perfilCategorias, setPerfilCategorias] = useState({ categorias: [] });
+  // Módulo Arquivos (Mídia)
+  const [arquivosMidia, setArquivosMidia] = useState([]);
+  const [novoArquivoMidia, setNovoArquivoMidia] = useState({ titulo: "", arquivo: "" });
+  // Pregação (Pastor insere, Mídia visualiza)
+  const [pregacoes, setPregacoes] = useState([]);
+  const [novaPregacao, setNovaPregacao] = useState({ titulo: "", versiculos: "", eventoId: "", data: "" });
+  const [pregacaoSelecionada, setPregacaoSelecionada] = useState(null);
   // Módulo Música
   const [musicaView, setMusicaView] = useState("escalas"); // escalas | musicas | cifras
   const [vsItems, setVsItems] = useState([]);
@@ -622,6 +633,18 @@ export default function FamiliaAliancaApp() {
   };
   const [enviandoVoluntario, setEnviandoVoluntario] = useState(false);
   const [maisScrollTarget, setMaisScrollTarget] = useState(null);
+
+  // Reseta a aba do Painel do Líder para uma válida quando muda de ministério
+  useEffect(() => {
+    if (tab === "admin" && isLider && !isAdmin) {
+      const validas = ministerioLider === "Aliança Music"
+        ? ["membros-min", "avisos-min", "eventos-min", "musica-min"]
+        : ministerioLider === "Mídia"
+        ? ["membros-min", "avisos-min", "eventos-min", "arquivos-min"]
+        : ["membros-min", "avisos-min", "eventos-min"];
+      if (!validas.includes(adminTab)) setAdminTab("membros-min");
+    }
+  }, [tab, isLider, isAdmin, ministerioLider]);
 
   // Scroll até seção alvo na aba Mais/Voluntario
   useEffect(() => {
@@ -803,6 +826,23 @@ export default function FamiliaAliancaApp() {
       setVsItems(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => a.titulo?.localeCompare(b.titulo)));
     });
 
+    // Categorias dinâmicas de equipe (ex: Mídia)
+    const unsubCategoriasEquipe = onSnapshot(collection(db, "categoriasEquipe"), snap => {
+      setCategoriasEquipe(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    // Arquivos de Mídia (imagens para telão, etc.)
+    const unsubArquivosMidia = onSnapshot(collection(db, "arquivosMidia"), snap => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""));
+      setArquivosMidia(lista);
+    });
+    // Pregações (inseridas pelo Pastor)
+    const unsubPregacoes = onSnapshot(collection(db, "pregacoes"), snap => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => (b.data || "").localeCompare(a.data || ""));
+      setPregacoes(lista);
+    });
+
     const unsubBannerJejum = onSnapshot(doc(db, "config", "bannerJejum"), (snap) => {
       if (snap.exists()) setBannerJejum(snap.data());
     });
@@ -848,7 +888,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes();
       clearInterval(heartbeat);
       removerPresenca();
       window.removeEventListener("beforeunload", removerPresenca);
@@ -2564,6 +2604,10 @@ export default function FamiliaAliancaApp() {
               const meuDadosEscala = proximaEscala?.membrosEscalados?.[user?.email];
               const musicasEscala = (proximaEscala?.musicas || []).map(mid => musicas.find(x => x.id === mid)).filter(Boolean);
               const todosEscalados = Object.entries(proximaEscala?.membrosEscalados || {});
+              const escalaLouvorMin = min !== "Aliança Music" && proximaEscala
+                ? escalas.find(e => e.ministerio === "Aliança Music" && (e.eventoId === proximaEscala.eventoId || e.eventoRef === proximaEscala.eventoId))
+                : null;
+              const musicasLouvorMin = (escalaLouvorMin?.musicas || []).map(mid => musicas.find(x => x.id === mid)).filter(Boolean);
 
               return (
                 <div key={min} style={{ margin: "0 16px 16px", background: darkMode ? "rgba(201,168,76,.04)" : "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 18, overflow: "hidden" }}>
@@ -2622,6 +2666,7 @@ export default function FamiliaAliancaApp() {
                                 <div style={{ fontSize: 12, fontWeight: "bold", color: "#22c55e", marginBottom: 2 }}>✅ Você está escalado!</div>
                                 {meuDadosEscala.funcoes?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🎤 {meuDadosEscala.funcoes.join(", ")}</div>}
                                 {meuDadosEscala.instrumentos?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🎸 {meuDadosEscala.instrumentos.join(", ")}</div>}
+                                {meuDadosEscala.categorias?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🏷️ {meuDadosEscala.categorias.join(", ")}</div>}
                                 {meuDadosEscala.obs && <div style={{ fontSize: 12, color: "#c9a84c", marginTop: 4, fontStyle: "italic" }}>"{meuDadosEscala.obs}"</div>}
                               </div>
                             ) : (
@@ -2643,7 +2688,7 @@ export default function FamiliaAliancaApp() {
                                       <div style={{ fontSize: 12, fontWeight: email === user?.email ? "bold" : "normal", color: email === user?.email ? "#c9a84c" : T.text }}>
                                         {dados.nome} {email === user?.email && "(você)"}
                                       </div>
-                                      <div style={{ fontSize: 10, color: T.textSub }}>{dados.funcoes?.join(", ")}{dados.instrumentos?.length > 0 && ` • 🎸 ${dados.instrumentos.join(", ")}`}</div>
+                                      <div style={{ fontSize: 10, color: T.textSub }}>{dados.funcoes?.join(", ")}{dados.instrumentos?.length > 0 && ` • 🎸 ${dados.instrumentos.join(", ")}`}{dados.categorias?.length > 0 && `🏷️ ${dados.categorias.join(", ")}`}</div>
                                     </div>
                                   </div>
                                 ))}
@@ -2790,6 +2835,18 @@ export default function FamiliaAliancaApp() {
                                 </>
                               );
                             })()}
+
+                            {/* Músicas escolhidas pelo Louvor — para membros de outros ministérios (ex: Mídia) */}
+                            {meuDadosEscala && min !== "Aliança Music" && musicasLouvorMin.length > 0 && (
+                              <div style={{ marginTop: 10 }}>
+                                <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas escolhidas pelo Louvor</div>
+                                {musicasLouvorMin.map((mus, i) => (
+                                  <div key={i} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, padding: "8px 12px", marginBottom: 6 }}>
+                                    <div style={{ fontSize: 12, fontWeight: "bold", color: T.text }}>{mus.titulo} <span style={{ color: T.textSub, fontWeight: "normal" }}>— {mus.artista}</span> {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -2899,9 +2956,14 @@ export default function FamiliaAliancaApp() {
 
             {/* Tabs do líder */}
             <div style={S.adminTabs}>
-              {["membros-min", "avisos-min", "eventos-min", "musica-min"].map(t => (
+              {(ministerioLider === "Aliança Music"
+                ? ["membros-min", "avisos-min", "eventos-min", "musica-min"]
+                : ministerioLider === "Mídia"
+                ? ["membros-min", "avisos-min", "eventos-min", "arquivos-min"]
+                : ["membros-min", "avisos-min", "eventos-min"]
+              ).map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ "membros-min": "👥 Membros", "avisos-min": "📢 Avisos", "eventos-min": "📅 Eventos", "musica-min": "🎵 Música" }[t]}
+                  {{ "membros-min": "👥 Membros", "avisos-min": "📢 Avisos", "eventos-min": "📅 Eventos", "musica-min": "🎵 Música", "arquivos-min": "🖼️ Arquivos" }[t]}
                 </button>
               ))}
             </div>
@@ -2910,16 +2972,19 @@ export default function FamiliaAliancaApp() {
             {adminTab === "membros-min" && (() => {
               const membrosMin = membros.filter(m => m.ministerios?.includes(ministerioLider));
               const membrosForaMin = membros.filter(m => !m.ministerios?.includes(ministerioLider) && !m.admin);
+              const isMusical = ministerioLider === "Aliança Music";
+              const categoriasMin = categoriasEquipe.filter(c => c.ministerio === ministerioLider);
+              const perfilKey = isMusical
+                ? `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`
+                : `perfilCategorias_${ministerioLider.replace(/\s/g, "_")}`;
 
               const addMembro = async (m) => {
                 const mins = m.ministerios || [];
                 if (!mins.includes(ministerioLider)) {
                   const novosMins = [...mins, ministerioLider];
-                  // Salvar perfil musical do membro neste ministério
-                  const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
                   await updateDoc(doc(db, "membros", m.email), {
                     ministerios: novosMins,
-                    [perfilKey]: perfilMusical
+                    [perfilKey]: isMusical ? perfilMusical : perfilCategorias
                   });
                   if (user?.email === m.email) {
                     const novoUser = { ...user, ministerios: novosMins };
@@ -2928,6 +2993,7 @@ export default function FamiliaAliancaApp() {
                   }
                   setMembroParaAdicionar(null);
                   setPerfilMusical({ funcoes: [], instrumentos: [] });
+                  setPerfilCategorias({ categorias: [] });
                   setMostrarAdicionar(false);
                   showToast(`✅ ${m.nome} adicionado ao ministério!`);
                 }
@@ -2939,6 +3005,15 @@ export default function FamiliaAliancaApp() {
                 showToast(`↩️ ${m.nome} removido do ministério`);
               };
 
+              const adicionarCategoria = async () => {
+                const nome = novaCategoriaNome.trim();
+                if (!nome) { showToast("⚠️ Informe o nome da categoria!"); return; }
+                if (categoriasMin.some(c => c.nome.toLowerCase() === nome.toLowerCase())) { showToast("⚠️ Essa categoria já existe!"); return; }
+                await addDoc(collection(db, "categoriasEquipe"), { ministerio: ministerioLider, nome });
+                setNovaCategoriaNome("");
+                showToast(`✅ Categoria "${nome}" criada!`);
+              };
+
               return (
                 <div style={{ padding: "0 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
@@ -2946,6 +3021,27 @@ export default function FamiliaAliancaApp() {
                     <span style={{ fontSize: 12, color: T.textSub }}>{membrosMin.length} membro(s)</span>
                   </div>
                   <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Gerencie os membros do seu ministério</div>
+
+                  {/* Gerenciar categorias (ministérios não-musicais) */}
+                  {!isMusical && (
+                    <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "12px 14px", marginBottom: 16 }}>
+                      <div style={{ fontSize: 12, fontWeight: "bold", color: T.gold, marginBottom: 8 }}>🏷️ Categorias da Equipe</div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+                        {categoriasMin.length === 0 && <span style={{ fontSize: 12, color: T.textFaint }}>Nenhuma categoria criada ainda</span>}
+                        {categoriasMin.map(c => (
+                          <span key={c.id} style={{ fontSize: 11, background: "rgba(6,182,212,.12)", color: "#22d3ee", border: "1px solid rgba(6,182,212,.3)", borderRadius: 20, padding: "4px 10px" }}>{c.nome}</span>
+                        ))}
+                      </div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <input style={{ ...S.input, marginBottom: 0, flex: 1 }} placeholder="Ex: Câmera, Letra, Transmissão..."
+                          value={novaCategoriaNome} onChange={e => setNovaCategoriaNome(e.target.value)} />
+                        <button onClick={adicionarCategoria}
+                          style={{ background: "linear-gradient(90deg,#06b6d4,#22d3ee)", border: "none", borderRadius: 10, padding: "0 16px", fontSize: 12, fontWeight: "bold", color: "#04202a", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                          + Nova
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Botão adicionar */}
                   <button style={{ ...S.saveBtn, marginBottom: 16 }}
@@ -2976,7 +3072,7 @@ export default function FamiliaAliancaApp() {
                                       <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
                                       <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
                                     </div>
-                                    <button onClick={() => { setMembroParaAdicionar(m); setBuscaAddMin(""); setPerfilMusical({ funcoes: [], instrumentos: [] }); }}
+                                    <button onClick={() => { setMembroParaAdicionar(m); setBuscaAddMin(""); setPerfilMusical({ funcoes: [], instrumentos: [] }); setPerfilCategorias({ categorias: [] }); }}
                                       style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                                       Selecionar
                                     </button>
@@ -2989,7 +3085,7 @@ export default function FamiliaAliancaApp() {
                           )}
                         </>
                       ) : (
-                        /* Formulário de perfil musical */
+                        /* Formulário de perfil */
                         <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px" }}>
                           {/* Header membro selecionado */}
                           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, paddingBottom: 12, borderBottom: `1px solid ${T.cardBorder}` }}>
@@ -2998,48 +3094,79 @@ export default function FamiliaAliancaApp() {
                             </div>
                             <div style={{ flex: 1 }}>
                               <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{membroParaAdicionar.nome}</div>
-                              <div style={{ fontSize: 11, color: T.textSub }}>Definindo perfil musical</div>
+                              <div style={{ fontSize: 11, color: T.textSub }}>{isMusical ? "Definindo perfil musical" : "Definindo categoria(s)"}</div>
                             </div>
                             <button onClick={() => setMembroParaAdicionar(null)}
                               style={{ background: "none", border: "none", color: T.textFaint, cursor: "pointer", fontSize: 18 }}>×</button>
                           </div>
 
-                          {/* Função vocal */}
-                          <div style={{ marginBottom: 14 }}>
-                            <div style={{ fontSize: 12, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎤 Função Vocal</div>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                              {["Ministro(a)", "Soprano", "Contralto", "Tenor", "Barítono"].map(f => (
-                                <button key={f} onClick={() => {
-                                  const atual = perfilMusical.funcoes;
-                                  setPerfilMusical({ ...perfilMusical, funcoes: atual.includes(f) ? atual.filter(x => x !== f) : [...atual, f] });
-                                }} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${perfilMusical.funcoes.includes(f) ? "#c9a84c" : T.cardBorder}`, background: perfilMusical.funcoes.includes(f) ? "rgba(201,168,76,.2)" : "transparent", color: perfilMusical.funcoes.includes(f) ? "#c9a84c" : T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: perfilMusical.funcoes.includes(f) ? "bold" : "normal" }}>
-                                  {f}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+                          {isMusical ? (
+                            <>
+                              {/* Função vocal */}
+                              <div style={{ marginBottom: 14 }}>
+                                <div style={{ fontSize: 12, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎤 Função Vocal</div>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                  {["Ministro(a)", "Soprano", "Contralto", "Tenor", "Barítono"].map(f => (
+                                    <button key={f} onClick={() => {
+                                      const atual = perfilMusical.funcoes;
+                                      setPerfilMusical({ ...perfilMusical, funcoes: atual.includes(f) ? atual.filter(x => x !== f) : [...atual, f] });
+                                    }} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${perfilMusical.funcoes.includes(f) ? "#c9a84c" : T.cardBorder}`, background: perfilMusical.funcoes.includes(f) ? "rgba(201,168,76,.2)" : "transparent", color: perfilMusical.funcoes.includes(f) ? "#c9a84c" : T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: perfilMusical.funcoes.includes(f) ? "bold" : "normal" }}>
+                                      {f}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
 
-                          {/* Instrumento */}
-                          <div style={{ marginBottom: 16 }}>
-                            <div style={{ fontSize: 12, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎸 Instrumento(s)</div>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                              {["Violão", "Teclado", "Bateria", "Baixo", "Guitarra", "Flauta", "Violino", "Percussão"].map(i => (
-                                <button key={i} onClick={() => {
-                                  const atual = perfilMusical.instrumentos;
-                                  setPerfilMusical({ ...perfilMusical, instrumentos: atual.includes(i) ? atual.filter(x => x !== i) : [...atual, i] });
-                                }} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${perfilMusical.instrumentos.includes(i) ? "#8b5cf6" : T.cardBorder}`, background: perfilMusical.instrumentos.includes(i) ? "rgba(139,92,246,.2)" : "transparent", color: perfilMusical.instrumentos.includes(i) ? "#a78bfa" : T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: perfilMusical.instrumentos.includes(i) ? "bold" : "normal" }}>
-                                  {i}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+                              {/* Instrumento */}
+                              <div style={{ marginBottom: 16 }}>
+                                <div style={{ fontSize: 12, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎸 Instrumento(s)</div>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                  {["Violão", "Teclado", "Bateria", "Baixo", "Guitarra", "Flauta", "Violino", "Percussão"].map(i => (
+                                    <button key={i} onClick={() => {
+                                      const atual = perfilMusical.instrumentos;
+                                      setPerfilMusical({ ...perfilMusical, instrumentos: atual.includes(i) ? atual.filter(x => x !== i) : [...atual, i] });
+                                    }} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${perfilMusical.instrumentos.includes(i) ? "#8b5cf6" : T.cardBorder}`, background: perfilMusical.instrumentos.includes(i) ? "rgba(139,92,246,.2)" : "transparent", color: perfilMusical.instrumentos.includes(i) ? "#a78bfa" : T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: perfilMusical.instrumentos.includes(i) ? "bold" : "normal" }}>
+                                      {i}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
 
-                          {/* Resumo selecionado */}
-                          {(perfilMusical.funcoes.length > 0 || perfilMusical.instrumentos.length > 0) && (
-                            <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 10, padding: "8px 12px", marginBottom: 12, fontSize: 12, color: T.textSub }}>
-                              {perfilMusical.funcoes.length > 0 && <div>🎤 {perfilMusical.funcoes.join(", ")}</div>}
-                              {perfilMusical.instrumentos.length > 0 && <div>🎸 {perfilMusical.instrumentos.join(", ")}</div>}
-                            </div>
+                              {/* Resumo selecionado */}
+                              {(perfilMusical.funcoes.length > 0 || perfilMusical.instrumentos.length > 0) && (
+                                <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 10, padding: "8px 12px", marginBottom: 12, fontSize: 12, color: T.textSub }}>
+                                  {perfilMusical.funcoes.length > 0 && <div>🎤 {perfilMusical.funcoes.join(", ")}</div>}
+                                  {perfilMusical.instrumentos.length > 0 && <div>🎸 {perfilMusical.instrumentos.join(", ")}</div>}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              {/* Categorias dinâmicas */}
+                              <div style={{ marginBottom: 16 }}>
+                                <div style={{ fontSize: 12, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🏷️ Categoria(s)</div>
+                                {categoriasMin.length === 0 ? (
+                                  <div style={{ fontSize: 12, color: T.textFaint }}>Nenhuma categoria criada. Crie uma categoria acima primeiro.</div>
+                                ) : (
+                                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                    {categoriasMin.map(c => (
+                                      <button key={c.id} onClick={() => {
+                                        const atual = perfilCategorias.categorias;
+                                        setPerfilCategorias({ categorias: atual.includes(c.nome) ? atual.filter(x => x !== c.nome) : [...atual, c.nome] });
+                                      }} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${perfilCategorias.categorias.includes(c.nome) ? "#06b6d4" : T.cardBorder}`, background: perfilCategorias.categorias.includes(c.nome) ? "rgba(6,182,212,.2)" : "transparent", color: perfilCategorias.categorias.includes(c.nome) ? "#22d3ee" : T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: perfilCategorias.categorias.includes(c.nome) ? "bold" : "normal" }}>
+                                        {c.nome}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              {perfilCategorias.categorias.length > 0 && (
+                                <div style={{ background: "rgba(6,182,212,.06)", border: "1px solid rgba(6,182,212,.15)", borderRadius: 10, padding: "8px 12px", marginBottom: 12, fontSize: 12, color: T.textSub }}>
+                                  🏷️ {perfilCategorias.categorias.join(", ")}
+                                </div>
+                              )}
+                            </>
                           )}
 
                           <button onClick={() => addMembro(membroParaAdicionar)}
@@ -3059,7 +3186,6 @@ export default function FamiliaAliancaApp() {
                       <div style={{ fontSize: 12, color: T.textFaint, marginTop: 4 }}>Use o botão acima para adicionar</div>
                     </div>
                   ) : membrosMin.map(m => {
-                    const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
                     const perfil = m[perfilKey];
                     return (
                     <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12 }}>
@@ -3069,15 +3195,25 @@ export default function FamiliaAliancaApp() {
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
                         <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
-                        {perfil && (perfil.funcoes?.length > 0 || perfil.instrumentos?.length > 0) && (
-                          <div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 4 }}>
-                            {(perfil.funcoes || []).map(f => (
-                              <span key={f} style={{ fontSize: 10, background: "rgba(201,168,76,.15)", color: "#c9a84c", border: "1px solid rgba(201,168,76,.3)", borderRadius: 20, padding: "2px 8px" }}>🎤 {f}</span>
-                            ))}
-                            {(perfil.instrumentos || []).map(i => (
-                              <span key={i} style={{ fontSize: 10, background: "rgba(139,92,246,.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,.3)", borderRadius: 20, padding: "2px 8px" }}>🎸 {i}</span>
-                            ))}
-                          </div>
+                        {isMusical ? (
+                          perfil && (perfil.funcoes?.length > 0 || perfil.instrumentos?.length > 0) && (
+                            <div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 4 }}>
+                              {(perfil.funcoes || []).map(f => (
+                                <span key={f} style={{ fontSize: 10, background: "rgba(201,168,76,.15)", color: "#c9a84c", border: "1px solid rgba(201,168,76,.3)", borderRadius: 20, padding: "2px 8px" }}>🎤 {f}</span>
+                              ))}
+                              {(perfil.instrumentos || []).map(i => (
+                                <span key={i} style={{ fontSize: 10, background: "rgba(139,92,246,.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,.3)", borderRadius: 20, padding: "2px 8px" }}>🎸 {i}</span>
+                              ))}
+                            </div>
+                          )
+                        ) : (
+                          perfil && perfil.categorias?.length > 0 && (
+                            <div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 4 }}>
+                              {(perfil.categorias || []).map(c => (
+                                <span key={c} style={{ fontSize: 10, background: "rgba(6,182,212,.15)", color: "#22d3ee", border: "1px solid rgba(6,182,212,.3)", borderRadius: 20, padding: "2px 8px" }}>🏷️ {c}</span>
+                              ))}
+                            </div>
+                          )
                         )}
                       </div>
                       <div style={{ display: "flex", gap: 6 }}>
@@ -3139,16 +3275,24 @@ export default function FamiliaAliancaApp() {
             {/* Eventos do Ministério */}
             {adminTab === "eventos-min" && (() => {
               const membrosMin = membros.filter(m => m.ministerios?.includes(ministerioLider));
-              const CATEGORIAS = ["Ministro(a)", "Soprano", "Contralto", "Tenor", "Backing Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado"];
+              const isMusical = ministerioLider === "Aliança Music";
+              const perfilKeyEv = isMusical
+                ? `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`
+                : `perfilCategorias_${ministerioLider.replace(/\s/g, "_")}`;
+              const CATEGORIAS = isMusical
+                ? ["Ministro(a)", "Soprano", "Contralto", "Tenor", "Backing Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado"]
+                : categoriasEquipe.filter(c => c.ministerio === ministerioLider).map(c => c.nome);
 
-              // Retorna membros que têm aquela função ou instrumento
+              // Retorna membros que têm aquela função/instrumento (musical) ou categoria (genérico)
               const membrosPorCategoria = (cat) => {
                 return membrosMin.filter(m => {
-                  const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
-                  const perfil = m[perfilKey];
+                  const perfil = m[perfilKeyEv];
                   if (!perfil) return false;
-                  const todasFuncoes = [...(perfil.funcoes || []), ...(perfil.instrumentos || [])];
-                  return todasFuncoes.some(f => f.toLowerCase().includes(cat.split("/")[0].toLowerCase()) || cat.toLowerCase().includes(f.toLowerCase()));
+                  if (isMusical) {
+                    const todasFuncoes = [...(perfil.funcoes || []), ...(perfil.instrumentos || [])];
+                    return todasFuncoes.some(f => f.toLowerCase().includes(cat.split("/")[0].toLowerCase()) || cat.toLowerCase().includes(f.toLowerCase()));
+                  }
+                  return (perfil.categorias || []).includes(cat);
                 });
               };
 
@@ -3189,9 +3333,15 @@ export default function FamiliaAliancaApp() {
                           {Object.entries(escalados).map(([email, dados]) => (
                             <div key={email} style={{ fontSize: 12, color: T.textSub, marginBottom: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <span>• {dados.nome}</span>
-                              <div style={{ display: "flex", gap: 4 }}>
-                                {dados.funcoes?.map(f => <span key={f} style={{ fontSize: 10, color: "#c9a84c", background: "rgba(201,168,76,.1)", borderRadius: 10, padding: "1px 6px" }}>{f}</span>)}
-                                {dados.instrumentos?.map(i => <span key={i} style={{ fontSize: 10, color: "#a78bfa", background: "rgba(139,92,246,.1)", borderRadius: 10, padding: "1px 6px" }}>🎸{i}</span>)}
+                              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                                {isMusical ? (
+                                  <>
+                                    {dados.funcoes?.map(f => <span key={f} style={{ fontSize: 10, color: "#c9a84c", background: "rgba(201,168,76,.1)", borderRadius: 10, padding: "1px 6px" }}>{f}</span>)}
+                                    {dados.instrumentos?.map(i => <span key={i} style={{ fontSize: 10, color: "#a78bfa", background: "rgba(139,92,246,.1)", borderRadius: 10, padding: "1px 6px" }}>🎸{i}</span>)}
+                                  </>
+                                ) : (
+                                  dados.categorias?.map(c => <span key={c} style={{ fontSize: 10, color: "#22d3ee", background: "rgba(6,182,212,.1)", borderRadius: 10, padding: "1px 6px" }}>{c}</span>)
+                                )}
                               </div>
                             </div>
                           ))}
@@ -3199,13 +3349,19 @@ export default function FamiliaAliancaApp() {
                       )}
 
                       {/* Grid de categorias */}
+                      {CATEGORIAS.length === 0 ? (
+                        <div style={{ fontSize: 12, color: T.textFaint, marginBottom: 16 }}>Nenhuma categoria criada ainda. Crie categorias na aba Membros primeiro.</div>
+                      ) : (
+                      <>
                       <div style={{ fontSize: 12, color: T.textSub, marginBottom: 10 }}>Selecione uma categoria para escalar:</div>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
                         {CATEGORIAS.map(cat => {
                           const disponiveis = membrosPorCategoria(cat);
-                          const escaladosNaCat = Object.values(escalados).filter(d =>
-                            [...(d.funcoes || []), ...(d.instrumentos || [])].some(f => f.toLowerCase().includes(cat.split("/")[0].toLowerCase()) || cat.toLowerCase().includes(f.toLowerCase()))
-                          );
+                          const escaladosNaCat = isMusical
+                            ? Object.values(escalados).filter(d =>
+                                [...(d.funcoes || []), ...(d.instrumentos || [])].some(f => f.toLowerCase().includes(cat.split("/")[0].toLowerCase()) || cat.toLowerCase().includes(f.toLowerCase()))
+                              )
+                            : Object.values(escalados).filter(d => (d.categorias || []).includes(cat));
                           if (disponiveis.length === 0) return null;
                           return (
                             <button key={cat} onClick={() => setCategoriaEscala(categoriaEscala === cat ? null : cat)}
@@ -3218,6 +3374,8 @@ export default function FamiliaAliancaApp() {
                           );
                         })}
                       </div>
+                      </>
+                      )}
 
                       {/* Lista de membros da categoria selecionada */}
                       {categoriaEscala && (
@@ -3233,22 +3391,27 @@ export default function FamiliaAliancaApp() {
                                 <div style={{ flex: 1 }}>
                                   <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
                                   {(() => {
-                                    const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
-                                    const perfil = m[perfilKey];
-                                    return perfil && (
+                                    const perfil = m[perfilKeyEv];
+                                    if (!perfil) return null;
+                                    return isMusical ? (
                                       <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginTop: 2 }}>
                                         {(perfil.funcoes || []).map(f => <span key={f} style={{ fontSize: 10, color: "#c9a84c", background: "rgba(201,168,76,.1)", borderRadius: 10, padding: "1px 5px" }}>🎤{f}</span>)}
                                         {(perfil.instrumentos || []).map(i => <span key={i} style={{ fontSize: 10, color: "#a78bfa", background: "rgba(139,92,246,.1)", borderRadius: 10, padding: "1px 5px" }}>🎸{i}</span>)}
+                                      </div>
+                                    ) : (
+                                      <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginTop: 2 }}>
+                                        {(perfil.categorias || []).map(c => <span key={c} style={{ fontSize: 10, color: "#22d3ee", background: "rgba(6,182,212,.1)", borderRadius: 10, padding: "1px 5px" }}>🏷️{c}</span>)}
                                       </div>
                                     );
                                   })()}
                                 </div>
                                 <div onClick={async () => {
-                                  const perfilKey = `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`;
-                                  const perfil = m[perfilKey];
+                                  const perfil = m[perfilKeyEv];
                                   const novos = { ...escalados };
                                   if (escalado) delete novos[m.email];
-                                  else novos[m.email] = { nome: m.nome, funcoes: perfil?.funcoes || [], instrumentos: perfil?.instrumentos || [] };
+                                  else novos[m.email] = isMusical
+                                    ? { nome: m.nome, funcoes: perfil?.funcoes || [], instrumentos: perfil?.instrumentos || [] }
+                                    : { nome: m.nome, categorias: perfil?.categorias || [] };
 
                                   if (escala) {
                                     await updateDoc(doc(db, "escalas", escala.id), { membrosEscalados: novos });
@@ -3275,8 +3438,8 @@ export default function FamiliaAliancaApp() {
                         </div>
                       )}
 
-                      {/* Músicas do evento */}
-                      {escala && (
+                      {/* Músicas do evento — gestão apenas para o Aliança Music */}
+                      {escala && isMusical && (
                         <div style={{ marginTop: 16 }}>
                           <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas</div>
                           {(escala.musicas || []).map((mid, i) => {
@@ -3303,6 +3466,23 @@ export default function FamiliaAliancaApp() {
                           </select>
                         </div>
                       )}
+
+                      {/* Músicas escolhidas pelo Louvor — visão somente-leitura para outros ministérios (ex: Mídia) */}
+                      {!isMusical && (() => {
+                        const escalaLouvor = escalas.find(e => e.ministerio === "Aliança Music" && (e.eventoId === eventoEscalaAberto.id || e.eventoRef === eventoEscalaAberto.id));
+                        const musicasDoLouvor = (escalaLouvor?.musicas || []).map(mid => musicas.find(x => x.id === mid)).filter(Boolean);
+                        if (musicasDoLouvor.length === 0) return null;
+                        return (
+                          <div style={{ marginTop: 16 }}>
+                            <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas escolhidas pelo Louvor</div>
+                            {musicasDoLouvor.map((mus, i) => (
+                              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
+                                <span style={{ fontSize: 12, color: T.text, flex: 1 }}>🎵 {mus.titulo} <span style={{ color: T.textSub }}>— {mus.artista}</span> {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 );
@@ -3784,6 +3964,97 @@ export default function FamiliaAliancaApp() {
                 </div>
               );
             })()}
+
+            {/* Arquivos — apenas Mídia */}
+            {adminTab === "arquivos-min" && ministerioLider === "Mídia" && (() => {
+              const arquivosMin = arquivosMidia.filter(a => a.ministerio === ministerioLider);
+              const hoje4 = new Date().toISOString().split("T")[0];
+              const pregacoesProximas = pregacoes.filter(p => !p.data || p.data >= hoje4).sort((a, b) => (a.data || "").localeCompare(b.data || ""));
+
+              return (
+                <div style={{ padding: "0 16px" }}>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>🖼️ Arquivos — {ministerioLider}</div>
+                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Imagens para o telão e a pregação inserida pelo Pastor</div>
+
+                  {/* Upload de imagem para o telão */}
+                  <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 20 }}>
+                    <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>➕ Nova Imagem (Telão)</div>
+                    <input style={{ ...S.input, marginBottom: 8 }} placeholder="Título (Ex: Fundo Culto de Domingo)"
+                      value={novoArquivoMidia.titulo} onChange={e => setNovoArquivoMidia({ ...novoArquivoMidia, titulo: e.target.value })} />
+
+                    <label style={{ display: "block", border: `1px dashed ${T.cardBorder}`, borderRadius: 10, padding: "12px", textAlign: "center", cursor: "pointer", marginBottom: 8, fontSize: 12, color: T.textSub }}>
+                      {uploadando ? `Enviando... ${uploadProgress ?? 0}%` : novoArquivoMidia.arquivo ? "✅ Imagem selecionada" : "🖼️ Toque para fazer upload da imagem"}
+                      <input type="file" accept="image/*" style={{ display: "none" }} onChange={async e => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploadando(true);
+                        setUploadProgress(0);
+                        try {
+                          const url = await uploadCloudinary(file, setUploadProgress);
+                          setNovoArquivoMidia(prev => ({ ...prev, arquivo: url }));
+                          showToast("✅ Imagem enviada!");
+                        } catch (err) {
+                          showToast("❌ Erro ao enviar imagem");
+                        } finally {
+                          setUploadando(false);
+                          setUploadProgress(null);
+                        }
+                      }} />
+                    </label>
+
+                    <button style={S.saveBtn} onClick={async () => {
+                      if (!novoArquivoMidia.titulo) { showToast("⚠️ Informe o título!"); return; }
+                      if (!novoArquivoMidia.arquivo) { showToast("⚠️ Envie uma imagem!"); return; }
+                      await addDoc(collection(db, "arquivosMidia"), { ...novoArquivoMidia, tipo: "imagem", ministerio: ministerioLider, criadoEm: new Date().toISOString() });
+                      setNovoArquivoMidia({ titulo: "", arquivo: "" });
+                      showToast("✅ Imagem salva!");
+                    }}>🖼️ Salvar Imagem</button>
+                  </div>
+
+                  {/* Lista de imagens */}
+                  <div style={{ fontSize: 12, color: T.gold, marginBottom: 10, letterSpacing: 1, textTransform: "uppercase" }}>Imagens ({arquivosMin.length})</div>
+                  {arquivosMin.length === 0 ? (
+                    <div style={{ ...S.card, textAlign: "center", padding: "24px 0", marginLeft: 0, marginRight: 0, marginBottom: 20 }}>
+                      <div style={{ fontSize: 32, marginBottom: 8 }}>🖼️</div>
+                      <div style={{ fontSize: 13, color: T.textSub }}>Nenhuma imagem enviada ainda</div>
+                    </div>
+                  ) : (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+                      {arquivosMin.map(a => (
+                        <div key={a.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, overflow: "hidden" }}>
+                          <img src={a.arquivo} alt={a.titulo} style={{ width: "100%", height: 100, objectFit: "cover", display: "block" }} />
+                          <div style={{ padding: "8px 10px" }}>
+                            <div style={{ fontSize: 11, fontWeight: "bold", color: T.text, marginBottom: 6 }}>{a.titulo}</div>
+                            <div style={{ display: "flex", gap: 6 }}>
+                              <button onClick={() => baixarArquivo(a.arquivo, a.titulo)} style={{ flex: 1, background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 0", fontSize: 10, fontWeight: "bold", color: "#4ade80", cursor: "pointer" }}>⬇️</button>
+                              <button onClick={async () => { if (window.confirm("Excluir esta imagem?")) { await deleteDoc(doc(db, "arquivosMidia", a.id)); showToast("🗑️ Removida!"); } }}
+                                style={{ flex: 1, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 6, padding: "5px 0", fontSize: 10, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>🗑️</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Pregação — inserida pelo Pastor, visualização apenas */}
+                  <div style={{ fontSize: 12, color: "#8b5cf6", marginBottom: 10, letterSpacing: 1, textTransform: "uppercase" }}>📜 Pregação (inserida pelo Pastor)</div>
+                  {pregacoesProximas.length === 0 ? (
+                    <div style={{ ...S.card, textAlign: "center", padding: "24px 0", marginLeft: 0, marginRight: 0 }}>
+                      <div style={{ fontSize: 32, marginBottom: 8 }}>📜</div>
+                      <div style={{ fontSize: 13, color: T.textSub }}>O Pastor ainda não inseriu nenhuma pregação</div>
+                    </div>
+                  ) : pregacoesProximas.map(p => (
+                    <div key={p.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 12, padding: "12px 14px", marginBottom: 10 }}>
+                      <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 4 }}>{p.titulo}</div>
+                      {p.data && <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>{new Date(p.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</div>}
+                      {p.versiculos && (
+                        <div style={{ fontSize: 12, color: T.textSub, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{p.versiculos}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -3793,9 +4064,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "devocional", "avisos", "estudos", "banner", "financeiro", "lideres", "jejum", "video", "aovivo", "membros"].map(t => (
+              {["agenda", "palavra", "pregacao", "devocional", "avisos", "estudos", "banner", "financeiro", "lideres", "jejum", "video", "aovivo", "membros"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", financeiro: "💰 Finanças", lideres: "🏛️ Líderes", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", pregacao: "🎙️ Pregação", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", financeiro: "💰 Finanças", lideres: "🏛️ Líderes", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
                 </button>
               ))}
             </div>
@@ -4015,6 +4286,68 @@ export default function FamiliaAliancaApp() {
                 </div>
               </div>
             )}
+
+            {/* Admin: Pregação — Pastor insere tópicos/versículos, Mídia visualiza */}
+            {adminTab === "pregacao" && (() => {
+              const hoje5 = new Date().toISOString().split("T")[0];
+              const eventosFuturos = agenda.filter(e => !e.data || e.data >= hoje5).sort((a, b) => a.data?.localeCompare(b.data));
+              return (
+                <div style={{ padding: "0 16px" }}>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>🎙️ Pregação</div>
+                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Insira o tema e os versículos da pregação. O Ministério de Mídia poderá visualizar para preparar o telão.</div>
+
+                  <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 20 }}>
+                    <label style={S.label}>Tema/Título *</label>
+                    <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: A Fé que Move Montanhas"
+                      value={novaPregacao.titulo} onChange={e => setNovaPregacao({ ...novaPregacao, titulo: e.target.value })} />
+
+                    <label style={S.label}>Versículos / Tópicos</label>
+                    <textarea style={{ ...S.input, minHeight: 100, marginBottom: 0 }} placeholder={"Ex:\nMateus 17:20\nMarcos 11:22-24\nTópico 1: A fé que agrada a Deus\nTópico 2: Duvidar x Confiar"}
+                      value={novaPregacao.versiculos} onChange={e => setNovaPregacao({ ...novaPregacao, versiculos: e.target.value })} />
+
+                    <label style={S.label}>Data do culto</label>
+                    <input type="date" style={{ ...S.input, marginBottom: 0 }}
+                      value={novaPregacao.data} onChange={e => setNovaPregacao({ ...novaPregacao, data: e.target.value })} />
+
+                    <label style={S.label}>Vincular a um evento da agenda (opcional)</label>
+                    <select style={{ ...S.select, marginBottom: 0 }} value={novaPregacao.eventoId}
+                      onChange={e => setNovaPregacao({ ...novaPregacao, eventoId: e.target.value })}>
+                      <option value="">Nenhum evento específico</option>
+                      {eventosFuturos.map(e => (
+                        <option key={e.id} value={e.id}>{e.titulo} — {new Date(e.data + "T12:00").toLocaleDateString("pt-BR")}</option>
+                      ))}
+                    </select>
+
+                    <button style={{ ...S.saveBtn, marginTop: 12 }} onClick={async () => {
+                      if (!novaPregacao.titulo) { showToast("⚠️ Informe o tema/título!"); return; }
+                      await addDoc(collection(db, "pregacoes"), { ...novaPregacao, criadoEm: new Date().toISOString(), criadoPor: user?.nome || "Pastor" });
+                      setNovaPregacao({ titulo: "", versiculos: "", eventoId: "", data: "" });
+                      showToast("✅ Pregação salva!");
+                    }}>🎙️ Salvar Pregação</button>
+                  </div>
+
+                  <div style={{ fontSize: 12, color: T.gold, marginBottom: 10, letterSpacing: 1, textTransform: "uppercase" }}>Pregações cadastradas ({pregacoes.length})</div>
+                  {pregacoes.length === 0 ? (
+                    <div style={{ ...S.card, textAlign: "center", padding: "24px 0", marginLeft: 0, marginRight: 0 }}>
+                      <div style={{ fontSize: 32, marginBottom: 8 }}>🎙️</div>
+                      <div style={{ fontSize: 13, color: T.textSub }}>Nenhuma pregação cadastrada ainda</div>
+                    </div>
+                  ) : pregacoes.map(p => (
+                    <div key={p.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{p.titulo}</div>
+                          {p.data && <div style={{ fontSize: 11, color: T.textSub }}>{new Date(p.data + "T12:00").toLocaleDateString("pt-BR")}</div>}
+                          {p.versiculos && <div style={{ fontSize: 12, color: T.textSub, whiteSpace: "pre-wrap", marginTop: 6, lineHeight: 1.6 }}>{p.versiculos}</div>}
+                        </div>
+                        <button onClick={async () => { if (window.confirm("Excluir esta pregação?")) { await deleteDoc(doc(db, "pregacoes", p.id)); showToast("🗑️ Removida!"); } }}
+                          style={S.delBtn}>🗑️</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
 
             {/* Admin: Devocional */}
             {adminTab === "devocional" && (
