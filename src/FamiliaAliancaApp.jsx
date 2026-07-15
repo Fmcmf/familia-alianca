@@ -476,14 +476,14 @@ export default function FamiliaAliancaApp() {
   // Módulo Música
   const [musicaView, setMusicaView] = useState("escalas"); // escalas | musicas | cifras
   const [vsItems, setVsItems] = useState([]);
-  const [novoVs, setNovoVs] = useState({ titulo: "", artista: "", link: "", arquivo: "" });
+  const [novoVs, setNovoVs] = useState({ titulo: "", artista: "", link: "", arquivo: "", musicaId: "" });
   const [uploadProgress, setUploadProgress] = useState(null); // null | 0-100
   const [uploadando, setUploadando] = useState(false);
   const [escalas, setEscalas] = useState([]);
   const [musicas, setMusicas] = useState([]);
   const [cifras, setCifras] = useState([]);
   const [novaMusica, setNovaMusica] = useState({ titulo: "", artista: "", tom: "", link: "" });
-  const [novaCifra, setNovaCifra] = useState({ titulo: "", artista: "", tom: "", conteudo: "", link: "", arquivo: "" });
+  const [novaCifra, setNovaCifra] = useState({ titulo: "", artista: "", tom: "", conteudo: "", link: "", arquivo: "", musicaId: "" });
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
   const [pdfAberto, setPdfAberto] = useState(null); // URL do PDF aberto inline
   const [showCompletarCadastro, setShowCompletarCadastro] = useState(false);
@@ -2618,73 +2618,130 @@ export default function FamiliaAliancaApp() {
                               </div>
                             )}
 
-                            {/* Músicas — só para escalados */}
-                            {meuDadosEscala && musicasEscala.length > 0 && (
-                              <div style={{ marginBottom: 10 }}>
-                                <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas do Culto</div>
-                                {musicasEscala.map((mus, i) => (
-                                  <div key={i} style={{ background: darkMode ? "rgba(0,0,0,.2)" : "rgba(0,0,0,.04)", borderRadius: 12, marginBottom: 8, overflow: "hidden" }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px" }}>
-                                      <span style={{ fontSize: 16 }}>🎵</span>
-                                      <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{mus.titulo}</div>
-                                        <div style={{ fontSize: 11, color: T.textSub }}>{mus.artista} {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>}</div>
-                                      </div>
-                                    </div>
-                                    {getYouTubeId(mus.link) && <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />}
-                                    {getSpotifyId(mus.link) && <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Cifras — só para escalados */}
-                            {meuDadosEscala && (() => {
+                            {/* Músicas — só para escalados, com Cifra e VS aninhados abaixo de cada uma */}
+                            {meuDadosEscala && musicasEscala.length > 0 && (() => {
                               const cifrasMin = cifras.filter(c => c.ministerio === min);
-                              if (cifrasMin.length === 0) return null;
-                              return (
-                                <div style={{ marginBottom: 10 }}>
-                                  <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎸 Cifras</div>
-                                  {cifrasMin.map(c => (
-                                    <div key={c.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
-                                      <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 6 }}>{c.titulo} {c.tom && <span style={{ color: "#c9a84c", fontSize: 11 }}>• {c.tom}</span>}</div>
-                                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                                        {c.link && <button onClick={() => window.open(c.link, "_blank")} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>🔗 Cifra</button>}
-                                        {c.arquivo && <button onClick={() => setPdfAberto(pdfAberto === c.arquivo ? null : c.arquivo)} style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>📄 PDF</button>}
-                                        {c.conteudo && <button onClick={() => setMusicaSelecionada(musicaSelecionada?.id === c.id ? null : c)} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>📝 Ver</button>}
-                                      </div>
-                                      {musicaSelecionada?.id === c.id && c.conteudo && (
-                                        <pre style={{ marginTop: 8, fontSize: 11, color: T.text, lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 8, padding: "10px" }}>{c.conteudo}</pre>
-                                      )}
-                                    </div>
-                                  ))}
+                              const vsMin = vsItems.filter(v => v.ministerio === min);
+                              const idsDoCulto = musicasEscala.map(m => m.id);
+                              // Cifras/VS vinculados a músicas que NÃO estão neste culto (ou sem vínculo) ficam numa seção geral abaixo
+                              const cifrasSemVinculo = cifrasMin.filter(c => !c.musicaId || !idsDoCulto.includes(c.musicaId));
+                              const vsSemVinculo = vsMin.filter(v => !v.musicaId || !idsDoCulto.includes(v.musicaId));
+
+                              const renderCifra = c => (
+                                <div key={c.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, padding: "10px 12px", marginTop: 8 }}>
+                                  <div style={{ fontSize: 12, fontWeight: "bold", color: "#a78bfa", marginBottom: 6 }}>🎸 {c.titulo} {c.tom && <span style={{ color: "#c9a84c", fontSize: 11 }}>• {c.tom}</span>}</div>
+                                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                    {c.link && <button onClick={() => window.open(c.link, "_blank")} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>🔗 Cifra</button>}
+                                    {c.arquivo && <button onClick={() => setPdfAberto(pdfAberto === c.arquivo ? null : c.arquivo)} style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>📄 PDF</button>}
+                                    {c.conteudo && <button onClick={() => setMusicaSelecionada(musicaSelecionada?.id === c.id ? null : c)} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>📝 Ver</button>}
+                                  </div>
+                                  {musicaSelecionada?.id === c.id && c.conteudo && (
+                                    <pre style={{ marginTop: 8, fontSize: 11, color: T.text, lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 8, padding: "10px" }}>{c.conteudo}</pre>
+                                  )}
                                 </div>
+                              );
+
+                              const renderVs = v => (
+                                <div key={v.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, marginTop: 8, overflow: "hidden" }}>
+                                  <div style={{ padding: "10px 12px" }}>
+                                    <div style={{ fontSize: 12, fontWeight: "bold", color: "#a78bfa" }}>{v.tipo?.includes("audio") ? "🎵" : "📁"} {v.titulo}</div>
+                                    {v.artista && <div style={{ fontSize: 11, color: T.textSub }}>{v.artista}</div>}
+                                  </div>
+                                  {v.arquivo && v.tipo?.includes("audio") && (
+                                    <div style={{ padding: "0 12px 10px" }}>
+                                      <audio controls style={{ width: "100%", borderRadius: 8 }}>
+                                        <source src={v.arquivo} type={v.tipo} />
+                                      </audio>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+
+                              return (
+                                <>
+                                  <div style={{ marginBottom: 10 }}>
+                                    <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas do Culto</div>
+                                    {musicasEscala.map((mus, i) => (
+                                      <div key={i} style={{ background: darkMode ? "rgba(0,0,0,.2)" : "rgba(0,0,0,.04)", borderRadius: 12, marginBottom: 8, overflow: "hidden", padding: "0 0 10px" }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px" }}>
+                                          <span style={{ fontSize: 16 }}>🎵</span>
+                                          <div style={{ flex: 1 }}>
+                                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{mus.titulo}</div>
+                                            <div style={{ fontSize: 11, color: T.textSub }}>{mus.artista} {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>}</div>
+                                          </div>
+                                        </div>
+                                        {getYouTubeId(mus.link) && <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />}
+                                        {getSpotifyId(mus.link) && <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />}
+                                        <div style={{ padding: "0 12px" }}>
+                                          {cifrasMin.filter(c => c.musicaId === mus.id).map(renderCifra)}
+                                          {vsMin.filter(v => v.musicaId === mus.id).map(renderVs)}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  {cifrasSemVinculo.length > 0 && (
+                                    <div style={{ marginBottom: 10 }}>
+                                      <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎸 Outras Cifras</div>
+                                      {cifrasSemVinculo.map(renderCifra)}
+                                    </div>
+                                  )}
+
+                                  {vsSemVinculo.length > 0 && (
+                                    <div>
+                                      <div style={{ fontSize: 11, color: "#a78bfa", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎧 Outros VS</div>
+                                      {vsSemVinculo.map(renderVs)}
+                                    </div>
+                                  )}
+                                </>
                               );
                             })()}
 
-                            {/* VS — só para escalados */}
-                            {meuDadosEscala && (() => {
+                            {/* Caso não haja músicas na escala, mostrar Cifras e VS gerais do ministério normalmente */}
+                            {meuDadosEscala && musicasEscala.length === 0 && (() => {
+                              const cifrasMin = cifras.filter(c => c.ministerio === min);
                               const vsMin = vsItems.filter(v => v.ministerio === min);
-                              if (vsMin.length === 0) return null;
                               return (
-                                <div>
-                                  <div style={{ fontSize: 11, color: "#a78bfa", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎧 VS</div>
-                                  {vsMin.map(v => (
-                                    <div key={v.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, marginBottom: 8, overflow: "hidden" }}>
-                                      <div style={{ padding: "10px 12px" }}>
-                                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{v.tipo?.includes("audio") ? "🎵" : "📁"} {v.titulo}</div>
-                                        {v.artista && <div style={{ fontSize: 11, color: T.textSub }}>{v.artista}</div>}
-                                      </div>
-                                      {v.arquivo && v.tipo?.includes("audio") && (
-                                        <div style={{ padding: "0 12px 10px" }}>
-                                          <audio controls style={{ width: "100%", borderRadius: 8 }}>
-                                            <source src={v.arquivo} type={v.tipo} />
-                                          </audio>
+                                <>
+                                  {cifrasMin.length > 0 && (
+                                    <div style={{ marginBottom: 10 }}>
+                                      <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎸 Cifras</div>
+                                      {cifrasMin.map(c => (
+                                        <div key={c.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
+                                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 6 }}>{c.titulo} {c.tom && <span style={{ color: "#c9a84c", fontSize: 11 }}>• {c.tom}</span>}</div>
+                                          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                            {c.link && <button onClick={() => window.open(c.link, "_blank")} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>🔗 Cifra</button>}
+                                            {c.arquivo && <button onClick={() => setPdfAberto(pdfAberto === c.arquivo ? null : c.arquivo)} style={{ flex: 1, minWidth: 80, background: "rgba(220,38,38,.15)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>📄 PDF</button>}
+                                            {c.conteudo && <button onClick={() => setMusicaSelecionada(musicaSelecionada?.id === c.id ? null : c)} style={{ flex: 1, minWidth: 80, background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "7px 0", fontSize: 11, fontWeight: "bold", color: "#a78bfa", cursor: "pointer" }}>📝 Ver</button>}
+                                          </div>
+                                          {musicaSelecionada?.id === c.id && c.conteudo && (
+                                            <pre style={{ marginTop: 8, fontSize: 11, color: T.text, lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 8, padding: "10px" }}>{c.conteudo}</pre>
+                                          )}
                                         </div>
-                                      )}
+                                      ))}
                                     </div>
-                                  ))}
-                                </div>
+                                  )}
+                                  {vsMin.length > 0 && (
+                                    <div>
+                                      <div style={{ fontSize: 11, color: "#a78bfa", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎧 VS</div>
+                                      {vsMin.map(v => (
+                                        <div key={v.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, marginBottom: 8, overflow: "hidden" }}>
+                                          <div style={{ padding: "10px 12px" }}>
+                                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{v.tipo?.includes("audio") ? "🎵" : "📁"} {v.titulo}</div>
+                                            {v.artista && <div style={{ fontSize: 11, color: T.textSub }}>{v.artista}</div>}
+                                          </div>
+                                          {v.arquivo && v.tipo?.includes("audio") && (
+                                            <div style={{ padding: "0 12px 10px" }}>
+                                              <audio controls style={{ width: "100%", borderRadius: 8 }}>
+                                                <source src={v.arquivo} type={v.tipo} />
+                                              </audio>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </>
                               );
                             })()}
                           </div>
@@ -3470,6 +3527,14 @@ export default function FamiliaAliancaApp() {
                             <input style={{ ...S.input, marginBottom: 8 }} placeholder="🔗 Link (Cifra Club, Ultimate Guitar...)"
                               value={novaCifra.link} onChange={e => setNovaCifra({ ...novaCifra, link: e.target.value })} />
 
+                            <select style={{ ...S.input, marginBottom: 8, color: novaCifra.musicaId ? T.text : T.textFaint }}
+                              value={novaCifra.musicaId} onChange={e => setNovaCifra({ ...novaCifra, musicaId: e.target.value })}>
+                              <option value="">🎵 Vincular a uma música (opcional)</option>
+                              {musicas.filter(m => m.ministerio === ministerioLider).map(m => (
+                                <option key={m.id} value={m.id}>{m.titulo}{m.artista ? ` — ${m.artista}` : ""}</option>
+                              ))}
+                            </select>
+
                             {/* Upload de PDF */}
                             <label style={{ display: "block", cursor: "pointer", marginBottom: 8 }}>
                               <div style={{ border: `2px dashed ${novaCifra.arquivo ? "rgba(34,197,94,.4)" : "rgba(201,168,76,.3)"}`, borderRadius: 10, padding: "12px 14px", textAlign: "center", background: novaCifra.arquivo ? "rgba(34,197,94,.04)" : "rgba(201,168,76,.03)" }}>
@@ -3505,7 +3570,7 @@ export default function FamiliaAliancaApp() {
                             <button style={S.saveBtn} onClick={async () => {
                               if (!novaCifra.titulo) { showToast("⚠️ Informe o título!"); return; }
                               await addDoc(collection(db, "cifras"), { ...novaCifra, ministerio: ministerioLider, criadoEm: new Date().toISOString() });
-                              setNovaCifra({ titulo: "", artista: "", tom: "", conteudo: "", link: "", arquivo: "" });
+                              setNovaCifra({ titulo: "", artista: "", tom: "", conteudo: "", link: "", arquivo: "", musicaId: "" });
                               showToast("✅ Cifra salva!");
                             }}>🎸 Salvar Cifra</button>
                           </div>
@@ -3547,6 +3612,14 @@ export default function FamiliaAliancaApp() {
                           value={novoVs.titulo} onChange={e => setNovoVs({ ...novoVs, titulo: e.target.value })} />
                         <input style={{ ...S.input, marginBottom: 12 }} placeholder="Artista/Banda (opcional)"
                           value={novoVs.artista} onChange={e => setNovoVs({ ...novoVs, artista: e.target.value })} />
+
+                        <select style={{ ...S.input, marginBottom: 12, color: novoVs.musicaId ? T.text : T.textFaint }}
+                          value={novoVs.musicaId} onChange={e => setNovoVs({ ...novoVs, musicaId: e.target.value })}>
+                          <option value="">🎵 Vincular a uma música (opcional)</option>
+                          {musicas.filter(m => m.ministerio === ministerioLider).map(m => (
+                            <option key={m.id} value={m.id}>{m.titulo}{m.artista ? ` — ${m.artista}` : ""}</option>
+                          ))}
+                        </select>
 
                         {/* Upload de arquivo */}
                         <label style={{ display: "block", cursor: "pointer" }}>
@@ -3599,7 +3672,7 @@ export default function FamiliaAliancaApp() {
                             if (!novoVs.titulo) { showToast("⚠️ Informe o título!"); return; }
                             if (!novoVs.arquivo) { showToast("⚠️ Selecione um arquivo!"); return; }
                             await addDoc(collection(db, "vs"), { ...novoVs, ministerio: ministerioLider, criadoEm: new Date().toISOString() });
-                            setNovoVs({ titulo: "", artista: "", arquivo: "", tipo: "" });
+                            setNovoVs({ titulo: "", artista: "", arquivo: "", tipo: "", musicaId: "" });
                             showToast("✅ VS adicionado!");
                           }}>🎧 Publicar VS</button>
                       </div>
