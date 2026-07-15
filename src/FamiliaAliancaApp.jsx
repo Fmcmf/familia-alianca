@@ -483,7 +483,6 @@ export default function FamiliaAliancaApp() {
   // Pregação (Pastor insere, Mídia visualiza)
   const [pregacoes, setPregacoes] = useState([]);
   const [novaPregacao, setNovaPregacao] = useState({ titulo: "", versiculos: "", eventoId: "", data: "" });
-  const [pregacaoSelecionada, setPregacaoSelecionada] = useState(null);
   // Módulo Música
   const [musicaView, setMusicaView] = useState("escalas"); // escalas | musicas | cifras
   const [vsItems, setVsItems] = useState([]);
@@ -644,7 +643,7 @@ export default function FamiliaAliancaApp() {
         : ["membros-min", "avisos-min", "eventos-min"];
       if (!validas.includes(adminTab)) setAdminTab("membros-min");
     }
-  }, [tab, isLider, isAdmin, ministerioLider]);
+  }, [tab, isLider, isAdmin, ministerioLider, adminTab]);
 
   // Scroll até seção alvo na aba Mais/Voluntario
   useEffect(() => {
