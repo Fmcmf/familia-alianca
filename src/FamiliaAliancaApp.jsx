@@ -13,7 +13,6 @@ const uploadCloudinary = async (file, onProgress) => {
   fd.append("file", file);
   fd.append("upload_preset", CLOUDINARY_PRESET);
   fd.append("resource_type", "auto");
-  fd.append("access_mode", "public");
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", CLOUDINARY_URL);
