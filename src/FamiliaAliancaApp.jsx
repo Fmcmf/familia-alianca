@@ -702,6 +702,7 @@ export default function FamiliaAliancaApp() {
           }).catch(() => {});
         }
         setScreen("app");
+        setTab("home");
       } // eslint-disable-line no-unused-vars
       else setScreen("login");
     }, 2200);
@@ -974,12 +975,12 @@ export default function FamiliaAliancaApp() {
       };
       await setDoc(doc(db, "membros", loginForm.email), u);
       store.set(SK.user, { ...u, id: loginForm.email });
-      setUser({ ...u, id: loginForm.email }); setScreen("app");
+      setUser({ ...u, id: loginForm.email }); setScreen("app"); setTab("home");
     } else {
       // admin master
       if (loginForm.email === "ALIANCA" && loginForm.senha === "mello2026") {
         const u = { id: 0, nome: "Pr Fernando Mello", email: loginForm.email, admin: true };
-        store.set(SK.user, u); setUser(u); setIsAdmin(true); setScreen("app"); return;
+        store.set(SK.user, u); setUser(u); setIsAdmin(true); setScreen("app"); setTab("home"); return;
       }
       const snap = await getDoc(doc(db, "membros", loginForm.email));
       if (!snap.exists() || snap.data().senha !== loginForm.senha) { setLoginErro("E-mail ou senha incorretos."); return; }
@@ -994,6 +995,7 @@ export default function FamiliaAliancaApp() {
         setMinisterioLider(null);
       }
       setScreen("app");
+      setTab("home");
       // Inicializar última visita se for primeira vez
       if (!localStorage.getItem("fa_ultima_visita")) {
         const agora = new Date().toISOString();
@@ -1080,7 +1082,7 @@ export default function FamiliaAliancaApp() {
     }
   };
 
-  const handleLogout = () => { store.set(SK.user, null); setUser(null); setIsAdmin(false); setIsLider(false); setMinisterioLider(null); setScreen("login"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
+  const handleLogout = () => { store.set(SK.user, null); setUser(null); setIsAdmin(false); setIsLider(false); setMinisterioLider(null); setScreen("login"); setTab("home"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
 
   // ── AGENDA ──
   const salvarEvento = async () => {
