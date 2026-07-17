@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db, messaging, solicitarPermissaoNotificacao, onMessage } from "./firebase";
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, getDocs } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
 
 // ─── CLOUDINARY CONFIG ──────────────────────────────────────────────────────
@@ -585,7 +585,6 @@ export default function FamiliaAliancaApp() {
   const [notifAtivada, setNotifAtivada] = useState(false);
   const [mostrarBannerNotif, setMostrarBannerNotif] = useState(false);
   const [notifBloqueada, setNotifBloqueada] = useState(false);
-  const [onlineCount, setOnlineCount] = useState(0);
 
   // Verificar status das notificações
   useEffect(() => {
@@ -871,38 +870,9 @@ export default function FamiliaAliancaApp() {
       });
     }
 
-    // ── PRESENÇA ONLINE ──
-    // Reutiliza o mesmo ID durante toda a sessão do navegador
-    let sessionId = sessionStorage.getItem("fa-session-id");
-    if (!sessionId) {
-      sessionId = Math.random().toString(36).slice(2);
-      sessionStorage.setItem("fa-session-id", sessionId);
-    }
-    const presencaRef = doc(db, "presenca", sessionId);
-
-    const registrarPresenca = () => {
-      setDoc(presencaRef, { ativo: true, visto: Date.now() });
-    };
-
-    registrarPresenca();
-    const heartbeat = setInterval(registrarPresenca, 20000); // atualiza a cada 20s
-
-    const removerPresenca = () => deleteDoc(presencaRef);
-    window.addEventListener("beforeunload", removerPresenca);
-
-    // Conta ativos (vistos nos últimos 60 segundos)
-    const unsubPresenca = onSnapshot(collection(db, "presenca"), (snap) => {
-      const agora = Date.now();
-      const ativos = snap.docs.filter(d => agora - (d.data().visto || 0) < 60000);
-      setOnlineCount(ativos.length);
-    });
-
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubPresenca(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes();
-      clearInterval(heartbeat);
-      removerPresenca();
-      window.removeEventListener("beforeunload", removerPresenca);
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes();
     };
   }, []);
 
@@ -1548,11 +1518,6 @@ export default function FamiliaAliancaApp() {
           </div>
           <div style={{ textAlign: "right" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {/* Contador online */}
-              <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(34,197,94,.12)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 20, padding: "4px 10px" }}>
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", display: "inline-block", boxShadow: "0 0 6px #22c55e" }} />
-                <span style={{ fontSize: 11, color: "#22c55e", fontWeight: "bold" }}>{onlineCount}</span>
-              </div>
               <button onClick={toggleTheme} style={{ background: "none", border: `1px solid ${T.cardBorder}`, borderRadius: 20, padding: "5px 10px", cursor: "pointer", fontSize: 15 }}>
                 {darkMode ? "☀️" : "🌙"}
               </button>
