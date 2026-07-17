@@ -2638,6 +2638,8 @@ export default function FamiliaAliancaApp() {
               const hoje3 = new Date().toISOString().split("T")[0];
               const proximaEscala = escalas.filter(e => e.ministerio === min && e.data >= hoje3).sort((a, b) => a.data.localeCompare(b.data))[0];
               const meuDadosEscala = proximaEscala?.membrosEscalados?.[user?.email];
+              const meuMembroLive = membros.find(mm => mm.email === user?.email);
+              const souUsuarioPadrao = !!meuMembroLive?.[`usuarioPadrao_${min.replace(/\s/g, "_")}`];
               const musicasEscala = (proximaEscala?.musicas || []).map(mid => musicas.find(x => x.id === mid)).filter(Boolean);
               const todosEscalados = Object.entries(proximaEscala?.membrosEscalados || {});
               const escalaLouvorMin = min !== "Aliança Music" && proximaEscala
@@ -2873,7 +2875,7 @@ export default function FamiliaAliancaApp() {
                             })()}
 
                             {/* Músicas escolhidas pelo Louvor — para membros de outros ministérios (ex: Mídia) */}
-                            {meuDadosEscala && min !== "Aliança Music" && musicasLouvorMin.length > 0 && (
+                            {(meuDadosEscala || souUsuarioPadrao) && min !== "Aliança Music" && musicasLouvorMin.length > 0 && (
                               <div style={{ marginTop: 10 }}>
                                 <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas escolhidas pelo Louvor</div>
                                 {musicasLouvorMin.map((mus, i) => (
@@ -2883,11 +2885,12 @@ export default function FamiliaAliancaApp() {
                                 ))}
                               </div>
                             )}
-                            {/* Arquivos e Pregação — para membros escalados no Ministério da Mídia */}
-                            {meuDadosEscala && min === "Mídia" && (() => {
+                            {/* Arquivos e Pregação — para membros escalados no Ministério da Mídia (ou Usuário Padrão, que sempre recebe tudo) */}
+                            {(meuDadosEscala || souUsuarioPadrao) && min === "Mídia" && (() => {
                               const arquivosDoMin = arquivosMidia.filter(a => a.ministerio === min);
                               const hojeMembro = new Date().toISOString().split("T")[0];
                               const pregacoesDoMin = pregacoes.filter(p => !p.data || p.data >= hojeMembro).sort((a, b) => (a.data || "").localeCompare(b.data || ""));
+                              const vejoPregacao = souUsuarioPadrao || meuDadosEscala?.categorias?.includes("Letra");
                               return (
                                 <>
                                   {arquivosDoMin.length > 0 && (
@@ -2908,7 +2911,7 @@ export default function FamiliaAliancaApp() {
                                     </div>
                                   )}
 
-                                  {pregacoesDoMin.length > 0 && meuDadosEscala.categorias?.includes("Letra") && (
+                                  {pregacoesDoMin.length > 0 && vejoPregacao && (
                                     <div style={{ marginTop: 10 }}>
                                       <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>📜 Pregação</div>
                                       {pregacoesDoMin.map(p => (
@@ -3322,14 +3325,19 @@ export default function FamiliaAliancaApp() {
                     </div>
                   ) : membrosMin.map(m => {
                     const perfil = m[perfilKey];
+                    const usuarioPadraoKey = `usuarioPadrao_${ministerioLider.replace(/\s/g, "_")}`;
+                    const ehPadrao = !!m[usuarioPadraoKey];
                     return (
-                    <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12 }}>
+                    <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12, border: ehPadrao ? "1px solid rgba(201,168,76,.4)" : undefined }}>
                       <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>
                         {m.nome?.charAt(0).toUpperCase()}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
                         <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
+                        {ehPadrao && (
+                          <div style={{ fontSize: 10, color: "#c9a84c", marginTop: 3, fontWeight: "bold" }}>📌 Usuário Padrão — sempre recebe tudo</div>
+                        )}
                         {isMusical ? (
                           perfil && (perfil.funcoes?.length > 0 || perfil.instrumentos?.length > 0) && (
                             <div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -3352,6 +3360,11 @@ export default function FamiliaAliancaApp() {
                         )}
                       </div>
                       <div style={{ display: "flex", gap: 6 }}>
+                        <button onClick={async () => {
+                          await updateDoc(doc(db, "membros", m.email), { [usuarioPadraoKey]: !ehPadrao });
+                          showToast(ehPadrao ? `↩️ ${m.nome} não é mais Usuário Padrão` : `📌 ${m.nome} agora é Usuário Padrão — sempre recebe tudo!`);
+                        }} title="Usuário Padrão: sempre recebe tudo, mesmo sem estar escalado"
+                          style={{ background: ehPadrao ? "rgba(201,168,76,.2)" : "transparent", border: `1px solid ${ehPadrao ? "#c9a84c" : T.cardBorder}`, borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>📌</button>
                         {m.celular && (
                           <button onClick={() => window.open(`https://wa.me/55${m.celular.replace(/\D/g, "")}`, "_blank")}
                             style={{ background: "#25d366", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>💬</button>
