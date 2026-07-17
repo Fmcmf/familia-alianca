@@ -464,7 +464,8 @@ export default function FamiliaAliancaApp() {
   const [user, setUser] = useState(null); // eslint-disable-line no-unused-vars
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLider, setIsLider] = useState(false);
-  const [ministerioLider, setMinisterioLider] = useState(null);
+  const [ministerioLider, setMinisterioLider] = useState(null); // ministério atualmente sendo gerenciado no painel
+  const [meusMinisteriosLider, setMeusMinisteriosLider] = useState([]); // todos os ministérios que o usuário lidera
   const [buscaAddMin, setBuscaAddMin] = useState("");
   const [mostrarAdicionar, setMostrarAdicionar] = useState(false);
   const [perfilMusical, setPerfilMusical] = useState({ funcoes: [], instrumentos: [] });
@@ -681,9 +682,11 @@ export default function FamiliaAliancaApp() {
         setUser(u);
         setIsAdmin(u.admin || false);
         // Restaurar estado de líder
-        if (u.lider && u.ministerioLider) {
+        const minsIniciais = u.ministeriosLider?.length > 0 ? u.ministeriosLider : (u.ministerioLider ? [u.ministerioLider] : []);
+        if (u.lider && minsIniciais.length > 0) {
           setIsLider(true);
-          setMinisterioLider(u.ministerioLider);
+          setMeusMinisteriosLider(minsIniciais);
+          setMinisterioLider(minsIniciais[0]);
         }
         // Buscar dados frescos do Firestore para garantir lider/ministerio atualizado
         if (u.email && u.email !== "ALIANCA") {
@@ -692,11 +695,14 @@ export default function FamiliaAliancaApp() {
               const dadosFrescos = { id: u.email, ...snap.data() };
               store.set(SK.user, dadosFrescos);
               setUser(dadosFrescos);
-              if (dadosFrescos.lider && dadosFrescos.ministerioLider) {
+              const minsFrescos = dadosFrescos.ministeriosLider?.length > 0 ? dadosFrescos.ministeriosLider : (dadosFrescos.ministerioLider ? [dadosFrescos.ministerioLider] : []);
+              if (dadosFrescos.lider && minsFrescos.length > 0) {
                 setIsLider(true);
-                setMinisterioLider(dadosFrescos.ministerioLider);
+                setMeusMinisteriosLider(minsFrescos);
+                setMinisterioLider(prev => minsFrescos.includes(prev) ? prev : minsFrescos[0]);
               } else {
                 setIsLider(false);
+                setMeusMinisteriosLider([]);
                 setMinisterioLider(null);
               }
               // Registrar último acesso
@@ -1011,11 +1017,14 @@ export default function FamiliaAliancaApp() {
       const agoraAcesso = new Date().toISOString();
       updateDoc(doc(db, "membros", loginForm.email), { ultimoAcesso: agoraAcesso }).catch(() => {});
       // Detectar líder
-      if (u.lider && u.ministerioLider) {
+      const minsLogin = u.ministeriosLider?.length > 0 ? u.ministeriosLider : (u.ministerioLider ? [u.ministerioLider] : []);
+      if (u.lider && minsLogin.length > 0) {
         setIsLider(true);
-        setMinisterioLider(u.ministerioLider);
+        setMeusMinisteriosLider(minsLogin);
+        setMinisterioLider(minsLogin[0]);
       } else {
         setIsLider(false);
+        setMeusMinisteriosLider([]);
         setMinisterioLider(null);
       }
       setScreen("app");
@@ -1106,7 +1115,7 @@ export default function FamiliaAliancaApp() {
     }
   };
 
-  const handleLogout = () => { store.set(SK.user, null); setUser(null); setIsAdmin(false); setIsLider(false); setMinisterioLider(null); setScreen("login"); setTab("home"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
+  const handleLogout = () => { store.set(SK.user, null); setUser(null); setIsAdmin(false); setIsLider(false); setMinisterioLider(null); setMeusMinisteriosLider([]); setScreen("login"); setTab("home"); setLoginForm({ nome: "", email: "", senha: "", modo: "login" }); };
 
   // ── AGENDA ──
   const salvarEvento = async () => {
@@ -2624,7 +2633,7 @@ export default function FamiliaAliancaApp() {
             </div>
             {user?.ministerios?.map(min => {
               const minData = MINISTERIOS.find(m => m.nome === min);
-              const liderMin = membros.find(m => m.lider && m.ministerioLider === min);
+              const liderMin = membros.find(m => m.lider && (m.ministeriosLider?.includes(min) || m.ministerioLider === min));
               const avisosMin = avisos.filter(a => a.ministerio === min);
               const hoje3 = new Date().toISOString().split("T")[0];
               const proximaEscala = escalas.filter(e => e.ministerio === min && e.data >= hoje3).sort((a, b) => a.data.localeCompare(b.data))[0];
@@ -3020,6 +3029,21 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>🏛️ Painel do Líder</div>
               <div style={{ fontSize: 12, color: T.textSub, marginTop: 4 }}>Ministério: <span style={{ color: T.gold, fontWeight: "bold" }}>{ministerioLider}</span></div>
             </div>
+
+            {/* Seletor de ministério — quando lidera mais de um */}
+            {meusMinisteriosLider.length > 1 && (
+              <div style={{ padding: "0 16px 12px" }}>
+                <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>Trocar ministério gerenciado:</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {meusMinisteriosLider.map(min => (
+                    <button key={min} onClick={() => { setMinisterioLider(min); setAdminTab("membros-min"); }}
+                      style={{ padding: "7px 14px", borderRadius: 20, border: `1px solid ${ministerioLider === min ? "#c9a84c" : T.cardBorder}`, background: ministerioLider === min ? "rgba(201,168,76,.15)" : T.card, color: ministerioLider === min ? "#c9a84c" : T.textSub, fontSize: 12, fontWeight: ministerioLider === min ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                      {min}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Tabs do líder */}
             <div style={S.adminTabs}>
@@ -4836,10 +4860,10 @@ export default function FamiliaAliancaApp() {
                 {membros.filter(m => m.lider && !m.admin).length > 0 && (
                   <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 12, padding: "12px 14px", marginBottom: 16 }}>
                     <div style={{ fontSize: 11, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Líderes ativos ({membros.filter(m => m.lider && !m.admin).length})</div>
-                    {membros.filter(m => m.lider && m.ministerioLider && !m.admin).map(m => (
+                    {membros.filter(m => m.lider && !m.admin && ((m.ministeriosLider?.length > 0) || m.ministerioLider)).map(m => (
                       <div key={m.id} style={{ fontSize: 12, color: T.textSub, marginBottom: 4, display: "flex", justifyContent: "space-between" }}>
                         <span>{m.nome}</span>
-                        <span style={{ color: T.gold }}>{m.ministerioLider}</span>
+                        <span style={{ color: T.gold, textAlign: "right" }}>{(m.ministeriosLider?.length > 0 ? m.ministeriosLider : [m.ministerioLider]).filter(Boolean).join(", ")}</span>
                       </div>
                     ))}
                   </div>
@@ -4869,8 +4893,8 @@ export default function FamiliaAliancaApp() {
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
                         <div style={{ fontSize: 11, color: T.textSub }}>{m.email}</div>
-                        {m.lider && m.ministerioLider && (
-                          <div style={{ fontSize: 11, color: "#c9a84c", marginTop: 2 }}>🏛️ Líder de {m.ministerioLider}</div>
+                        {m.lider && (m.ministeriosLider?.length > 0 || m.ministerioLider) && (
+                          <div style={{ fontSize: 11, color: "#c9a84c", marginTop: 2 }}>🏛️ Líder de {(m.ministeriosLider?.length > 0 ? m.ministeriosLider : [m.ministerioLider]).filter(Boolean).join(", ")}</div>
                         )}
                       </div>
                       {/* Toggle líder */}
@@ -4878,9 +4902,11 @@ export default function FamiliaAliancaApp() {
                         <span style={{ fontSize: 11, color: T.textSub }}>{m.lider ? "Líder" : "Membro"}</span>
                         <div onClick={async () => {
                           const novoLider = !m.lider;
+                          const minsAtuais = m.ministeriosLider?.length > 0 ? m.ministeriosLider : (m.ministerioLider ? [m.ministerioLider] : []);
                           await updateDoc(doc(db, "membros", m.email), {
                             lider: novoLider,
-                            ministerioLider: novoLider ? (m.ministerioLider || "") : ""
+                            ministeriosLider: novoLider ? minsAtuais : [],
+                            ministerioLider: novoLider ? (minsAtuais[0] || "") : "" // compatibilidade
                           });
                           showToast(novoLider ? `✅ ${m.nome} é agora líder!` : `↩️ ${m.nome} voltou a ser membro`);
                         }} style={{ width: 46, height: 26, borderRadius: 13, background: m.lider ? "#c9a84c" : "rgba(150,150,150,.3)", cursor: "pointer", position: "relative", transition: "background .2s", flexShrink: 0 }}>
@@ -4889,23 +4915,39 @@ export default function FamiliaAliancaApp() {
                       </div>
                     </div>
 
-                    {/* Seletor de ministério quando é líder */}
-                    {m.lider && (
-                      <div style={{ paddingTop: 8, borderTop: `1px solid ${T.cardBorder}` }}>
-                        <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>Ministério que lidera:</div>
-                        <select style={{ ...S.select, marginBottom: 0 }}
-                          value={m.ministerioLider || ""}
-                          onChange={async e => {
-                            await updateDoc(doc(db, "membros", m.email), { ministerioLider: e.target.value });
-                            showToast(`✅ Ministério atualizado!`);
-                          }}>
-                          <option value="">Selecione...</option>
-                          {MINISTERIOS.map(min => (
-                            <option key={min.id} value={min.nome}>{min.icon} {min.nome}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
+                    {/* Seletor de ministérios (múltiplos) quando é líder */}
+                    {m.lider && (() => {
+                      const minsSelecionados = m.ministeriosLider?.length > 0 ? m.ministeriosLider : (m.ministerioLider ? [m.ministerioLider] : []);
+                      const toggleMin = async (nomeMin) => {
+                        const novos = minsSelecionados.includes(nomeMin)
+                          ? minsSelecionados.filter(x => x !== nomeMin)
+                          : [...minsSelecionados, nomeMin];
+                        await updateDoc(doc(db, "membros", m.email), {
+                          ministeriosLider: novos,
+                          ministerioLider: novos[0] || "" // compatibilidade com código legado
+                        });
+                        showToast(`✅ Ministérios atualizados!`);
+                      };
+                      return (
+                        <div style={{ paddingTop: 8, borderTop: `1px solid ${T.cardBorder}` }}>
+                          <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>Ministério(s) que lidera:</div>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                            {MINISTERIOS.map(min => {
+                              const ativo = minsSelecionados.includes(min.nome);
+                              return (
+                                <button key={min.id} onClick={() => toggleMin(min.nome)}
+                                  style={{ padding: "6px 12px", borderRadius: 20, border: `1px solid ${ativo ? "#c9a84c" : T.cardBorder}`, background: ativo ? "rgba(201,168,76,.15)" : "transparent", color: ativo ? "#c9a84c" : T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: ativo ? "bold" : "normal" }}>
+                                  {ativo ? "✓ " : ""}{min.icon} {min.nome}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {minsSelecionados.length === 0 && (
+                            <div style={{ fontSize: 11, color: "#f87171", marginTop: 6 }}>⚠️ Selecione ao menos um ministério</div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
