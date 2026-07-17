@@ -523,6 +523,7 @@ export default function FamiliaAliancaApp() {
   const [buscaMembro, setBuscaMembro] = useState("");
   const [anivMes, setAnivMes] = useState(new Date().getMonth() + 1);
   const [membrosView, setMembrosView] = useState("lista"); // lista | aniversariantes
+  const [membrosOrdem, setMembrosOrdem] = useState("nome"); // nome | acesso
   const [lancamentos, setLancamentos] = useState([]);
   const [novoLancamento, setNovoLancamento] = useState({ tipo: "entrada", categoria: "Dízimo", descricao: "", valor: "", data: new Date().toISOString().split("T")[0] });
   const [finPeriodo, setFinPeriodo] = useState(new Date().toISOString().slice(0, 7));
@@ -698,6 +699,8 @@ export default function FamiliaAliancaApp() {
                 setIsLider(false);
                 setMinisterioLider(null);
               }
+              // Registrar último acesso
+              updateDoc(doc(db, "membros", u.email), { ultimoAcesso: new Date().toISOString() }).catch(() => {});
             }
           }).catch(() => {});
         }
@@ -919,6 +922,23 @@ export default function FamiliaAliancaApp() {
     return m ? { type: m[1], id: m[2] } : null;
   };
 
+  const formatarUltimoAcesso = (iso) => {
+    if (!iso) return "Nunca acessou";
+    const data = new Date(iso);
+    const agora = new Date();
+    const diffMs = agora - data;
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHoras = Math.floor(diffMin / 60);
+    const diffDias = Math.floor(diffHoras / 24);
+    if (diffMin < 1) return "Agora mesmo";
+    if (diffMin < 60) return `há ${diffMin} min`;
+    if (diffHoras < 24) return `há ${diffHoras}h`;
+    if (diffDias === 1) return "Ontem";
+    if (diffDias < 30) return `há ${diffDias} dias`;
+    if (diffDias < 365) return `há ${Math.floor(diffDias / 30)} mês(es)`;
+    return data.toLocaleDateString("pt-BR");
+  };
+
   const baixarArquivo = (url, nomeArquivo) => {
     if (!url) return;
     // Reserva uma aba já no clique (síncrono), para o navegador não bloquear como pop-up
@@ -972,6 +992,7 @@ export default function FamiliaAliancaApp() {
         dataBAT: loginForm.batizado === "sim" ? (loginForm.dataBAT || "") : "",
         admin: false,
         dataCadastro: new Date().toISOString(),
+        ultimoAcesso: new Date().toISOString(),
       };
       await setDoc(doc(db, "membros", loginForm.email), u);
       store.set(SK.user, { ...u, id: loginForm.email });
@@ -986,6 +1007,9 @@ export default function FamiliaAliancaApp() {
       if (!snap.exists() || snap.data().senha !== loginForm.senha) { setLoginErro("E-mail ou senha incorretos."); return; }
       const u = { id: loginForm.email, ...snap.data() };
       store.set(SK.user, u); setUser(u); setIsAdmin(u.admin || false);
+      // Registrar último acesso
+      const agoraAcesso = new Date().toISOString();
+      updateDoc(doc(db, "membros", loginForm.email), { ultimoAcesso: agoraAcesso }).catch(() => {});
       // Detectar líder
       if (u.lider && u.ministerioLider) {
         setIsLider(true);
@@ -5484,6 +5508,7 @@ export default function FamiliaAliancaApp() {
                       { label: "Igreja do Batismo", valor: membroSelecionado.igrejaBAT, icon: "⛪" },
                       { label: "Data do Batismo", valor: membroSelecionado.dataBAT || null, icon: "📅" },
                       { label: "Cadastrado em", valor: membroSelecionado.dataCadastro ? new Date(membroSelecionado.dataCadastro).toLocaleDateString("pt-BR") : null, icon: "🗓️" },
+                      { label: "Último Acesso", valor: formatarUltimoAcesso(membroSelecionado.ultimoAcesso), icon: "🕒" },
                     ].filter(d => d.valor).map((d, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, marginBottom: 8 }}>
                         <span style={{ fontSize: 20, flexShrink: 0 }}>{d.icon}</span>
@@ -5618,11 +5643,21 @@ export default function FamiliaAliancaApp() {
 
                     {/* Campo de busca */}
                     <input
-                      style={{ ...S.input, marginBottom: 12 }}
+                      style={{ ...S.input, marginBottom: 8 }}
                       placeholder="🔍 Buscar por nome ou e-mail..."
                       value={buscaMembro}
                       onChange={e => setBuscaMembro(e.target.value)}
                     />
+
+                    {/* Ordenação */}
+                    <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                      {[{ id: "nome", label: "🔤 Nome" }, { id: "acesso", label: "🕒 Último acesso" }].map(o => (
+                        <button key={o.id} onClick={() => setMembrosOrdem(o.id)}
+                          style={{ flex: 1, padding: "7px 0", border: `1px solid ${membrosOrdem === o.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 8, background: membrosOrdem === o.id ? "rgba(201,168,76,.12)" : "transparent", color: membrosOrdem === o.id ? "#c9a84c" : T.textSub, fontSize: 11, fontWeight: membrosOrdem === o.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                          {o.label}
+                        </button>
+                      ))}
+                    </div>
 
                     {/* Contador de resultados */}
                     {buscaMembro.trim() && (
@@ -5644,7 +5679,9 @@ export default function FamiliaAliancaApp() {
                           m.nome?.toLowerCase().includes(buscaMembro.toLowerCase()) ||
                           m.email?.toLowerCase().includes(buscaMembro.toLowerCase())
                         )
-                        .sort((a, b) => a.nome?.localeCompare(b.nome))
+                        .sort((a, b) => membrosOrdem === "nome"
+                          ? a.nome?.localeCompare(b.nome)
+                          : (b.ultimoAcesso || "").localeCompare(a.ultimoAcesso || ""))
                         .map(m => (
                       <div key={m.id} onClick={() => setMembroSelecionado(m)}
                         style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", alignItems: "center", gap: 12, cursor: "pointer", marginBottom: 8 }}>
@@ -5654,6 +5691,7 @@ export default function FamiliaAliancaApp() {
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{m.nome}</div>
                           <div style={{ fontSize: 11, color: T.textSub }}>{m.celular || m.email}</div>
+                          <div style={{ fontSize: 10, color: m.ultimoAcesso ? T.textFaint : "#f87171", marginTop: 2 }}>🕒 {formatarUltimoAcesso(m.ultimoAcesso)}</div>
                         </div>
                         <span style={{ fontSize: 18, color: T.textSub }}>›</span>
                       </div>
