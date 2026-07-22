@@ -1445,6 +1445,8 @@ export default function FamiliaAliancaApp() {
         ::-webkit-scrollbar-thumb{background:rgba(201,168,76,.3);border-radius:2px}
         select option{background:${darkMode ? "#07112a" : "#ffffff"}; color:${T.text};}
         @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeSlideIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
         .acesso-rapido::-webkit-scrollbar{display:none}
         .acesso-rapido{scrollbar-width:none;-ms-overflow-style:none;}
       `}</style>
@@ -1536,6 +1538,41 @@ export default function FamiliaAliancaApp() {
               <div style={{ fontSize: 13, color: T.textSub }}>Bem-vindo!</div>
               <div style={{ fontSize: 16, color: T.text, fontWeight: "bold" }}>Que bom ter você aqui. 🙏</div>
             </div>
+
+            {/* ── CARD NOVO AVISO (avisos gerais do Admin) ── */}
+            {(() => {
+              const avisoGeral = avisos.find(a => !a.ministerio);
+              if (!avisoGeral) return null;
+              const tipoAviso = {
+                info:    { cor: "#3b82f6", bg1: "#1e3a5f", bg2: "#0f2440", icon: "ℹ️" },
+                urgente: { cor: "#ef4444", bg1: "#5f1e1e", bg2: "#3a0f0f", icon: "🚨" },
+                evento:  { cor: "#c9a84c", bg1: "#5f4a1e", bg2: "#3a2c0f", icon: "📅" },
+                oracao:  { cor: "#8b5cf6", bg1: "#3a1e5f", bg2: "#22103a", icon: "🙏" },
+              }[avisoGeral.tipo] || { cor: "#3b82f6", bg1: "#1e3a5f", bg2: "#0f2440", icon: "ℹ️" };
+              return (
+                <div onClick={() => { setTab("mais"); setMaisScrollTarget("avisos"); }}
+                  style={{
+                    margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", cursor: "pointer",
+                    border: `1px solid ${tipoAviso.cor}55`,
+                    background: darkMode ? `linear-gradient(135deg, ${tipoAviso.bg1} 0%, ${tipoAviso.bg2} 100%)` : `linear-gradient(135deg, ${tipoAviso.cor}18, ${tipoAviso.cor}08)`,
+                    boxShadow: `0 4px 20px ${tipoAviso.cor}25`,
+                    animation: "fadeSlideIn .5s ease",
+                  }}>
+                  <div style={{ background: `linear-gradient(90deg, ${tipoAviso.cor}, ${tipoAviso.cor}cc)`, padding: "6px 16px", display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#fff", display: "inline-block", animation: "pulseDot 1.5s infinite" }} />
+                    <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#fff" }}>Novo Aviso</span>
+                  </div>
+                  <div style={{ padding: "16px", display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ fontSize: 32, flexShrink: 0 }}>{tipoAviso.icon}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 16, fontWeight: "bold", color: darkMode ? "#fff" : "#1a0f00", marginBottom: 4, lineHeight: 1.3 }}>{avisoGeral.titulo}</div>
+                      <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.5, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{avisoGeral.texto}</div>
+                    </div>
+                    <div style={{ color: tipoAviso.cor, fontSize: 20, flexShrink: 0 }}>›</div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* ── BANNER DE IMAGEM ── */}
             {bannerHome?.url && (
