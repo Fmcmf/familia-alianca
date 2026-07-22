@@ -555,6 +555,7 @@ export default function FamiliaAliancaApp() {
   });
   const [estudosAberto, setEstudosAberto] = useState(false);
   const [dicionarioAberto, setDicionarioAberto] = useState(false);
+  const [bibliaModo, setBibliaModo] = useState("texto"); // texto | audio
   const [dicionarioLetra, setDicionarioLetra] = useState("A");
   const [dicionarioTermo, setDicionarioTermo] = useState(null);
   const [dicionarioBusca, setDicionarioBusca] = useState("");
@@ -1996,38 +1997,81 @@ export default function FamiliaAliancaApp() {
         {tab === "biblia" && (
           <div style={{ animation: "slideUp .4s ease" }}>
             <div style={S.secTitle}>Bíblia Sagrada</div>
-            <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
-              <div style={{ fontSize: 52, marginBottom: 16 }}>📖</div>
-              <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 10 }}>Leia a Bíblia Sagrada</div>
-              <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.7, marginBottom: 20 }}>
-                Acesse a Bíblia completa em diversas versões — NVI, NVT, ARC e muito mais — pelo YouVersion, o app de Bíblia mais usado no mundo!
-              </div>
-              <button style={{ width: "100%", padding: "15px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 10 }}
-                onClick={() => window.open("https://www.bible.com/pt", "_blank")}>
-                📖 Abrir Bíblia Online
-              </button>
-              <button style={{ width: "100%", padding: "13px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 12, color: T.textSub, fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif" }}
-                onClick={() => window.open("https://www.bible.com/app", "_blank")}>
-                📱 Baixar App YouVersion
-              </button>
+
+            {/* Alternador Texto / Áudio */}
+            <div style={{ display: "flex", gap: 8, margin: "0 16px 16px" }}>
+              {[{ id: "texto", label: "📖 Texto" }, { id: "audio", label: "🎧 Áudio" }].map(m => (
+                <button key={m.id} onClick={() => setBibliaModo(m.id)}
+                  style={{ flex: 1, padding: "11px 0", borderRadius: 12, border: `1px solid ${bibliaModo === m.id ? "#c9a84c" : T.cardBorder}`, background: bibliaModo === m.id ? "rgba(201,168,76,.15)" : T.card, color: bibliaModo === m.id ? "#c9a84c" : T.textSub, fontSize: 14, fontWeight: bibliaModo === m.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                  {m.label}
+                </button>
+              ))}
             </div>
-            <div style={S.secTitle}>Versões Disponíveis</div>
-            {[
-              { nome: "Nova Versão Internacional", sigla: "NVI", desc: "Tradução moderna e fiel ao texto original", url: "https://www.bible.com/pt/bible/129/GEN.1.NVI" },
-              { nome: "Nova Versão Transformadora", sigla: "NVT", desc: "Linguagem contemporânea e clara", url: "https://www.bible.com/pt/bible/1608/GEN.1.NVT" },
-              { nome: "Almeida Revista e Corrigida", sigla: "ARC", desc: "A versão clássica mais conhecida", url: "https://www.bible.com/pt/bible/212/GEN.1.ARC" },
-              { nome: "Nova Tradução na Linguagem de Hoje", sigla: "NTLH", desc: "Linguagem simples e acessível", url: "https://www.bible.com/pt/bible/211/GEN.1.NTLH" },
-            ].map(v => (
-              <div key={v.sigla} style={{ margin: "0 16px 10px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
-                onClick={() => window.open(v.url, "_blank")}>
-                <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>{v.sigla}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{v.nome}</div>
-                  <div style={{ fontSize: 12, color: T.textSub }}>{v.desc}</div>
+
+            {bibliaModo === "texto" ? (
+              <>
+                <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
+                  <div style={{ fontSize: 52, marginBottom: 16 }}>📖</div>
+                  <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 10 }}>Leia a Bíblia Sagrada</div>
+                  <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.7, marginBottom: 20 }}>
+                    Acesse a Bíblia completa em diversas versões — NVI, NVT, ARC e muito mais — pelo YouVersion, o app de Bíblia mais usado no mundo!
+                  </div>
+                  <button style={{ width: "100%", padding: "15px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 10 }}
+                    onClick={() => window.open("https://www.bible.com/pt", "_blank")}>
+                    📖 Abrir Bíblia Online
+                  </button>
+                  <button style={{ width: "100%", padding: "13px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 12, color: T.textSub, fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                    onClick={() => window.open("https://www.bible.com/app", "_blank")}>
+                    📱 Baixar App YouVersion
+                  </button>
                 </div>
-                <div style={{ color: T.gold, fontSize: 18 }}>›</div>
-              </div>
-            ))}
+                <div style={S.secTitle}>Versões Disponíveis</div>
+                {[
+                  { nome: "Nova Versão Internacional", sigla: "NVI", desc: "Tradução moderna e fiel ao texto original", url: "https://www.bible.com/pt/bible/129/GEN.1.NVI" },
+                  { nome: "Nova Versão Transformadora", sigla: "NVT", desc: "Linguagem contemporânea e clara", url: "https://www.bible.com/pt/bible/1608/GEN.1.NVT" },
+                  { nome: "Almeida Revista e Corrigida", sigla: "ARC", desc: "A versão clássica mais conhecida", url: "https://www.bible.com/pt/bible/212/GEN.1.ARC" },
+                  { nome: "Nova Tradução na Linguagem de Hoje", sigla: "NTLH", desc: "Linguagem simples e acessível", url: "https://www.bible.com/pt/bible/211/GEN.1.NTLH" },
+                ].map(v => (
+                  <div key={v.sigla} style={{ margin: "0 16px 10px", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
+                    onClick={() => window.open(v.url, "_blank")}>
+                    <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>{v.sigla}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 3 }}>{v.nome}</div>
+                      <div style={{ fontSize: 12, color: T.textSub }}>{v.desc}</div>
+                    </div>
+                    <div style={{ color: T.gold, fontSize: 18 }}>›</div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+                <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(139,92,246,.18),rgba(201,168,76,.10))", border: `1px solid ${darkMode ? "rgba(139,92,246,.3)" : "rgba(109,62,200,.4)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
+                  <div style={{ fontSize: 52, marginBottom: 16 }}>🎧</div>
+                  <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 10 }}>Ouça a Bíblia Sagrada</div>
+                  <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.7, marginBottom: 20 }}>
+                    Prefere ouvir em vez de ler? A Bíblia em áudio narrada, também pelo YouVersion — ótimo pra trajeto, tarefas domésticas ou antes de dormir.
+                  </div>
+                  <button style={{ width: "100%", padding: "15px 0", background: "linear-gradient(90deg,#8b5cf6,#a78bfa)", border: "none", borderRadius: 12, color: "#fff", fontSize: 15, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 10 }}
+                    onClick={() => window.open("https://www.bible.com/pt/audio-bible-app-versions/129-nvi-nova-vers%C3%A3o-internacional---portugu%C3%AAs", "_blank")}>
+                    🎧 Ouvir Bíblia em Áudio (NVI)
+                  </button>
+                  <button style={{ width: "100%", padding: "13px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 12, color: T.textSub, fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 10 }}
+                    onClick={() => window.open("https://www.bible.com/pt/audio-bible-app-versions", "_blank")}>
+                    🔊 Ver todas as versões em áudio
+                  </button>
+                  <button style={{ width: "100%", padding: "13px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 12, color: T.textSub, fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                    onClick={() => window.open("https://www.bible.com/app", "_blank")}>
+                    📱 Baixar App YouVersion
+                  </button>
+                </div>
+                <div style={{ margin: "0 16px 20px", background: "rgba(139,92,246,.06)", border: "1px solid rgba(139,92,246,.15)", borderRadius: 14, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 13, color: T.textSub, lineHeight: 1.7 }}>
+                    💡 O botão acima já abre direto a narração em áudio da versão NVI. Toque em "Ver todas as versões em áudio" para escolher outras traduções, incluindo ARC e NVT.
+                  </div>
+                </div>
+              </>
+            )}
+
             {!dicionarioAberto && (
               <div style={{ margin: "14px 16px 4px", borderRadius: 18, overflow: "hidden", border: "1px solid rgba(201,168,76,.35)", background: darkMode ? "linear-gradient(135deg,#0a1a3a 0%,#050d1f 100%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 100%)", position: "relative", cursor: "pointer" }}
                 onClick={() => { setDicionarioAberto(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
