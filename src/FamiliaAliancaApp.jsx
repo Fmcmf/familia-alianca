@@ -3476,6 +3476,7 @@ export default function FamiliaAliancaApp() {
               const CATEGORIAS = isMusical
                 ? ["Ministro(a)", "Soprano", "Contralto", "Tenor", "Backing Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado"]
                 : categoriasEquipe.filter(c => c.ministerio === ministerioLider).map(c => c.nome);
+              const FUNCOES_VOCAIS = ["Ministro(a)", "Soprano", "Contralto", "Tenor", "Backing Vocal"];
 
               // Retorna membros que têm aquela função/instrumento (musical) ou categoria (genérico)
               const membrosPorCategoria = (cat) => {
@@ -3576,7 +3577,12 @@ export default function FamiliaAliancaApp() {
                         <div style={{ background: "rgba(201,168,76,.04)", border: `1px solid rgba(201,168,76,.2)`, borderRadius: 12, padding: "12px 14px" }}>
                           <div style={{ fontSize: 12, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>🎵 {categoriaEscala}</div>
                           {membrosPorCategoria(categoriaEscala).map(m => {
-                            const escalado = escalados[m.email];
+                            const entryAtual = escalados[m.email];
+                            const ehFuncaoVocal = isMusical && FUNCOES_VOCAIS.includes(categoriaEscala);
+                            // "escalado" aqui reflete só a categoria/função/instrumento específico sendo visualizado, não o perfil inteiro
+                            const escalado = isMusical
+                              ? (ehFuncaoVocal ? entryAtual?.funcoes?.includes(categoriaEscala) : entryAtual?.instrumentos?.includes(categoriaEscala))
+                              : entryAtual?.categorias?.includes(categoriaEscala);
                             return (
                               <div key={m.email} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
                                 <div style={{ width: 34, height: 34, borderRadius: "50%", background: escalado ? "rgba(34,197,94,.15)" : "rgba(201,168,76,.1)", border: `1px solid ${escalado ? "rgba(34,197,94,.4)" : "rgba(201,168,76,.25)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", color: escalado ? "#22c55e" : "#c9a84c", flexShrink: 0 }}>
@@ -3600,12 +3606,23 @@ export default function FamiliaAliancaApp() {
                                   })()}
                                 </div>
                                 <div onClick={async () => {
-                                  const perfil = m[perfilKeyEv];
                                   const novos = { ...escalados };
-                                  if (escalado) delete novos[m.email];
-                                  else novos[m.email] = isMusical
-                                    ? { nome: m.nome, funcoes: perfil?.funcoes || [], instrumentos: perfil?.instrumentos || [] }
-                                    : { nome: m.nome, categorias: perfil?.categorias || [] };
+                                  if (isMusical) {
+                                    const entry = novos[m.email] || { nome: m.nome, funcoes: [], instrumentos: [] };
+                                    const listaAtual = ehFuncaoVocal ? (entry.funcoes || []) : (entry.instrumentos || []);
+                                    const novaLista = escalado ? listaAtual.filter(x => x !== categoriaEscala) : [...listaAtual, categoriaEscala];
+                                    const novaEntry = ehFuncaoVocal
+                                      ? { ...entry, nome: m.nome, funcoes: novaLista }
+                                      : { ...entry, nome: m.nome, instrumentos: novaLista };
+                                    if ((novaEntry.funcoes || []).length === 0 && (novaEntry.instrumentos || []).length === 0) delete novos[m.email];
+                                    else novos[m.email] = novaEntry;
+                                  } else {
+                                    const entry = novos[m.email] || { nome: m.nome, categorias: [] };
+                                    const listaAtual = entry.categorias || [];
+                                    const novaLista = escalado ? listaAtual.filter(x => x !== categoriaEscala) : [...listaAtual, categoriaEscala];
+                                    if (novaLista.length === 0) delete novos[m.email];
+                                    else novos[m.email] = { nome: m.nome, categorias: novaLista };
+                                  }
 
                                   if (escala) {
                                     await updateDoc(doc(db, "escalas", escala.id), { membrosEscalados: novos });
