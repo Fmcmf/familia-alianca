@@ -478,6 +478,8 @@ export default function FamiliaAliancaApp() {
   const [categoriasEquipe, setCategoriasEquipe] = useState([]);
   const [novaCategoriaNome, setNovaCategoriaNome] = useState("");
   const [categoriaEditando, setCategoriaEditando] = useState(null); // categoria sendo renomeada
+  const [membroEditandoPerfil, setMembroEditandoPerfil] = useState(null); // email do membro cujo perfil/categorias está sendo editado
+  const [perfilEmEdicao, setPerfilEmEdicao] = useState({ funcoes: [], instrumentos: [], categorias: [] });
   const [categoriaEditNome, setCategoriaEditNome] = useState("");
   const [perfilCategorias, setPerfilCategorias] = useState({ categorias: [] });
   // Módulo Arquivos (Mídia)
@@ -3374,7 +3376,8 @@ export default function FamiliaAliancaApp() {
                     const usuarioPadraoKey = `usuarioPadrao_${ministerioLider.replace(/\s/g, "_")}`;
                     const ehPadrao = !!m[usuarioPadraoKey];
                     return (
-                    <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 12, border: ehPadrao ? "1px solid rgba(201,168,76,.4)" : undefined }}>
+                    <div key={m.id}>
+                    <div style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: membroEditandoPerfil === m.email ? 0 : 10, display: "flex", alignItems: "flex-start", gap: 12, border: ehPadrao ? "1px solid rgba(201,168,76,.4)" : undefined, borderBottomLeftRadius: membroEditandoPerfil === m.email ? 0 : undefined, borderBottomRightRadius: membroEditandoPerfil === m.email ? 0 : undefined }}>
                       <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: "bold", color: T.gold, flexShrink: 0 }}>
                         {m.nome?.charAt(0).toUpperCase()}
                       </div>
@@ -3411,6 +3414,12 @@ export default function FamiliaAliancaApp() {
                           showToast(ehPadrao ? `↩️ ${m.nome} não é mais Usuário Padrão` : `📌 ${m.nome} agora é Usuário Padrão — sempre recebe tudo!`);
                         }} title="Usuário Padrão: sempre recebe tudo, mesmo sem estar escalado"
                           style={{ background: ehPadrao ? "rgba(201,168,76,.2)" : "transparent", border: `1px solid ${ehPadrao ? "#c9a84c" : T.cardBorder}`, borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>📌</button>
+                        <button onClick={() => {
+                          if (membroEditandoPerfil === m.email) { setMembroEditandoPerfil(null); return; }
+                          setMembroEditandoPerfil(m.email);
+                          setPerfilEmEdicao({ funcoes: perfil?.funcoes || [], instrumentos: perfil?.instrumentos || [], categorias: perfil?.categorias || [] });
+                        }} title="Editar categorias/perfil"
+                          style={{ background: membroEditandoPerfil === m.email ? "rgba(201,168,76,.2)" : "transparent", border: `1px solid ${membroEditandoPerfil === m.email ? "#c9a84c" : T.cardBorder}`, borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>✏️</button>
                         {m.celular && (
                           <button onClick={() => window.open(`https://wa.me/55${m.celular.replace(/\D/g, "")}`, "_blank")}
                             style={{ background: "#25d366", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>💬</button>
@@ -3418,6 +3427,74 @@ export default function FamiliaAliancaApp() {
                         <button onClick={() => { if (window.confirm(`Remover ${m.nome} do ministério?`)) removerMembro(m); }}
                           style={S.delBtn}>🗑️</button>
                       </div>
+                    </div>
+
+                    {/* Painel de edição de categorias/perfil */}
+                    {membroEditandoPerfil === m.email && (
+                      <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderTop: "none", borderRadius: "0 0 14px 14px", padding: "14px 16px", marginBottom: 10 }}>
+                        {isMusical ? (
+                          <>
+                            <div style={{ marginBottom: 12 }}>
+                              <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎤 Função Vocal</div>
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                {["Ministro(a)", "Soprano", "Contralto", "Tenor", "Barítono"].map(f => (
+                                  <button key={f} onClick={() => {
+                                    const atual = perfilEmEdicao.funcoes;
+                                    setPerfilEmEdicao({ ...perfilEmEdicao, funcoes: atual.includes(f) ? atual.filter(x => x !== f) : [...atual, f] });
+                                  }} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${perfilEmEdicao.funcoes.includes(f) ? "#c9a84c" : T.cardBorder}`, background: perfilEmEdicao.funcoes.includes(f) ? "rgba(201,168,76,.2)" : "transparent", color: perfilEmEdicao.funcoes.includes(f) ? "#c9a84c" : T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: perfilEmEdicao.funcoes.includes(f) ? "bold" : "normal" }}>
+                                    {f}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <div style={{ marginBottom: 14 }}>
+                              <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎸 Instrumento(s)</div>
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                {["Violão", "Teclado", "Bateria", "Baixo", "Guitarra", "Flauta", "Violino", "Percussão"].map(i => (
+                                  <button key={i} onClick={() => {
+                                    const atual = perfilEmEdicao.instrumentos;
+                                    setPerfilEmEdicao({ ...perfilEmEdicao, instrumentos: atual.includes(i) ? atual.filter(x => x !== i) : [...atual, i] });
+                                  }} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${perfilEmEdicao.instrumentos.includes(i) ? "#8b5cf6" : T.cardBorder}`, background: perfilEmEdicao.instrumentos.includes(i) ? "rgba(139,92,246,.2)" : "transparent", color: perfilEmEdicao.instrumentos.includes(i) ? "#a78bfa" : T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: perfilEmEdicao.instrumentos.includes(i) ? "bold" : "normal" }}>
+                                    {i}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <div style={{ marginBottom: 14 }}>
+                            <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🏷️ Categoria(s)</div>
+                            {categoriasMin.length === 0 ? (
+                              <div style={{ fontSize: 12, color: T.textFaint }}>Nenhuma categoria criada ainda.</div>
+                            ) : (
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                {categoriasMin.map(c => (
+                                  <button key={c.id} onClick={() => {
+                                    const atual = perfilEmEdicao.categorias;
+                                    setPerfilEmEdicao({ ...perfilEmEdicao, categorias: atual.includes(c.nome) ? atual.filter(x => x !== c.nome) : [...atual, c.nome] });
+                                  }} style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${perfilEmEdicao.categorias.includes(c.nome) ? "#06b6d4" : T.cardBorder}`, background: perfilEmEdicao.categorias.includes(c.nome) ? "rgba(6,182,212,.2)" : "transparent", color: perfilEmEdicao.categorias.includes(c.nome) ? "#22d3ee" : T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif", fontWeight: perfilEmEdicao.categorias.includes(c.nome) ? "bold" : "normal" }}>
+                                    {c.nome}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button onClick={async () => {
+                            await updateDoc(doc(db, "membros", m.email), {
+                              [perfilKey]: isMusical
+                                ? { funcoes: perfilEmEdicao.funcoes, instrumentos: perfilEmEdicao.instrumentos }
+                                : { categorias: perfilEmEdicao.categorias }
+                            });
+                            setMembroEditandoPerfil(null);
+                            showToast(`✅ Perfil de ${m.nome} atualizado!`);
+                          }} style={{ ...S.saveBtn, marginTop: 0, flex: 1 }}>💾 Salvar</button>
+                          <button onClick={() => setMembroEditandoPerfil(null)}
+                            style={{ padding: "0 16px", background: "transparent", border: `1px solid ${T.cardBorder}`, borderRadius: 10, color: T.textSub, fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}>Cancelar</button>
+                        </div>
+                      </div>
+                    )}
                     </div>
                     );
                   })}
