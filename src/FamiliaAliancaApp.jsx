@@ -489,16 +489,15 @@ export default function FamiliaAliancaApp() {
   const [pregacoes, setPregacoes] = useState([]);
   const [novaPregacao, setNovaPregacao] = useState({ titulo: "", versiculos: "", eventoId: "", data: "" });
   // Módulo Música
-  const [musicaView, setMusicaView] = useState("escalas"); // escalas | musicas | cifras
   const [vsItems, setVsItems] = useState([]);
-  const [novoVs, setNovoVs] = useState({ titulo: "", artista: "", link: "", arquivo: "", musicaId: "" });
   const [uploadProgress, setUploadProgress] = useState(null); // null | 0-100
   const [uploadando, setUploadando] = useState(false);
   const [escalas, setEscalas] = useState([]);
   const [musicas, setMusicas] = useState([]);
   const [cifras, setCifras] = useState([]);
-  const [novaMusica, setNovaMusica] = useState({ titulo: "", artista: "", tom: "", link: "" });
-  const [novaCifra, setNovaCifra] = useState({ titulo: "", artista: "", tom: "", conteudo: "", link: "", arquivo: "", musicaId: "" });
+  const [novaMusica, setNovaMusica] = useState({ titulo: "", artista: "", categoria: "", tom: "", tempo: "", link: "" });
+  const [musicaExpandida, setMusicaExpandida] = useState(null); // id da música aberta (com arquivos visíveis)
+  const [novoArquivoMusica, setNovoArquivoMusica] = useState({ nome: "", arquivo: "", link: "" });
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
   const [pdfAberto, setPdfAberto] = useState(null); // URL do PDF aberto inline
   const [showCompletarCadastro, setShowCompletarCadastro] = useState(false);
@@ -2837,12 +2836,24 @@ export default function FamiliaAliancaApp() {
                                           <span style={{ fontSize: 16 }}>🎵</span>
                                           <div style={{ flex: 1 }}>
                                             <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{mus.titulo}</div>
-                                            <div style={{ fontSize: 11, color: T.textSub }}>{mus.artista} {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>}</div>
+                                            <div style={{ fontSize: 11, color: T.textSub }}>{mus.artista} {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>} {mus.tempo && <span style={{ color: "#8b5cf6" }}>• 🥁{mus.tempo}</span>}</div>
                                           </div>
                                         </div>
                                         {getYouTubeId(mus.link) && <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />}
                                         {getSpotifyId(mus.link) && <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />}
                                         <div style={{ padding: "0 12px" }}>
+                                          {(mus.arquivos || []).map(a => (
+                                            <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 8, background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.15)", borderRadius: 10, padding: "8px 10px", marginTop: 8 }}>
+                                            <span style={{ fontSize: 15 }}>{{ pdf: "📄", audio: "🎵", imagem: "🖼️", link: "🔗" }[a.tipo] || "📁"}</span>
+                                            <span style={{ flex: 1, fontSize: 12, fontWeight: "bold", color: T.text }}>{a.nome}</span>
+                                            <button onClick={() => window.open(a.url, "_blank")}
+                                              style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>Abrir</button>
+                                            {a.tipo !== "link" && (
+                                              <button onClick={() => baixarArquivo(a.url, a.nome)}
+                                                style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#4ade80", cursor: "pointer" }}>⬇️</button>
+                                            )}
+                                            </div>
+                                          ))}
                                           {cifrasMin.filter(c => c.musicaId === mus.id).map(renderCifra)}
                                           {vsMin.filter(v => v.musicaId === mus.id).map(renderVs)}
                                         </div>
@@ -2928,7 +2939,7 @@ export default function FamiliaAliancaApp() {
                                 <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas escolhidas pelo Louvor</div>
                                 {musicasLouvorMin.map((mus, i) => (
                                   <div key={i} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, padding: "8px 12px", marginBottom: 6 }}>
-                                    <div style={{ fontSize: 12, fontWeight: "bold", color: T.text }}>{mus.titulo} <span style={{ color: T.textSub, fontWeight: "normal" }}>— {mus.artista}</span> {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>}</div>
+                                    <div style={{ fontSize: 12, fontWeight: "bold", color: T.text }}>{mus.titulo} <span style={{ color: T.textSub, fontWeight: "normal" }}>— {mus.artista}</span> {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>} {mus.tempo && <span style={{ color: "#8b5cf6" }}>• 🥁{mus.tempo}</span>}</div>
                                   </div>
                                 ))}
                               </div>
@@ -3734,7 +3745,7 @@ export default function FamiliaAliancaApp() {
                             const mus = musicas.find(x => x.id === mid);
                             return mus ? (
                               <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
-                                <span style={{ fontSize: 12, color: T.text, flex: 1 }}>🎵 {mus.titulo} <span style={{ color: T.textSub }}>— {mus.artista}</span> {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>}</span>
+                                <span style={{ fontSize: 12, color: T.text, flex: 1 }}>🎵 {mus.titulo} <span style={{ color: T.textSub }}>— {mus.artista}</span> {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>} {mus.tempo && <span style={{ color: "#8b5cf6" }}>• 🥁{mus.tempo}</span>}</span>
                                 <button onClick={async () => {
                                   const novas = (escala.musicas || []).filter(x => x !== mid);
                                   await updateDoc(doc(db, "escalas", escala.id), { musicas: novas });
@@ -3765,7 +3776,7 @@ export default function FamiliaAliancaApp() {
                             <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas escolhidas pelo Louvor</div>
                             {musicasDoLouvor.map((mus, i) => (
                               <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
-                                <span style={{ fontSize: 12, color: T.text, flex: 1 }}>🎵 {mus.titulo} <span style={{ color: T.textSub }}>— {mus.artista}</span> {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>}</span>
+                                <span style={{ fontSize: 12, color: T.text, flex: 1 }}>🎵 {mus.titulo} <span style={{ color: T.textSub }}>— {mus.artista}</span> {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>} {mus.tempo && <span style={{ color: "#8b5cf6" }}>• 🥁{mus.tempo}</span>}</span>
                               </div>
                             ))}
                           </div>
@@ -3913,20 +3924,10 @@ export default function FamiliaAliancaApp() {
               return (
                 <div style={{ padding: "0 16px" }}>
                   <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>🎵 Módulo Música</div>
-                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>Gerencie escalas, músicas e cifras do ministério</div>
-
-                  {/* Sub-nav */}
-                  <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", scrollbarWidth: "none" }}>
-                    {[{ id: "musicas", label: "🎶 Músicas" }, { id: "cifras", label: "🎸 Cifras" }, { id: "vs", label: "🎧 VS" }].map(v => (
-                      <button key={v.id} onClick={() => setMusicaView(v.id)}
-                        style={{ flexShrink: 0, padding: "8px 16px", border: `1px solid ${musicaView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: musicaView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: musicaView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: musicaView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
-                        {v.label}
-                      </button>
-                    ))}
-                  </div>
+                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>Gerencie as músicas do ministério — cifras, áudios por naipe e links ficam todos dentro de cada música</div>
 
                   {/* ── MÚSICAS ── */}
-                  {musicaView === "musicas" && (
+                  {(
                     <>
                       <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
                         <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>➕ Nova Música</div>
@@ -3934,8 +3935,18 @@ export default function FamiliaAliancaApp() {
                           value={novaMusica.titulo} onChange={e => setNovaMusica({ ...novaMusica, titulo: e.target.value })} />
                         <input style={{ ...S.input, marginBottom: 8 }} placeholder="Artista/Banda"
                           value={novaMusica.artista} onChange={e => setNovaMusica({ ...novaMusica, artista: e.target.value })} />
+                        <select style={{ ...S.select, marginBottom: 8 }} value={novaMusica.categoria}
+                          onChange={e => setNovaMusica({ ...novaMusica, categoria: e.target.value })}>
+                          <option value="">Categoria da música (opcional)</option>
+                          <option value="Repertório feminino">Repertório feminino</option>
+                          <option value="Repertório masculino">Repertório masculino</option>
+                          <option value="Repertório geral">Repertório geral</option>
+                          <option value="Ativo">Ativo</option>
+                        </select>
                         <input style={{ ...S.input, marginBottom: 8 }} placeholder="Tom (Ex: Dó, Ré, Mi...)"
                           value={novaMusica.tom} onChange={e => setNovaMusica({ ...novaMusica, tom: e.target.value })} />
+                        <input type="number" style={{ ...S.input, marginBottom: 8 }} placeholder="🥁 Tempo/BPM (Ex: 120)"
+                          value={novaMusica.tempo} onChange={e => setNovaMusica({ ...novaMusica, tempo: e.target.value })} />
                         <input style={{ ...S.input, marginBottom: 0 }} placeholder="🔗 Link YouTube ou Spotify"
                           value={novaMusica.link} onChange={e => setNovaMusica({ ...novaMusica, link: e.target.value })} />
                         {/* Preview do link */}
@@ -3952,21 +3963,50 @@ export default function FamiliaAliancaApp() {
                         <button style={{ ...S.saveBtn, marginTop: 10 }} onClick={async () => {
                           if (!novaMusica.titulo) { showToast("⚠️ Informe o título!"); return; }
                           await addDoc(collection(db, "musicas"), { ...novaMusica, ministerio: ministerioLider, criadoEm: new Date().toISOString() });
-                          setNovaMusica({ titulo: "", artista: "", tom: "", link: "" });
+                          setNovaMusica({ titulo: "", artista: "", categoria: "", tom: "", tempo: "", link: "" });
                           showToast("✅ Música adicionada!");
                         }}>🎶 Adicionar Música</button>
                       </div>
                       {musicas.filter(m => m.ministerio === ministerioLider).map(m => {
                         const ytId = getYouTubeId(m.link);
                         const spId = getSpotifyId(m.link);
+                        const expandida = musicaExpandida === m.id;
+                        const arquivosM = m.arquivos || [];
+
+                        const iconePorTipo = { pdf: "📄", audio: "🎵", imagem: "🖼️", link: "🔗", arquivo: "📁" };
+
+                        const adicionarArquivo = async () => {
+                          if (!novoArquivoMusica.nome.trim()) { showToast("⚠️ Dê um nome pro arquivo (Ex: Soprano, Cifra...)"); return; }
+                          if (!novoArquivoMusica.arquivo && !novoArquivoMusica.link.trim()) { showToast("⚠️ Envie um arquivo ou informe um link!"); return; }
+                          const novoItem = {
+                            id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+                            nome: novoArquivoMusica.nome.trim(),
+                            url: novoArquivoMusica.arquivo || novoArquivoMusica.link.trim(),
+                            tipo: novoArquivoMusica.tipoDetectado || "link",
+                          };
+                          await updateDoc(doc(db, "musicas", m.id), { arquivos: [...arquivosM, novoItem] });
+                          setNovoArquivoMusica({ nome: "", arquivo: "", link: "" });
+                          showToast(`✅ "${novoItem.nome}" adicionado à música!`);
+                        };
+
+                        const removerArquivo = async (arqId) => {
+                          if (!window.confirm("Remover este arquivo da música?")) return;
+                          await updateDoc(doc(db, "musicas", m.id), { arquivos: arquivosM.filter(a => a.id !== arqId) });
+                          showToast("🗑️ Arquivo removido!");
+                        };
+
                         return (
                           <div key={m.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 10, overflow: "hidden" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", cursor: "pointer" }}
+                              onClick={() => setMusicaExpandida(expandida ? null : m.id)}>
                               <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{m.titulo}</div>
-                                <div style={{ fontSize: 12, color: T.textSub }}>{m.artista} {m.tom && <span style={{ color: "#c9a84c" }}>• Tom: {m.tom}</span>}</div>
+                                <div style={{ fontSize: 12, color: T.textSub }}>{m.artista} {m.tom && <span style={{ color: "#c9a84c" }}>• Tom: {m.tom}</span>} {m.tempo && <span style={{ color: "#8b5cf6" }}>• 🥁 {m.tempo} BPM</span>}</div>
+                                {m.categoria && <div style={{ fontSize: 10, color: "#22d3ee", marginTop: 3 }}>🏷️ {m.categoria}</div>}
+                                {arquivosM.length > 0 && <div style={{ fontSize: 10, color: T.textFaint, marginTop: 3 }}>📎 {arquivosM.length} arquivo(s) anexado(s)</div>}
                               </div>
-                              <button style={S.delBtn} onClick={async () => { if (window.confirm("Excluir música?")) { await deleteDoc(doc(db, "musicas", m.id)); showToast("🗑️ Removida!"); } }}>🗑️</button>
+                              <span style={{ color: T.textSub, fontSize: 16 }}>{expandida ? "▲" : "▼"}</span>
+                              <button onClick={async (e) => { e.stopPropagation(); if (window.confirm("Excluir música?")) { await deleteDoc(doc(db, "musicas", m.id)); showToast("🗑️ Removida!"); } }} style={S.delBtn}>🗑️</button>
                             </div>
                             {/* YouTube embed */}
                             {ytId && (
@@ -3985,6 +4025,61 @@ export default function FamiliaAliancaApp() {
                                 </button>
                               </div>
                             )}
+
+                            {/* ── Arquivos nomeados da música (expansível) ── */}
+                            {expandida && (
+                              <div style={{ padding: "0 14px 14px", borderTop: `1px solid ${T.cardBorder}`, marginTop: 4 }}>
+                                <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", margin: "12px 0 8px" }}>📎 Arquivos desta música</div>
+                                {arquivosM.length === 0 && (
+                                  <div style={{ fontSize: 12, color: T.textFaint, marginBottom: 10 }}>Nenhum arquivo anexado ainda — adicione cifra, áudios por naipe (soprano, contralto, tenor), VS, links, etc.</div>
+                                )}
+                                {arquivosM.map(a => (
+                                  <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 8, background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.15)", borderRadius: 10, padding: "8px 10px", marginBottom: 6 }}>
+                                    <span style={{ fontSize: 16 }}>{iconePorTipo[a.tipo] || "📁"}</span>
+                                    <span style={{ flex: 1, fontSize: 12, fontWeight: "bold", color: T.text }}>{a.nome}</span>
+                                    <button onClick={() => window.open(a.url, "_blank")}
+                                      style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>Abrir</button>
+                                    {a.tipo !== "link" && (
+                                      <button onClick={() => baixarArquivo(a.url, a.nome)}
+                                        style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#4ade80", cursor: "pointer" }}>⬇️</button>
+                                    )}
+                                    <button onClick={() => removerArquivo(a.id)}
+                                      style={{ background: "rgba(220,38,38,.12)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#f87171", cursor: "pointer" }}>✕</button>
+                                  </div>
+                                ))}
+
+                                {/* Form de novo arquivo nomeado */}
+                                <div style={{ background: darkMode ? "rgba(0,0,0,.2)" : "rgba(0,0,0,.03)", borderRadius: 10, padding: "10px 12px", marginTop: 10 }}>
+                                  <div style={{ fontSize: 11, color: T.textSub, marginBottom: 8 }}>+ Adicionar arquivo a esta música</div>
+                                  <input style={{ ...S.input, marginBottom: 8 }} placeholder='Nome (Ex: "Soprano", "Cifra", "VS Estudo"...)'
+                                    value={novoArquivoMusica.nome} onChange={e => setNovoArquivoMusica({ ...novoArquivoMusica, nome: e.target.value })} />
+                                  <label style={{ display: "block", border: `1px dashed ${T.cardBorder}`, borderRadius: 10, padding: "10px", textAlign: "center", cursor: "pointer", marginBottom: 8, fontSize: 12, color: T.textSub }}>
+                                    {uploadando ? `Enviando... ${uploadProgress ?? 0}%` : novoArquivoMusica.arquivo ? "✅ Arquivo selecionado" : "📤 Toque para subir um arquivo (PDF, áudio, imagem...)"}
+                                    <input type="file" accept="application/pdf,audio/*,image/*" style={{ display: "none" }} onChange={async e => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      setUploadando(true);
+                                      setUploadProgress(0);
+                                      try {
+                                        const url = await uploadCloudinary(file, setUploadProgress);
+                                        const tipoDetectado = file.type.startsWith("audio/") ? "audio" : file.type === "application/pdf" ? "pdf" : file.type.startsWith("image/") ? "imagem" : "arquivo";
+                                        setNovoArquivoMusica(prev => ({ ...prev, arquivo: url, tipoDetectado }));
+                                        showToast("✅ Arquivo enviado!");
+                                      } catch {
+                                        showToast("❌ Erro ao enviar arquivo");
+                                      } finally {
+                                        setUploadando(false);
+                                        setUploadProgress(null);
+                                      }
+                                    }} />
+                                  </label>
+                                  <div style={{ textAlign: "center", fontSize: 11, color: T.textFaint, margin: "4px 0" }}>— ou —</div>
+                                  <input style={{ ...S.input, marginBottom: 8 }} placeholder="🔗 Cole um link (YouTube, Cifra Club...)"
+                                    value={novoArquivoMusica.link} onChange={e => setNovoArquivoMusica({ ...novoArquivoMusica, link: e.target.value, tipoDetectado: "link" })} />
+                                  <button style={{ ...S.saveBtn, marginTop: 0 }} onClick={adicionarArquivo}>📎 Adicionar à Música</button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -3996,259 +4091,6 @@ export default function FamiliaAliancaApp() {
                     </>
                   )}
 
-                  {/* ── CIFRAS ── */}
-                  {musicaView === "cifras" && (
-                    <>
-                      {musicaSelecionada ? (
-                        <div>
-                          <button onClick={() => setMusicaSelecionada(null)}
-                            style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 13, fontFamily: "Georgia,serif", marginBottom: 12 }}>← Voltar</button>
-                          <div style={{ background: T.card, border: "1px solid rgba(201,168,76,.3)", borderRadius: 16, overflow: "hidden", marginBottom: 14 }}>
-                            <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "8px 16px" }}>
-                              <div style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{musicaSelecionada.titulo}</div>
-                              <div style={{ fontSize: 11, color: "#080810" }}>{musicaSelecionada.artista} {musicaSelecionada.tom && `• Tom: ${musicaSelecionada.tom}`}</div>
-                            </div>
-                            <div style={{ padding: "14px 16px" }}>
-                              {musicaSelecionada.link && (
-                                <button onClick={() => window.open(musicaSelecionada.link, "_blank")}
-                                  style={{ ...S.saveBtn, background: "#1a56db", marginBottom: 12 }}>🔗 Abrir Link</button>
-                              )}
-                              {musicaSelecionada.arquivo && (
-                                <button onClick={() => window.open(musicaSelecionada.arquivo, "_blank")}
-                                  style={{ ...S.saveBtn, background: "#dc2626", marginBottom: 12 }}>📄 Abrir PDF/Imagem</button>
-                              )}
-                              {musicaSelecionada.arquivo && (
-                                <button onClick={() => baixarArquivo(musicaSelecionada.arquivo, musicaSelecionada.titulo)}
-                                  style={{ ...S.saveBtn, background: "#16a34a", marginBottom: 12 }}>⬇️ Baixar PDF/Imagem</button>
-                              )}
-                              {musicaSelecionada.conteudo && (
-                                <pre style={{ fontSize: 12, color: T.text, lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace", background: darkMode ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.05)", borderRadius: 10, padding: "12px" }}>
-                                  {musicaSelecionada.conteudo}
-                                </pre>
-                              )}
-                            </div>
-                          </div>
-                          <button style={S.delBtn} onClick={async () => {
-                            if (window.confirm("Excluir cifra?")) { await deleteDoc(doc(db, "cifras", musicaSelecionada.id)); setMusicaSelecionada(null); showToast("🗑️ Removida!"); }
-                          }}>🗑️ Excluir Cifra</button>
-                        </div>
-                      ) : (
-                        <>
-                          <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
-                            <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>➕ Nova Cifra</div>
-                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="Título *"
-                              value={novaCifra.titulo} onChange={e => setNovaCifra({ ...novaCifra, titulo: e.target.value })} />
-                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="Artista"
-                              value={novaCifra.artista} onChange={e => setNovaCifra({ ...novaCifra, artista: e.target.value })} />
-                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="Tom (Ex: Ré, Mi, Sol...)"
-                              value={novaCifra.tom} onChange={e => setNovaCifra({ ...novaCifra, tom: e.target.value })} />
-                            <input style={{ ...S.input, marginBottom: 8 }} placeholder="🔗 Link (Cifra Club, Ultimate Guitar...)"
-                              value={novaCifra.link} onChange={e => setNovaCifra({ ...novaCifra, link: e.target.value })} />
-
-                            <select style={{ ...S.input, marginBottom: 8, color: novaCifra.musicaId ? T.text : T.textFaint }}
-                              value={novaCifra.musicaId} onChange={e => setNovaCifra({ ...novaCifra, musicaId: e.target.value })}>
-                              <option value="">🎵 Vincular a uma música (opcional)</option>
-                              {musicas.filter(m => m.ministerio === ministerioLider).map(m => (
-                                <option key={m.id} value={m.id}>{m.titulo}{m.artista ? ` — ${m.artista}` : ""}</option>
-                              ))}
-                            </select>
-
-                            {/* Upload de PDF */}
-                            <label style={{ display: "block", cursor: "pointer", marginBottom: 8 }}>
-                              <div style={{ border: `2px dashed ${novaCifra.arquivo ? "rgba(34,197,94,.4)" : "rgba(201,168,76,.3)"}`, borderRadius: 10, padding: "12px 14px", textAlign: "center", background: novaCifra.arquivo ? "rgba(34,197,94,.04)" : "rgba(201,168,76,.03)" }}>
-                                {uploadando ? (
-                                  <>
-                                    <div style={{ fontSize: 12, color: "#a78bfa", marginBottom: 6 }}>Enviando... {uploadProgress}%</div>
-                                    <div style={{ background: "rgba(139,92,246,.2)", borderRadius: 20, height: 5, overflow: "hidden" }}>
-                                      <div style={{ background: "#8b5cf6", height: "100%", width: `${uploadProgress}%`, transition: "width .3s", borderRadius: 20 }} />
-                                    </div>
-                                  </>
-                                ) : novaCifra.arquivo ? (
-                                  <div style={{ fontSize: 12, color: "#22c55e" }}>✅ PDF enviado — clique para trocar</div>
-                                ) : (
-                                  <div style={{ fontSize: 12, color: T.textSub }}>📄 Toque para fazer upload de PDF/imagem</div>
-                                )}
-                              </div>
-                              <input type="file" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" style={{ display: "none" }}
-                                onChange={async e => {
-                                  const file = e.target.files?.[0];
-                                  if (!file) return;
-                                  setUploadando(true); setUploadProgress(0);
-                                  try {
-                                    const url = await uploadCloudinary(file, setUploadProgress);
-                                    setNovaCifra(c => ({ ...c, arquivo: url }));
-                                    showToast("✅ Arquivo enviado!");
-                                  } catch (err) { showToast("❌ " + err.message); }
-                                  finally { setUploadando(false); setUploadProgress(null); }
-                                }} />
-                            </label>
-                            <textarea style={{ ...S.textarea, minHeight: 120, fontFamily: "monospace", fontSize: 12 }}
-                              placeholder={"Ou digite a cifra aqui:\n\nAm         G\nQuando eu louvar..."}
-                              value={novaCifra.conteudo} onChange={e => setNovaCifra({ ...novaCifra, conteudo: e.target.value })} />
-                            <button style={S.saveBtn} onClick={async () => {
-                              if (!novaCifra.titulo) { showToast("⚠️ Informe o título!"); return; }
-                              await addDoc(collection(db, "cifras"), { ...novaCifra, ministerio: ministerioLider, criadoEm: new Date().toISOString() });
-                              setNovaCifra({ titulo: "", artista: "", tom: "", conteudo: "", link: "", arquivo: "", musicaId: "" });
-                              showToast("✅ Cifra salva!");
-                            }}>🎸 Salvar Cifra</button>
-                          </div>
-                          {cifras.filter(c => c.ministerio === ministerioLider).map(c => (
-                            <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #8b5cf6", borderRadius: 12, marginBottom: 8, cursor: "pointer" }}
-                              onClick={() => setMusicaSelecionada(c)}>
-                              <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{c.titulo}</div>
-                                <div style={{ fontSize: 12, color: T.textSub }}>{c.artista} {c.tom && `• Tom: ${c.tom}`}</div>
-                                <div style={{ fontSize: 11, color: T.textFaint, marginTop: 2 }}>
-                                  {c.link ? "🔗 Link" : ""} {c.arquivo ? "📄 PDF/Img" : ""} {c.conteudo ? "📝 Cifra" : ""}
-                                </div>
-                              </div>
-                              <div style={{ color: "#8b5cf6", fontSize: 20 }}>›</div>
-                            </div>
-                          ))}
-                          {cifras.filter(c => c.ministerio === ministerioLider).length === 0 && (
-                            <div style={{ textAlign: "center", padding: "24px 0", color: T.textSub, fontSize: 13 }}>
-                              <div style={{ fontSize: 32, marginBottom: 8 }}>🎸</div>Nenhuma cifra cadastrada
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </>
-                  )}
-
-                  {/* ── VS (Voz e Som) ── */}
-                  {musicaView === "vs" && (
-                    <>
-                      <div style={{ background: "rgba(139,92,246,.06)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#a78bfa" }}>
-                        🎧 Faça upload de áudios MP3/WAV ou PDFs direto do seu dispositivo para os músicos do ministério.
-                      </div>
-
-                      {/* Formulário */}
-                      <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
-                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>➕ Novo VS</div>
-
-                        <input style={{ ...S.input, marginBottom: 8 }} placeholder="Título *"
-                          value={novoVs.titulo} onChange={e => setNovoVs({ ...novoVs, titulo: e.target.value })} />
-                        <input style={{ ...S.input, marginBottom: 12 }} placeholder="Artista/Banda (opcional)"
-                          value={novoVs.artista} onChange={e => setNovoVs({ ...novoVs, artista: e.target.value })} />
-
-                        <select style={{ ...S.input, marginBottom: 12, color: novoVs.musicaId ? T.text : T.textFaint }}
-                          value={novoVs.musicaId} onChange={e => setNovoVs({ ...novoVs, musicaId: e.target.value })}>
-                          <option value="">🎵 Vincular a uma música (opcional)</option>
-                          {musicas.filter(m => m.ministerio === ministerioLider).map(m => (
-                            <option key={m.id} value={m.id}>{m.titulo}{m.artista ? ` — ${m.artista}` : ""}</option>
-                          ))}
-                        </select>
-
-                        {/* Upload de arquivo */}
-                        <label style={{ display: "block", cursor: "pointer" }}>
-                          <div style={{ border: `2px dashed ${uploadando ? "#a78bfa" : "rgba(139,92,246,.4)"}`, borderRadius: 12, padding: "20px 16px", textAlign: "center", background: "rgba(139,92,246,.04)", transition: "all .2s" }}>
-                            {uploadando ? (
-                              <>
-                                <div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div>
-                                <div style={{ fontSize: 13, color: "#a78bfa", marginBottom: 8 }}>Enviando... {uploadProgress}%</div>
-                                <div style={{ background: "rgba(139,92,246,.2)", borderRadius: 20, height: 6, overflow: "hidden" }}>
-                                  <div style={{ background: "#8b5cf6", height: "100%", width: `${uploadProgress}%`, transition: "width .3s", borderRadius: 20 }} />
-                                </div>
-                              </>
-                            ) : novoVs.arquivo ? (
-                              <>
-                                <div style={{ fontSize: 28, marginBottom: 6 }}>✅</div>
-                                <div style={{ fontSize: 12, color: "#22c55e", wordBreak: "break-all" }}>Arquivo enviado!</div>
-                                <div style={{ fontSize: 11, color: T.textFaint, marginTop: 4 }}>Clique para trocar</div>
-                              </>
-                            ) : (
-                              <>
-                                <div style={{ fontSize: 32, marginBottom: 8 }}>📁</div>
-                                <div style={{ fontSize: 13, color: "#a78bfa", marginBottom: 4 }}>Toque para selecionar arquivo</div>
-                                <div style={{ fontSize: 11, color: T.textFaint }}>MP3, WAV, PDF, DOC, TXT</div>
-                              </>
-                            )}
-                          </div>
-                          <input type="file" accept=".mp3,.wav,.ogg,.pdf,.doc,.docx,.txt" style={{ display: "none" }}
-                            onChange={async e => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              if (file.size > 50 * 1024 * 1024) { showToast("⚠️ Arquivo muito grande! Máx 50MB"); return; }
-                              setUploadando(true);
-                              setUploadProgress(0);
-                              try {
-                                const url = await uploadCloudinary(file, setUploadProgress);
-                                setNovoVs(v => ({ ...v, arquivo: url, tipo: file.type }));
-                                showToast("✅ Arquivo enviado!");
-                              } catch (err) {
-                                showToast("❌ Erro no upload: " + err.message);
-                              } finally {
-                                setUploadando(false);
-                                setUploadProgress(null);
-                              }
-                            }} />
-                        </label>
-
-                        <button style={{ ...S.saveBtn, marginTop: 12, opacity: (!novoVs.titulo || uploadando) ? 0.5 : 1 }}
-                          disabled={!novoVs.titulo || uploadando}
-                          onClick={async () => {
-                            if (!novoVs.titulo) { showToast("⚠️ Informe o título!"); return; }
-                            if (!novoVs.arquivo) { showToast("⚠️ Selecione um arquivo!"); return; }
-                            await addDoc(collection(db, "vs"), { ...novoVs, ministerio: ministerioLider, criadoEm: new Date().toISOString() });
-                            setNovoVs({ titulo: "", artista: "", arquivo: "", tipo: "", musicaId: "" });
-                            showToast("✅ VS adicionado!");
-                          }}>🎧 Publicar VS</button>
-                      </div>
-
-                      {/* Lista de VS */}
-                      {vsItems.filter(v => v.ministerio === ministerioLider).length === 0 ? (
-                        <div style={{ textAlign: "center", padding: "24px 0", color: T.textSub, fontSize: 13 }}>
-                          <div style={{ fontSize: 32, marginBottom: 8 }}>🎧</div>Nenhum VS cadastrado
-                        </div>
-                      ) : vsItems.filter(v => v.ministerio === ministerioLider).map(v => (
-                        <div key={v.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #8b5cf6", borderRadius: 12, marginBottom: 10, overflow: "hidden" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px" }}>
-                            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(139,92,246,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
-                              {v.tipo?.includes("audio") ? "🎵" : v.tipo?.includes("pdf") ? "📄" : "📁"}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{v.titulo}</div>
-                              {v.artista && <div style={{ fontSize: 12, color: T.textSub }}>{v.artista}</div>}
-                            </div>
-                            <button style={S.delBtn} onClick={async () => {
-                              if (window.confirm("Excluir este VS?")) {
-                                await deleteDoc(doc(db, "vs", v.id));
-                                showToast("🗑️ Removido!");
-                              }
-                            }}>🗑️</button>
-                          </div>
-                          {/* Player de áudio */}
-                          {v.arquivo && v.tipo?.includes("audio") && (
-                            <div style={{ padding: "0 14px 12px" }}>
-                              <audio controls style={{ width: "100%", borderRadius: 8 }}>
-                                <source src={v.arquivo} type={v.tipo} />
-                              </audio>
-                            </div>
-                          )}
-                          {/* PDF/Doc */}
-                          {v.arquivo && !v.tipo?.includes("audio") && (
-                            <div style={{ padding: "0 14px 12px" }}>
-                              <button onClick={() => {
-                                                  let url = v.arquivo;
-                                                  setPdfAberto(pdfAberto === url ? null : url);
-                                                }}
-                                style={{ width: "100%", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#a78bfa", cursor: "pointer" }}>
-                                📄 Abrir Arquivo
-                              </button>
-                            </div>
-                          )}
-                          {v.arquivo && (
-                            <div style={{ padding: "0 14px 12px" }}>
-                              <button onClick={() => baixarArquivo(v.arquivo, v.titulo)}
-                                style={{ width: "100%", background: "rgba(34,197,94,.1)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: "#4ade80", cursor: "pointer" }}>
-                                ⬇️ Baixar
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </>
-                  )}
                 </div>
               );
             })()}
