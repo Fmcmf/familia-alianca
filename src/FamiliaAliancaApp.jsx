@@ -1356,10 +1356,7 @@ export default function FamiliaAliancaApp() {
     { id: "home", icon: "🏠", label: "Início" },
     { id: "biblia", icon: "📖", label: "Bíblia" },
     { id: "oracao", icon: "🙏", label: "Oração" },
-    { id: "devocional", icon: "🕊️", label: "Devocional" },
-    { id: "voluntario", icon: "🤲", label: "Servir" },
     { id: "mais", icon: "⋯", label: "Mais" },
-    { id: "perfil", icon: "👤", label: "Perfil" },
     ...(membroEscalado ? [{ id: "meumin", icon: "⛪", label: "Meu Min." }] : []),
     ...(isAdmin || isLider ? [{ id: "admin", icon: isAdmin ? "⚙️" : "🏛️", label: isAdmin ? "Admin" : "Líder" }] : []),
   ];
@@ -2482,6 +2479,22 @@ export default function FamiliaAliancaApp() {
         {/* ══ MAIS ══ */}
         {tab === "mais" && (
           <div style={{ animation: "slideUp .4s ease" }}>
+
+            {/* Menu rápido */}
+            <div style={S.secTitle}>Menu</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, margin: "0 16px 20px" }}>
+              {[
+                { id: "devocional", icon: "🕊️", label: "Devocional" },
+                { id: "voluntario", icon: "🤲", label: "Servir" },
+                { id: "perfil", icon: "👤", label: "Perfil" },
+              ].map(item => (
+                <button key={item.id} onClick={() => setTab(item.id)}
+                  style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "16px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                  <span style={{ fontSize: 26 }}>{item.icon}</span>
+                  <span style={{ fontSize: 12, color: T.text, fontWeight: "bold" }}>{item.label}</span>
+                </button>
+              ))}
+            </div>
 
             {/* Horários dos Cultos */}
             <div style={S.secTitle}>Horários dos Cultos</div>
