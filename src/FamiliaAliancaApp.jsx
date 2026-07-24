@@ -503,6 +503,16 @@ export default function FamiliaAliancaApp() {
   const [filtroCategoriaCatalogo, setFiltroCategoriaCatalogo] = useState("");
   const [musicaCatalogoExpandida, setMusicaCatalogoExpandida] = useState(null);
   const [escalaQuadradoExpandido, setEscalaQuadradoExpandido] = useState(null);
+  // Gerenciamento de Administradores
+  const [buscaPromoverAdmin, setBuscaPromoverAdmin] = useState("");
+  const [membroParaPromover, setMembroParaPromover] = useState(null);
+  const [senhaNovoAdmin, setSenhaNovoAdmin] = useState("");
+  const [confirmSenhaNovoAdmin, setConfirmSenhaNovoAdmin] = useState("");
+  const [senhaConfirmacaoAdminAtual, setSenhaConfirmacaoAdminAtual] = useState("");
+  const [modoAdminNovo, setModoAdminNovo] = useState("existente"); // existente | novo
+  const [novoAdminCadastro, setNovoAdminCadastro] = useState({ nome: "", email: "", senha: "" });
+  const [revogarAlvoAdmin, setRevogarAlvoAdmin] = useState(null);
+  const [senhaConfirmacaoRevogar, setSenhaConfirmacaoRevogar] = useState("");
   const [novoArquivoMusica, setNovoArquivoMusica] = useState({ nome: "", arquivo: "", link: "" });
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
   const [pdfAberto, setPdfAberto] = useState(null); // URL do PDF aberto inline
@@ -1029,6 +1039,13 @@ export default function FamiliaAliancaApp() {
     if (!email) return false;
     const hoje = new Date().toISOString().split("T")[0];
     return escalas.some(e => e.data >= hoje && e.membrosEscalados?.[email]);
+  };
+
+  // Verifica a senha do admin atualmente logado (proteção extra antes de conceder/revogar acesso admin)
+  const senhaAdminAtualCorreta = (senhaDigitada) => {
+    if (!senhaDigitada) return false;
+    if (user?.email === "ALIANCA") return senhaDigitada === "mello2026";
+    return senhaDigitada === user?.senha;
   };
 
   const salvarCadastroCompleto = async () => {
@@ -4490,9 +4507,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "pregacao", "devocional", "avisos", "estudos", "banner", "financeiro", "lideres", "jejum", "video", "aovivo", "membros"].map(t => (
+              {["agenda", "palavra", "pregacao", "devocional", "avisos", "estudos", "banner", "financeiro", "lideres", "jejum", "video", "aovivo", "membros", "administradores"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", pregacao: "🎙️ Pregação", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", financeiro: "💰 Finanças", lideres: "🏛️ Líderes", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros" }[t]}
+                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", pregacao: "🎙️ Pregação", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", financeiro: "💰 Finanças", lideres: "🏛️ Líderes", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros", administradores: "🔐 Admins" }[t]}
                 </button>
               ))}
             </div>
@@ -6034,6 +6051,185 @@ export default function FamiliaAliancaApp() {
                 )}
               </div>
             )}
+
+            {/* ── ADMINISTRADORES ── */}
+            {adminTab === "administradores" && (() => {
+              const admins = membros.filter(m => m.admin);
+              const naoAdmins = membros.filter(m => !m.admin);
+              const resultadosBusca = buscaPromoverAdmin.trim().length > 1
+                ? naoAdmins.filter(m =>
+                    m.nome?.toLowerCase().includes(buscaPromoverAdmin.toLowerCase()) ||
+                    m.email?.toLowerCase().includes(buscaPromoverAdmin.toLowerCase())
+                  ).slice(0, 8)
+                : [];
+
+              const promoverMembro = async () => {
+                if (!membroParaPromover) return;
+                if (senhaNovoAdmin.length < 6) { showToast("⚠️ A senha deve ter pelo menos 6 caracteres!"); return; }
+                if (senhaNovoAdmin !== confirmSenhaNovoAdmin) { showToast("⚠️ As senhas não coincidem!"); return; }
+                if (!senhaAdminAtualCorreta(senhaConfirmacaoAdminAtual)) { showToast("❌ Sua senha de administrador está incorreta!"); return; }
+                await updateDoc(doc(db, "membros", membroParaPromover.email), {
+                  admin: true,
+                  senha: senhaNovoAdmin,
+                  promovidoPor: user?.nome || user?.email || "Admin",
+                  dataPromocaoAdmin: new Date().toISOString(),
+                });
+                showToast(`✅ ${membroParaPromover.nome} agora tem acesso administrativo!`);
+                setMembroParaPromover(null); setSenhaNovoAdmin(""); setConfirmSenhaNovoAdmin(""); setSenhaConfirmacaoAdminAtual(""); setBuscaPromoverAdmin("");
+              };
+
+              const criarNovoAdmin = async () => {
+                if (!novoAdminCadastro.nome.trim() || !novoAdminCadastro.email.trim() || !novoAdminCadastro.senha) { showToast("⚠️ Preencha nome, e-mail e senha!"); return; }
+                if (novoAdminCadastro.senha.length < 6) { showToast("⚠️ A senha deve ter pelo menos 6 caracteres!"); return; }
+                if (!senhaAdminAtualCorreta(senhaConfirmacaoAdminAtual)) { showToast("❌ Sua senha de administrador está incorreta!"); return; }
+                const emailNovo = novoAdminCadastro.email.trim().toLowerCase();
+                const existente = await getDoc(doc(db, "membros", emailNovo));
+                if (existente.exists()) { showToast("⚠️ Já existe um cadastro com esse e-mail! Use a opção 'Promover membro existente'."); return; }
+                await setDoc(doc(db, "membros", emailNovo), {
+                  nome: novoAdminCadastro.nome.trim(),
+                  email: emailNovo,
+                  senha: novoAdminCadastro.senha,
+                  admin: true,
+                  dataCadastro: new Date().toISOString(),
+                  ultimoAcesso: null,
+                  promovidoPor: user?.nome || user?.email || "Admin",
+                  dataPromocaoAdmin: new Date().toISOString(),
+                });
+                showToast(`✅ Administrador "${novoAdminCadastro.nome}" criado com sucesso!`);
+                setNovoAdminCadastro({ nome: "", email: "", senha: "" }); setSenhaConfirmacaoAdminAtual("");
+              };
+
+              const revogarAdmin = async (m) => {
+                if (m.email === user?.email) { showToast("⚠️ Você não pode remover seu próprio acesso administrativo!"); return; }
+                if (!senhaAdminAtualCorreta(senhaConfirmacaoRevogar)) { showToast("❌ Sua senha de administrador está incorreta!"); return; }
+                await updateDoc(doc(db, "membros", m.email), { admin: false });
+                showToast(`↩️ Acesso administrativo de ${m.nome} removido.`);
+                setRevogarAlvoAdmin(null); setSenhaConfirmacaoRevogar("");
+              };
+
+              return (
+                <div style={{ padding: "0 16px" }}>
+                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>🔐 Administradores</div>
+                  <div style={{ background: "rgba(220,38,38,.08)", border: "1px solid rgba(220,38,38,.25)", borderRadius: 12, padding: "10px 14px", marginBottom: 18, fontSize: 12, color: "#f87171", lineHeight: 1.6 }}>
+                    ⚠️ Acesso administrativo dá controle total sobre o app: membros, finanças, avisos, líderes e configurações. Conceda apenas para pessoas de máxima confiança. Toda ação aqui exige sua senha de admin para confirmar.
+                  </div>
+
+                  {/* Lista de admins atuais */}
+                  <div style={{ fontSize: 12, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>Administradores atuais ({admins.length})</div>
+                  {admins.map(m => (
+                    <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(220,38,38,.12)", border: "1px solid rgba(220,38,38,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: "bold", color: "#f87171", flexShrink: 0 }}>
+                          {m.nome?.charAt(0).toUpperCase()}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome} {m.email === user?.email && <span style={{ color: T.textFaint, fontWeight: "normal" }}>(você)</span>}</div>
+                          <div style={{ fontSize: 11, color: T.textSub }}>{m.email}</div>
+                          {m.promovidoPor && <div style={{ fontSize: 10, color: T.textFaint, marginTop: 2 }}>Concedido por {m.promovidoPor}</div>}
+                        </div>
+                        {m.email !== user?.email && (
+                          <button onClick={() => setRevogarAlvoAdmin(revogarAlvoAdmin === m.email ? null : m.email)}
+                            style={{ background: "rgba(220,38,38,.12)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 8, padding: "7px 12px", fontSize: 11, fontWeight: "bold", color: "#f87171", cursor: "pointer" }}>
+                            Revogar
+                          </button>
+                        )}
+                      </div>
+                      {revogarAlvoAdmin === m.email && (
+                        <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${T.cardBorder}` }}>
+                          <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>Digite sua senha de admin para confirmar a remoção:</div>
+                          <input type="password" style={{ ...S.input, marginBottom: 8 }} placeholder="Sua senha de administrador"
+                            value={senhaConfirmacaoRevogar} onChange={e => setSenhaConfirmacaoRevogar(e.target.value)} />
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button onClick={() => revogarAdmin(m)} style={{ flex: 1, background: "#dc2626", border: "none", borderRadius: 10, padding: "10px 0", color: "#fff", fontSize: 12, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}>Confirmar Revogação</button>
+                            <button onClick={() => { setRevogarAlvoAdmin(null); setSenhaConfirmacaoRevogar(""); }} style={{ padding: "0 14px", background: "transparent", border: `1px solid ${T.cardBorder}`, borderRadius: 10, color: T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>Cancelar</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Conceder novo acesso */}
+                  <div style={{ fontSize: 12, color: T.gold, letterSpacing: 1, textTransform: "uppercase", margin: "22px 0 10px" }}>➕ Conceder novo acesso</div>
+
+                  <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+                    {[{ id: "existente", label: "Promover membro" }, { id: "novo", label: "Criar do zero" }].map(o => (
+                      <button key={o.id} onClick={() => { setModoAdminNovo(o.id); setMembroParaPromover(null); setBuscaPromoverAdmin(""); }}
+                        style={{ flex: 1, padding: "9px 0", border: `1px solid ${modoAdminNovo === o.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: modoAdminNovo === o.id ? "rgba(201,168,76,.12)" : "transparent", color: modoAdminNovo === o.id ? "#c9a84c" : T.textSub, fontSize: 12, fontWeight: modoAdminNovo === o.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {modoAdminNovo === "existente" ? (
+                    <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px" }}>
+                      {!membroParaPromover ? (
+                        <>
+                          <input style={{ ...S.input, marginBottom: 8 }} placeholder="🔍 Buscar membro por nome ou e-mail..."
+                            value={buscaPromoverAdmin} onChange={e => setBuscaPromoverAdmin(e.target.value)} />
+                          {resultadosBusca.map(m => (
+                            <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 6px", borderBottom: `1px solid ${T.cardBorder}` }}>
+                              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
+                                {m.nome?.charAt(0).toUpperCase()}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                                <div style={{ fontSize: 11, color: T.textSub }}>{m.email}</div>
+                              </div>
+                              <button onClick={() => setMembroParaPromover(m)}
+                                style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                                Selecionar
+                              </button>
+                            </div>
+                          ))}
+                          {buscaPromoverAdmin.trim().length > 1 && resultadosBusca.length === 0 && (
+                            <div style={{ fontSize: 12, color: T.textSub, padding: "8px 0" }}>Nenhum membro encontrado</div>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, paddingBottom: 12, borderBottom: `1px solid ${T.cardBorder}` }}>
+                            <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: "bold", color: "#c9a84c" }}>
+                              {membroParaPromover.nome?.charAt(0).toUpperCase()}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{membroParaPromover.nome}</div>
+                              <div style={{ fontSize: 11, color: T.textSub }}>{membroParaPromover.email}</div>
+                            </div>
+                            <button onClick={() => setMembroParaPromover(null)} style={{ background: "none", border: "none", color: T.textFaint, fontSize: 18, cursor: "pointer" }}>×</button>
+                          </div>
+                          <label style={S.label}>Definir senha de acesso admin *</label>
+                          <input type="password" style={{ ...S.input, marginBottom: 8 }} placeholder="Mínimo 6 caracteres"
+                            value={senhaNovoAdmin} onChange={e => setSenhaNovoAdmin(e.target.value)} />
+                          <label style={S.label}>Confirmar senha *</label>
+                          <input type="password" style={{ ...S.input, marginBottom: 8 }} placeholder="Repita a senha"
+                            value={confirmSenhaNovoAdmin} onChange={e => setConfirmSenhaNovoAdmin(e.target.value)} />
+                          <label style={S.label}>Sua senha de admin (confirmação) *</label>
+                          <input type="password" style={{ ...S.input, marginBottom: 12 }} placeholder="Confirme com sua própria senha"
+                            value={senhaConfirmacaoAdminAtual} onChange={e => setSenhaConfirmacaoAdminAtual(e.target.value)} />
+                          <button onClick={promoverMembro} style={{ ...S.saveBtn, marginTop: 0 }}>🔐 Conceder Acesso Admin</button>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px" }}>
+                      <label style={S.label}>Nome completo *</label>
+                      <input style={{ ...S.input, marginBottom: 8 }} placeholder="Nome do novo administrador"
+                        value={novoAdminCadastro.nome} onChange={e => setNovoAdminCadastro({ ...novoAdminCadastro, nome: e.target.value })} />
+                      <label style={S.label}>E-mail *</label>
+                      <input type="email" style={{ ...S.input, marginBottom: 8 }} placeholder="email@exemplo.com"
+                        value={novoAdminCadastro.email} onChange={e => setNovoAdminCadastro({ ...novoAdminCadastro, email: e.target.value })} />
+                      <label style={S.label}>Senha *</label>
+                      <input type="password" style={{ ...S.input, marginBottom: 8 }} placeholder="Mínimo 6 caracteres"
+                        value={novoAdminCadastro.senha} onChange={e => setNovoAdminCadastro({ ...novoAdminCadastro, senha: e.target.value })} />
+                      <label style={S.label}>Sua senha de admin (confirmação) *</label>
+                      <input type="password" style={{ ...S.input, marginBottom: 12 }} placeholder="Confirme com sua própria senha"
+                        value={senhaConfirmacaoAdminAtual} onChange={e => setSenhaConfirmacaoAdminAtual(e.target.value)} />
+                      <button onClick={criarNovoAdmin} style={{ ...S.saveBtn, marginTop: 0 }}>🔐 Criar Administrador</button>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
