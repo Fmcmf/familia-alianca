@@ -881,6 +881,7 @@ export default function FamiliaAliancaApp() {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
       unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
