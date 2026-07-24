@@ -513,6 +513,7 @@ export default function FamiliaAliancaApp() {
   const [novoAdminCadastro, setNovoAdminCadastro] = useState({ nome: "", email: "", senha: "" });
   const [revogarAlvoAdmin, setRevogarAlvoAdmin] = useState(null);
   const [senhaConfirmacaoRevogar, setSenhaConfirmacaoRevogar] = useState("");
+  const [mostrarSenhaAdmin, setMostrarSenhaAdmin] = useState({});
   const [novoArquivoMusica, setNovoArquivoMusica] = useState({ nome: "", arquivo: "", link: "" });
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
   const [pdfAberto, setPdfAberto] = useState(null); // URL do PDF aberto inline
@@ -6137,8 +6138,14 @@ export default function FamiliaAliancaApp() {
                       {revogarAlvoAdmin === m.email && (
                         <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${T.cardBorder}` }}>
                           <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>Digite sua senha de admin para confirmar a remoção:</div>
-                          <input type="password" style={{ ...S.input, marginBottom: 8 }} placeholder="Sua senha de administrador"
-                            value={senhaConfirmacaoRevogar} onChange={e => setSenhaConfirmacaoRevogar(e.target.value)} />
+                          <div style={{ position: "relative", marginBottom: 8 }}>
+                            <input type={mostrarSenhaAdmin.revogar ? "text" : "password"} style={{ ...S.input, marginBottom: 0, paddingRight: 40 }} placeholder="Sua senha de administrador"
+                              value={senhaConfirmacaoRevogar} onChange={e => setSenhaConfirmacaoRevogar(e.target.value)} />
+                            <button type="button" onClick={() => setMostrarSenhaAdmin({ ...mostrarSenhaAdmin, revogar: !mostrarSenhaAdmin.revogar })}
+                              style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: 0 }}>
+                              {mostrarSenhaAdmin.revogar ? "🙈" : "👁️"}
+                            </button>
+                          </div>
                           <div style={{ display: "flex", gap: 8 }}>
                             <button onClick={() => revogarAdmin(m)} style={{ flex: 1, background: "#dc2626", border: "none", borderRadius: 10, padding: "10px 0", color: "#fff", fontSize: 12, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}>Confirmar Revogação</button>
                             <button onClick={() => { setRevogarAlvoAdmin(null); setSenhaConfirmacaoRevogar(""); }} style={{ padding: "0 14px", background: "transparent", border: `1px solid ${T.cardBorder}`, borderRadius: 10, color: T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>Cancelar</button>
@@ -6198,14 +6205,32 @@ export default function FamiliaAliancaApp() {
                             <button onClick={() => setMembroParaPromover(null)} style={{ background: "none", border: "none", color: T.textFaint, fontSize: 18, cursor: "pointer" }}>×</button>
                           </div>
                           <label style={S.label}>Definir senha de acesso admin *</label>
-                          <input type="password" style={{ ...S.input, marginBottom: 8 }} placeholder="Mínimo 6 caracteres"
-                            value={senhaNovoAdmin} onChange={e => setSenhaNovoAdmin(e.target.value)} />
+                          <div style={{ position: "relative", marginBottom: 8 }}>
+                            <input type={mostrarSenhaAdmin.novo ? "text" : "password"} style={{ ...S.input, marginBottom: 0, paddingRight: 40 }} placeholder="Mínimo 6 caracteres"
+                              value={senhaNovoAdmin} onChange={e => setSenhaNovoAdmin(e.target.value)} />
+                            <button type="button" onClick={() => setMostrarSenhaAdmin({ ...mostrarSenhaAdmin, novo: !mostrarSenhaAdmin.novo })}
+                              style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: 0 }}>
+                              {mostrarSenhaAdmin.novo ? "🙈" : "👁️"}
+                            </button>
+                          </div>
                           <label style={S.label}>Confirmar senha *</label>
-                          <input type="password" style={{ ...S.input, marginBottom: 8 }} placeholder="Repita a senha"
-                            value={confirmSenhaNovoAdmin} onChange={e => setConfirmSenhaNovoAdmin(e.target.value)} />
+                          <div style={{ position: "relative", marginBottom: 8 }}>
+                            <input type={mostrarSenhaAdmin.confirm ? "text" : "password"} style={{ ...S.input, marginBottom: 0, paddingRight: 40 }} placeholder="Repita a senha"
+                              value={confirmSenhaNovoAdmin} onChange={e => setConfirmSenhaNovoAdmin(e.target.value)} />
+                            <button type="button" onClick={() => setMostrarSenhaAdmin({ ...mostrarSenhaAdmin, confirm: !mostrarSenhaAdmin.confirm })}
+                              style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: 0 }}>
+                              {mostrarSenhaAdmin.confirm ? "🙈" : "👁️"}
+                            </button>
+                          </div>
                           <label style={S.label}>Sua senha de admin (confirmação) *</label>
-                          <input type="password" style={{ ...S.input, marginBottom: 12 }} placeholder="Confirme com sua própria senha"
-                            value={senhaConfirmacaoAdminAtual} onChange={e => setSenhaConfirmacaoAdminAtual(e.target.value)} />
+                          <div style={{ position: "relative", marginBottom: 12 }}>
+                            <input type={mostrarSenhaAdmin.atual1 ? "text" : "password"} style={{ ...S.input, marginBottom: 0, paddingRight: 40 }} placeholder="Confirme com sua própria senha"
+                              value={senhaConfirmacaoAdminAtual} onChange={e => setSenhaConfirmacaoAdminAtual(e.target.value)} />
+                            <button type="button" onClick={() => setMostrarSenhaAdmin({ ...mostrarSenhaAdmin, atual1: !mostrarSenhaAdmin.atual1 })}
+                              style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: 0 }}>
+                              {mostrarSenhaAdmin.atual1 ? "🙈" : "👁️"}
+                            </button>
+                          </div>
                           <button onClick={promoverMembro} style={{ ...S.saveBtn, marginTop: 0 }}>🔐 Conceder Acesso Admin</button>
                         </>
                       )}
@@ -6219,11 +6244,23 @@ export default function FamiliaAliancaApp() {
                       <input type="email" style={{ ...S.input, marginBottom: 8 }} placeholder="email@exemplo.com"
                         value={novoAdminCadastro.email} onChange={e => setNovoAdminCadastro({ ...novoAdminCadastro, email: e.target.value })} />
                       <label style={S.label}>Senha *</label>
-                      <input type="password" style={{ ...S.input, marginBottom: 8 }} placeholder="Mínimo 6 caracteres"
-                        value={novoAdminCadastro.senha} onChange={e => setNovoAdminCadastro({ ...novoAdminCadastro, senha: e.target.value })} />
+                      <div style={{ position: "relative", marginBottom: 8 }}>
+                        <input type={mostrarSenhaAdmin.cadastro ? "text" : "password"} style={{ ...S.input, marginBottom: 0, paddingRight: 40 }} placeholder="Mínimo 6 caracteres"
+                          value={novoAdminCadastro.senha} onChange={e => setNovoAdminCadastro({ ...novoAdminCadastro, senha: e.target.value })} />
+                        <button type="button" onClick={() => setMostrarSenhaAdmin({ ...mostrarSenhaAdmin, cadastro: !mostrarSenhaAdmin.cadastro })}
+                          style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: 0 }}>
+                          {mostrarSenhaAdmin.cadastro ? "🙈" : "👁️"}
+                        </button>
+                      </div>
                       <label style={S.label}>Sua senha de admin (confirmação) *</label>
-                      <input type="password" style={{ ...S.input, marginBottom: 12 }} placeholder="Confirme com sua própria senha"
-                        value={senhaConfirmacaoAdminAtual} onChange={e => setSenhaConfirmacaoAdminAtual(e.target.value)} />
+                      <div style={{ position: "relative", marginBottom: 12 }}>
+                        <input type={mostrarSenhaAdmin.atual2 ? "text" : "password"} style={{ ...S.input, marginBottom: 0, paddingRight: 40 }} placeholder="Confirme com sua própria senha"
+                          value={senhaConfirmacaoAdminAtual} onChange={e => setSenhaConfirmacaoAdminAtual(e.target.value)} />
+                        <button type="button" onClick={() => setMostrarSenhaAdmin({ ...mostrarSenhaAdmin, atual2: !mostrarSenhaAdmin.atual2 })}
+                          style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: 0 }}>
+                          {mostrarSenhaAdmin.atual2 ? "🙈" : "👁️"}
+                        </button>
+                      </div>
                       <button onClick={criarNovoAdmin} style={{ ...S.saveBtn, marginTop: 0 }}>🔐 Criar Administrador</button>
                     </div>
                   )}
