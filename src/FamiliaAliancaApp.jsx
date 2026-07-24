@@ -2875,7 +2875,7 @@ export default function FamiliaAliancaApp() {
                     {min === "Aliança Music" && (
                       <button onClick={() => setCatalogoMusicasAberto(min)}
                         style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 14, padding: "14px 0", fontSize: 15, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 14, boxShadow: "0 4px 14px rgba(201,168,76,.35)" }}>
-                        🎵 Músicas
+                        🎵 Todas as Músicas
                       </button>
                     )}
 
