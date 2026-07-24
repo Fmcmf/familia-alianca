@@ -502,6 +502,7 @@ export default function FamiliaAliancaApp() {
   const [buscaCatalogoMusica, setBuscaCatalogoMusica] = useState("");
   const [filtroCategoriaCatalogo, setFiltroCategoriaCatalogo] = useState("");
   const [musicaCatalogoExpandida, setMusicaCatalogoExpandida] = useState(null);
+  const [escalaQuadradoExpandido, setEscalaQuadradoExpandido] = useState(null);
   const [novoArquivoMusica, setNovoArquivoMusica] = useState({ nome: "", arquivo: "", link: "" });
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
   const [pdfAberto, setPdfAberto] = useState(null); // URL do PDF aberto inline
@@ -2853,6 +2854,10 @@ export default function FamiliaAliancaApp() {
               const avisosMin = avisos.filter(a => a.ministerio === min);
               const hoje3 = new Date().toISOString().split("T")[0];
               const proximaEscala = escalas.filter(e => e.ministerio === min && e.data >= hoje3).sort((a, b) => a.data.localeCompare(b.data))[0];
+              const minhasEscalasFuturas = escalas
+                .filter(e => e.ministerio === min && e.data >= hoje3 && e.membrosEscalados?.[user?.email])
+                .sort((a, b) => a.data.localeCompare(b.data));
+              const outrasEscalasFuturas = minhasEscalasFuturas.filter(e => e.id !== proximaEscala?.id);
               const meuDadosEscala = proximaEscala?.membrosEscalados?.[user?.email];
               const meuMembroLive = membros.find(mm => mm.email === user?.email);
               const souUsuarioPadrao = !!meuMembroLive?.[`usuarioPadrao_${min.replace(/\s/g, "_")}`];
@@ -3156,6 +3161,76 @@ export default function FamiliaAliancaApp() {
                             })()}
                           </div>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Quadradinhos com as próximas datas escaladas */}
+                    {outrasEscalasFuturas.length > 0 && (
+                      <div style={{ marginTop: 14 }}>
+                        <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>🗓️ Próximas Escalas</div>
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+                          {outrasEscalasFuturas.map(e => {
+                            const d = new Date(e.data + "T12:00");
+                            const ativo = escalaQuadradoExpandido === e.id;
+                            return (
+                              <button key={e.id} onClick={() => setEscalaQuadradoExpandido(ativo ? null : e.id)}
+                                style={{ width: 56, height: 56, borderRadius: 12, border: `1px solid ${ativo ? "#c9a84c" : T.cardBorder}`, background: ativo ? "rgba(201,168,76,.18)" : T.card, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "Georgia,serif" }}>
+                                <span style={{ fontSize: 17, fontWeight: "bold", color: ativo ? "#c9a84c" : T.text, lineHeight: 1 }}>{d.getDate()}</span>
+                                <span style={{ fontSize: 9, color: ativo ? "#c9a84c" : T.textSub, textTransform: "uppercase", marginTop: 2 }}>{d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "")}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Detalhe da escala selecionada */}
+                        {outrasEscalasFuturas.filter(e => e.id === escalaQuadradoExpandido).map(e => {
+                          const meusDadosAqui = e.membrosEscalados?.[user?.email];
+                          const equipeAqui = Object.entries(e.membrosEscalados || {});
+                          return (
+                            <div key={e.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, overflow: "hidden", marginBottom: 10, animation: "fadeSlideIn .3s ease" }}>
+                              <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "7px 14px" }}>
+                                <div style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{e.culto}</div>
+                                <div style={{ fontSize: 11, color: "#080810" }}>{new Date(e.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })} {e.hora && `• ${e.hora}`}</div>
+                              </div>
+                              <div style={{ padding: "12px 14px" }}>
+                                {meusDadosAqui && (
+                                  <div style={{ background: "rgba(34,197,94,.1)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 8, padding: "8px 12px", marginBottom: 10 }}>
+                                    <div style={{ fontSize: 12, fontWeight: "bold", color: "#22c55e", marginBottom: 2 }}>✅ Você está escalado!</div>
+                                    {meusDadosAqui.funcoes?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🎤 {meusDadosAqui.funcoes.join(", ")}</div>}
+                                    {meusDadosAqui.instrumentos?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🎸 {meusDadosAqui.instrumentos.join(", ")}</div>}
+                                    {meusDadosAqui.categorias?.length > 0 && <div style={{ fontSize: 12, color: T.textSub }}>🏷️ {meusDadosAqui.categorias.join(", ")}</div>}
+                                  </div>
+                                )}
+                                {equipeAqui.length > 0 && (
+                                  <div>
+                                    <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>👥 Equipe</div>
+                                    {equipeAqui.map(([email, dados]) => (
+                                      <div key={email} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
+                                        <div style={{ width: 26, height: 26, borderRadius: "50%", background: "rgba(201,168,76,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: "bold", color: "#c9a84c", flexShrink: 0 }}>
+                                          {dados.nome?.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                          <div style={{ fontSize: 12, fontWeight: email === user?.email ? "bold" : "normal", color: email === user?.email ? "#c9a84c" : T.text }}>
+                                            {dados.nome} {email === user?.email && "(você)"}
+                                          </div>
+                                          <div style={{ fontSize: 10, color: T.textSub }}>{dados.funcoes?.join(", ")}{dados.instrumentos?.length > 0 && ` • 🎸 ${dados.instrumentos.join(", ")}`}{dados.categorias?.length > 0 && `🏷️ ${dados.categorias.join(", ")}`}</div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                {(e.musicas || []).length > 0 && (
+                                  <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas</div>
+                                    {(e.musicas || []).map(mid => musicas.find(x => x.id === mid)).filter(Boolean).map((mus, i) => (
+                                      <div key={i} style={{ fontSize: 12, color: T.text, padding: "4px 0" }}>🎵 {mus.titulo} <span style={{ color: T.textSub }}>— {mus.artista}</span> {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>}</div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
