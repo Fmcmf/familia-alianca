@@ -2830,7 +2830,6 @@ export default function FamiliaAliancaApp() {
             </div>
             {user?.ministerios?.map(min => {
               const minData = MINISTERIOS.find(m => m.nome === min);
-              const liderMin = membros.find(m => m.lider && (m.ministeriosLider?.includes(min) || m.ministerioLider === min));
               const avisosMin = avisos.filter(a => a.ministerio === min);
               const hoje3 = new Date().toISOString().split("T")[0];
               const proximaEscala = escalas.filter(e => e.ministerio === min && e.data >= hoje3).sort((a, b) => a.data.localeCompare(b.data))[0];
@@ -2847,35 +2846,17 @@ export default function FamiliaAliancaApp() {
               return (
                 <div key={min} style={{ margin: "0 16px 16px", background: darkMode ? "rgba(201,168,76,.04)" : "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 18, overflow: "hidden" }}>
                   {/* Header ministério */}
-                  <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontSize: 20 }}>{minData?.icon || "⛪"}</span>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: "bold", color: "#080810" }}>{min}</div>
-                      {minData?.desc && <div style={{ fontSize: 11, color: "#080810", opacity: 0.7 }}>{minData.desc}</div>}
-                    </div>
-                    {min === "Aliança Music" && (
-                      <button onClick={() => setCatalogoMusicasAberto(min)}
-                        style={{ background: "rgba(8,8,16,.15)", border: "1px solid rgba(8,8,16,.3)", borderRadius: 10, padding: "8px 12px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }}>
-                        🎵 Músicas
-                      </button>
-                    )}
+                    <div style={{ fontSize: 15, fontWeight: "bold", color: "#080810" }}>{min}</div>
                   </div>
                   <div style={{ padding: "14px 16px" }}>
-                    {/* Líder */}
-                    {liderMin && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: T.card, borderRadius: 10, marginBottom: 14 }}>
-                        <div style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: "bold", color: "#c9a84c" }}>
-                          {liderMin.nome?.charAt(0).toUpperCase()}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 10, color: T.textFaint, textTransform: "uppercase", letterSpacing: 1 }}>Líder</div>
-                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{liderMin.nome}</div>
-                        </div>
-                        {liderMin.celular && (
-                          <button onClick={() => window.open(`https://wa.me/55${liderMin.celular.replace(/\D/g, "")}`, "_blank")}
-                            style={{ background: "#25d366", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 14, cursor: "pointer" }}>💬</button>
-                        )}
-                      </div>
+                    {/* Botão Músicas em destaque */}
+                    {min === "Aliança Music" && (
+                      <button onClick={() => setCatalogoMusicasAberto(min)}
+                        style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "linear-gradient(90deg,#8b5cf6,#a78bfa)", border: "none", borderRadius: 14, padding: "14px 0", fontSize: 15, fontWeight: "bold", color: "#fff", cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 14, boxShadow: "0 4px 14px rgba(139,92,246,.35)" }}>
+                        🎵 Músicas
+                      </button>
                     )}
 
                     {/* Avisos */}
