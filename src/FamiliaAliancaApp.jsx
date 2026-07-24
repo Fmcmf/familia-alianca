@@ -2254,6 +2254,14 @@ export default function FamiliaAliancaApp() {
         {tab === "devocional" && (
           <div style={{ animation: "slideUp .4s ease", paddingBottom: 20 }}>
 
+            {/* Voltar */}
+            <div style={{ padding: "16px 16px 0" }}>
+              <button onClick={() => setTab("mais")}
+                style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
+                ‹ Voltar
+              </button>
+            </div>
+
             {/* Hero */}
             <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.12))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🕊️</div>
@@ -2380,6 +2388,13 @@ export default function FamiliaAliancaApp() {
         {/* ══ VOLUNTARIADO ══ */}
         {tab === "voluntario" && (
           <div style={{ animation: "slideUp .4s ease" }}>
+            {/* Voltar */}
+            <div style={{ padding: "16px 16px 0" }}>
+              <button onClick={() => setTab("mais")}
+                style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
+                ‹ Voltar
+              </button>
+            </div>
             {/* Hero */}
             <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🤲</div>
@@ -3012,6 +3027,13 @@ export default function FamiliaAliancaApp() {
         {/* ══ PERFIL ══ */}
         {tab === "perfil" && (
           <div style={{ padding: "0 16px 24px", animation: "slideUp .4s ease" }}>
+            {/* Voltar */}
+            <div style={{ padding: "16px 0 0" }}>
+              <button onClick={() => setTab("mais")}
+                style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
+                ‹ Voltar
+              </button>
+            </div>
             <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 16 }}>Meu Perfil</div>
 
             {/* Avatar */}
