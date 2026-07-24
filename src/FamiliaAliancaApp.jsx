@@ -1023,23 +1023,35 @@ export default function FamiliaAliancaApp() {
   };
 
   const salvarCadastroCompleto = async () => {
-    if (!completarForm.celular || !completarForm.sexo || !completarForm.estadoCivil || !completarForm.dataNascimento) {
+    // Usa o valor editado agora, ou cai pro valor que a pessoa já tinha salvo antes (campo não tocado nesta edição)
+    const nome = completarForm.nome ?? user?.nome;
+    const celular = completarForm.celular ?? user?.celular;
+    const sexo = completarForm.sexo ?? user?.sexo;
+    const estadoCivil = completarForm.estadoCivil ?? user?.estadoCivil;
+    const dataNascimento = completarForm.dataNascimento ?? user?.dataNascimento;
+    const batizado = completarForm.batizado ?? user?.batizado ?? "nao";
+    const igrejaBAT = completarForm.igrejaBAT ?? user?.igrejaBAT;
+    const dataBAT = completarForm.dataBAT ?? user?.dataBAT;
+
+    if (!nome || !celular || !sexo || !estadoCivil || !dataNascimento) {
       showToast("⚠️ Preencha os campos obrigatórios!"); return;
     }
     const dadosAtualizados = {
-      celular: completarForm.celular || "",
-      sexo: completarForm.sexo || "",
-      estadoCivil: completarForm.estadoCivil || "",
-      dataNascimento: completarForm.dataNascimento || "",
-      batizado: completarForm.batizado || "nao",
-      igrejaBAT: completarForm.batizado === "sim" ? (completarForm.igrejaBAT || "") : "",
-      dataBAT: completarForm.batizado === "sim" ? (completarForm.dataBAT || "") : "",
+      nome: nome || "",
+      celular: celular || "",
+      sexo: sexo || "",
+      estadoCivil: estadoCivil || "",
+      dataNascimento: dataNascimento || "",
+      batizado: batizado || "nao",
+      igrejaBAT: batizado === "sim" ? (igrejaBAT || "") : "",
+      dataBAT: batizado === "sim" ? (dataBAT || "") : "",
     };
     await updateDoc(doc(db, "membros", user.email), dadosAtualizados);
     const u = { ...user, ...dadosAtualizados };
     store.set(SK.user, u); setUser(u);
+    setCompletarForm({});
     setShowCompletarCadastro(false);
-    showToast("✅ Cadastro completado! Obrigado!");
+    showToast("✅ Cadastro atualizado! Obrigado!");
   };
 
   const handleRecuperarSenha = async () => {
@@ -3197,6 +3209,8 @@ export default function FamiliaAliancaApp() {
               ✏️ {(!user?.celular || !user?.sexo) ? "Complete" : "Edite"} seus dados
             </div>
 
+            <input style={S.input} placeholder="Nome completo *" value={completarForm.nome ?? (user?.nome || "")}
+              onChange={e => setCompletarForm({ ...completarForm, nome: e.target.value })} />
             <input style={S.input} placeholder="Celular (WhatsApp) *" type="tel" value={completarForm.celular ?? (user?.celular || "")}
               onChange={e => setCompletarForm({ ...completarForm, celular: e.target.value })} />
             <select style={{ ...S.input, color: (completarForm.sexo ?? user?.sexo) ? "inherit" : "#888" }}
