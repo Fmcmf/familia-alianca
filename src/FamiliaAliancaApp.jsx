@@ -514,6 +514,8 @@ export default function FamiliaAliancaApp() {
   const [revogarAlvoAdmin, setRevogarAlvoAdmin] = useState(null);
   const [senhaConfirmacaoRevogar, setSenhaConfirmacaoRevogar] = useState("");
   const [mostrarSenhaAdmin, setMostrarSenhaAdmin] = useState({});
+  const [buscaMusicaEscala, setBuscaMusicaEscala] = useState("");
+  const [dropdownMusicaEscalaAberto, setDropdownMusicaEscalaAberto] = useState(false);
   const [novoArquivoMusica, setNovoArquivoMusica] = useState({ nome: "", arquivo: "", link: "" });
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
   const [pdfAberto, setPdfAberto] = useState(null); // URL do PDF aberto inline
@@ -4024,16 +4026,46 @@ export default function FamiliaAliancaApp() {
                               </div>
                             ) : null;
                           })}
-                          <select style={{ ...S.select, marginTop: 8 }} value="" onChange={async e => {
-                            if (!e.target.value || !escala) return;
-                            const novas = [...(escala.musicas || []), e.target.value];
-                            await updateDoc(doc(db, "escalas", escala.id), { musicas: novas });
-                          }}>
-                            <option value="">+ Adicionar música...</option>
-                            {musicas.filter(m => !(escala.musicas || []).includes(m.id)).map(m => (
-                              <option key={m.id} value={m.id}>{m.titulo} — {m.artista}</option>
-                            ))}
-                          </select>
+                          <div style={{ position: "relative", marginTop: 8 }}>
+                            <input
+                              style={{ ...S.input, marginBottom: 0 }}
+                              placeholder="🔍 Buscar música por nome ou artista..."
+                              value={buscaMusicaEscala}
+                              onFocus={() => setDropdownMusicaEscalaAberto(true)}
+                              onChange={e => { setBuscaMusicaEscala(e.target.value); setDropdownMusicaEscalaAberto(true); }}
+                            />
+                            {dropdownMusicaEscalaAberto && (() => {
+                              const disponiveis = musicas.filter(m => !(escala.musicas || []).includes(m.id));
+                              const filtradas = buscaMusicaEscala.trim()
+                                ? disponiveis.filter(m =>
+                                    m.titulo?.toLowerCase().includes(buscaMusicaEscala.toLowerCase()) ||
+                                    m.artista?.toLowerCase().includes(buscaMusicaEscala.toLowerCase())
+                                  )
+                                : disponiveis;
+                              return (
+                                <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 20, maxHeight: 260, overflowY: "auto", background: darkMode ? "#07112a" : "#fff", border: `1px solid ${T.cardBorder}`, borderRadius: 12, boxShadow: "0 8px 24px rgba(0,0,0,.35)" }}>
+                                  {filtradas.length === 0 ? (
+                                    <div style={{ padding: "12px 14px", fontSize: 12, color: T.textSub }}>Nenhuma música encontrada</div>
+                                  ) : filtradas.slice(0, 50).map(m => (
+                                    <div key={m.id} onClick={async () => {
+                                      const novas = [...(escala.musicas || []), m.id];
+                                      await updateDoc(doc(db, "escalas", escala.id), { musicas: novas });
+                                      setBuscaMusicaEscala(""); setDropdownMusicaEscalaAberto(false);
+                                    }}
+                                      style={{ padding: "10px 14px", borderBottom: `1px solid ${T.cardBorder}`, cursor: "pointer" }}>
+                                      <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.titulo}</div>
+                                      <div style={{ fontSize: 11, color: T.textSub }}>{m.artista} {m.tom && `• Tom: ${m.tom}`}</div>
+                                    </div>
+                                  ))}
+                                  {filtradas.length > 50 && (
+                                    <div style={{ padding: "8px 14px", fontSize: 11, color: T.textFaint }}>Mostrando 50 de {filtradas.length} — refine a busca para ver mais</div>
+                                  )}
+                                  <div onClick={() => setDropdownMusicaEscalaAberto(false)}
+                                    style={{ padding: "8px 14px", fontSize: 11, color: T.gold, textAlign: "center", cursor: "pointer", fontWeight: "bold" }}>Fechar</div>
+                                </div>
+                              );
+                            })()}
+                          </div>
                         </div>
                       )}
 
