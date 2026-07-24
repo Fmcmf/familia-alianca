@@ -497,6 +497,7 @@ export default function FamiliaAliancaApp() {
   const [cifras, setCifras] = useState([]);
   const [novaMusica, setNovaMusica] = useState({ titulo: "", artista: "", categoria: "", tom: "", tempo: "", link: "" });
   const [musicaExpandida, setMusicaExpandida] = useState(null); // id da música aberta (com arquivos visíveis)
+  const [audioTocando, setAudioTocando] = useState(null); // id do arquivo de áudio com player aberto inline
   const [novoArquivoMusica, setNovoArquivoMusica] = useState({ nome: "", arquivo: "", link: "" });
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
   const [pdfAberto, setPdfAberto] = useState(null); // URL do PDF aberto inline
@@ -2875,14 +2876,26 @@ export default function FamiliaAliancaApp() {
                                         {getSpotifyId(mus.link) && <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />}
                                         <div style={{ padding: "0 12px" }}>
                                           {(mus.arquivos || []).map(a => (
-                                            <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 8, background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.15)", borderRadius: 10, padding: "8px 10px", marginTop: 8 }}>
-                                            <span style={{ fontSize: 15 }}>{{ pdf: "📄", audio: "🎵", imagem: "🖼️", link: "🔗" }[a.tipo] || "📁"}</span>
-                                            <span style={{ flex: 1, fontSize: 12, fontWeight: "bold", color: T.text }}>{a.nome}</span>
-                                            <button onClick={() => window.open(a.url, "_blank")}
-                                              style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>Abrir</button>
-                                            {a.tipo !== "link" && (
-                                              <button onClick={() => baixarArquivo(a.url, a.nome)}
-                                                style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#4ade80", cursor: "pointer" }}>⬇️</button>
+                                            <div key={a.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.15)", borderRadius: 10, padding: "8px 10px", marginTop: 8 }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                              <span style={{ fontSize: 15 }}>{{ pdf: "📄", audio: "🎵", imagem: "🖼️", link: "🔗" }[a.tipo] || "📁"}</span>
+                                              <span style={{ flex: 1, fontSize: 12, fontWeight: "bold", color: T.text }}>{a.nome}</span>
+                                              {a.tipo === "audio" ? (
+                                                <button onClick={() => setAudioTocando(audioTocando === a.id ? null : a.id)}
+                                                  style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>{audioTocando === a.id ? "⏹ Fechar" : "▶️ Tocar"}</button>
+                                              ) : (
+                                                <button onClick={() => window.open(a.url, "_blank")}
+                                                  style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>Abrir</button>
+                                              )}
+                                              {a.tipo !== "link" && (
+                                                <button onClick={() => baixarArquivo(a.url, a.nome)}
+                                                  style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#4ade80", cursor: "pointer" }}>⬇️</button>
+                                              )}
+                                            </div>
+                                            {a.tipo === "audio" && audioTocando === a.id && (
+                                              <audio controls autoPlay style={{ width: "100%", marginTop: 8, height: 34 }}>
+                                                <source src={a.url} />
+                                              </audio>
                                             )}
                                             </div>
                                           ))}
@@ -4077,17 +4090,29 @@ export default function FamiliaAliancaApp() {
                                   <div style={{ fontSize: 12, color: T.textFaint, marginBottom: 10 }}>Nenhum arquivo anexado ainda — adicione cifra, áudios por naipe (soprano, contralto, tenor), VS, links, etc.</div>
                                 )}
                                 {arquivosM.map(a => (
-                                  <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 8, background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.15)", borderRadius: 10, padding: "8px 10px", marginBottom: 6 }}>
-                                    <span style={{ fontSize: 16 }}>{iconePorTipo[a.tipo] || "📁"}</span>
-                                    <span style={{ flex: 1, fontSize: 12, fontWeight: "bold", color: T.text }}>{a.nome}</span>
-                                    <button onClick={() => window.open(a.url, "_blank")}
-                                      style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>Abrir</button>
-                                    {a.tipo !== "link" && (
-                                      <button onClick={() => baixarArquivo(a.url, a.nome)}
-                                        style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#4ade80", cursor: "pointer" }}>⬇️</button>
+                                  <div key={a.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.15)", borderRadius: 10, padding: "8px 10px", marginBottom: 6 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                      <span style={{ fontSize: 16 }}>{iconePorTipo[a.tipo] || "📁"}</span>
+                                      <span style={{ flex: 1, fontSize: 12, fontWeight: "bold", color: T.text }}>{a.nome}</span>
+                                      {a.tipo === "audio" ? (
+                                        <button onClick={() => setAudioTocando(audioTocando === a.id ? null : a.id)}
+                                          style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>{audioTocando === a.id ? "⏹ Fechar" : "▶️ Tocar"}</button>
+                                      ) : (
+                                        <button onClick={() => window.open(a.url, "_blank")}
+                                          style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>Abrir</button>
+                                      )}
+                                      {a.tipo !== "link" && (
+                                        <button onClick={() => baixarArquivo(a.url, a.nome)}
+                                          style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#4ade80", cursor: "pointer" }}>⬇️</button>
+                                      )}
+                                      <button onClick={() => removerArquivo(a.id)}
+                                        style={{ background: "rgba(220,38,38,.12)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#f87171", cursor: "pointer" }}>✕</button>
+                                    </div>
+                                    {a.tipo === "audio" && audioTocando === a.id && (
+                                      <audio controls autoPlay style={{ width: "100%", marginTop: 8, height: 34 }}>
+                                        <source src={a.url} />
+                                      </audio>
                                     )}
-                                    <button onClick={() => removerArquivo(a.id)}
-                                      style={{ background: "rgba(220,38,38,.12)", border: "1px solid rgba(220,38,38,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#f87171", cursor: "pointer" }}>✕</button>
                                   </div>
                                 ))}
 
