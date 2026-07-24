@@ -498,6 +498,10 @@ export default function FamiliaAliancaApp() {
   const [novaMusica, setNovaMusica] = useState({ titulo: "", artista: "", categoria: "", tom: "", tempo: "", link: "" });
   const [musicaExpandida, setMusicaExpandida] = useState(null); // id da música aberta (com arquivos visíveis)
   const [audioTocando, setAudioTocando] = useState(null); // id do arquivo de áudio com player aberto inline
+  const [catalogoMusicasAberto, setCatalogoMusicasAberto] = useState(false);
+  const [buscaCatalogoMusica, setBuscaCatalogoMusica] = useState("");
+  const [filtroCategoriaCatalogo, setFiltroCategoriaCatalogo] = useState("");
+  const [musicaCatalogoExpandida, setMusicaCatalogoExpandida] = useState(null);
   const [novoArquivoMusica, setNovoArquivoMusica] = useState({ nome: "", arquivo: "", link: "" });
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
   const [pdfAberto, setPdfAberto] = useState(null); // URL do PDF aberto inline
@@ -2708,6 +2712,119 @@ export default function FamiliaAliancaApp() {
         {/* ══ MEU MINISTÉRIO ══ */}
         {tab === "meumin" && (
           <div style={{ animation: "slideUp .4s ease", paddingBottom: 20 }}>
+            {catalogoMusicasAberto ? (() => {
+              const musicasDoMin = musicas.filter(m => m.ministerio === catalogoMusicasAberto);
+              const CATEGORIAS_FILTRO = [
+                { id: "", label: "Todas" },
+                { id: "Repertório feminino", label: "Feminino" },
+                { id: "Repertório masculino", label: "Masculino" },
+                { id: "Repertório geral", label: "Geral" },
+              ];
+              const musicasFiltradas = musicasDoMin.filter(m => {
+                const buscaOk = !buscaCatalogoMusica.trim() ||
+                  m.titulo?.toLowerCase().includes(buscaCatalogoMusica.toLowerCase()) ||
+                  m.artista?.toLowerCase().includes(buscaCatalogoMusica.toLowerCase());
+                const categoriaOk = !filtroCategoriaCatalogo || m.categoria === filtroCategoriaCatalogo;
+                return buscaOk && categoriaOk;
+              });
+              const iconePorTipoCat = { pdf: "📄", audio: "🎵", imagem: "🖼️", link: "🔗" };
+
+              return (
+                <div style={{ padding: "0 16px" }}>
+                  <div style={{ padding: "16px 0 0" }}>
+                    <button onClick={() => { setCatalogoMusicasAberto(false); setMusicaCatalogoExpandida(null); setBuscaCatalogoMusica(""); setFiltroCategoriaCatalogo(""); }}
+                      style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", gap: 4, padding: 0, marginBottom: 10 }}>
+                      ‹ Voltar
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 4 }}>🎵 Músicas — {catalogoMusicasAberto}</div>
+                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>{musicasFiltradas.length} de {musicasDoMin.length} música(s)</div>
+
+                  {/* Busca */}
+                  <input style={{ ...S.input, marginBottom: 10 }} placeholder="🔍 Buscar por nome ou artista..."
+                    value={buscaCatalogoMusica} onChange={e => setBuscaCatalogoMusica(e.target.value)} />
+
+                  {/* Filtro de categoria */}
+                  <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto" }}>
+                    {CATEGORIAS_FILTRO.map(c => (
+                      <button key={c.id} onClick={() => setFiltroCategoriaCatalogo(c.id)}
+                        style={{ flexShrink: 0, padding: "7px 14px", borderRadius: 20, border: `1px solid ${filtroCategoriaCatalogo === c.id ? "#c9a84c" : T.cardBorder}`, background: filtroCategoriaCatalogo === c.id ? "rgba(201,168,76,.15)" : T.card, color: filtroCategoriaCatalogo === c.id ? "#c9a84c" : T.textSub, fontSize: 12, fontWeight: filtroCategoriaCatalogo === c.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {musicasFiltradas.length === 0 ? (
+                    <div style={{ ...S.card, textAlign: "center", padding: "28px 0", marginLeft: 0, marginRight: 0 }}>
+                      <div style={{ fontSize: 32, marginBottom: 8 }}>🎵</div>
+                      <div style={{ fontSize: 13, color: T.textSub }}>Nenhuma música encontrada</div>
+                    </div>
+                  ) : musicasFiltradas.map(m => {
+                    const expandida = musicaCatalogoExpandida === m.id;
+                    const ytId = getYouTubeId(m.link);
+                    const spId = getSpotifyId(m.link);
+                    const arquivosM = m.arquivos || [];
+                    return (
+                      <div key={m.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 10, overflow: "hidden" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", cursor: "pointer" }}
+                          onClick={() => setMusicaCatalogoExpandida(expandida ? null : m.id)}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{m.titulo}</div>
+                            <div style={{ fontSize: 12, color: T.textSub }}>{m.artista} {m.tom && <span style={{ color: "#c9a84c" }}>• Tom: {m.tom}</span>} {m.tempo && <span style={{ color: "#8b5cf6" }}>• 🥁 {m.tempo} BPM</span>}</div>
+                            {m.categoria && <div style={{ fontSize: 10, color: "#22d3ee", marginTop: 3 }}>🏷️ {m.categoria}</div>}
+                          </div>
+                          <span style={{ color: T.textSub, fontSize: 16 }}>{expandida ? "▲" : "▼"}</span>
+                        </div>
+                        {expandida && (
+                          <div style={{ padding: "0 14px 14px" }}>
+                            {ytId && <div style={{ margin: "10px 0" }}><iframe width="100%" height="180" src={`https://www.youtube.com/embed/${ytId}`} frameBorder="0" allowFullScreen loading="lazy" style={{ display: "block", borderRadius: 10 }} title="Video player"/></div>}
+                            {spId && <div style={{ margin: "10px 0" }}><iframe src={`https://open.spotify.com/embed/${spId.type}/${spId.id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style={{ display: "block", borderRadius: 10 }} title="Spotify player"/></div>}
+                            {m.link && !ytId && !spId && (
+                              <div style={{ margin: "10px 0" }}>
+                                <button onClick={() => window.open(m.link, "_blank")}
+                                  style={{ width: "100%", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: T.gold, cursor: "pointer" }}>🔗 Abrir Link</button>
+                              </div>
+                            )}
+                            {arquivosM.length === 0 ? (
+                              <div style={{ fontSize: 12, color: T.textFaint }}>Nenhum arquivo anexado ainda.</div>
+                            ) : (
+                              <>
+                                <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>📎 Arquivos</div>
+                                {arquivosM.map(a => (
+                                  <div key={a.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.15)", borderRadius: 10, padding: "8px 10px", marginBottom: 6 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                      <span style={{ fontSize: 15 }}>{iconePorTipoCat[a.tipo] || "📁"}</span>
+                                      <span style={{ flex: 1, fontSize: 12, fontWeight: "bold", color: T.text }}>{a.nome}</span>
+                                      {a.tipo === "audio" ? (
+                                        <button onClick={() => setAudioTocando(audioTocando === a.id ? null : a.id)}
+                                          style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>{audioTocando === a.id ? "⏹ Fechar" : "▶️ Tocar"}</button>
+                                      ) : (
+                                        <button onClick={() => window.open(a.url, "_blank")}
+                                          style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>Abrir</button>
+                                      )}
+                                      {a.tipo !== "link" && (
+                                        <button onClick={() => baixarArquivo(a.url, a.nome)}
+                                          style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#4ade80", cursor: "pointer" }}>⬇️</button>
+                                      )}
+                                    </div>
+                                    {a.tipo === "audio" && audioTocando === a.id && (
+                                      <audio controls autoPlay style={{ width: "100%", marginTop: 8, height: 34 }}>
+                                        <source src={a.url} />
+                                      </audio>
+                                    )}
+                                  </div>
+                                ))}
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })() : (
+              <>
             <div style={{ padding: "16px 16px 8px" }}>
               <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 4 }}>⛪ Meu Ministério</div>
             </div>
@@ -2732,10 +2849,16 @@ export default function FamiliaAliancaApp() {
                   {/* Header ministério */}
                   <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontSize: 20 }}>{minData?.icon || "⛪"}</span>
-                    <div>
+                    <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 14, fontWeight: "bold", color: "#080810" }}>{min}</div>
                       {minData?.desc && <div style={{ fontSize: 11, color: "#080810", opacity: 0.7 }}>{minData.desc}</div>}
                     </div>
+                    {min === "Aliança Music" && (
+                      <button onClick={() => setCatalogoMusicasAberto(min)}
+                        style={{ background: "rgba(8,8,16,.15)", border: "1px solid rgba(8,8,16,.3)", borderRadius: 10, padding: "8px 12px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }}>
+                        🎵 Músicas
+                      </button>
+                    )}
                   </div>
                   <div style={{ padding: "14px 16px" }}>
                     {/* Líder */}
@@ -3038,6 +3161,8 @@ export default function FamiliaAliancaApp() {
                 </div>
               );
             })}
+              </>
+            )}
           </div>
         )}
 
