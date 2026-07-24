@@ -2871,7 +2871,7 @@ export default function FamiliaAliancaApp() {
                                             <div style={{ fontSize: 11, color: T.textSub }}>{mus.artista} {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>} {mus.tempo && <span style={{ color: "#8b5cf6" }}>• 🥁{mus.tempo}</span>}</div>
                                           </div>
                                         </div>
-                                        {getYouTubeId(mus.link) && <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen style={{ display: "block" }} />}
+                                        {getYouTubeId(mus.link) && <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen loading="lazy" style={{ display: "block" }} />}
                                         {getSpotifyId(mus.link) && <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />}
                                         <div style={{ padding: "0 12px" }}>
                                           {(mus.arquivos || []).map(a => (
@@ -4047,27 +4047,31 @@ export default function FamiliaAliancaApp() {
                               <span style={{ color: T.textSub, fontSize: 16 }}>{expandida ? "▲" : "▼"}</span>
                               <button onClick={async (e) => { e.stopPropagation(); if (window.confirm("Excluir música?")) { await deleteDoc(doc(db, "musicas", m.id)); showToast("🗑️ Removida!"); } }} style={S.delBtn}>🗑️</button>
                             </div>
-                            {/* YouTube embed */}
-                            {ytId && (
-                              <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${ytId}`} frameBorder="0" allowFullScreen style={{ display: "block" }}  title="Video player"/>
-                            )}
-                            {/* Spotify embed */}
-                            {spId && (
-                              <iframe src={`https://open.spotify.com/embed/${spId.type}/${spId.id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }}  title="Video player"/>
-                            )}
-                            {/* Link externo se não for YT nem Spotify */}
-                            {m.link && !ytId && !spId && (
-                              <div style={{ padding: "0 14px 12px" }}>
-                                <button onClick={() => window.open(m.link, "_blank")}
-                                  style={{ width: "100%", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: T.gold, cursor: "pointer" }}>
-                                  🔗 Abrir Link
-                                </button>
-                              </div>
-                            )}
-
                             {/* ── Arquivos nomeados da música (expansível) ── */}
                             {expandida && (
-                              <div style={{ padding: "0 14px 14px", borderTop: `1px solid ${T.cardBorder}`, marginTop: 4 }}>
+                              <div style={{ padding: "0 14px 14px", marginTop: 4 }}>
+                                {/* YouTube embed — só carrega quando a música está aberta */}
+                                {ytId && (
+                                  <div style={{ margin: "10px 0" }}>
+                                    <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${ytId}`} frameBorder="0" allowFullScreen loading="lazy" style={{ display: "block", borderRadius: 10 }} title="Video player"/>
+                                  </div>
+                                )}
+                                {/* Spotify embed — só carrega quando a música está aberta */}
+                                {spId && (
+                                  <div style={{ margin: "10px 0" }}>
+                                    <iframe src={`https://open.spotify.com/embed/${spId.type}/${spId.id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style={{ display: "block", borderRadius: 10 }} title="Spotify player"/>
+                                  </div>
+                                )}
+                                {/* Link externo se não for YT nem Spotify */}
+                                {m.link && !ytId && !spId && (
+                                  <div style={{ margin: "10px 0" }}>
+                                    <button onClick={() => window.open(m.link, "_blank")}
+                                      style={{ width: "100%", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, padding: "8px 0", fontSize: 12, color: T.gold, cursor: "pointer" }}>
+                                      🔗 Abrir Link
+                                    </button>
+                                  </div>
+                                )}
+
                                 <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", margin: "12px 0 8px" }}>📎 Arquivos desta música</div>
                                 {arquivosM.length === 0 && (
                                   <div style={{ fontSize: 12, color: T.textFaint, marginBottom: 10 }}>Nenhum arquivo anexado ainda — adicione cifra, áudios por naipe (soprano, contralto, tenor), VS, links, etc.</div>
