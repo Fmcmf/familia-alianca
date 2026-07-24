@@ -3739,9 +3739,9 @@ export default function FamiliaAliancaApp() {
                 ? `perfilMusical_${ministerioLider.replace(/\s/g, "_")}`
                 : `perfilCategorias_${ministerioLider.replace(/\s/g, "_")}`;
               const CATEGORIAS = isMusical
-                ? ["Ministro(a)", "Soprano", "Contralto", "Tenor", "Backing Vocal", "Violão", "Guitarra", "Baixo", "Bateria", "Teclado"]
+                ? ["Ministro(a)", "Soprano", "Contralto", "Tenor", "Barítono", "Violão", "Teclado", "Bateria", "Baixo", "Guitarra", "Flauta", "Violino", "Percussão"]
                 : categoriasEquipe.filter(c => c.ministerio === ministerioLider).map(c => c.nome);
-              const FUNCOES_VOCAIS = ["Ministro(a)", "Soprano", "Contralto", "Tenor", "Backing Vocal"];
+              const FUNCOES_VOCAIS = ["Ministro(a)", "Soprano", "Contralto", "Tenor", "Barítono"];
 
               // Retorna membros que têm aquela função/instrumento (musical) ou categoria (genérico)
               const membrosPorCategoria = (cat) => {
@@ -3750,7 +3750,7 @@ export default function FamiliaAliancaApp() {
                   if (!perfil) return false;
                   if (isMusical) {
                     const todasFuncoes = [...(perfil.funcoes || []), ...(perfil.instrumentos || [])];
-                    return todasFuncoes.some(f => f.toLowerCase().includes(cat.split("/")[0].toLowerCase()) || cat.toLowerCase().includes(f.toLowerCase()));
+                    return todasFuncoes.includes(cat);
                   }
                   return (perfil.categorias || []).includes(cat);
                 });
@@ -3818,9 +3818,7 @@ export default function FamiliaAliancaApp() {
                         {CATEGORIAS.map(cat => {
                           const disponiveis = membrosPorCategoria(cat);
                           const escaladosNaCat = isMusical
-                            ? Object.values(escalados).filter(d =>
-                                [...(d.funcoes || []), ...(d.instrumentos || [])].some(f => f.toLowerCase().includes(cat.split("/")[0].toLowerCase()) || cat.toLowerCase().includes(f.toLowerCase()))
-                              )
+                            ? Object.values(escalados).filter(d => [...(d.funcoes || []), ...(d.instrumentos || [])].includes(cat))
                             : Object.values(escalados).filter(d => (d.categorias || []).includes(cat));
                           if (disponiveis.length === 0) return null;
                           return (
