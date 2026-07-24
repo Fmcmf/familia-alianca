@@ -4263,6 +4263,33 @@ export default function FamiliaAliancaApp() {
                     </>
                   )}
 
+                  {/* Limpeza de Cifras/VS antigos (cadastrados antes da mudança de estrutura, sem vínculo de música) */}
+                  {(() => {
+                    const cifrasAntigas = cifras.filter(c => c.ministerio === ministerioLider);
+                    const vsAntigos = vsItems.filter(v => v.ministerio === ministerioLider);
+                    if (cifrasAntigas.length === 0 && vsAntigos.length === 0) return null;
+                    return (
+                      <div style={{ marginTop: 24, background: "rgba(220,38,38,.05)", border: "1px solid rgba(220,38,38,.2)", borderRadius: 14, padding: "14px 16px" }}>
+                        <div style={{ fontSize: 12, fontWeight: "bold", color: "#f87171", marginBottom: 4 }}>🧹 Cifras/VS antigos (fora da estrutura atual)</div>
+                        <div style={{ fontSize: 11, color: T.textSub, marginBottom: 12 }}>Registros cadastrados antes da mudança — não pertencem a nenhuma música do jeito novo. Exclua o que não precisar mais.</div>
+                        {cifrasAntigas.map(c => (
+                          <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
+                            <span style={{ fontSize: 12, color: T.text, flex: 1 }}>🎸 {c.titulo || "(sem título)"}</span>
+                            <button onClick={async () => { if (window.confirm(`Excluir a cifra "${c.titulo}"?`)) { await deleteDoc(doc(db, "cifras", c.id)); showToast("🗑️ Excluída!"); } }}
+                              style={S.delBtn}>🗑️</button>
+                          </div>
+                        ))}
+                        {vsAntigos.map(v => (
+                          <div key={v.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 0", borderBottom: `1px solid ${T.cardBorder}` }}>
+                            <span style={{ fontSize: 12, color: T.text, flex: 1 }}>🎧 {v.titulo || "(sem título)"}</span>
+                            <button onClick={async () => { if (window.confirm(`Excluir "${v.titulo}"?`)) { await deleteDoc(doc(db, "vs", v.id)); showToast("🗑️ Excluído!"); } }}
+                              style={S.delBtn}>🗑️</button>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+
                 </div>
               );
             })()}
