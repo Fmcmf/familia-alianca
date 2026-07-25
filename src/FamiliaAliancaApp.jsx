@@ -39,7 +39,6 @@ const EMAILJS_TEMPLATE_ID = "template_142tb2a";
 const EMAILJS_PUBLIC_KEY  = "KkcyGeZOZYPkwGing";
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
-const YOUTUBE_CHANNEL = "familiaaliancapiracicaba";
 const WHATSAPP_PASTOR = "5519997218590";
 const PIX_KEY = "13.327.600/0001-00";
 
@@ -1821,22 +1820,6 @@ export default function FamiliaAliancaApp() {
               </div>
             )}
 
-            {/* YouTube */}
-            <div style={S.secTitle}>Canal no YouTube</div>
-            <div style={{ ...S.card, display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
-              onClick={() => window.open(`https://www.youtube.com/@${YOUTUBE_CHANNEL}`, "_blank")}>
-              <div style={{ background: "#ff0000", borderRadius: 12, width: 52, height: 38, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <svg width="24" height="18" viewBox="0 0 24 18" fill="white">
-                  <path d="M23.5 2.8S23.2.7 22.3.8C21.4-.1 20.3 0 20.3 0H3.7S2.6-.1 1.7.8C.8.7.5 2.8.5 2.8S0 5.2 0 7.6v2.2c0 2.4.5 4.8.5 4.8s.3 2.1 1.2 2s1.7.8 1.7.8H12s5.5.1 7.3-.1c1.8-.2 1.7-.8 1.7-.8s1.2-1.9 1.2-2 .5-2.4.5-4.8V7.6c0-2.4-.5-4.8-.5-4.8zM9.7 12.1V5.2l6.6 3.5-6.6 3.4z"/>
-                </svg>
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4 }}>Família Aliança Piracicaba</div>
-                <div style={{ fontSize: 12, color: T.textSub }}>Assista nossos cultos e pregações</div>
-                <div style={{ fontSize: 12, color: "#ef4444", marginTop: 4 }}>youtube.com/@familiaaliancapiracicaba</div>
-              </div>
-            </div>
-
             {/* Último Vídeo do Culto */}
             {ultimoVideo && getYouTubeId(ultimoVideo.url) && (
               <>
@@ -2249,7 +2232,7 @@ export default function FamiliaAliancaApp() {
 
             {/* Voltar */}
             <div style={{ padding: "16px 16px 0" }}>
-              <button onClick={() => setTab("mais")}
+              <button onClick={() => setTab("home")}
                 style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
                 ‹ Voltar
               </button>
@@ -2487,6 +2470,14 @@ export default function FamiliaAliancaApp() {
         {/* ══ MAIS ══ */}
         {tab === "mais" && (
           <div style={{ animation: "slideUp .4s ease" }}>
+
+            {/* Voltar */}
+            <div style={{ padding: "16px 16px 0" }}>
+              <button onClick={() => setTab("home")}
+                style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
+                ‹ Voltar
+              </button>
+            </div>
 
             {/* Menu rápido */}
             <div style={S.secTitle}>Menu</div>
