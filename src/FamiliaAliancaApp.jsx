@@ -1408,10 +1408,6 @@ export default function FamiliaAliancaApp() {
     ...(isAdmin || isLider ? [{ id: "admin", icon: isAdmin ? "⚙️" : "🏛️", label: isAdmin ? "Admin" : "Líder" }] : []),
   ];
 
-  // próximos eventos
-  const hoje = new Date().toISOString().split("T")[0];
-  const proximos = agenda.filter(e => e.data >= hoje).slice(0, 4);
-
   const getMonAbbr = (dataStr) => { const meses = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"]; const [, m] = dataStr.split("-"); return meses[parseInt(m) - 1]; };
   const getDay = (dataStr) => dataStr.split("-")[2];
 
@@ -1801,32 +1797,21 @@ export default function FamiliaAliancaApp() {
               </div>
             </div>
 
-            {/* ── PRÓXIMOS EVENTOS ── */}
-            <div style={{ padding: "20px 16px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub }}>Próximos eventos</div>
-              <button style={{ background: "none", border: "none", color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }} onClick={() => setTab("mais")}>Ver todos</button>
+            {/* ── HORÁRIO DOS CULTOS ── */}
+            <div style={{ padding: "20px 16px 0" }}>
+              <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub }}>Horário dos Cultos</div>
             </div>
-            {proximos.length === 0 ? (
-              <div style={{ ...S.card, textAlign: "center", padding: "28px 20px", margin: "12px 16px" }}>
-                <div style={{ fontSize: 13, color: T.textSub }}>Nenhum evento programado.</div>
-              </div>
-            ) : proximos.map(ev => (
-              <div key={ev.id} style={{ margin: "10px 16px 0", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", display: "flex", gap: 16, alignItems: "center" }}>
-                {/* data lateral */}
-                <div style={{ minWidth: 42, textAlign: "center" }}>
-                  <div style={{ fontSize: 24, fontWeight: "bold", color: T.gold, lineHeight: 1 }}>{getDay(ev.data)}</div>
-                  <div style={{ fontSize: 10, color: T.textSub, textTransform: "uppercase", letterSpacing: 1 }}>{getMonAbbr(ev.data)}</div>
+            <div style={{ ...S.card, margin: "12px 16px 0" }}>
+              {HORARIOS_CULTO.map((h, i) => (
+                <div key={i} style={{ ...S.contatoRow, borderBottom: i < HORARIOS_CULTO.length - 1 ? "1px solid " + T.cardBorder : "none" }}>
+                  <div style={S.contatoIcon}>{h.icon}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{h.dia}</div>
+                    <div style={{ fontSize: 12, color: T.gold, marginTop: 2 }}>{h.hora}</div>
+                  </div>
                 </div>
-                {/* divider */}
-                <div style={{ width: 1, alignSelf: "stretch", background: T.cardBorder }} />
-                {/* info */}
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: "bold", color: T.text, marginBottom: 2 }}>{ev.titulo}</div>
-                  <div style={{ fontSize: 12, color: T.textSub }}>{tipoLabel[ev.tipo] || ev.tipo}{ev.hora ? `, ${ev.hora}` : ""}</div>
-                  {ev.local && <div style={{ fontSize: 12, color: T.textFaint, marginTop: 2 }}>{ev.local}</div>}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
 
             {/* ── AO VIVO ── */}
             <div style={S.secTitle}>Transmissão Online</div>
@@ -2541,20 +2526,6 @@ export default function FamiliaAliancaApp() {
                   <span style={{ fontSize: 26 }}>{item.icon}</span>
                   <span style={{ fontSize: 12, color: T.text, fontWeight: "bold" }}>{item.label}</span>
                 </button>
-              ))}
-            </div>
-
-            {/* Horários dos Cultos */}
-            <div style={S.secTitle}>Horários dos Cultos</div>
-            <div style={S.card}>
-              {HORARIOS_CULTO.map((h, i) => (
-                <div key={i} style={{ ...S.contatoRow, borderBottom: i < HORARIOS_CULTO.length - 1 ? "1px solid " + T.cardBorder : "none" }}>
-                  <div style={S.contatoIcon}>{h.icon}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{h.dia}</div>
-                    <div style={{ fontSize: 12, color: T.gold, marginTop: 2 }}>{h.hora}</div>
-                  </div>
-                </div>
               ))}
             </div>
 
