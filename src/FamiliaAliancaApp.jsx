@@ -730,7 +730,7 @@ export default function FamiliaAliancaApp() {
           }).catch(() => {});
         }
         setScreen("app");
-        setTab((!u.lider && !u.admin && verificarEscalado(u.email)) ? "meumin" : "home");
+        setTab(u.admin ? "home" : u.lider ? "admin" : (u.ministerios?.length > 0 ? "meumin" : "home"));
       } // eslint-disable-line no-unused-vars
       else setScreen("login");
     }, 2200);
@@ -1004,7 +1004,7 @@ export default function FamiliaAliancaApp() {
         setMinisterioLider(null);
       }
       setScreen("app");
-      setTab((!u.lider && !u.admin && verificarEscalado(u.email)) ? "meumin" : "home");
+      setTab(u.admin ? "home" : u.lider ? "admin" : (u.ministerios?.length > 0 ? "meumin" : "home"));
       // Inicializar última visita se for primeira vez
       if (!localStorage.getItem("fa_ultima_visita")) {
         const agora = new Date().toISOString();
@@ -1019,13 +1019,6 @@ export default function FamiliaAliancaApp() {
         setShowCompletarCadastro(true);
       }
     }
-  };
-
-  // Verifica se o e-mail está escalado em alguma escala futura (usado para redirecionar após login)
-  const verificarEscalado = (email) => {
-    if (!email) return false;
-    const hoje = new Date().toISOString().split("T")[0];
-    return escalas.some(e => e.data >= hoje && e.membrosEscalados?.[email]);
   };
 
   // Verifica a senha do admin atualmente logado (proteção extra antes de conceder/revogar acesso admin)
