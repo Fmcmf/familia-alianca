@@ -1682,25 +1682,30 @@ export default function FamiliaAliancaApp() {
               </div>
             )}
 
-            {/* ── CARD PALAVRA SEMANAL (com foto do pastor) ── */}
-            {palavra ? (
+            {/* ── CARD DEVOCIONAL DO DIA (com foto do pastor) ── */}
+            {devocional ? (
               <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", position: "relative", background: darkMode ? "linear-gradient(135deg,#0a1a3a 0%,#050d1f 60%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 60%)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.55)"}`, minHeight: 190 }}>
                 {/* faixa dourada topo */}
                 <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px", display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>Palavra Semanal</span>
+                  <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>🕊️ Devocional do Dia</span>
                 </div>
                 {/* conteúdo */}
                 <div style={{ display: "flex", alignItems: "stretch", minHeight: 160 }}>
                   {/* texto */}
                   <div style={{ flex: 1, padding: "14px 16px 16px" }}>
                     <div style={{ fontSize: 11, color: "#c9a84c", marginBottom: 4, letterSpacing: 1 }}>Pr. Fernando Mello</div>
-                    <div style={{ fontSize: 20, fontWeight: "bold", lineHeight: 1.25, color: darkMode ? "#fff" : "#1a0f00", marginBottom: 14 }}>
-                      {palavra.titulo}
+                    <div style={{ fontSize: 18, fontWeight: "bold", lineHeight: 1.25, color: darkMode ? "#fff" : "#1a0f00", marginBottom: 8 }}>
+                      {devocional.titulo}
                     </div>
+                    {devocional.palavra && (
+                      <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5, marginBottom: 12, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+                        {devocional.palavra.replace(/\*\*/g, "").split("\n").find(p => p.trim())}
+                      </div>
+                    )}
                     <button
                       style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 20, padding: "10px 16px", fontSize: 13, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}
-                      onClick={() => setTab("palavra")}>
-                      Ler Palavra Completa →
+                      onClick={() => setTab("devocional")}>
+                      Leia o Devocional completo →
                     </button>
                   </div>
                   {/* foto pastor — maior */}
@@ -1716,8 +1721,8 @@ export default function FamiliaAliancaApp() {
               </div>
             ) : (
               <div style={{ ...S.card, textAlign: "center", padding: "32px 20px" }}>
-                <div style={{ fontSize: 36, marginBottom: 12 }}>📜</div>
-                <div style={{ fontSize: 14, color: T.textSub }}>Nenhuma palavra semanal publicada ainda.</div>
+                <div style={{ fontSize: 36, marginBottom: 12 }}>🕊️</div>
+                <div style={{ fontSize: 14, color: T.textSub }}>Nenhum devocional publicado ainda.</div>
               </div>
             )}
 
