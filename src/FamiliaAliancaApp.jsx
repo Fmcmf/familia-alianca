@@ -937,6 +937,26 @@ export default function FamiliaAliancaApp() {
     return data.toLocaleDateString("pt-BR");
   };
 
+  // Gera e baixa a pregação como arquivo de texto (.txt), pronta pra organizar em pasta
+  const baixarPregacaoTxt = (p) => {
+    const linhas = [
+      p.titulo || "Pregação",
+      "",
+      p.versiculos || "",
+    ];
+    const conteudo = linhas.join("\n");
+    const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const nomeArq = (p.titulo || "pregacao").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "_").slice(0, 60);
+    a.download = `${nomeArq || "pregacao"}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const baixarArquivo = (url, nomeArquivo) => {
     if (!url) return;
     // Link direto e síncrono com fl_attachment (Cloudinary) — funciona de forma confiável
@@ -3027,8 +3047,7 @@ export default function FamiliaAliancaApp() {
                             {/* Arquivos e Pregação — para membros escalados no Ministério da Mídia (ou Usuário Padrão, que sempre recebe tudo) */}
                             {(meuDadosEscala || souUsuarioPadrao) && min === "Mídia" && (() => {
                               const arquivosDoMin = arquivosMidia.filter(a => a.ministerio === min);
-                              const hojeMembro = new Date().toISOString().split("T")[0];
-                              const pregacoesDoMin = pregacoes.filter(p => !p.data || p.data >= hojeMembro).sort((a, b) => (a.data || "").localeCompare(b.data || ""));
+                              const pregacaoAtualMin = [...pregacoes].sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""))[0];
                               const vejoPregacao = souUsuarioPadrao || meuDadosEscala?.categorias?.includes("Letra");
                               return (
                                 <>
@@ -3050,16 +3069,17 @@ export default function FamiliaAliancaApp() {
                                     </div>
                                   )}
 
-                                  {pregacoesDoMin.length > 0 && vejoPregacao && (
+                                  {pregacaoAtualMin && vejoPregacao && (
                                     <div style={{ marginTop: 10 }}>
                                       <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>📜 Pregação</div>
-                                      {pregacoesDoMin.map(p => (
-                                        <div key={p.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, padding: "8px 12px", marginBottom: 6 }}>
-                                          <div style={{ fontSize: 12, fontWeight: "bold", color: T.text }}>{p.titulo}</div>
-                                          {p.data && <div style={{ fontSize: 10, color: T.textSub, marginBottom: 4 }}>{new Date(p.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</div>}
-                                          {p.versiculos && <div style={{ fontSize: 11, color: T.textSub, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{p.versiculos}</div>}
+                                      <div style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 10, padding: "10px 12px" }}>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                                          <div style={{ fontSize: 12, fontWeight: "bold", color: T.text, flex: 1 }}>{pregacaoAtualMin.titulo}</div>
+                                          <button onClick={() => baixarPregacaoTxt(pregacaoAtualMin)}
+                                            style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 10, fontWeight: "bold", color: "#4ade80", cursor: "pointer", flexShrink: 0 }}>⬇️ .txt</button>
                                         </div>
-                                      ))}
+                                        {pregacaoAtualMin.versiculos && <div style={{ fontSize: 11, color: T.textSub, whiteSpace: "pre-wrap", lineHeight: 1.6, marginTop: 6 }}>{pregacaoAtualMin.versiculos}</div>}
+                                      </div>
                                     </div>
                                   )}
                                 </>
@@ -3155,7 +3175,7 @@ export default function FamiliaAliancaApp() {
           const escalaAtualLouvor = escalas.filter(e => e.ministerio === "Aliança Music" && e.data >= hojeMidia).sort((a, b) => a.data.localeCompare(b.data))[0];
           const musicasDoEvento = (escalaAtualLouvor?.musicas || []).map(mid => musicas.find(x => x.id === mid)).filter(Boolean);
           const arquivosDoMinMidia = arquivosMidia.filter(a => a.ministerio === "Mídia");
-          const pregacoesProximasMidia = pregacoes.filter(p => !p.data || p.data >= hojeMidia).sort((a, b) => (a.data || "").localeCompare(b.data || ""));
+          const pregacaoAtualMidia = [...pregacoes].sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""))[0];
 
           return (
             <div style={{ animation: "slideUp .4s ease", paddingBottom: 20 }}>
@@ -3232,18 +3252,21 @@ export default function FamiliaAliancaApp() {
 
                 {/* Palavra do Pastor */}
                 <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>📜 Palavra do Pastor</div>
-                {pregacoesProximasMidia.length === 0 ? (
+                {!pregacaoAtualMidia ? (
                   <div style={{ ...S.card, textAlign: "center", padding: "24px 0", marginLeft: 0, marginRight: 0 }}>
                     <div style={{ fontSize: 28, marginBottom: 8 }}>📜</div>
                     <div style={{ fontSize: 13, color: T.textSub }}>O Pastor ainda não inseriu a palavra para esse evento.</div>
                   </div>
-                ) : pregacoesProximasMidia.map(p => (
-                  <div key={p.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 12, padding: "12px 14px", marginBottom: 10 }}>
-                    <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 4 }}>{p.titulo}</div>
-                    {p.data && <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>{new Date(p.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</div>}
-                    {p.versiculos && <div style={{ fontSize: 12, color: T.textSub, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{p.versiculos}</div>}
+                ) : (
+                  <div style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 12, padding: "12px 14px", marginBottom: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 4 }}>
+                      <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, flex: 1 }}>{pregacaoAtualMidia.titulo}</div>
+                      <button onClick={() => baixarPregacaoTxt(pregacaoAtualMidia)}
+                        style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "6px 10px", fontSize: 11, fontWeight: "bold", color: "#4ade80", cursor: "pointer", flexShrink: 0 }}>⬇️ .txt</button>
+                    </div>
+                    {pregacaoAtualMidia.versiculos && <div style={{ fontSize: 12, color: T.textSub, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{pregacaoAtualMidia.versiculos}</div>}
                   </div>
-                ))}
+                )}
               </div>
             </div>
           );
@@ -4431,8 +4454,7 @@ export default function FamiliaAliancaApp() {
             {/* Arquivos — apenas Mídia */}
             {adminTab === "arquivos-min" && ministerioLider === "Mídia" && (() => {
               const arquivosMin = arquivosMidia.filter(a => a.ministerio === ministerioLider);
-              const hoje4 = new Date().toISOString().split("T")[0];
-              const pregacoesProximas = pregacoes.filter(p => !p.data || p.data >= hoje4).sort((a, b) => (a.data || "").localeCompare(b.data || ""));
+              const pregacaoAtualLider = [...pregacoes].sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""))[0];
 
               return (
                 <div style={{ padding: "0 16px" }}>
@@ -4501,20 +4523,23 @@ export default function FamiliaAliancaApp() {
 
                   {/* Pregação — inserida pelo Pastor, visualização apenas */}
                   <div style={{ fontSize: 12, color: "#8b5cf6", marginBottom: 10, letterSpacing: 1, textTransform: "uppercase" }}>📜 Pregação (inserida pelo Pastor)</div>
-                  {pregacoesProximas.length === 0 ? (
+                  {!pregacaoAtualLider ? (
                     <div style={{ ...S.card, textAlign: "center", padding: "24px 0", marginLeft: 0, marginRight: 0 }}>
                       <div style={{ fontSize: 32, marginBottom: 8 }}>📜</div>
                       <div style={{ fontSize: 13, color: T.textSub }}>O Pastor ainda não inseriu nenhuma pregação</div>
                     </div>
-                  ) : pregacoesProximas.map(p => (
-                    <div key={p.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 12, padding: "12px 14px", marginBottom: 10 }}>
-                      <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 4 }}>{p.titulo}</div>
-                      {p.data && <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>{new Date(p.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</div>}
-                      {p.versiculos && (
-                        <div style={{ fontSize: 12, color: T.textSub, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{p.versiculos}</div>
+                  ) : (
+                    <div style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 12, padding: "12px 14px", marginBottom: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 4 }}>
+                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, flex: 1 }}>{pregacaoAtualLider.titulo}</div>
+                        <button onClick={() => baixarPregacaoTxt(pregacaoAtualLider)}
+                          style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "6px 10px", fontSize: 11, fontWeight: "bold", color: "#4ade80", cursor: "pointer", flexShrink: 0 }}>⬇️ .txt</button>
+                      </div>
+                      {pregacaoAtualLider.versiculos && (
+                        <div style={{ fontSize: 12, color: T.textSub, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{pregacaoAtualLider.versiculos}</div>
                       )}
                     </div>
-                  ))}
+                  )}
                 </div>
               );
             })()}
@@ -4754,10 +4779,11 @@ export default function FamiliaAliancaApp() {
             {adminTab === "pregacao" && (() => {
               const hoje5 = new Date().toISOString().split("T")[0];
               const eventosFuturos = agenda.filter(e => !e.data || e.data >= hoje5).sort((a, b) => a.data?.localeCompare(b.data));
+              const pregacoesOrdenadas = [...pregacoes].sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""));
               return (
                 <div style={{ padding: "0 16px" }}>
                   <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>🎙️ Pregação</div>
-                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Insira o tema e os versículos da pregação. O Ministério de Mídia poderá visualizar para preparar o telão.</div>
+                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Insira o tema e os versículos da pregação. O Ministério de Mídia poderá visualizar e baixar para preparar o telão.</div>
 
                   <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 20 }}>
                     <label style={S.label}>Tema/Título *</label>
@@ -4765,14 +4791,10 @@ export default function FamiliaAliancaApp() {
                       value={novaPregacao.titulo} onChange={e => setNovaPregacao({ ...novaPregacao, titulo: e.target.value })} />
 
                     <label style={S.label}>Versículos / Tópicos</label>
-                    <textarea style={{ ...S.input, minHeight: 100, marginBottom: 0 }} placeholder={"Ex:\nMateus 17:20\nMarcos 11:22-24\nTópico 1: A fé que agrada a Deus\nTópico 2: Duvidar x Confiar"}
+                    <textarea style={{ ...S.input, minHeight: 140, marginBottom: 0, fontFamily: "inherit", whiteSpace: "pre-wrap" }} placeholder={"Ex:\nMateus 17:20\nMarcos 11:22-24\nTópico 1: A fé que agrada a Deus\nTópico 2: Duvidar x Confiar"}
                       value={novaPregacao.versiculos} onChange={e => setNovaPregacao({ ...novaPregacao, versiculos: e.target.value })} />
 
-                    <label style={S.label}>Data do culto</label>
-                    <input type="date" style={{ ...S.input, marginBottom: 0 }}
-                      value={novaPregacao.data} onChange={e => setNovaPregacao({ ...novaPregacao, data: e.target.value })} />
-
-                    <label style={S.label}>Vincular a um evento da agenda (opcional)</label>
+                    <label style={S.label}>Vincular a um evento da agenda (define a data do culto)</label>
                     <select style={{ ...S.select, marginBottom: 0 }} value={novaPregacao.eventoId}
                       onChange={e => setNovaPregacao({ ...novaPregacao, eventoId: e.target.value })}>
                       <option value="">Nenhum evento específico</option>
@@ -4783,31 +4805,39 @@ export default function FamiliaAliancaApp() {
 
                     <button style={{ ...S.saveBtn, marginTop: 12 }} onClick={async () => {
                       if (!novaPregacao.titulo) { showToast("⚠️ Informe o tema/título!"); return; }
-                      await addDoc(collection(db, "pregacoes"), { ...novaPregacao, criadoEm: new Date().toISOString(), criadoPor: user?.nome || "Pastor" });
+                      await addDoc(collection(db, "pregacoes"), { titulo: novaPregacao.titulo, versiculos: novaPregacao.versiculos, eventoId: novaPregacao.eventoId, criadoEm: new Date().toISOString(), criadoPor: user?.nome || "Pastor" });
                       setNovaPregacao({ titulo: "", versiculos: "", eventoId: "", data: "" });
                       showToast("✅ Pregação salva!");
                     }}>🎙️ Salvar Pregação</button>
                   </div>
 
-                  <div style={{ fontSize: 12, color: T.gold, marginBottom: 10, letterSpacing: 1, textTransform: "uppercase" }}>Pregações cadastradas ({pregacoes.length})</div>
-                  {pregacoes.length === 0 ? (
+                  <div style={{ fontSize: 12, color: T.gold, marginBottom: 10, letterSpacing: 1, textTransform: "uppercase" }}>Pregações cadastradas ({pregacoesOrdenadas.length})</div>
+                  {pregacoesOrdenadas.length === 0 ? (
                     <div style={{ ...S.card, textAlign: "center", padding: "24px 0", marginLeft: 0, marginRight: 0 }}>
                       <div style={{ fontSize: 32, marginBottom: 8 }}>🎙️</div>
                       <div style={{ fontSize: 13, color: T.textSub }}>Nenhuma pregação cadastrada ainda</div>
                     </div>
-                  ) : pregacoes.map(p => (
-                    <div key={p.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10 }}>
+                  ) : pregacoesOrdenadas.map((p, idx) => {
+                    const eventoVinculado = agenda.find(e => e.id === p.eventoId);
+                    return (
+                    <div key={p.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 10, border: idx === 0 ? "1px solid rgba(34,197,94,.35)" : undefined }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
                         <div style={{ flex: 1 }}>
+                          {idx === 0 && <div style={{ fontSize: 10, fontWeight: "bold", color: "#22c55e", marginBottom: 4 }}>✅ MAIS RECENTE</div>}
                           <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{p.titulo}</div>
-                          {p.data && <div style={{ fontSize: 11, color: T.textSub }}>{new Date(p.data + "T12:00").toLocaleDateString("pt-BR")}</div>}
+                          {eventoVinculado && <div style={{ fontSize: 11, color: T.gold, marginTop: 2 }}>📅 {eventoVinculado.titulo} — {new Date(eventoVinculado.data + "T12:00").toLocaleDateString("pt-BR")}</div>}
                           {p.versiculos && <div style={{ fontSize: 12, color: T.textSub, whiteSpace: "pre-wrap", marginTop: 6, lineHeight: 1.6 }}>{p.versiculos}</div>}
                         </div>
-                        <button onClick={async () => { if (window.confirm("Excluir esta pregação?")) { await deleteDoc(doc(db, "pregacoes", p.id)); showToast("🗑️ Removida!"); } }}
-                          style={S.delBtn}>🗑️</button>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
+                          <button onClick={() => baixarPregacaoTxt(p)}
+                            style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 8, padding: "6px 10px", fontSize: 12, cursor: "pointer" }}>⬇️ .txt</button>
+                          <button onClick={async () => { if (window.confirm("Excluir esta pregação?")) { await deleteDoc(doc(db, "pregacoes", p.id)); showToast("🗑️ Removida!"); } }}
+                            style={S.delBtn}>🗑️</button>
+                        </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })()}
