@@ -731,7 +731,7 @@ export default function FamiliaAliancaApp() {
           }).catch(() => {});
         }
         setScreen("app");
-        setTab(u.admin ? "home" : u.lider ? "admin" : (u.ministerios?.length > 0 ? "meumin" : "home"));
+        setTab(u.admin ? "home" : u.lider ? "admin" : u.usuarioPadrao_Mídia ? "midia-videos" : (u.ministerios?.length > 0 ? "meumin" : "home"));
       } // eslint-disable-line no-unused-vars
       else setScreen("login");
     }, 2200);
@@ -1005,7 +1005,7 @@ export default function FamiliaAliancaApp() {
         setMinisterioLider(null);
       }
       setScreen("app");
-      setTab(u.admin ? "home" : u.lider ? "admin" : (u.ministerios?.length > 0 ? "meumin" : "home"));
+      setTab(u.admin ? "home" : u.lider ? "admin" : u.usuarioPadrao_Mídia ? "midia-videos" : (u.ministerios?.length > 0 ? "meumin" : "home"));
       // Inicializar última visita se for primeira vez
       if (!localStorage.getItem("fa_ultima_visita")) {
         const agora = new Date().toISOString();
