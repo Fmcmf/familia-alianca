@@ -502,6 +502,7 @@ export default function FamiliaAliancaApp() {
   const [filtroCategoriaCatalogo, setFiltroCategoriaCatalogo] = useState("");
   const [musicaCatalogoExpandida, setMusicaCatalogoExpandida] = useState(null);
   const [escalaQuadradoExpandido, setEscalaQuadradoExpandido] = useState(null);
+  const [musicaEscalaExpandida, setMusicaEscalaExpandida] = useState(null);
   // Gerenciamento de Administradores
   const [buscaPromoverAdmin, setBuscaPromoverAdmin] = useState("");
   const [membroParaPromover, setMembroParaPromover] = useState(null);
@@ -2791,7 +2792,7 @@ export default function FamiliaAliancaApp() {
                     {/* Próxima escala */}
                     {proximaEscala && (
                       <div>
-                        <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>📋 Próxima Escala</div>
+                        <div style={{ fontSize: 11, color: "#c9a84c", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>📋 Sua Escala Atual</div>
                         <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, overflow: "hidden", marginBottom: 10 }}>
                           <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "7px 14px" }}>
                             <div style={{ fontSize: 13, fontWeight: "bold", color: "#080810" }}>{proximaEscala.culto}</div>
@@ -2883,47 +2884,56 @@ export default function FamiliaAliancaApp() {
                                 <>
                                   <div style={{ marginBottom: 10 }}>
                                     <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas do Culto</div>
-                                    {musicasEscala.map((mus, i) => (
-                                      <div key={i} style={{ background: darkMode ? "rgba(0,0,0,.2)" : "rgba(0,0,0,.04)", borderRadius: 12, marginBottom: 8, overflow: "hidden", padding: "0 0 10px" }}>
-                                        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px" }}>
+                                    {musicasEscala.map((mus, i) => {
+                                      const expandidaMembro = musicaEscalaExpandida === (mus.id || i);
+                                      return (
+                                      <div key={i} style={{ background: darkMode ? "rgba(0,0,0,.2)" : "rgba(0,0,0,.04)", borderRadius: 12, marginBottom: 8, overflow: "hidden", padding: expandidaMembro ? "0 0 10px" : "0" }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", cursor: "pointer" }}
+                                          onClick={() => setMusicaEscalaExpandida(expandidaMembro ? null : (mus.id || i))}>
                                           <span style={{ fontSize: 16 }}>🎵</span>
                                           <div style={{ flex: 1 }}>
                                             <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{mus.titulo}</div>
                                             <div style={{ fontSize: 11, color: T.textSub }}>{mus.artista} {mus.tom && <span style={{ color: "#c9a84c" }}>• {mus.tom}</span>} {mus.tempo && <span style={{ color: "#8b5cf6" }}>• 🥁{mus.tempo}</span>}</div>
                                           </div>
+                                          <span style={{ color: T.textSub, fontSize: 15 }}>{expandidaMembro ? "▲" : "▼"}</span>
                                         </div>
-                                        {getYouTubeId(mus.link) && <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen loading="lazy" style={{ display: "block" }} />}
-                                        {getSpotifyId(mus.link) && <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />}
-                                        <div style={{ padding: "0 12px" }}>
-                                          {(mus.arquivos || []).map(a => (
-                                            <div key={a.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.15)", borderRadius: 10, padding: "8px 10px", marginTop: 8 }}>
-                                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                              <span style={{ fontSize: 15 }}>{{ pdf: "📄", audio: "🎵", imagem: "🖼️", link: "🔗" }[a.tipo] || "📁"}</span>
-                                              <span style={{ flex: 1, fontSize: 12, fontWeight: "bold", color: T.text }}>{a.nome}</span>
-                                              {a.tipo === "audio" ? (
-                                                <button onClick={() => setAudioTocando(audioTocando === a.id ? null : a.id)}
-                                                  style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>{audioTocando === a.id ? "⏹ Fechar" : "▶️ Tocar"}</button>
-                                              ) : (
-                                                <button onClick={() => window.open(a.url, "_blank")}
-                                                  style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>Abrir</button>
-                                              )}
-                                              {a.tipo !== "link" && (
-                                                <button onClick={() => baixarArquivo(a.url, a.nome)}
-                                                  style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#4ade80", cursor: "pointer" }}>⬇️</button>
-                                              )}
+                                        {expandidaMembro && (
+                                          <>
+                                            {getYouTubeId(mus.link) && <iframe width="100%" height="160" title="YouTube video" src={`https://www.youtube.com/embed/${getYouTubeId(mus.link)}`} frameBorder="0" allowFullScreen loading="lazy" style={{ display: "block" }} />}
+                                            {getSpotifyId(mus.link) && <iframe title="Spotify player" src={`https://open.spotify.com/embed/${getSpotifyId(mus.link).type}/${getSpotifyId(mus.link).id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style={{ display: "block" }} />}
+                                            <div style={{ padding: "0 12px" }}>
+                                              {(mus.arquivos || []).map(a => (
+                                                <div key={a.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.15)", borderRadius: 10, padding: "8px 10px", marginTop: 8 }}>
+                                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                                  <span style={{ fontSize: 15 }}>{{ pdf: "📄", audio: "🎵", imagem: "🖼️", link: "🔗" }[a.tipo] || "📁"}</span>
+                                                  <span style={{ flex: 1, fontSize: 12, fontWeight: "bold", color: T.text }}>{a.nome}</span>
+                                                  {a.tipo === "audio" ? (
+                                                    <button onClick={() => setAudioTocando(audioTocando === a.id ? null : a.id)}
+                                                      style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>{audioTocando === a.id ? "⏹ Fechar" : "▶️ Tocar"}</button>
+                                                  ) : (
+                                                    <button onClick={() => window.open(a.url, "_blank")}
+                                                      style={{ background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#a78bfa", cursor: "pointer" }}>Abrir</button>
+                                                  )}
+                                                  {a.tipo !== "link" && (
+                                                    <button onClick={() => baixarArquivo(a.url, a.nome)}
+                                                      style={{ background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 8px", fontSize: 11, color: "#4ade80", cursor: "pointer" }}>⬇️</button>
+                                                  )}
+                                                </div>
+                                                {a.tipo === "audio" && audioTocando === a.id && (
+                                                  <audio controls autoPlay style={{ width: "100%", marginTop: 8, height: 34 }}>
+                                                    <source src={a.url} />
+                                                  </audio>
+                                                )}
+                                                </div>
+                                              ))}
+                                              {cifrasMin.filter(c => c.musicaId === mus.id).map(renderCifra)}
+                                              {vsMin.filter(v => v.musicaId === mus.id).map(renderVs)}
                                             </div>
-                                            {a.tipo === "audio" && audioTocando === a.id && (
-                                              <audio controls autoPlay style={{ width: "100%", marginTop: 8, height: 34 }}>
-                                                <source src={a.url} />
-                                              </audio>
-                                            )}
-                                            </div>
-                                          ))}
-                                          {cifrasMin.filter(c => c.musicaId === mus.id).map(renderCifra)}
-                                          {vsMin.filter(v => v.musicaId === mus.id).map(renderVs)}
-                                        </div>
+                                          </>
+                                        )}
                                       </div>
-                                    ))}
+                                      );
+                                    })}
                                   </div>
 
                                   {cifrasSemVinculo.length > 0 && (
