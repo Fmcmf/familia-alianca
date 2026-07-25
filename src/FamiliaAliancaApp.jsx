@@ -1744,7 +1744,7 @@ export default function FamiliaAliancaApp() {
             {/* ── ACESSE AQUI ── */}
             <div style={{ padding: "20px 16px 0" }}>
               <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub, marginBottom: 14 }}>Acesse Aqui</div>
-              <div className="acesso-rapido" style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4 }}>
+              <div style={{ display: "flex", gap: 10 }}>
                 {[
                   {
                     label: "Agenda",
@@ -1763,7 +1763,7 @@ export default function FamiliaAliancaApp() {
                   },
                 ].map(item => (
                   <button key={item.label} onClick={item.action}
-                    style={{ background: darkMode ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.05)", border: `1px solid rgba(201,168,76,.18)`, borderRadius: 14, padding: "14px 10px 11px", display: "flex", flexDirection: "column", alignItems: "center", gap: 7, cursor: "pointer", fontFamily: "Georgia,serif", flexShrink: 0, width: 80 }}>
+                    style={{ flex: 1, background: darkMode ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.05)", border: `1px solid rgba(201,168,76,.18)`, borderRadius: 14, padding: "14px 10px 11px", display: "flex", flexDirection: "column", alignItems: "center", gap: 7, cursor: "pointer", fontFamily: "Georgia,serif" }}>
                     {item.svg}
                     <span style={{ fontSize: 10, color: T.textSub, textAlign: "center", lineHeight: 1.2 }}>{item.label}</span>
                   </button>
