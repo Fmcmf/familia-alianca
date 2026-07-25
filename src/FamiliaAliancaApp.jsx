@@ -2490,9 +2490,8 @@ export default function FamiliaAliancaApp() {
 
             {/* Menu rápido */}
             <div style={S.secTitle}>Menu</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, margin: "0 16px 20px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, margin: "0 16px 20px" }}>
               {[
-                { id: "devocional", icon: "🕊️", label: "Devocional" },
                 { id: "voluntario", icon: "🤲", label: "Servir" },
                 { id: "perfil", icon: "👤", label: "Perfil" },
               ].map(item => (
