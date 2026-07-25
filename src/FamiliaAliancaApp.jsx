@@ -3148,31 +3148,37 @@ export default function FamiliaAliancaApp() {
           </div>
         )}
 
-        {/* ══ MÍDIA (exclusiva do usuário padrão) ══ */}
+
+        {/* ══ MÍDIA (exclusiva do usuário padrão) — músicas do evento + imagens + palavra do pastor ══ */}
         {tab === "midia-videos" && souUsuarioPadraoMidia && (() => {
-          const musicasComVideo = musicas.filter(m => m.ministerio === "Aliança Music");
-          const filtradas = buscaCatalogoMusica.trim()
-            ? musicasComVideo.filter(m =>
-                m.titulo?.toLowerCase().includes(buscaCatalogoMusica.toLowerCase()) ||
-                m.artista?.toLowerCase().includes(buscaCatalogoMusica.toLowerCase())
-              )
-            : musicasComVideo;
+          const hojeMidia = new Date().toISOString().split("T")[0];
+          const escalaAtualLouvor = escalas.filter(e => e.ministerio === "Aliança Music" && e.data >= hojeMidia).sort((a, b) => a.data.localeCompare(b.data))[0];
+          const musicasDoEvento = (escalaAtualLouvor?.musicas || []).map(mid => musicas.find(x => x.id === mid)).filter(Boolean);
+          const arquivosDoMinMidia = arquivosMidia.filter(a => a.ministerio === "Mídia");
+          const pregacoesProximasMidia = pregacoes.filter(p => !p.data || p.data >= hojeMidia).sort((a, b) => (a.data || "").localeCompare(b.data || ""));
+
           return (
             <div style={{ animation: "slideUp .4s ease", paddingBottom: 20 }}>
               <div style={{ padding: "16px 16px 0" }}>
-                <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 4 }}>🎬 Mídia — Vídeos das Músicas</div>
-                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>{filtradas.length} de {musicasComVideo.length} música(s)</div>
-              </div>
-              <div style={{ padding: "0 16px" }}>
-                <input style={{ ...S.input, marginBottom: 14 }} placeholder="🔍 Buscar por nome ou artista..."
-                  value={buscaCatalogoMusica} onChange={e => setBuscaCatalogoMusica(e.target.value)} />
-
-                {filtradas.length === 0 ? (
-                  <div style={{ ...S.card, textAlign: "center", padding: "28px 0", marginLeft: 0, marginRight: 0 }}>
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>🎬</div>
-                    <div style={{ fontSize: 13, color: T.textSub }}>Nenhuma música encontrada</div>
+                <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 4 }}>🎬 Mídia — Evento Atual</div>
+                {escalaAtualLouvor ? (
+                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>
+                    {escalaAtualLouvor.culto} — {new Date(escalaAtualLouvor.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })} {escalaAtualLouvor.hora && `• ${escalaAtualLouvor.hora}`}
                   </div>
-                ) : filtradas.map(m => {
+                ) : (
+                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>Nenhum evento futuro cadastrado ainda pelo Louvor.</div>
+                )}
+              </div>
+
+              <div style={{ padding: "0 16px" }}>
+                {/* Músicas escolhidas pelo Louvor */}
+                <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas escolhidas pelo Louvor</div>
+                {musicasDoEvento.length === 0 ? (
+                  <div style={{ ...S.card, textAlign: "center", padding: "24px 0", marginLeft: 0, marginRight: 0, marginBottom: 20 }}>
+                    <div style={{ fontSize: 28, marginBottom: 8 }}>🎵</div>
+                    <div style={{ fontSize: 13, color: T.textSub }}>Nenhuma música cadastrada ainda para esse evento.</div>
+                  </div>
+                ) : musicasDoEvento.map(m => {
                   const expandida = musicaCatalogoExpandida === m.id;
                   const ytId = getYouTubeId(m.link);
                   const spId = getSpotifyId(m.link);
@@ -3183,7 +3189,7 @@ export default function FamiliaAliancaApp() {
                         <span style={{ fontSize: 18 }}>🎬</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{m.titulo}</div>
-                          <div style={{ fontSize: 12, color: T.textSub }}>{m.artista} {m.tom && <span style={{ color: "#c9a84c" }}>• Tom: {m.tom}</span>} {m.tempo && <span style={{ color: "#8b5cf6" }}>• 🥁 {m.tempo} BPM</span>}</div>
+                          <div style={{ fontSize: 12, color: T.textSub }}>{m.artista} {m.tom && <span style={{ color: "#c9a84c" }}>• Tom: {m.tom}</span>}</div>
                         </div>
                         <span style={{ color: T.textSub, fontSize: 16 }}>{expandida ? "▲" : "▼"}</span>
                       </div>
@@ -3194,13 +3200,50 @@ export default function FamiliaAliancaApp() {
                           ) : spId ? (
                             <iframe src={`https://open.spotify.com/embed/${spId.type}/${spId.id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style={{ display: "block", borderRadius: 10 }} title="Spotify player"/>
                           ) : (
-                            <div style={{ fontSize: 12, color: T.textFaint, padding: "10px 0" }}>Nenhum vídeo cadastrado para esta música.</div>
+                            <div style={{ fontSize: 12, color: T.textFaint, padding: "6px 0" }}>Nenhum vídeo cadastrado para esta música.</div>
                           )}
                         </div>
                       )}
                     </div>
                   );
                 })}
+
+                {/* Imagens que serão usadas no telão */}
+                <div style={{ fontSize: 11, color: T.gold, letterSpacing: 1, textTransform: "uppercase", margin: "22px 0 8px" }}>🖼️ Imagens do Telão</div>
+                {arquivosDoMinMidia.length === 0 ? (
+                  <div style={{ ...S.card, textAlign: "center", padding: "24px 0", marginLeft: 0, marginRight: 0, marginBottom: 20 }}>
+                    <div style={{ fontSize: 28, marginBottom: 8 }}>🖼️</div>
+                    <div style={{ fontSize: 13, color: T.textSub }}>Nenhuma imagem cadastrada ainda.</div>
+                  </div>
+                ) : (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+                    {arquivosDoMinMidia.map(a => (
+                      <div key={a.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 12, overflow: "hidden" }}>
+                        <img src={a.arquivo} alt={a.titulo} style={{ width: "100%", height: 100, objectFit: "cover", display: "block" }} />
+                        <div style={{ padding: "8px 10px" }}>
+                          <div style={{ fontSize: 11, fontWeight: "bold", color: T.text, marginBottom: 6 }}>{a.titulo}</div>
+                          <button onClick={() => baixarArquivo(a.arquivo, a.titulo)}
+                            style={{ width: "100%", background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 6, padding: "5px 0", fontSize: 10, fontWeight: "bold", color: "#4ade80", cursor: "pointer" }}>⬇️ Baixar</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Palavra do Pastor */}
+                <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>📜 Palavra do Pastor</div>
+                {pregacoesProximasMidia.length === 0 ? (
+                  <div style={{ ...S.card, textAlign: "center", padding: "24px 0", marginLeft: 0, marginRight: 0 }}>
+                    <div style={{ fontSize: 28, marginBottom: 8 }}>📜</div>
+                    <div style={{ fontSize: 13, color: T.textSub }}>O Pastor ainda não inseriu a palavra para esse evento.</div>
+                  </div>
+                ) : pregacoesProximasMidia.map(p => (
+                  <div key={p.id} style={{ background: darkMode ? "rgba(139,92,246,.06)" : "rgba(139,92,246,.04)", border: "1px solid rgba(139,92,246,.2)", borderRadius: 12, padding: "12px 14px", marginBottom: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 4 }}>{p.titulo}</div>
+                    {p.data && <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>{new Date(p.data + "T12:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</div>}
+                    {p.versiculos && <div style={{ fontSize: 12, color: T.textSub, whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{p.versiculos}</div>}
+                  </div>
+                ))}
               </div>
             </div>
           );
