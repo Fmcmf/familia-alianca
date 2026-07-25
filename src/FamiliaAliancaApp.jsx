@@ -2494,6 +2494,24 @@ export default function FamiliaAliancaApp() {
               ))}
             </div>
 
+            {/* Agenda completa */}
+            <div id="mais-agenda" style={S.secTitle}>Agenda Completa</div>
+            {agenda.length === 0 ? (
+              <div style={{ ...S.card, textAlign: "center" }}><div style={{ fontSize: 13, color: T.textSub }}>Nenhum evento.</div></div>
+            ) : agenda.map(ev => (
+              <div key={ev.id} style={S.eventoCard}>
+                <div style={S.eventoData}>
+                  <div style={S.eventoDay}>{getDay(ev.data)}</div>
+                  <div style={S.eventoMon}>{getMonAbbr(ev.data)}</div>
+                </div>
+                <div style={S.eventoInfo}>
+                  <div style={S.eventoTitle}>{ev.titulo}</div>
+                  <div style={S.eventoSub}>{fmtData(ev.data)} • {ev.hora}{ev.local ? ` • ${ev.local}` : ""}</div>
+                  <div style={S.eventoBadge(ev.tipo)}>{tipoLabel[ev.tipo]}</div>
+                </div>
+              </div>
+            ))}
+
             {/* WhatsApp Atendimento */}
             <div id="mais-whatsapp" style={S.secTitle}>Fale Conosco pelo WhatsApp</div>
             <div style={S.card}>
@@ -2622,24 +2640,6 @@ export default function FamiliaAliancaApp() {
                 </button>
               ))}
             </div>
-
-            {/* Agenda completa */}
-            <div id="mais-agenda" style={S.secTitle}>Agenda Completa</div>
-            {agenda.length === 0 ? (
-              <div style={{ ...S.card, textAlign: "center" }}><div style={{ fontSize: 13, color: T.textSub }}>Nenhum evento.</div></div>
-            ) : agenda.map(ev => (
-              <div key={ev.id} style={S.eventoCard}>
-                <div style={S.eventoData}>
-                  <div style={S.eventoDay}>{getDay(ev.data)}</div>
-                  <div style={S.eventoMon}>{getMonAbbr(ev.data)}</div>
-                </div>
-                <div style={S.eventoInfo}>
-                  <div style={S.eventoTitle}>{ev.titulo}</div>
-                  <div style={S.eventoSub}>{fmtData(ev.data)} • {ev.hora}{ev.local ? ` • ${ev.local}` : ""}</div>
-                  <div style={S.eventoBadge(ev.tipo)}>{tipoLabel[ev.tipo]}</div>
-                </div>
-              </div>
-            ))}
           </div>
         )}
 
