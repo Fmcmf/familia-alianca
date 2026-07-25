@@ -47,9 +47,9 @@ const ENDERECO = "Rua Armando Longatti, nº 45 - Jardim São Vicente - Piracicab
 const MAPS_URL = "https://www.google.com/maps/search/?api=1&query=Rua+Armando+Longatti+45+Vila+Industrial+Piracicaba+SP";
 
 const HORARIOS_CULTO = [
-  { dia: "Terça-feira", hora: "15h — Oração", icon: "🙏" },
+  { dia: "Terças de Cura", hora: "15h — Oração", icon: "🙏" },
   { dia: "Quinta-feira", hora: "20h", icon: "🌙" },
-  { dia: "Domingo", hora: "10h", icon: "🌅" },
+  { dia: "Domingo em Família", hora: "10h", icon: "🌅" },
 ];
 
 const WHATSAPP_SERVICOS = [
@@ -1742,9 +1742,9 @@ export default function FamiliaAliancaApp() {
               </div>
             )}
 
-            {/* ── ACESSO RÁPIDO ── */}
+            {/* ── ACESSE AQUI ── */}
             <div style={{ padding: "20px 16px 0" }}>
-              <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub, marginBottom: 14 }}>Acesso rápido</div>
+              <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: T.textSub, marginBottom: 14 }}>Acesse Aqui</div>
               <div className="acesso-rapido" style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4 }}>
                 {[
                   {
@@ -1753,39 +1753,14 @@ export default function FamiliaAliancaApp() {
                     svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                   },
                   {
-                    label: "Mensagens",
-                    action: () => window.open(`https://www.youtube.com/@${YOUTUBE_CHANNEL}`, "_blank"),
-                    svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#c9a84c" stroke="none"/></svg>
-                  },
-                  {
-                    label: "Contribuir",
-                    action: () => { setTab("mais"); setMaisScrollTarget("pix"); },
-                    svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="rgba(201,168,76,.15)"/></svg>
-                  },
-                  {
                     label: "Fale Conosco",
                     action: () => { setTab("mais"); setMaisScrollTarget("whatsapp"); },
                     svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="rgba(201,168,76,.1)"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="13" y2="14"/></svg>
                   },
                   {
-                    label: "Ministérios",
-                    action: () => { setTab("voluntario"); setMaisScrollTarget("ministerios"); },
-                    svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="rgba(201,168,76,.12)"/></svg>
-                  },
-                  {
-                    label: "Avisos",
-                    action: () => { setAvisoCardExpandido(true); window.scrollTo({ top: 0, behavior: "smooth" }); },
-                    svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0" fill="rgba(201,168,76,.15)"/><circle cx="18" cy="5" r="3" fill="#c9a84c" stroke="none"/></svg>
-                  },
-                  {
-                    label: "Devocional",
-                    action: () => setTab("devocional"),
-                    svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="rgba(201,168,76,.08)"/><path d="M12 6v6l4 2" strokeLinecap="round"/><circle cx="12" cy="12" r="1" fill="#c9a84c" stroke="none"/><path d="M8 3.5C9.3 3 10.6 2.8 12 2.8" strokeLinecap="round"/></svg>
-                  },
-                  {
-                    label: "Bíblia",
-                    action: () => setTab("biblia"),
-                    svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h7a4 4 0 0 1 4 4v12H4V4z" fill="rgba(201,168,76,.08)"/><path d="M20 20H11a4 4 0 0 1-4-4V4"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="8" y1="9" x2="11" y2="9"/><line x1="8" y1="13" x2="11" y2="13"/></svg>
+                    label: "Localização",
+                    action: () => { setTab("mais"); setMaisScrollTarget("localizacao"); },
+                    svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" fill="rgba(201,168,76,.12)"/><circle cx="12" cy="10" r="2.5"/></svg>
                   },
                 ].map(item => (
                   <button key={item.label} onClick={item.action}
@@ -2550,7 +2525,7 @@ export default function FamiliaAliancaApp() {
             </div>
 
             {/* Endereço e Mapa */}
-            <div style={S.secTitle}>Nossa Localização</div>
+            <div id="mais-localizacao" style={S.secTitle}>Nossa Localização</div>
             <div style={S.card}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
                 <div style={{ fontSize: 20, marginTop: 2 }}>📍</div>
