@@ -1376,6 +1376,10 @@ export default function FamiliaAliancaApp() {
     e.data >= hoje2 && e.membrosEscalados?.[user.email]
   );
 
+  // Usuário Padrão da Mídia (ex: conta fixa da categoria Letra) — vê aba exclusiva de vídeos das músicas
+  const meuMembroLiveGlobal = membros.find(mm => mm.email === user?.email);
+  const souUsuarioPadraoMidia = !!meuMembroLiveGlobal?.usuarioPadrao_Mídia;
+
   const TABS = [
     { id: "home", icon: "🏠", label: "Início" },
     { id: "biblia", icon: "📖", label: "Bíblia" },
@@ -1383,6 +1387,7 @@ export default function FamiliaAliancaApp() {
     { id: "oracao", icon: "🙏", label: "Oração" },
     { id: "mais", icon: "⋯", label: "Mais" },
     ...(membroEscalado ? [{ id: "meumin", icon: "⛪", label: "Meu Min." }] : []),
+    ...(souUsuarioPadraoMidia ? [{ id: "midia-videos", icon: "🎬", label: "Mídia" }] : []),
     ...(isAdmin || isLider ? [{ id: "admin", icon: isAdmin ? "⚙️" : "🏛️", label: isAdmin ? "Admin" : "Líder" }] : []),
   ];
 
@@ -3142,6 +3147,64 @@ export default function FamiliaAliancaApp() {
             )}
           </div>
         )}
+
+        {/* ══ MÍDIA (exclusiva do usuário padrão) ══ */}
+        {tab === "midia-videos" && souUsuarioPadraoMidia && (() => {
+          const musicasComVideo = musicas.filter(m => m.ministerio === "Aliança Music");
+          const filtradas = buscaCatalogoMusica.trim()
+            ? musicasComVideo.filter(m =>
+                m.titulo?.toLowerCase().includes(buscaCatalogoMusica.toLowerCase()) ||
+                m.artista?.toLowerCase().includes(buscaCatalogoMusica.toLowerCase())
+              )
+            : musicasComVideo;
+          return (
+            <div style={{ animation: "slideUp .4s ease", paddingBottom: 20 }}>
+              <div style={{ padding: "16px 16px 0" }}>
+                <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#c9a84c", marginBottom: 4 }}>🎬 Mídia — Vídeos das Músicas</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>{filtradas.length} de {musicasComVideo.length} música(s)</div>
+              </div>
+              <div style={{ padding: "0 16px" }}>
+                <input style={{ ...S.input, marginBottom: 14 }} placeholder="🔍 Buscar por nome ou artista..."
+                  value={buscaCatalogoMusica} onChange={e => setBuscaCatalogoMusica(e.target.value)} />
+
+                {filtradas.length === 0 ? (
+                  <div style={{ ...S.card, textAlign: "center", padding: "28px 0", marginLeft: 0, marginRight: 0 }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>🎬</div>
+                    <div style={{ fontSize: 13, color: T.textSub }}>Nenhuma música encontrada</div>
+                  </div>
+                ) : filtradas.map(m => {
+                  const expandida = musicaCatalogoExpandida === m.id;
+                  const ytId = getYouTubeId(m.link);
+                  const spId = getSpotifyId(m.link);
+                  return (
+                    <div key={m.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, marginBottom: 10, overflow: "hidden" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", cursor: "pointer" }}
+                        onClick={() => setMusicaCatalogoExpandida(expandida ? null : m.id)}>
+                        <span style={{ fontSize: 18 }}>🎬</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{m.titulo}</div>
+                          <div style={{ fontSize: 12, color: T.textSub }}>{m.artista} {m.tom && <span style={{ color: "#c9a84c" }}>• Tom: {m.tom}</span>} {m.tempo && <span style={{ color: "#8b5cf6" }}>• 🥁 {m.tempo} BPM</span>}</div>
+                        </div>
+                        <span style={{ color: T.textSub, fontSize: 16 }}>{expandida ? "▲" : "▼"}</span>
+                      </div>
+                      {expandida && (
+                        <div style={{ padding: "0 14px 14px" }}>
+                          {ytId ? (
+                            <iframe width="100%" height="200" src={`https://www.youtube.com/embed/${ytId}`} frameBorder="0" allowFullScreen loading="lazy" style={{ display: "block", borderRadius: 10 }} title="Video player"/>
+                          ) : spId ? (
+                            <iframe src={`https://open.spotify.com/embed/${spId.type}/${spId.id}`} width="100%" height="80" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style={{ display: "block", borderRadius: 10 }} title="Spotify player"/>
+                          ) : (
+                            <div style={{ fontSize: 12, color: T.textFaint, padding: "10px 0" }}>Nenhum vídeo cadastrado para esta música.</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ══ PERFIL ══ */}
         {tab === "perfil" && (
