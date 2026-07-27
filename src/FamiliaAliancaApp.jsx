@@ -1406,7 +1406,7 @@ export default function FamiliaAliancaApp() {
     { id: "estudos", icon: "📚", label: "Estudos" },
     { id: "oracao", icon: "🙏", label: "Oração" },
     { id: "mais", icon: "⋯", label: "Mais" },
-    ...(membroEscalado ? [{ id: "meumin", icon: "⛪", label: "Meu Min." }] : []),
+    ...((membroEscalado || user?.ministerios?.length > 0) ? [{ id: "meumin", icon: "⛪", label: "Meu Min." }] : []),
     ...(souUsuarioPadraoMidia ? [{ id: "midia-videos", icon: "🎬", label: "Mídia" }] : []),
     ...(isAdmin || isLider ? [{ id: "admin", icon: isAdmin ? "⚙️" : "🏛️", label: isAdmin ? "Admin" : "Líder" }] : []),
   ];
