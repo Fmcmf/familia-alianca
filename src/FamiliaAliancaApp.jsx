@@ -454,6 +454,17 @@ const store = {
 
 // ─── HELPERS ───────────────────────────────────────────────────────────────
 const fmtData = (s) => { if (!s) return ""; const [a, m, d] = s.split("-"); return `${d}/${m}/${a}`; };
+// Retorna o intervalo (segunda a domingo) da semana atual, no formato "YYYY-MM-DD" (comparável com ev.data)
+const getSemanaAtual = () => {
+  const hoje = new Date();
+  const diaSemana = hoje.getDay(); // 0=domingo ... 6=sábado
+  const seg = new Date(hoje);
+  seg.setDate(hoje.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
+  const dom = new Date(seg);
+  dom.setDate(seg.getDate() + 6);
+  const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return { inicio: fmt(seg), fim: fmt(dom) };
+};
 const tipoColor = { culto: "#c9a84c", oracao: "#3b82f6", kids: "#f59e0b", music: "#8b5cf6" };
 const tipoLabel = { culto: "Culto", oracao: "Oração", kids: "Kids", music: "Music" };
 
@@ -2516,23 +2527,28 @@ export default function FamiliaAliancaApp() {
               ))}
             </div>
 
-            {/* Agenda completa */}
-            <div id="mais-agenda" style={S.secTitle}>Agenda Completa</div>
-            {agenda.length === 0 ? (
-              <div style={{ ...S.card, textAlign: "center" }}><div style={{ fontSize: 13, color: T.textSub }}>Nenhum evento.</div></div>
-            ) : agenda.map(ev => (
-              <div key={ev.id} style={S.eventoCard}>
-                <div style={S.eventoData}>
-                  <div style={S.eventoDay}>{getDay(ev.data)}</div>
-                  <div style={S.eventoMon}>{getMonAbbr(ev.data)}</div>
+            {/* Agenda completa (Admin vê tudo; Membros e Líderes veem só a semana atual) */}
+            <div id="mais-agenda" style={S.secTitle}>{isAdmin ? "Agenda Completa" : "Eventos desta Semana"}</div>
+            {(() => {
+              const { inicio, fim } = getSemanaAtual();
+              const eventosExibidos = isAdmin ? agenda : agenda.filter(e => e.data >= inicio && e.data <= fim);
+              if (eventosExibidos.length === 0) {
+                return <div style={{ ...S.card, textAlign: "center" }}><div style={{ fontSize: 13, color: T.textSub }}>{isAdmin ? "Nenhum evento." : "Nenhum evento esta semana."}</div></div>;
+              }
+              return eventosExibidos.map(ev => (
+                <div key={ev.id} style={S.eventoCard}>
+                  <div style={S.eventoData}>
+                    <div style={S.eventoDay}>{getDay(ev.data)}</div>
+                    <div style={S.eventoMon}>{getMonAbbr(ev.data)}</div>
+                  </div>
+                  <div style={S.eventoInfo}>
+                    <div style={S.eventoTitle}>{ev.titulo}</div>
+                    <div style={S.eventoSub}>{fmtData(ev.data)} • {ev.hora}{ev.local ? ` • ${ev.local}` : ""}</div>
+                    <div style={S.eventoBadge(ev.tipo)}>{tipoLabel[ev.tipo]}</div>
+                  </div>
                 </div>
-                <div style={S.eventoInfo}>
-                  <div style={S.eventoTitle}>{ev.titulo}</div>
-                  <div style={S.eventoSub}>{fmtData(ev.data)} • {ev.hora}{ev.local ? ` • ${ev.local}` : ""}</div>
-                  <div style={S.eventoBadge(ev.tipo)}>{tipoLabel[ev.tipo]}</div>
-                </div>
-              </div>
-            ))}
+              ));
+            })()}
 
             {/* WhatsApp Atendimento */}
             <div id="mais-whatsapp" style={S.secTitle}>Fale Conosco pelo WhatsApp</div>
