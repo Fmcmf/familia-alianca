@@ -4708,6 +4708,7 @@ export default function FamiliaAliancaApp() {
                     <div>
                       <div style={{ fontSize: 13, fontWeight: "bold" }}>{ev.titulo}</div>
                       <div style={{ fontSize: 12, color: T.textSub }}>{fmtData(ev.data)} • {ev.hora}</div>
+                      {ev.local && <div style={{ fontSize: 12, color: T.textFaint }}>📍 {ev.local}</div>}
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
