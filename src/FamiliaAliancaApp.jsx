@@ -5796,7 +5796,7 @@ export default function FamiliaAliancaApp() {
                 <div style={{ padding: "0 16px" }}>
                   {/* Seletor de view */}
                   <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", scrollbarWidth: "none" }}>
-                    {[{ id: "dashboard", label: "📊 Resumo" }, { id: "entradas", label: "🟢 Entradas (novo)" }, { id: "lancamentos", label: "📋 Lançamentos" }, { id: "novo", label: "➕ Novo" }, { id: "dizimistas", label: "🙏 Dizimistas" }].map(v => (
+                    {[{ id: "dashboard", label: "📊 Resumo" }, { id: "entradas", label: "🟢 Entradas (novo)" }, { id: "lancamentos", label: "📋 Lançamentos" }].map(v => (
                       <button key={v.id} onClick={() => setFinView(v.id)}
                         style={{ flexShrink: 0, padding: "8px 14px", border: `1px solid ${finView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: finView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: finView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: finView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                         {v.label}
