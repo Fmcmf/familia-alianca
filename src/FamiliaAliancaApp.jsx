@@ -3417,7 +3417,7 @@ export default function FamiliaAliancaApp() {
                 <div style={{ fontSize: 11, color: T.textSub, marginBottom: 6 }}>Trocar ministério gerenciado:</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {meusMinisteriosLider.map(min => (
-                    <button key={min} onClick={() => { setMinisterioLider(min); setAdminTab("membros-min"); }}
+                    <button key={min} onClick={() => { setMinisterioLider(min); setAdminTab("membros-min"); setEventoModo("novo"); }}
                       style={{ padding: "7px 14px", borderRadius: 20, border: `1px solid ${ministerioLider === min ? "#c9a84c" : T.cardBorder}`, background: ministerioLider === min ? "rgba(201,168,76,.15)" : T.card, color: ministerioLider === min ? "#c9a84c" : T.textSub, fontSize: 12, fontWeight: ministerioLider === min ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                       {min}
                     </button>
@@ -3904,6 +3904,9 @@ export default function FamiliaAliancaApp() {
                 ...agenda.filter(e => e.ministeriosVinculados?.includes(ministerioLider))
               ].sort((a, b) => a.data?.localeCompare(b.data));
 
+              // Líderes do Aliança Music e Mídia podem editar qualquer evento da agenda da igreja
+              const podeEditarAgendaCompleta = ministerioLider === "Aliança Music" || ministerioLider === "Mídia";
+
               // Buscar ou criar escala para um evento
               const escalaDoEvento = (eventoId) => escalas.find(e =>
                 e.ministerio === ministerioLider &&
@@ -4141,7 +4144,11 @@ export default function FamiliaAliancaApp() {
 
                   {/* Seletor de modo */}
                   <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                    {[{ id: "novo", label: "➕ Novo Evento" }, { id: "buscar", label: "🔍 Buscar na Agenda" }].map(m => (
+                    {[
+                      { id: "novo", label: "➕ Novo Evento" },
+                      { id: "buscar", label: "🔍 Buscar na Agenda" },
+                      ...(podeEditarAgendaCompleta ? [{ id: "editar", label: "✏️ Editar Eventos" }] : []),
+                    ].map(m => (
                       <button key={m.id} onClick={() => setEventoModo(m.id)}
                         style={{ flex: 1, padding: "9px 0", border: `1px solid ${eventoModo === m.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: eventoModo === m.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: eventoModo === m.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: eventoModo === m.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                         {m.label}
@@ -4210,6 +4217,87 @@ export default function FamiliaAliancaApp() {
                             </div>
                           );
                         })}
+                    </>
+                  )}
+
+                  {eventoModo === "editar" && podeEditarAgendaCompleta && (
+                    <>
+                      <div style={{ background: "rgba(59,130,246,.06)", border: "1px solid rgba(59,130,246,.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#60a5fa" }}>
+                        ℹ️ Como líder de {ministerioLider}, você pode editar qualquer evento da agenda da igreja.
+                      </div>
+
+                      <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 14, color: T.gold }}>
+                        {editandoEvento ? "Editar Evento" : "Novo Evento"}
+                      </div>
+                      <label style={S.label}>Título</label>
+                      <input style={{ ...S.input, marginBottom: 0 }} placeholder="Digite ou escolha um modelo já cadastrado" value={novoEvento.titulo}
+                        list="lista-modelos-evento-lider"
+                        onChange={e => {
+                          const valor = e.target.value;
+                          const modelo = modelosEvento.find(m => m.titulo === valor);
+                          setNovoEvento({ ...novoEvento, titulo: valor, hora: modelo ? modelo.horario : novoEvento.hora });
+                        }} />
+                      {modelosEvento.length > 0 && (
+                        <datalist id="lista-modelos-evento-lider">
+                          {modelosEvento.map(m => (
+                            <option key={m.id} value={m.titulo} />
+                          ))}
+                        </datalist>
+                      )}
+                      <label style={S.label}>Data</label>
+                      <input style={{ ...S.input, marginBottom: 0 }} type="date" value={novoEvento.data}
+                        onChange={e => setNovoEvento({ ...novoEvento, data: e.target.value })} />
+                      <label style={S.label}>Horário</label>
+                      <input style={{ ...S.input, marginBottom: 0 }} type="time" value={novoEvento.hora}
+                        onChange={e => setNovoEvento({ ...novoEvento, hora: e.target.value })} />
+                      <label style={S.label}>Local</label>
+                      <select style={S.select} value={novoEvento.local} onChange={e => setNovoEvento({ ...novoEvento, local: e.target.value })}>
+                        <option value="">Selecione o local...</option>
+                        {locaisEvento.map(l => (
+                          <option key={l.id} value={l.nome}>{l.nome}</option>
+                        ))}
+                        {novoEvento.local && !locaisEvento.some(l => l.nome === novoEvento.local) && (
+                          <option value={novoEvento.local}>{novoEvento.local} (personalizado)</option>
+                        )}
+                      </select>
+                      <label style={{ ...S.label, marginTop: 12 }}>Tipo</label>
+                      <select style={S.select} value={novoEvento.tipo} onChange={e => setNovoEvento({ ...novoEvento, tipo: e.target.value })}>
+                        <option value="culto">Culto</option>
+                        <option value="oracao">Reunião de Oração</option>
+                        <option value="kids">Kids</option>
+                        <option value="music">Music</option>
+                        {tiposCustom.map(t => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+
+                      <button style={{ ...S.saveBtn, marginTop: 14 }} onClick={salvarEvento}>
+                        {editandoEvento ? "💾 Atualizar Evento" : "➕ Adicionar Evento"}
+                      </button>
+                      {editandoEvento && (
+                        <button style={{ ...S.saveBtn, background: T.card, color: T.textSub, marginTop: 8 }}
+                          onClick={() => { setEditandoEvento(null); setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto" }); }}>
+                          Cancelar
+                        </button>
+                      )}
+
+                      <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: T.textFaint, marginTop: 24, marginBottom: 12 }}>Todos os Eventos da Agenda</div>
+                      {agenda.map(ev => (
+                        <div key={ev.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            <div style={{ fontSize: 13, fontWeight: "bold" }}>
+                              {ev.titulo}
+                              {ev.local && <span style={{ fontWeight: "normal", fontSize: 12, color: T.textFaint }}> · 📍 {ev.local}</span>}
+                            </div>
+                            <div style={{ fontSize: 12, color: T.textSub }}>{fmtData(ev.data)} • {ev.hora}</div>
+                          </div>
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                              onClick={() => { setEditandoEvento(ev.id); setNovoEvento({ ...ev }); }}>✏️</button>
+                            <button style={S.delBtn} onClick={() => deletarEvento(ev.id)}>🗑️</button>
+                          </div>
+                        </div>
+                      ))}
                     </>
                   )}
 
