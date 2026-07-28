@@ -4706,9 +4706,11 @@ export default function FamiliaAliancaApp() {
                 {agenda.map(ev => (
                   <div key={ev.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
-                      <div style={{ fontSize: 13, fontWeight: "bold" }}>{ev.titulo}</div>
+                      <div style={{ fontSize: 13, fontWeight: "bold" }}>
+                        {ev.titulo}
+                        {ev.local && <span style={{ fontWeight: "normal", fontSize: 12, color: T.textFaint }}> · 📍 {ev.local}</span>}
+                      </div>
                       <div style={{ fontSize: 12, color: T.textSub }}>{fmtData(ev.data)} • {ev.hora}</div>
-                      {ev.local && <div style={{ fontSize: 12, color: T.textFaint }}>📍 {ev.local}</div>}
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
