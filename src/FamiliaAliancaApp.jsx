@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { db, messaging, solicitarPermissaoNotificacao, onMessage } from "./firebase";
+import { db, messaging, solicitarPermissaoNotificacao, onMessage, auth } from "./firebase";
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, deleteField } from "firebase/firestore";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import emailjs from "@emailjs/browser";
 
 // ─── CLOUDINARY CONFIG ──────────────────────────────────────────────────────
@@ -469,6 +470,10 @@ const hashSenha = async (senha, salt) => {
 };
 // Senha temporária aleatória (usada na recuperação de senha)
 const gerarSenhaTemporaria = () => Math.random().toString(36).slice(-8);
+// Deriva um e-mail válido pro Firebase Authentication a partir do identificador de login.
+// Contas normais já usam e-mail real (passa direto). Serve como salvaguarda caso algum
+// identificador de login não tenha "@" — só pra satisfazer a exigência de formato do Firebase.
+const paraContaAuth = (identificador) => identificador.includes("@") ? identificador : `${identificador.toLowerCase()}@interno.familia-alianca`;
 // Retorna o intervalo (segunda a domingo) da semana atual, no formato "YYYY-MM-DD" (comparável com ev.data)
 const getSemanaAtual = () => {
   const hoje = new Date();
@@ -741,7 +746,7 @@ export default function FamiliaAliancaApp() {
           setMinisterioLider(minsIniciais[0]);
         }
         // Buscar dados frescos do Firestore para garantir lider/ministerio atualizado
-        if (u.email && u.email !== "ALIANCA") {
+        if (u.email) {
           getDoc(doc(db, "membros", u.email)).then(snap => {
             if (snap.exists()) {
               const dadosFrescos = { id: u.email, ...snap.data() };
@@ -1045,17 +1050,31 @@ export default function FamiliaAliancaApp() {
         ultimoAcesso: new Date().toISOString(),
       };
       await setDoc(doc(db, "membros", loginForm.email), u);
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, paraContaAuth(loginForm.email), loginForm.senha);
+        await setDoc(doc(db, "authIndex", cred.user.uid), { membroId: loginForm.email });
+      } catch (errAuth) {
+        console.warn("Cadastro salvo, mas o Firebase Authentication não sincronizou:", errAuth);
+      }
       store.set(SK.user, { ...u, id: loginForm.email });
       setUser({ ...u, id: loginForm.email }); setScreen("app"); setTab("home");
     } else {
-      // admin master
-      if (loginForm.email === "ALIANCA" && loginForm.senha === "mello2026") {
-        const u = { id: 0, nome: "Pr Fernando Mello", email: loginForm.email, admin: true };
-        store.set(SK.user, u); setUser(u); setIsAdmin(true); setScreen("app"); setTab("home"); return;
-      }
       const snap = await getDoc(doc(db, "membros", loginForm.email));
-      if (!snap.exists()) { setLoginErro("E-mail ou senha incorretos."); return; }
-      const dados = snap.data();
+      let dados;
+      if (!snap.exists()) {
+        // Bootstrap único da conta mestra do Pastor — só roda essa vez, na primeira vez que o documento não existir.
+        // Depois desse primeiro login, a conta passa a funcionar 100% igual a qualquer outra (com hash normal).
+        if (loginForm.email === "prfernandomellofilho@gmail.com" && loginForm.senha === "mello2026") {
+          const saltInicial = gerarSalt();
+          const hashInicial = await hashSenha(loginForm.senha, saltInicial);
+          dados = { nome: "Pr Fernando Mello", email: "prfernandomellofilho@gmail.com", senhaHash: hashInicial, senhaSalt: saltInicial, admin: true, dataCadastro: new Date().toISOString() };
+          await setDoc(doc(db, "membros", "prfernandomellofilho@gmail.com"), dados);
+        } else {
+          setLoginErro("E-mail ou senha incorretos."); return;
+        }
+      } else {
+        dados = snap.data();
+      }
       let senhaOk = false;
       if (dados.senhaHash && dados.senhaSalt) {
         // Conta já migrada — compara o hash
@@ -1074,6 +1093,25 @@ export default function FamiliaAliancaApp() {
         }
       }
       if (!senhaOk) { setLoginErro("E-mail ou senha incorretos."); return; }
+
+      // Sincroniza com o Firebase Authentication por baixo dos panos (não bloqueia o login se falhar)
+      try {
+        const authEmail = paraContaAuth(loginForm.email);
+        let cred;
+        try {
+          cred = await signInWithEmailAndPassword(auth, authEmail, loginForm.senha);
+        } catch (errSignIn) {
+          if (errSignIn.code === "auth/user-not-found") {
+            cred = await createUserWithEmailAndPassword(auth, authEmail, loginForm.senha);
+          } else {
+            throw errSignIn;
+          }
+        }
+        await setDoc(doc(db, "authIndex", cred.user.uid), { membroId: loginForm.email });
+      } catch (errAuth) {
+        console.warn("Login no Firebase Authentication não sincronizou (o acesso ao app continua normal):", errAuth);
+      }
+
       const u = { id: loginForm.email, ...dados };
       store.set(SK.user, u); setUser(u); setIsAdmin(u.admin || false);
       // Registrar último acesso
@@ -1111,7 +1149,6 @@ export default function FamiliaAliancaApp() {
   // Verifica a senha do admin atualmente logado (proteção extra antes de conceder/revogar acesso admin)
   const senhaAdminAtualCorreta = async (senhaDigitada) => {
     if (!senhaDigitada) return false;
-    if (user?.email === "ALIANCA") return senhaDigitada === "mello2026";
     if (user?.senhaHash && user?.senhaSalt) {
       const hash = await hashSenha(senhaDigitada, user.senhaSalt);
       return hash === user.senhaHash;
@@ -6458,6 +6495,12 @@ export default function FamiliaAliancaApp() {
                   promovidoPor: user?.nome || user?.email || "Admin",
                   dataPromocaoAdmin: new Date().toISOString(),
                 });
+                try {
+                  const cred = await createUserWithEmailAndPassword(auth, paraContaAuth(emailNovo), novoAdminCadastro.senha);
+                  await setDoc(doc(db, "authIndex", cred.user.uid), { membroId: emailNovo });
+                } catch (errAuth) {
+                  console.warn("Admin criado no Firestore, mas o Firebase Authentication não sincronizou:", errAuth);
+                }
                 showToast(`✅ Administrador "${novoAdminCadastro.nome}" criado com sucesso!`);
                 setNovoAdminCadastro({ nome: "", email: "", senha: "" }); setSenhaConfirmacaoAdminAtual("");
               };
