@@ -591,6 +591,13 @@ export default function FamiliaAliancaApp() {
     catch { return []; }
   });
   const [novoTipo, setNovoTipo] = useState("");
+  // Modelos de evento (título + horário padrão) e Locais padrão — compartilhados via Firestore
+  const [modelosEvento, setModelosEvento] = useState([]);
+  const [novoModeloEvento, setNovoModeloEvento] = useState({ titulo: "", horario: "" });
+  const [editandoModeloEvento, setEditandoModeloEvento] = useState(null);
+  const [modeloSelecionado, setModeloSelecionado] = useState("");
+  const [locaisEvento, setLocaisEvento] = useState([]);
+  const [novoLocalEvento, setNovoLocalEvento] = useState("");
   const [novaPalavra, setNovaPalavra] = useState({ titulo: "", texto: "", referencia: "", video: "" });
   const [editandoEvento, setEditandoEvento] = useState(null);
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -861,6 +868,18 @@ export default function FamiliaAliancaApp() {
     const unsubCategoriasEquipe = onSnapshot(collection(db, "categoriasEquipe"), snap => {
       setCategoriasEquipe(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
+    // Modelos de evento (título + horário padrão)
+    const unsubModelosEvento = onSnapshot(collection(db, "modelosEvento"), snap => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => (a.titulo || "").localeCompare(b.titulo || ""));
+      setModelosEvento(lista);
+    });
+    // Locais padrão de evento
+    const unsubLocaisEvento = onSnapshot(collection(db, "locaisEvento"), snap => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => (a.nome || "").localeCompare(b.nome || ""));
+      setLocaisEvento(lista);
+    });
     // Arquivos de Mídia (imagens para telão, etc.)
     const unsubArquivosMidia = onSnapshot(collection(db, "arquivosMidia"), snap => {
       const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -893,7 +912,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes(); unsubModelosEvento(); unsubLocaisEvento();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -4552,9 +4571,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "palavra", "pregacao", "devocional", "avisos", "estudos", "banner", "financeiro", "lideres", "jejum", "video", "aovivo", "membros", "administradores"].map(t => (
+              {["agenda", "padroes", "palavra", "pregacao", "devocional", "avisos", "estudos", "banner", "financeiro", "lideres", "jejum", "video", "aovivo", "membros", "administradores"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", palavra: "📜 Palavra", pregacao: "🎙️ Pregação", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", financeiro: "💰 Finanças", lideres: "🏛️ Líderes", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros", administradores: "🔐 Admins" }[t]}
+                  {{ agenda: "📅 Agenda", padroes: "🧩 Padrões", palavra: "📜 Palavra", pregacao: "🎙️ Pregação", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", financeiro: "💰 Finanças", lideres: "🏛️ Líderes", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros", administradores: "🔐 Admins" }[t]}
                 </button>
               ))}
             </div>
@@ -4566,8 +4585,22 @@ export default function FamiliaAliancaApp() {
                   {editandoEvento ? "Editar Evento" : "Novo Evento"}
                 </div>
                 <label style={S.label}>Título</label>
+                {modelosEvento.length > 0 && (
+                  <select style={{ ...S.select, marginBottom: 8 }} value={modeloSelecionado}
+                    onChange={e => {
+                      const id = e.target.value;
+                      setModeloSelecionado(id);
+                      const modelo = modelosEvento.find(m => m.id === id);
+                      if (modelo) setNovoEvento({ ...novoEvento, titulo: modelo.titulo, hora: modelo.horario });
+                    }}>
+                    <option value="">📋 Usar um modelo (opcional)...</option>
+                    {modelosEvento.map(m => (
+                      <option key={m.id} value={m.id}>{m.titulo} — {m.horario}</option>
+                    ))}
+                  </select>
+                )}
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="Nome do evento" value={novoEvento.titulo}
-                  onChange={e => setNovoEvento({ ...novoEvento, titulo: e.target.value })} />
+                  onChange={e => { setNovoEvento({ ...novoEvento, titulo: e.target.value }); setModeloSelecionado(""); }} />
                 <label style={S.label}>Data</label>
                 <input style={{ ...S.input, marginBottom: 0 }} type="date" value={novoEvento.data}
                   onChange={e => setNovoEvento({ ...novoEvento, data: e.target.value })} />
@@ -4575,9 +4608,40 @@ export default function FamiliaAliancaApp() {
                 <input style={{ ...S.input, marginBottom: 0 }} type="time" value={novoEvento.hora}
                   onChange={e => setNovoEvento({ ...novoEvento, hora: e.target.value })} />
                 <label style={S.label}>Local</label>
-                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Templo, Sala..." value={novoEvento.local}
-                  onChange={e => setNovoEvento({ ...novoEvento, local: e.target.value })} />
-                <label style={S.label}>Tipo</label>
+                <select style={S.select} value={novoEvento.local} onChange={e => setNovoEvento({ ...novoEvento, local: e.target.value })}>
+                  <option value="">Selecione o local...</option>
+                  {locaisEvento.map(l => (
+                    <option key={l.id} value={l.nome}>{l.nome}</option>
+                  ))}
+                  {novoEvento.local && !locaisEvento.some(l => l.nome === novoEvento.local) && (
+                    <option value={novoEvento.local}>{novoEvento.local} (personalizado)</option>
+                  )}
+                </select>
+
+                {/* Adicionar novo local rápido */}
+                <div style={{ display: "flex", gap: 8, marginTop: 8, marginBottom: 0 }}>
+                  <input style={{ ...S.input, marginBottom: 0, flex: 1 }}
+                    placeholder="+ Novo local..."
+                    value={novoLocalEvento}
+                    onChange={e => setNovoLocalEvento(e.target.value)}
+                    onKeyDown={async e => {
+                      if (e.key === "Enter" && novoLocalEvento.trim()) {
+                        await addDoc(collection(db, "locaisEvento"), { nome: novoLocalEvento.trim() });
+                        setNovoEvento({ ...novoEvento, local: novoLocalEvento.trim() });
+                        setNovoLocalEvento("");
+                        showToast("✅ Local adicionado!");
+                      }
+                    }} />
+                  <button onClick={async () => {
+                    if (!novoLocalEvento.trim()) return;
+                    await addDoc(collection(db, "locaisEvento"), { nome: novoLocalEvento.trim() });
+                    setNovoEvento({ ...novoEvento, local: novoLocalEvento.trim() });
+                    setNovoLocalEvento("");
+                    showToast("✅ Local adicionado!");
+                  }} style={{ padding: "0 14px", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 10, color: T.gold, fontSize: 18, cursor: "pointer", flexShrink: 0 }}>+</button>
+                </div>
+
+                <label style={{ ...S.label, marginTop: 12 }}>Tipo</label>
                 <select style={S.select} value={novoEvento.tipo} onChange={e => setNovoEvento({ ...novoEvento, tipo: e.target.value })}>
                   <option value="culto">Culto</option>
                   <option value="oracao">Reunião de Oração</option>
@@ -4636,7 +4700,7 @@ export default function FamiliaAliancaApp() {
                 </button>
                 {editandoEvento && (
                   <button style={{ ...S.saveBtn, background: T.card, color: T.textSub, marginTop: 8 }}
-                    onClick={() => { setEditandoEvento(null); setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto" }); }}>
+                    onClick={() => { setEditandoEvento(null); setModeloSelecionado(""); setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto" }); }}>
                     Cancelar
                   </button>
                 )}
@@ -4650,11 +4714,101 @@ export default function FamiliaAliancaApp() {
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
-                        onClick={() => { setEditandoEvento(ev.id); setNovoEvento({ ...ev }); }}>✏️</button>
+                        onClick={() => { setEditandoEvento(ev.id); setModeloSelecionado(""); setNovoEvento({ ...ev }); }}>✏️</button>
                       <button style={S.delBtn} onClick={() => deletarEvento(ev.id)}>🗑️</button>
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Admin: Padrões (Modelos de Evento + Locais) */}
+            {adminTab === "padroes" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Modelos de Evento</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>Cadastre combinações de Título + Horário padrão (ex: "Culto de Domingo em Família" → 10h). Na tela de Novo Evento, dá pra escolher o modelo e o horário já vem preenchido.</div>
+
+                <label style={S.label}>Título do modelo</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Culto de Domingo em Família"
+                  value={novoModeloEvento.titulo}
+                  onChange={e => setNovoModeloEvento({ ...novoModeloEvento, titulo: e.target.value })} />
+                <label style={S.label}>Horário padrão</label>
+                <input style={{ ...S.input, marginBottom: 0 }} type="time"
+                  value={novoModeloEvento.horario}
+                  onChange={e => setNovoModeloEvento({ ...novoModeloEvento, horario: e.target.value })} />
+
+                <button style={S.saveBtn} onClick={async () => {
+                  if (!novoModeloEvento.titulo.trim() || !novoModeloEvento.horario) { showToast("⚠️ Preencha título e horário!"); return; }
+                  if (editandoModeloEvento) {
+                    await updateDoc(doc(db, "modelosEvento", editandoModeloEvento), { titulo: novoModeloEvento.titulo.trim(), horario: novoModeloEvento.horario });
+                    setEditandoModeloEvento(null);
+                  } else {
+                    await addDoc(collection(db, "modelosEvento"), { titulo: novoModeloEvento.titulo.trim(), horario: novoModeloEvento.horario });
+                  }
+                  setNovoModeloEvento({ titulo: "", horario: "" });
+                  showToast("✅ Modelo salvo!");
+                }}>
+                  {editandoModeloEvento ? "💾 Atualizar Modelo" : "➕ Adicionar Modelo"}
+                </button>
+                {editandoModeloEvento && (
+                  <button style={{ ...S.saveBtn, background: T.card, color: T.textSub, marginTop: 8 }}
+                    onClick={() => { setEditandoModeloEvento(null); setNovoModeloEvento({ titulo: "", horario: "" }); }}>
+                    Cancelar
+                  </button>
+                )}
+
+                <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: T.textFaint, marginTop: 24, marginBottom: 12 }}>Modelos Cadastrados</div>
+                {modelosEvento.length === 0 ? (
+                  <div style={{ fontSize: 12, color: T.textFaint }}>Nenhum modelo cadastrado ainda.</div>
+                ) : modelosEvento.map(m => (
+                  <div key={m.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: "bold" }}>{m.titulo}</div>
+                      <div style={{ fontSize: 12, color: T.textSub }}>Horário padrão: {m.horario}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                        onClick={() => { setEditandoModeloEvento(m.id); setNovoModeloEvento({ titulo: m.titulo, horario: m.horario }); }}>✏️</button>
+                      <button style={S.delBtn} onClick={async () => { await deleteDoc(doc(db, "modelosEvento", m.id)); showToast("🗑️ Modelo removido"); }}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
+
+                <div style={{ height: 1, background: "rgba(201,168,76,.15)", margin: "28px 0 20px" }} />
+
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Locais Padrão</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14 }}>Cadastre os locais mais usados (Igreja, Espaço de Comunhão, Sala, Casa...). Eles aparecem prontos na hora de criar um evento.</div>
+
+                <div style={{ display: "flex", gap: 8, marginBottom: 0 }}>
+                  <input style={{ ...S.input, marginBottom: 0, flex: 1 }}
+                    placeholder="+ Novo local..."
+                    value={novoLocalEvento}
+                    onChange={e => setNovoLocalEvento(e.target.value)}
+                    onKeyDown={async e => {
+                      if (e.key === "Enter" && novoLocalEvento.trim()) {
+                        await addDoc(collection(db, "locaisEvento"), { nome: novoLocalEvento.trim() });
+                        setNovoLocalEvento("");
+                        showToast("✅ Local adicionado!");
+                      }
+                    }} />
+                  <button onClick={async () => {
+                    if (!novoLocalEvento.trim()) return;
+                    await addDoc(collection(db, "locaisEvento"), { nome: novoLocalEvento.trim() });
+                    setNovoLocalEvento("");
+                    showToast("✅ Local adicionado!");
+                  }} style={{ padding: "0 14px", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 10, color: T.gold, fontSize: 18, cursor: "pointer", flexShrink: 0 }}>+</button>
+                </div>
+
+                {locaisEvento.length > 0 && (
+                  <div style={{ marginTop: 12, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {locaisEvento.map(l => (
+                      <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 20, padding: "3px 10px 3px 12px" }}>
+                        <span style={{ fontSize: 12, color: T.textSub }}>{l.nome}</span>
+                        <button onClick={async () => { await deleteDoc(doc(db, "locaisEvento", l.id)); }} style={{ background: "none", border: "none", color: T.textFaint, cursor: "pointer", fontSize: 14, lineHeight: 1, padding: "0 2px" }}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
