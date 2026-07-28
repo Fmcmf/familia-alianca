@@ -1059,12 +1059,15 @@ export default function FamiliaAliancaApp() {
       store.set(SK.user, { ...u, id: loginForm.email });
       setUser({ ...u, id: loginForm.email }); setScreen("app"); setTab("home");
     } else {
-      const snap = await getDoc(doc(db, "membros", loginForm.email));
+      // Apelido de conveniência: digitar "ALIANCA" continua funcionando, mas aponta pra conta real do Pastor.
+      // A senha continua sendo checada normalmente contra o hash — isso não é mais um atalho sem verificação.
+      const emailLogin = loginForm.email.trim().toUpperCase() === "ALIANCA" ? "prfernandomellofilho@gmail.com" : loginForm.email;
+      const snap = await getDoc(doc(db, "membros", emailLogin));
       let dados;
       if (!snap.exists()) {
         // Bootstrap único da conta mestra do Pastor — só roda essa vez, na primeira vez que o documento não existir.
         // Depois desse primeiro login, a conta passa a funcionar 100% igual a qualquer outra (com hash normal).
-        if (loginForm.email === "prfernandomellofilho@gmail.com" && loginForm.senha === "mello2026") {
+        if (emailLogin === "prfernandomellofilho@gmail.com" && loginForm.senha === "mello2026") {
           const saltInicial = gerarSalt();
           const hashInicial = await hashSenha(loginForm.senha, saltInicial);
           dados = { nome: "Pr Fernando Mello", email: "prfernandomellofilho@gmail.com", senhaHash: hashInicial, senhaSalt: saltInicial, admin: true, dataCadastro: new Date().toISOString() };
@@ -1086,7 +1089,7 @@ export default function FamiliaAliancaApp() {
         if (senhaOk) {
           const novoSalt = gerarSalt();
           const novoHash = await hashSenha(loginForm.senha, novoSalt);
-          await updateDoc(doc(db, "membros", loginForm.email), { senhaHash: novoHash, senhaSalt: novoSalt, senha: deleteField() });
+          await updateDoc(doc(db, "membros", emailLogin), { senhaHash: novoHash, senhaSalt: novoSalt, senha: deleteField() });
           delete dados.senha;
           dados.senhaHash = novoHash;
           dados.senhaSalt = novoSalt;
@@ -1096,7 +1099,7 @@ export default function FamiliaAliancaApp() {
 
       // Sincroniza com o Firebase Authentication por baixo dos panos (não bloqueia o login se falhar)
       try {
-        const authEmail = paraContaAuth(loginForm.email);
+        const authEmail = paraContaAuth(emailLogin);
         let cred;
         try {
           cred = await signInWithEmailAndPassword(auth, authEmail, loginForm.senha);
@@ -1107,16 +1110,16 @@ export default function FamiliaAliancaApp() {
             throw errSignIn;
           }
         }
-        await setDoc(doc(db, "authIndex", cred.user.uid), { membroId: loginForm.email });
+        await setDoc(doc(db, "authIndex", cred.user.uid), { membroId: emailLogin });
       } catch (errAuth) {
         console.warn("Login no Firebase Authentication não sincronizou (o acesso ao app continua normal):", errAuth);
       }
 
-      const u = { id: loginForm.email, ...dados };
+      const u = { id: emailLogin, ...dados };
       store.set(SK.user, u); setUser(u); setIsAdmin(u.admin || false);
       // Registrar último acesso
       const agoraAcesso = new Date().toISOString();
-      updateDoc(doc(db, "membros", loginForm.email), { ultimoAcesso: agoraAcesso }).catch(() => {});
+      updateDoc(doc(db, "membros", emailLogin), { ultimoAcesso: agoraAcesso }).catch(() => {});
       // Detectar líder
       const minsLogin = u.ministeriosLider?.length > 0 ? u.ministeriosLider : (u.ministerioLider ? [u.ministerioLider] : []);
       if (u.lider && minsLogin.length > 0) {
