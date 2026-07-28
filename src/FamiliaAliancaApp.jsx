@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db, messaging, solicitarPermissaoNotificacao, onMessage } from "./firebase";
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, deleteField } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
 
 // ─── CLOUDINARY CONFIG ──────────────────────────────────────────────────────
@@ -454,6 +454,21 @@ const store = {
 
 // ─── HELPERS ───────────────────────────────────────────────────────────────
 const fmtData = (s) => { if (!s) return ""; const [a, m, d] = s.split("-"); return `${d}/${m}/${a}`; };
+// ── SEGURANÇA DE SENHA ──
+// Gera um salt aleatório (evita que duas pessoas com a mesma senha tenham o mesmo hash)
+const gerarSalt = () => {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
+};
+// Hash SHA-256 de (salt + senha), em hexadecimal — feito com a Web Crypto API nativa do navegador
+const hashSenha = async (senha, salt) => {
+  const dados = new TextEncoder().encode(salt + ":" + senha);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", dados);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+};
+// Senha temporária aleatória (usada na recuperação de senha)
+const gerarSenhaTemporaria = () => Math.random().toString(36).slice(-8);
 // Retorna o intervalo (segunda a domingo) da semana atual, no formato "YYYY-MM-DD" (comparável com ev.data)
 const getSemanaAtual = () => {
   const hoje = new Date();
@@ -1011,10 +1026,13 @@ export default function FamiliaAliancaApp() {
       }
       const snap = await getDoc(doc(db, "membros", loginForm.email));
       if (snap.exists()) { setLoginErro("E-mail já cadastrado."); return; }
+      const senhaSalt = gerarSalt();
+      const senhaHash = await hashSenha(loginForm.senha, senhaSalt);
       const u = {
         nome: loginForm.nome,
         email: loginForm.email,
-        senha: loginForm.senha,
+        senhaHash,
+        senhaSalt,
         celular: loginForm.celular || "",
         sexo: loginForm.sexo || "",
         estadoCivil: loginForm.estadoCivil || "",
@@ -1036,8 +1054,27 @@ export default function FamiliaAliancaApp() {
         store.set(SK.user, u); setUser(u); setIsAdmin(true); setScreen("app"); setTab("home"); return;
       }
       const snap = await getDoc(doc(db, "membros", loginForm.email));
-      if (!snap.exists() || snap.data().senha !== loginForm.senha) { setLoginErro("E-mail ou senha incorretos."); return; }
-      const u = { id: loginForm.email, ...snap.data() };
+      if (!snap.exists()) { setLoginErro("E-mail ou senha incorretos."); return; }
+      const dados = snap.data();
+      let senhaOk = false;
+      if (dados.senhaHash && dados.senhaSalt) {
+        // Conta já migrada — compara o hash
+        const hashDigitado = await hashSenha(loginForm.senha, dados.senhaSalt);
+        senhaOk = hashDigitado === dados.senhaHash;
+      } else if (dados.senha !== undefined) {
+        // Conta antiga (senha em texto puro) — valida e migra para hash automaticamente
+        senhaOk = dados.senha === loginForm.senha;
+        if (senhaOk) {
+          const novoSalt = gerarSalt();
+          const novoHash = await hashSenha(loginForm.senha, novoSalt);
+          await updateDoc(doc(db, "membros", loginForm.email), { senhaHash: novoHash, senhaSalt: novoSalt, senha: deleteField() });
+          delete dados.senha;
+          dados.senhaHash = novoHash;
+          dados.senhaSalt = novoSalt;
+        }
+      }
+      if (!senhaOk) { setLoginErro("E-mail ou senha incorretos."); return; }
+      const u = { id: loginForm.email, ...dados };
       store.set(SK.user, u); setUser(u); setIsAdmin(u.admin || false);
       // Registrar último acesso
       const agoraAcesso = new Date().toISOString();
@@ -1072,10 +1109,14 @@ export default function FamiliaAliancaApp() {
   };
 
   // Verifica a senha do admin atualmente logado (proteção extra antes de conceder/revogar acesso admin)
-  const senhaAdminAtualCorreta = (senhaDigitada) => {
+  const senhaAdminAtualCorreta = async (senhaDigitada) => {
     if (!senhaDigitada) return false;
     if (user?.email === "ALIANCA") return senhaDigitada === "mello2026";
-    return senhaDigitada === user?.senha;
+    if (user?.senhaHash && user?.senhaSalt) {
+      const hash = await hashSenha(senhaDigitada, user.senhaSalt);
+      return hash === user.senhaHash;
+    }
+    return senhaDigitada === user?.senha; // conta ainda não migrada (legado)
   };
 
   const salvarCadastroCompleto = async () => {
@@ -1112,22 +1153,29 @@ export default function FamiliaAliancaApp() {
 
   const handleRecuperarSenha = async () => {
     if (!recuperandoEmail.trim()) { setRecuperandoMsg("⚠️ Digite seu e-mail cadastrado."); return; }
-    const snap = await getDoc(doc(db, "membros", recuperandoEmail.trim().toLowerCase()));
+    const emailBusca = recuperandoEmail.trim().toLowerCase();
+    const snap = await getDoc(doc(db, "membros", emailBusca));
     if (!snap.exists()) { setRecuperandoMsg("⚠️ E-mail não encontrado. Verifique e tente novamente."); return; }
     const dados = snap.data();
+    // Gera uma senha temporária nova — não guardamos mais a senha original em texto puro pra poder reenviá-la
+    const senhaTemporaria = gerarSenhaTemporaria();
     try {
       await emailjs.send(
         "service_sffzlx2",
         "template_o6kyn56",
         {
           to_name: dados.nome,
-          to_email: recuperandoEmail.trim().toLowerCase(),
-          senha_atual: dados.senha,
+          to_email: emailBusca,
+          senha_atual: senhaTemporaria,
           app_url: window.location.origin,
         },
         "KkcyGeZOZYPkwGing"
       );
-      setRecuperandoMsg("✅ E-mail enviado! Verifique sua caixa de entrada.");
+      // Só troca a senha de verdade depois de confirmar que o e-mail foi enviado (evita trancar o acesso à toa)
+      const salt = gerarSalt();
+      const hash = await hashSenha(senhaTemporaria, salt);
+      await updateDoc(doc(db, "membros", emailBusca), { senhaHash: hash, senhaSalt: salt, senha: deleteField() });
+      setRecuperandoMsg("✅ Enviamos uma senha temporária para o seu e-mail. Faça login com ela e recomendamos trocá-la depois.");
     } catch {
       setRecuperandoMsg("❌ Erro ao enviar e-mail. Tente novamente.");
     }
@@ -6375,10 +6423,14 @@ export default function FamiliaAliancaApp() {
                 if (!membroParaPromover) return;
                 if (senhaNovoAdmin.length < 6) { showToast("⚠️ A senha deve ter pelo menos 6 caracteres!"); return; }
                 if (senhaNovoAdmin !== confirmSenhaNovoAdmin) { showToast("⚠️ As senhas não coincidem!"); return; }
-                if (!senhaAdminAtualCorreta(senhaConfirmacaoAdminAtual)) { showToast("❌ Sua senha de administrador está incorreta!"); return; }
+                if (!(await senhaAdminAtualCorreta(senhaConfirmacaoAdminAtual))) { showToast("❌ Sua senha de administrador está incorreta!"); return; }
+                const salt = gerarSalt();
+                const hash = await hashSenha(senhaNovoAdmin, salt);
                 await updateDoc(doc(db, "membros", membroParaPromover.email), {
                   admin: true,
-                  senha: senhaNovoAdmin,
+                  senhaHash: hash,
+                  senhaSalt: salt,
+                  senha: deleteField(),
                   promovidoPor: user?.nome || user?.email || "Admin",
                   dataPromocaoAdmin: new Date().toISOString(),
                 });
@@ -6389,14 +6441,17 @@ export default function FamiliaAliancaApp() {
               const criarNovoAdmin = async () => {
                 if (!novoAdminCadastro.nome.trim() || !novoAdminCadastro.email.trim() || !novoAdminCadastro.senha) { showToast("⚠️ Preencha nome, e-mail e senha!"); return; }
                 if (novoAdminCadastro.senha.length < 6) { showToast("⚠️ A senha deve ter pelo menos 6 caracteres!"); return; }
-                if (!senhaAdminAtualCorreta(senhaConfirmacaoAdminAtual)) { showToast("❌ Sua senha de administrador está incorreta!"); return; }
+                if (!(await senhaAdminAtualCorreta(senhaConfirmacaoAdminAtual))) { showToast("❌ Sua senha de administrador está incorreta!"); return; }
                 const emailNovo = novoAdminCadastro.email.trim().toLowerCase();
                 const existente = await getDoc(doc(db, "membros", emailNovo));
                 if (existente.exists()) { showToast("⚠️ Já existe um cadastro com esse e-mail! Use a opção 'Promover membro existente'."); return; }
+                const salt = gerarSalt();
+                const hash = await hashSenha(novoAdminCadastro.senha, salt);
                 await setDoc(doc(db, "membros", emailNovo), {
                   nome: novoAdminCadastro.nome.trim(),
                   email: emailNovo,
-                  senha: novoAdminCadastro.senha,
+                  senhaHash: hash,
+                  senhaSalt: salt,
                   admin: true,
                   dataCadastro: new Date().toISOString(),
                   ultimoAcesso: null,
@@ -6409,7 +6464,7 @@ export default function FamiliaAliancaApp() {
 
               const revogarAdmin = async (m) => {
                 if (m.email === user?.email) { showToast("⚠️ Você não pode remover seu próprio acesso administrativo!"); return; }
-                if (!senhaAdminAtualCorreta(senhaConfirmacaoRevogar)) { showToast("❌ Sua senha de administrador está incorreta!"); return; }
+                if (!(await senhaAdminAtualCorreta(senhaConfirmacaoRevogar))) { showToast("❌ Sua senha de administrador está incorreta!"); return; }
                 await updateDoc(doc(db, "membros", m.email), { admin: false });
                 showToast(`↩️ Acesso administrativo de ${m.nome} removido.`);
                 setRevogarAlvoAdmin(null); setSenhaConfirmacaoRevogar("");
