@@ -594,6 +594,22 @@ export default function FamiliaAliancaApp() {
   const [dizimoFiltroTipo, setDizimoFiltroTipo] = useState("mes"); // mes | periodo
   const [dizimoDataInicio, setDizimoDataInicio] = useState(new Date().toISOString().split("T")[0]);
   const [dizimoDataFim, setDizimoDataFim] = useState(new Date().toISOString().split("T")[0]);
+  // ── NOVO: Entradas (redesenho — lançamento individual, identificado ou não) ──
+  const [entradas, setEntradas] = useState([]);
+  const [novaEntrada, setNovaEntrada] = useState({
+    data: new Date().toISOString().split("T")[0],
+    valor: "",
+    tipoPagamento: "pix", // pix | cartao | cheque | dinheiro | outros
+    outroTipoDesc: "",
+    identificado: null, // null (não escolhido ainda) | true | false
+    subtipo: "dizimo", // dizimo | oferta (só quando identificado)
+    membroNome: "",
+    membroEmail: "",
+  });
+  const [buscaEntradaMembro, setBuscaEntradaMembro] = useState("");
+  const [mostrarSugestoesEntrada, setMostrarSugestoesEntrada] = useState(false);
+  const [nomeManualEntrada, setNomeManualEntrada] = useState(false);
+  const [entradasPeriodo, setEntradasPeriodo] = useState(new Date().toISOString().slice(0, 7));
   const [estudoNivel, setEstudoNivel] = useState("iniciante");
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
@@ -878,6 +894,13 @@ export default function FamiliaAliancaApp() {
       setDizimistas(lista);
     });
 
+    // NOVO: Entradas (redesenho do financeiro)
+    const unsubEntradas = onSnapshot(collection(db, "entradas"), (snap) => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => b.data.localeCompare(a.data));
+      setEntradas(lista);
+    });
+
     // Módulo Música
     const unsubEscalas = onSnapshot(collection(db, "escalas"), snap => {
       const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -942,7 +965,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes(); unsubModelosEvento(); unsubLocaisEvento();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes(); unsubModelosEvento(); unsubLocaisEvento(); unsubEntradas();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -5773,7 +5796,7 @@ export default function FamiliaAliancaApp() {
                 <div style={{ padding: "0 16px" }}>
                   {/* Seletor de view */}
                   <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", scrollbarWidth: "none" }}>
-                    {[{ id: "dashboard", label: "📊 Resumo" }, { id: "lancamentos", label: "📋 Lançamentos" }, { id: "novo", label: "➕ Novo" }, { id: "dizimistas", label: "🙏 Dizimistas" }].map(v => (
+                    {[{ id: "dashboard", label: "📊 Resumo" }, { id: "entradas", label: "🟢 Entradas (novo)" }, { id: "lancamentos", label: "📋 Lançamentos" }, { id: "novo", label: "➕ Novo" }, { id: "dizimistas", label: "🙏 Dizimistas" }].map(v => (
                       <button key={v.id} onClick={() => setFinView(v.id)}
                         style={{ flexShrink: 0, padding: "8px 14px", border: `1px solid ${finView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: finView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: finView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: finView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                         {v.label}
@@ -5867,6 +5890,183 @@ export default function FamiliaAliancaApp() {
                       )}
                     </>
                   )}
+
+                  {/* ── NOVO: ENTRADAS (redesenho) ── */}
+                  {finView === "entradas" && (() => {
+                    const fmtV = v => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+                    const entradasPeriodoLista = entradas.filter(e => e.data?.startsWith(entradasPeriodo)).sort((a, b) => b.data.localeCompare(a.data));
+                    const totalPeriodo = entradasPeriodoLista.reduce((s, e) => s + (parseFloat(e.valor) || 0), 0);
+                    const totalDizimo = entradasPeriodoLista.filter(e => e.identificado && e.subtipo === "dizimo").reduce((s, e) => s + (parseFloat(e.valor) || 0), 0);
+                    const totalOfertaIdent = entradasPeriodoLista.filter(e => e.identificado && e.subtipo === "oferta").reduce((s, e) => s + (parseFloat(e.valor) || 0), 0);
+                    const totalOfertaNaoIdent = entradasPeriodoLista.filter(e => !e.identificado).reduce((s, e) => s + (parseFloat(e.valor) || 0), 0);
+                    const labelTipoPag = { pix: "PIX", cartao: "Cartão", cheque: "Cheque", dinheiro: "Dinheiro" };
+
+                    return (
+                      <>
+                        <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Nova Entrada</div>
+                        <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Lançamento individual — dízimo, oferta identificada ou oferta avulsa.</div>
+
+                        <label style={S.label}>Data *</label>
+                        <input type="date" style={{ ...S.input, marginBottom: 0 }} value={novaEntrada.data}
+                          onChange={e => setNovaEntrada({ ...novaEntrada, data: e.target.value })} />
+
+                        <label style={S.label}>Valor (R$) *</label>
+                        <input type="number" step="0.01" placeholder="0,00" style={{ ...S.input, marginBottom: 0 }} value={novaEntrada.valor}
+                          onChange={e => setNovaEntrada({ ...novaEntrada, valor: e.target.value })} />
+
+                        <label style={S.label}>Tipo</label>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: novaEntrada.tipoPagamento === "outros" ? 8 : 0 }}>
+                          {[{ id: "pix", label: "💠 PIX" }, { id: "cartao", label: "💳 CT" }, { id: "cheque", label: "📄 CH" }, { id: "dinheiro", label: "💵 $" }, { id: "outros", label: "✏️ Outros" }].map(t => (
+                            <button key={t.id} onClick={() => setNovaEntrada({ ...novaEntrada, tipoPagamento: t.id })}
+                              style={{ padding: "9px 0", border: `1px solid ${novaEntrada.tipoPagamento === t.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: novaEntrada.tipoPagamento === t.id ? "rgba(201,168,76,.15)" : T.card, color: novaEntrada.tipoPagamento === t.id ? "#c9a84c" : T.textSub, fontSize: 12, fontWeight: novaEntrada.tipoPagamento === t.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                              {t.label}
+                            </button>
+                          ))}
+                        </div>
+                        {novaEntrada.tipoPagamento === "outros" && (
+                          <input placeholder="Especifique o tipo..." style={{ ...S.input, marginBottom: 0 }} value={novaEntrada.outroTipoDesc}
+                            onChange={e => setNovaEntrada({ ...novaEntrada, outroTipoDesc: e.target.value })} />
+                        )}
+
+                        <label style={{ ...S.label, marginTop: 14 }}>Identificado?</label>
+                        <div style={{ display: "flex", gap: 8, marginBottom: novaEntrada.identificado !== null ? 12 : 0 }}>
+                          {[{ id: true, label: "✅ Sim" }, { id: false, label: "🚫 Não" }].map(op => (
+                            <button key={String(op.id)} onClick={() => setNovaEntrada({ ...novaEntrada, identificado: op.id, membroNome: "", membroEmail: "" })}
+                              style={{ flex: 1, padding: "10px 0", border: `1px solid ${novaEntrada.identificado === op.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: novaEntrada.identificado === op.id ? "rgba(201,168,76,.15)" : T.card, color: novaEntrada.identificado === op.id ? "#c9a84c" : T.textSub, fontSize: 13, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                              {op.label}
+                            </button>
+                          ))}
+                        </div>
+
+                        {novaEntrada.identificado === true && (
+                          <>
+                            <label style={S.label}>Isso é...</label>
+                            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                              {[{ id: "dizimo", label: "🙏 Dízimo" }, { id: "oferta", label: "🎁 Oferta identificada" }].map(s => (
+                                <button key={s.id} onClick={() => setNovaEntrada({ ...novaEntrada, subtipo: s.id })}
+                                  style={{ flex: 1, padding: "9px 0", border: `1px solid ${novaEntrada.subtipo === s.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: novaEntrada.subtipo === s.id ? "rgba(201,168,76,.15)" : T.card, color: novaEntrada.subtipo === s.id ? "#c9a84c" : T.textSub, fontSize: 12, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                                  {s.label}
+                                </button>
+                              ))}
+                            </div>
+
+                            <label style={S.label}>Pessoa</label>
+                            {!nomeManualEntrada ? (
+                              <div style={{ position: "relative", marginBottom: 8 }}>
+                                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Buscar pessoa cadastrada..."
+                                  value={buscaEntradaMembro}
+                                  onChange={e => { setBuscaEntradaMembro(e.target.value); setMostrarSugestoesEntrada(true); setNovaEntrada({ ...novaEntrada, membroNome: e.target.value, membroEmail: "" }); }}
+                                  onFocus={() => setMostrarSugestoesEntrada(true)} />
+                                {mostrarSugestoesEntrada && buscaEntradaMembro.length > 1 && (
+                                  <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: darkMode ? "#07112a" : "#fff", border: `1px solid ${T.cardBorder}`, borderRadius: 10, zIndex: 100, maxHeight: 180, overflowY: "auto", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}>
+                                    {membros.filter(m => m.nome?.toLowerCase().includes(buscaEntradaMembro.toLowerCase())).slice(0, 6).map(m => (
+                                      <div key={m.id} style={{ padding: "10px 14px", cursor: "pointer", borderBottom: `1px solid ${T.cardBorder}`, fontSize: 13, color: T.text }}
+                                        onClick={() => { setNovaEntrada({ ...novaEntrada, membroNome: m.nome, membroEmail: m.email || "" }); setBuscaEntradaMembro(m.nome); setMostrarSugestoesEntrada(false); }}>
+                                        <div style={{ fontWeight: "bold" }}>{m.nome}</div>
+                                        {m.email && <div style={{ fontSize: 11, color: T.textSub }}>{m.email}</div>}
+                                      </div>
+                                    ))}
+                                    {membros.filter(m => m.nome?.toLowerCase().includes(buscaEntradaMembro.toLowerCase())).length === 0 && (
+                                      <div style={{ padding: "10px 14px", fontSize: 13, color: T.textSub }}>Nenhum membro encontrado</div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <input style={{ ...S.input, marginBottom: 8 }} placeholder="Digite o nome completo..."
+                                value={novaEntrada.membroNome}
+                                onChange={e => setNovaEntrada({ ...novaEntrada, membroNome: e.target.value })} />
+                            )}
+                            <button onClick={() => { setNomeManualEntrada(!nomeManualEntrada); setBuscaEntradaMembro(""); setNovaEntrada({ ...novaEntrada, membroNome: "", membroEmail: "" }); }}
+                              style={{ background: "none", border: "none", color: T.gold, fontSize: 12, cursor: "pointer", padding: 0, marginBottom: 12, textDecoration: "underline" }}>
+                              {nomeManualEntrada ? "🔍 Buscar pessoa cadastrada" : "✏️ Pessoa não está cadastrada — digitar nome"}
+                            </button>
+                          </>
+                        )}
+
+                        {novaEntrada.identificado === false && (
+                          <div style={{ background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 12, fontSize: 12, color: T.textSub }}>
+                            Será registrado como <strong style={{ color: T.gold }}>Oferta</strong>, sem identificação de pessoa.
+                          </div>
+                        )}
+
+                        <button style={S.saveBtn} onClick={async () => {
+                          if (!novaEntrada.valor || !novaEntrada.data) { showToast("⚠️ Preencha valor e data!"); return; }
+                          if (novaEntrada.identificado === null) { showToast("⚠️ Responda se é identificado!"); return; }
+                          if (novaEntrada.identificado && !novaEntrada.membroNome.trim()) { showToast("⚠️ Informe o nome da pessoa!"); return; }
+                          if (novaEntrada.tipoPagamento === "outros" && !novaEntrada.outroTipoDesc.trim()) { showToast("⚠️ Especifique o tipo de pagamento!"); return; }
+
+                          await addDoc(collection(db, "entradas"), {
+                            data: novaEntrada.data,
+                            valor: parseFloat(novaEntrada.valor),
+                            tipoPagamento: novaEntrada.tipoPagamento,
+                            outroTipoDesc: novaEntrada.tipoPagamento === "outros" ? novaEntrada.outroTipoDesc.trim() : "",
+                            identificado: novaEntrada.identificado,
+                            subtipo: novaEntrada.identificado ? novaEntrada.subtipo : "oferta",
+                            membroNome: novaEntrada.identificado ? novaEntrada.membroNome.trim() : "",
+                            membroEmail: novaEntrada.identificado ? novaEntrada.membroEmail : "",
+                            criadoEm: new Date().toISOString(),
+                          });
+
+                          setNovaEntrada({ data: new Date().toISOString().split("T")[0], valor: "", tipoPagamento: "pix", outroTipoDesc: "", identificado: null, subtipo: "dizimo", membroNome: "", membroEmail: "" });
+                          setBuscaEntradaMembro(""); setNomeManualEntrada(false);
+                          showToast("✅ Entrada registrada!");
+                        }}>💰 Registrar Entrada</button>
+
+                        {/* Lista do período */}
+                        <div style={{ marginTop: 28 }}>
+                          <div style={{ fontSize: 12, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>📋 Entradas do Período</div>
+                          <input type="month" value={entradasPeriodo} onChange={e => setEntradasPeriodo(e.target.value)} style={{ ...S.input, marginBottom: 12 }} />
+
+                          {entradasPeriodoLista.length > 0 && (
+                            <div style={{ background: "rgba(34,197,94,.08)", border: "1px solid rgba(34,197,94,.2)", borderRadius: 12, padding: "14px 16px", marginBottom: 12 }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                                <span style={{ fontSize: 12, color: T.textSub }}>Total do período</span>
+                                <span style={{ fontSize: 15, fontWeight: "bold", color: "#22c55e" }}>{fmtV(totalPeriodo)}</span>
+                              </div>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                                <span style={{ fontSize: 11, color: T.textSub }}>🙏 Dízimos</span>
+                                <span style={{ fontSize: 12, color: T.text }}>{fmtV(totalDizimo)}</span>
+                              </div>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                                <span style={{ fontSize: 11, color: T.textSub }}>🎁 Ofertas identificadas</span>
+                                <span style={{ fontSize: 12, color: T.text }}>{fmtV(totalOfertaIdent)}</span>
+                              </div>
+                              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <span style={{ fontSize: 11, color: T.textSub }}>💰 Ofertas (não identificadas)</span>
+                                <span style={{ fontSize: 12, color: T.text }}>{fmtV(totalOfertaNaoIdent)}</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {entradasPeriodoLista.length === 0 ? (
+                            <div style={{ textAlign: "center", padding: "20px 0", color: T.textSub, fontSize: 13 }}>Nenhuma entrada neste período</div>
+                          ) : entradasPeriodoLista.map(e => (
+                            <div key={e.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #22c55e", borderRadius: 12, marginBottom: 8 }}>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                                  <span style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>
+                                    {e.identificado ? (e.subtipo === "dizimo" ? "🙏 Dízimo" : "🎁 Oferta identificada") : "💰 Oferta"}
+                                  </span>
+                                  <span style={{ fontSize: 13, fontWeight: "bold", color: "#22c55e" }}>{fmtV(parseFloat(e.valor))}</span>
+                                </div>
+                                {e.identificado && <div style={{ fontSize: 12, color: T.textSub }}>{e.membroNome}</div>}
+                                <div style={{ fontSize: 11, color: T.textFaint, marginTop: 2 }}>
+                                  {new Date(e.data + "T12:00:00").toLocaleDateString("pt-BR")} • {e.tipoPagamento === "outros" ? e.outroTipoDesc : labelTipoPag[e.tipoPagamento]}
+                                </div>
+                              </div>
+                              <button style={S.delBtn} onClick={async () => {
+                                if (window.confirm("Excluir esta entrada?")) {
+                                  await deleteDoc(doc(db, "entradas", e.id));
+                                  showToast("🗑️ Removido!");
+                                }
+                              }}>🗑️</button>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    );
+                  })()}
 
                   {/* ── LANÇAMENTOS ── */}
                   {finView === "lancamentos" && (
