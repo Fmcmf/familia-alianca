@@ -595,7 +595,6 @@ export default function FamiliaAliancaApp() {
   const [modelosEvento, setModelosEvento] = useState([]);
   const [novoModeloEvento, setNovoModeloEvento] = useState({ titulo: "", horario: "" });
   const [editandoModeloEvento, setEditandoModeloEvento] = useState(null);
-  const [modeloSelecionado, setModeloSelecionado] = useState("");
   const [locaisEvento, setLocaisEvento] = useState([]);
   const [novoLocalEvento, setNovoLocalEvento] = useState("");
   const [novaPalavra, setNovaPalavra] = useState({ titulo: "", texto: "", referencia: "", video: "" });
@@ -4585,22 +4584,20 @@ export default function FamiliaAliancaApp() {
                   {editandoEvento ? "Editar Evento" : "Novo Evento"}
                 </div>
                 <label style={S.label}>Título</label>
+                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Digite ou escolha um modelo já cadastrado" value={novoEvento.titulo}
+                  list="lista-modelos-evento"
+                  onChange={e => {
+                    const valor = e.target.value;
+                    const modelo = modelosEvento.find(m => m.titulo === valor);
+                    setNovoEvento({ ...novoEvento, titulo: valor, hora: modelo ? modelo.horario : novoEvento.hora });
+                  }} />
                 {modelosEvento.length > 0 && (
-                  <select style={{ ...S.select, marginBottom: 8 }} value={modeloSelecionado}
-                    onChange={e => {
-                      const id = e.target.value;
-                      setModeloSelecionado(id);
-                      const modelo = modelosEvento.find(m => m.id === id);
-                      if (modelo) setNovoEvento({ ...novoEvento, titulo: modelo.titulo, hora: modelo.horario });
-                    }}>
-                    <option value="">📋 Usar um modelo (opcional)...</option>
+                  <datalist id="lista-modelos-evento">
                     {modelosEvento.map(m => (
-                      <option key={m.id} value={m.id}>{m.titulo} — {m.horario}</option>
+                      <option key={m.id} value={m.titulo} />
                     ))}
-                  </select>
+                  </datalist>
                 )}
-                <input style={{ ...S.input, marginBottom: 0 }} placeholder="Nome do evento" value={novoEvento.titulo}
-                  onChange={e => { setNovoEvento({ ...novoEvento, titulo: e.target.value }); setModeloSelecionado(""); }} />
                 <label style={S.label}>Data</label>
                 <input style={{ ...S.input, marginBottom: 0 }} type="date" value={novoEvento.data}
                   onChange={e => setNovoEvento({ ...novoEvento, data: e.target.value })} />
@@ -4700,7 +4697,7 @@ export default function FamiliaAliancaApp() {
                 </button>
                 {editandoEvento && (
                   <button style={{ ...S.saveBtn, background: T.card, color: T.textSub, marginTop: 8 }}
-                    onClick={() => { setEditandoEvento(null); setModeloSelecionado(""); setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto" }); }}>
+                    onClick={() => { setEditandoEvento(null); setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto" }); }}>
                     Cancelar
                   </button>
                 )}
@@ -4714,7 +4711,7 @@ export default function FamiliaAliancaApp() {
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
-                        onClick={() => { setEditandoEvento(ev.id); setModeloSelecionado(""); setNovoEvento({ ...ev }); }}>✏️</button>
+                        onClick={() => { setEditandoEvento(ev.id); setNovoEvento({ ...ev }); }}>✏️</button>
                       <button style={S.delBtn} onClick={() => deletarEvento(ev.id)}>🗑️</button>
                     </div>
                   </div>
