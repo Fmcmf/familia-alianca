@@ -1104,7 +1104,7 @@ export default function FamiliaAliancaApp() {
         try {
           cred = await signInWithEmailAndPassword(auth, authEmail, loginForm.senha);
         } catch (errSignIn) {
-          if (errSignIn.code === "auth/user-not-found") {
+          if (errSignIn.code === "auth/user-not-found" || errSignIn.code === "auth/invalid-credential") {
             cred = await createUserWithEmailAndPassword(auth, authEmail, loginForm.senha);
           } else {
             throw errSignIn;
