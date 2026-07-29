@@ -1365,7 +1365,7 @@ export default function FamiliaAliancaApp() {
   const S = {
     app: { minHeight: "100vh", background: T.bg, color: T.text, fontFamily: "'Georgia', 'Times New Roman', serif", position: "relative", overflowX: "hidden" },
     bg: { position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", background: darkMode ? "linear-gradient(160deg, #0a1a3a 0%, #050d1f 40%, #03091a 70%, #060f28 100%)" : "none" },
-    wrap: { position: "relative", zIndex: 1, maxWidth: 430, margin: "0 auto", paddingBottom: 90 },
+    wrap: { position: "relative", zIndex: 1, maxWidth: 430, margin: "0 auto", paddingBottom: "calc(90px + env(safe-area-inset-bottom, 0px))" },
     splash: { minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 },
     splashLogo: { width: 160, animation: "fadeIn 1s ease" },
     splashTag: { fontSize: 13, letterSpacing: 4, textTransform: "uppercase", color: T.textSub },
@@ -1397,7 +1397,7 @@ export default function FamiliaAliancaApp() {
     minInfo: { flex: 1 },
     minNome: { fontSize: 15, fontWeight: "bold", marginBottom: 3 },
     minDesc: { fontSize: 13, color: T.textSub, lineHeight: 1.5 },
-    nav: { position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: T.nav, borderTop: `1px solid ${T.navBorder}`, display: "flex", backdropFilter: "blur(20px)", zIndex: 100 },
+    nav: { position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: T.nav, borderTop: `1px solid ${T.navBorder}`, display: "flex", backdropFilter: "blur(20px)", zIndex: 100, paddingBottom: "env(safe-area-inset-bottom, 0px)" },
     navBtn: (a) => ({ flex: 1, padding: "10px 0 14px", background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: a ? "#c9a84c" : darkMode ? "rgba(255,255,255,.65)" : "rgba(0,0,0,.45)", fontSize: 10, letterSpacing: 1, textTransform: "uppercase", fontFamily: "Georgia,serif" }),
     navIcon: { fontSize: 20 },
     pixCard: { margin: "0 16px 12px", background: "linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 16, padding: "20px" },
@@ -1429,8 +1429,8 @@ export default function FamiliaAliancaApp() {
 
   // ── SPLASH ──
   if (screen === "splash") return (
-    <div style={S.splash}>
-      <style>{`@keyframes fadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}} @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}`}</style>
+    <div style={S.splash} className="tela-cheia">
+      <style>{`html,body{height:100%;margin:0;} .tela-cheia{min-height:100vh;min-height:100dvh;} @keyframes fadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}} @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}`}</style>
       <img src="/logo-igreja.png" alt="Família Aliança" style={{ width: 180, animation: "fadeIn 1s ease", borderRadius: 16, background: darkMode ? "transparent" : "#080810", padding: darkMode ? 0 : 12 }} />
       <div style={{ textAlign: "center", animation: "fadeIn 1.4s ease" }}>
         <div style={{ fontSize: 12, color: T.textFaint, animation: "pulse 1.5s ease infinite", marginTop: 8, letterSpacing: 3 }}>Igreja do Nazareno</div>
@@ -1441,7 +1441,8 @@ export default function FamiliaAliancaApp() {
 
   // ── LOGIN ──
   if (screen === "login") return (
-    <div style={S.loginWrap}>
+    <div style={S.loginWrap} className="tela-cheia">
+      <style>{`html,body{height:100%;margin:0;} .tela-cheia{min-height:100vh;min-height:100dvh;}`}</style>
       <img src="/logo-igreja.png" alt="Família Aliança" style={{ width: 160, marginBottom: 28, borderRadius: 16, background: darkMode ? "transparent" : "#080810", padding: darkMode ? 0 : 12 }} />
       <div style={{ fontSize: 16, fontWeight: "bold", marginBottom: 32, textAlign: "center", color: T.text, letterSpacing: 1 }}>
         {recuperando ? "Recuperar Senha" : loginForm.modo === "login" ? "Entrar na sua conta" : "Criar sua conta"}
@@ -1579,7 +1580,7 @@ export default function FamiliaAliancaApp() {
 
   // ── RENDER APP ──
   return (
-    <div style={S.app}>
+    <div style={S.app} className="tela-cheia">
       {/* ── MODAL PDF/IMAGEM INLINE ── */}
       {pdfAberto && (
         <div style={{ position: "fixed", inset: 0, zIndex: 3000, background: "#000", display: "flex", flexDirection: "column" }}>
@@ -1645,6 +1646,9 @@ export default function FamiliaAliancaApp() {
       <style>{`
         * { box-sizing: border-box; }
         html { font-size: 18px; }
+        html, body { height: 100%; margin: 0; }
+        #root { min-height: 100vh; min-height: 100dvh; }
+        .tela-cheia { min-height: 100vh; min-height: 100dvh; }
         input::placeholder,textarea::placeholder{color:${darkMode ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.35)"};}
         input,textarea,select{color:${T.text} !important; background:${T.input} !important;}
         ::-webkit-scrollbar{width:4px;height:4px}
