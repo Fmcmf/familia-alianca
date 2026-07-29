@@ -610,6 +610,19 @@ export default function FamiliaAliancaApp() {
   const [mostrarSugestoesEntrada, setMostrarSugestoesEntrada] = useState(false);
   const [nomeManualEntrada, setNomeManualEntrada] = useState(false);
   const [entradasPeriodo, setEntradasPeriodo] = useState(new Date().toISOString().slice(0, 7));
+  // ── NOVO: Saídas (redesenho — cadastro com vencimento, baixa de pagamento depois) ──
+  const [saidas, setSaidas] = useState([]);
+  const [novaSaida, setNovaSaida] = useState({
+    descricao: "",
+    dataLancamento: new Date().toISOString().split("T")[0],
+    dataVencimento: "",
+    tipo: "boleto", // boleto | debito | pix | dinheiro
+    valor: "",
+  });
+  const [buscaSaida, setBuscaSaida] = useState("");
+  const [filtroSaidaStatus, setFiltroSaidaStatus] = useState("pendentes"); // pendentes | pagas | todas
+  const [saidaBaixaId, setSaidaBaixaId] = useState(null);
+  const [dataBaixaTemp, setDataBaixaTemp] = useState(new Date().toISOString().split("T")[0]);
   const [estudoNivel, setEstudoNivel] = useState("iniciante");
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
@@ -901,6 +914,13 @@ export default function FamiliaAliancaApp() {
       setEntradas(lista);
     });
 
+    // NOVO: Saídas (redesenho do financeiro)
+    const unsubSaidas = onSnapshot(collection(db, "saidas"), (snap) => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => (a.dataVencimento || "").localeCompare(b.dataVencimento || ""));
+      setSaidas(lista);
+    });
+
     // Módulo Música
     const unsubEscalas = onSnapshot(collection(db, "escalas"), snap => {
       const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -965,7 +985,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes(); unsubModelosEvento(); unsubLocaisEvento(); unsubEntradas();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes(); unsubModelosEvento(); unsubLocaisEvento(); unsubEntradas(); unsubSaidas();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -5797,7 +5817,7 @@ export default function FamiliaAliancaApp() {
                 <div style={{ padding: "0 16px" }}>
                   {/* Seletor de view */}
                   <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", scrollbarWidth: "none" }}>
-                    {[{ id: "dashboard", label: "📊 Resumo" }, { id: "entradas", label: "🟢 Entradas (novo)" }, { id: "lancamentos", label: "📋 Lançamentos" }].map(v => (
+                    {[{ id: "dashboard", label: "📊 Resumo" }, { id: "entradas", label: "🟢 Entradas (novo)" }, { id: "saidas", label: "🔴 Saídas (novo)" }, { id: "lancamentos", label: "📋 Lançamentos" }].map(v => (
                       <button key={v.id} onClick={() => setFinView(v.id)}
                         style={{ flexShrink: 0, padding: "8px 14px", border: `1px solid ${finView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: finView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: finView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: finView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                         {v.label}
@@ -6065,6 +6085,152 @@ export default function FamiliaAliancaApp() {
                             </div>
                           ))}
                         </div>
+                      </>
+                    );
+                  })()}
+
+                  {/* ── NOVO: SAÍDAS (redesenho) ── */}
+                  {finView === "saidas" && (() => {
+                    const fmtV = v => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+                    const fmtD = s => s ? new Date(s + "T12:00:00").toLocaleDateString("pt-BR") : "—";
+                    const hoje = new Date().toISOString().split("T")[0];
+                    const labelTipo = { boleto: "🧾 Boleto", debito: "💳 Débito", pix: "💠 PIX", dinheiro: "💵 $" };
+
+                    const totalPendente = saidas.filter(s => !s.pago).reduce((s2, s) => s2 + (parseFloat(s.valor) || 0), 0);
+                    const totalVencido = saidas.filter(s => !s.pago && s.dataVencimento && s.dataVencimento < hoje).reduce((s2, s) => s2 + (parseFloat(s.valor) || 0), 0);
+
+                    const filtradas = saidas
+                      .filter(s => filtroSaidaStatus === "todas" ? true : filtroSaidaStatus === "pagas" ? s.pago : !s.pago)
+                      .filter(s => !buscaSaida.trim() || s.descricao?.toLowerCase().includes(buscaSaida.trim().toLowerCase()));
+
+                    return (
+                      <>
+                        <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Nova Saída</div>
+                        <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Cadastre a conta com o vencimento. Depois, busque e dê baixa quando pagar.</div>
+
+                        <label style={S.label}>Descrição / Fornecedor *</label>
+                        <input placeholder="Ex: Aluguel do salão, Energia elétrica..." style={{ ...S.input, marginBottom: 0 }}
+                          value={novaSaida.descricao}
+                          onChange={e => setNovaSaida({ ...novaSaida, descricao: e.target.value })} />
+
+                        <label style={S.label}>Data do Lançamento *</label>
+                        <input type="date" style={{ ...S.input, marginBottom: 0 }} value={novaSaida.dataLancamento}
+                          onChange={e => setNovaSaida({ ...novaSaida, dataLancamento: e.target.value })} />
+
+                        <label style={S.label}>Data do Vencimento *</label>
+                        <input type="date" style={{ ...S.input, marginBottom: 0 }} value={novaSaida.dataVencimento}
+                          onChange={e => setNovaSaida({ ...novaSaida, dataVencimento: e.target.value })} />
+
+                        <label style={S.label}>Tipo</label>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 0 }}>
+                          {[{ id: "boleto", label: "🧾 Boleto" }, { id: "debito", label: "💳 Débito" }, { id: "pix", label: "💠 PIX" }, { id: "dinheiro", label: "💵 $" }].map(t => (
+                            <button key={t.id} onClick={() => setNovaSaida({ ...novaSaida, tipo: t.id })}
+                              style={{ padding: "9px 0", border: `1px solid ${novaSaida.tipo === t.id ? "#ef4444" : T.cardBorder}`, borderRadius: 10, background: novaSaida.tipo === t.id ? "rgba(239,68,68,.15)" : T.card, color: novaSaida.tipo === t.id ? "#ef4444" : T.textSub, fontSize: 11, fontWeight: novaSaida.tipo === t.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                              {t.label}
+                            </button>
+                          ))}
+                        </div>
+
+                        <label style={S.label}>Valor (R$) *</label>
+                        <input type="number" step="0.01" placeholder="0,00" style={{ ...S.input, marginBottom: 0 }}
+                          value={novaSaida.valor}
+                          onChange={e => setNovaSaida({ ...novaSaida, valor: e.target.value })} />
+
+                        <button style={{ ...S.saveBtn, background: "linear-gradient(90deg,#ef4444,#f87171)" }} onClick={async () => {
+                          if (!novaSaida.descricao.trim() || !novaSaida.dataVencimento || !novaSaida.valor) { showToast("⚠️ Preencha descrição, vencimento e valor!"); return; }
+                          await addDoc(collection(db, "saidas"), {
+                            descricao: novaSaida.descricao.trim(),
+                            dataLancamento: novaSaida.dataLancamento,
+                            dataVencimento: novaSaida.dataVencimento,
+                            tipo: novaSaida.tipo,
+                            valor: parseFloat(novaSaida.valor),
+                            pago: false,
+                            dataPagamento: "",
+                            criadoEm: new Date().toISOString(),
+                          });
+                          setNovaSaida({ descricao: "", dataLancamento: new Date().toISOString().split("T")[0], dataVencimento: "", tipo: "boleto", valor: "" });
+                          showToast("✅ Saída cadastrada!");
+                        }}>💸 Cadastrar Saída</button>
+
+                        {/* Resumo */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 24, marginBottom: 16 }}>
+                          <div style={{ background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.25)", borderRadius: 14, padding: "14px 16px" }}>
+                            <div style={{ fontSize: 11, color: "#ef4444", letterSpacing: 1, marginBottom: 4 }}>PENDENTE</div>
+                            <div style={{ fontSize: 16, fontWeight: "bold", color: "#ef4444" }}>{fmtV(totalPendente)}</div>
+                          </div>
+                          <div style={{ background: "rgba(239,68,68,.15)", border: "1px solid rgba(239,68,68,.4)", borderRadius: 14, padding: "14px 16px" }}>
+                            <div style={{ fontSize: 11, color: "#ef4444", letterSpacing: 1, marginBottom: 4 }}>VENCIDO</div>
+                            <div style={{ fontSize: 16, fontWeight: "bold", color: "#ef4444" }}>{fmtV(totalVencido)}</div>
+                          </div>
+                        </div>
+
+                        {/* Busca */}
+                        <div style={{ fontSize: 12, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>🔍 Buscar / Dar Baixa</div>
+                        <input placeholder="Buscar por descrição/fornecedor..." style={{ ...S.input, marginBottom: 12 }}
+                          value={buscaSaida} onChange={e => setBuscaSaida(e.target.value)} />
+
+                        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                          {[{ id: "pendentes", label: "⏳ Pendentes" }, { id: "pagas", label: "✅ Pagas" }, { id: "todas", label: "📋 Todas" }].map(f => (
+                            <button key={f.id} onClick={() => setFiltroSaidaStatus(f.id)}
+                              style={{ flex: 1, padding: "8px 0", border: `1px solid ${filtroSaidaStatus === f.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: filtroSaidaStatus === f.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: filtroSaidaStatus === f.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: filtroSaidaStatus === f.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                              {f.label}
+                            </button>
+                          ))}
+                        </div>
+
+                        {filtradas.length === 0 ? (
+                          <div style={{ textAlign: "center", padding: "20px 0", color: T.textSub, fontSize: 13 }}>Nenhuma saída encontrada</div>
+                        ) : filtradas.map(s => {
+                          const vencida = !s.pago && s.dataVencimento && s.dataVencimento < hoje;
+                          return (
+                            <div key={s.id} style={{ padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: `3px solid ${s.pago ? "#22c55e" : vencida ? "#ef4444" : "#c9a84c"}`, borderRadius: 12, marginBottom: 8 }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                                <span style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{s.descricao}</span>
+                                <span style={{ fontSize: 13, fontWeight: "bold", color: "#ef4444" }}>{fmtV(parseFloat(s.valor))}</span>
+                              </div>
+                              <div style={{ fontSize: 11, color: T.textFaint, marginBottom: 4 }}>
+                                {labelTipo[s.tipo]} • Vencimento: <span style={{ color: vencida ? "#ef4444" : T.textFaint, fontWeight: vencida ? "bold" : "normal" }}>{fmtD(s.dataVencimento)}</span>
+                                {vencida && " ⚠️ Vencida"}
+                              </div>
+
+                              {s.pago ? (
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                                  <span style={{ fontSize: 12, color: "#22c55e", fontWeight: "bold" }}>✅ Pago em {fmtD(s.dataPagamento)}</span>
+                                  <div style={{ display: "flex", gap: 8 }}>
+                                    <button onClick={async () => { await updateDoc(doc(db, "saidas", s.id), { pago: false, dataPagamento: "" }); showToast("↩️ Baixa desfeita"); }}
+                                      style={{ padding: "6px 10px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 8, color: T.textSub, fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif" }}>🔄 Reabrir</button>
+                                    <button style={S.delBtn} onClick={async () => {
+                                      if (window.confirm("Excluir esta saída?")) { await deleteDoc(doc(db, "saidas", s.id)); showToast("🗑️ Removido!"); }
+                                    }}>🗑️</button>
+                                  </div>
+                                </div>
+                              ) : saidaBaixaId === s.id ? (
+                                <div style={{ marginTop: 10, padding: 10, background: "rgba(34,197,94,.08)", border: "1px solid rgba(34,197,94,.25)", borderRadius: 10 }}>
+                                  <label style={{ ...S.label, marginTop: 0 }}>Data do Pagamento</label>
+                                  <input type="date" style={{ ...S.input, marginBottom: 8 }} value={dataBaixaTemp} onChange={e => setDataBaixaTemp(e.target.value)} />
+                                  <div style={{ display: "flex", gap: 8 }}>
+                                    <button style={{ flex: 1, padding: "8px 0", background: "#22c55e", border: "none", borderRadius: 8, color: "#fff", fontSize: 12, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}
+                                      onClick={async () => {
+                                        await updateDoc(doc(db, "saidas", s.id), { pago: true, dataPagamento: dataBaixaTemp });
+                                        setSaidaBaixaId(null);
+                                        showToast("✅ Pagamento confirmado!");
+                                      }}>✅ Confirmar</button>
+                                    <button style={{ flex: 1, padding: "8px 0", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 8, color: T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                                      onClick={() => setSaidaBaixaId(null)}>Cancelar</button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+                                  <button style={{ padding: "6px 12px", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, color: T.gold, fontSize: 12, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}
+                                    onClick={() => { setSaidaBaixaId(s.id); setDataBaixaTemp(hoje); }}>💰 Dar Baixa</button>
+                                  <button style={S.delBtn} onClick={async () => {
+                                    if (window.confirm("Excluir esta saída?")) { await deleteDoc(doc(db, "saidas", s.id)); showToast("🗑️ Removido!"); }
+                                  }}>🗑️</button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </>
                     );
                   })()}
