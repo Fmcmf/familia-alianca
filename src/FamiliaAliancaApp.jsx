@@ -4472,8 +4472,8 @@ export default function FamiliaAliancaApp() {
                                 {qtdEscalados > 0 && <div style={{ fontSize: 11, color: "#22c55e", marginTop: 3 }}>✅ {qtdEscalados} escalado(s)</div>}
                               </div>
                               {e.ministerio === ministerioLider && (
-                                <button style={S.delBtn} onClick={async () => {
-                                  if (window.confirm("Excluir este evento?")) {
+                                <button title="Excluir evento inteiro" style={S.delBtn} onClick={async () => {
+                                  if (window.confirm("Excluir este evento? Isso remove o evento inteiro (não só a escala).")) {
                                     await deleteDoc(doc(db, "agenda", e.id));
                                     showToast("🗑️ Evento removido!");
                                   }
@@ -4491,8 +4491,8 @@ export default function FamiliaAliancaApp() {
                                     await deleteDoc(doc(db, "escalas", escala.id));
                                     showToast("🗑️ Escala removida!");
                                   }
-                                }} style={{ padding: "9px 12px", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 10, color: "#ef4444", fontSize: 13, cursor: "pointer" }}>
-                                  🗑️
+                                }} style={{ padding: "9px 12px", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 10, color: "#ef4444", fontSize: 11, fontWeight: "bold", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "Georgia,serif" }}>
+                                  🗑️ Escala
                                 </button>
                               )}
                             </div>
