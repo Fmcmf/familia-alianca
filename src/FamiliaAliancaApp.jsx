@@ -475,6 +475,8 @@ const gerarSenhaTemporaria = () => Math.random().toString(36).slice(-8);
 // identificador de login não tenha "@" — só pra satisfazer a exigência de formato do Firebase.
 const paraContaAuth = (identificador) => identificador.includes("@") ? identificador : `${identificador.toLowerCase()}@interno.familia-alianca`;
 // Retorna o intervalo (segunda a domingo) da semana atual, no formato "YYYY-MM-DD" (comparável com ev.data)
+// Aliança Music e Mídia servem juntos em todo evento — retorna o ministério "parceiro" pra vínculo automático
+const parceiroMinisterio = (m) => m === "Aliança Music" ? "Mídia" : m === "Mídia" ? "Aliança Music" : null;
 const getSemanaAtual = () => {
   const hoje = new Date();
   const diaSemana = hoje.getDay(); // 0=domingo ... 6=sábado
@@ -1303,7 +1305,12 @@ export default function FamiliaAliancaApp() {
       await updateDoc(doc(db, "agenda", editandoEvento), novoEvento);
       setEditandoEvento(null);
     } else {
-      await addDoc(collection(db, "agenda"), novoEvento);
+      // Se for líder de Aliança Music ou Mídia criando um evento novo, vincula os dois ministérios de uma vez
+      const parceiro = (isLider && !isAdmin) ? parceiroMinisterio(ministerioLider) : null;
+      await addDoc(collection(db, "agenda"), {
+        ...novoEvento,
+        ...(parceiro ? { ministeriosVinculados: [ministerioLider, parceiro] } : {}),
+      });
     }
     setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto" });
     showToast("✅ Evento salvo!");
@@ -4312,9 +4319,14 @@ export default function FamiliaAliancaApp() {
                         value={novoEvento.local} onChange={e => setNovoEvento({ ...novoEvento, local: e.target.value })} />
                       <button style={S.saveBtn} onClick={async () => {
                         if (!novoEvento.titulo || !novoEvento.data) { showToast("⚠️ Preencha título e data!"); return; }
-                        await addDoc(collection(db, "agenda"), { ...novoEvento, tipo: "culto", ministerio: ministerioLider, criadoPor: user?.nome || "Líder" });
+                        const parceiro = parceiroMinisterio(ministerioLider);
+                        await addDoc(collection(db, "agenda"), {
+                          ...novoEvento, tipo: "culto", ministerio: ministerioLider,
+                          ministeriosVinculados: parceiro ? [ministerioLider, parceiro] : [],
+                          criadoPor: user?.nome || "Líder",
+                        });
                         setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto", descricao: "" });
-                        showToast("✅ Evento adicionado!");
+                        showToast(parceiro ? `✅ Evento adicionado! (${parceiro} já vê este evento também)` : "✅ Evento adicionado!");
                       }}>📅 Adicionar Evento</button>
                     </>
                   )}
@@ -4347,9 +4359,11 @@ export default function FamiliaAliancaApp() {
                                 </div>
                               ) : (
                                 <button onClick={async () => {
+                                  const parceiro = parceiroMinisterio(ministerioLider);
                                   const novosVinc = [...(e.ministeriosVinculados || []), ministerioLider];
+                                  if (parceiro && !novosVinc.includes(parceiro)) novosVinc.push(parceiro);
                                   await updateDoc(doc(db, "agenda", e.id), { ministeriosVinculados: novosVinc });
-                                  showToast(`✅ Evento vinculado!`);
+                                  showToast(parceiro ? `✅ Vinculado! (${parceiro} já vê este evento também)` : "✅ Evento vinculado!");
                                 }} style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: "bold", color: "#080810", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                                   + Vincular
                                 </button>
