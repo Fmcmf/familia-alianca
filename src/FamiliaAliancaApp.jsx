@@ -1305,11 +1305,10 @@ export default function FamiliaAliancaApp() {
       await updateDoc(doc(db, "agenda", editandoEvento), novoEvento);
       setEditandoEvento(null);
     } else {
-      // Se for líder de Aliança Music ou Mídia criando um evento novo, vincula os dois ministérios de uma vez
-      const parceiro = (isLider && !isAdmin) ? parceiroMinisterio(ministerioLider) : null;
+      // Todo evento novo já nasce vinculado a Aliança Music e Mídia (praticamente todo culto tem os dois)
       await addDoc(collection(db, "agenda"), {
         ...novoEvento,
-        ...(parceiro ? { ministeriosVinculados: [ministerioLider, parceiro] } : {}),
+        ministeriosVinculados: Array.from(new Set([...(novoEvento.ministeriosVinculados || []), "Aliança Music", "Mídia"])),
       });
     }
     setNovoEvento({ titulo: "", data: "", hora: "", local: "", tipo: "culto" });
