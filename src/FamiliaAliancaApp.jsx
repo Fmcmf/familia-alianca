@@ -2665,8 +2665,9 @@ export default function FamiliaAliancaApp() {
             {/* Agenda completa (Admin vê tudo; Membros e Líderes veem só a semana atual) */}
             <div id="mais-agenda" style={S.secTitle}>{isAdmin ? "Agenda Completa" : "Eventos desta Semana"}</div>
             {(() => {
-              const { inicio, fim } = getSemanaAtual();
-              const eventosExibidos = isAdmin ? agenda : agenda.filter(e => e.data >= inicio && e.data <= fim);
+              const { fim } = getSemanaAtual();
+              const hoje = new Date().toISOString().split("T")[0];
+              const eventosExibidos = isAdmin ? agenda : agenda.filter(e => e.data >= hoje && e.data <= fim);
               if (eventosExibidos.length === 0) {
                 return <div style={{ ...S.card, textAlign: "center" }}><div style={{ fontSize: 13, color: T.textSub }}>{isAdmin ? "Nenhum evento." : "Nenhum evento esta semana."}</div></div>;
               }
