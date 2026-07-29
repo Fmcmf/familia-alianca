@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db, messaging, solicitarPermissaoNotificacao, onMessage, auth } from "./firebase";
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, deleteField } from "firebase/firestore";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword } from "firebase/auth";
 import emailjs from "@emailjs/browser";
 
 // ─── CLOUDINARY CONFIG ──────────────────────────────────────────────────────
@@ -545,6 +545,9 @@ export default function FamiliaAliancaApp() {
   const [revogarAlvoAdmin, setRevogarAlvoAdmin] = useState(null);
   const [senhaConfirmacaoRevogar, setSenhaConfirmacaoRevogar] = useState("");
   const [mostrarSenhaAdmin, setMostrarSenhaAdmin] = useState({});
+  const [senhaAtualPropria, setSenhaAtualPropria] = useState("");
+  const [novaSenhaPropria, setNovaSenhaPropria] = useState("");
+  const [confirmNovaSenhaPropria, setConfirmNovaSenhaPropria] = useState("");
   const [buscaMusicaEscala, setBuscaMusicaEscala] = useState("");
   const [dropdownMusicaEscalaAberto, setDropdownMusicaEscalaAberto] = useState(false);
   const [avisoCardExpandido, setAvisoCardExpandido] = useState(false);
@@ -6883,11 +6886,66 @@ export default function FamiliaAliancaApp() {
                 setRevogarAlvoAdmin(null); setSenhaConfirmacaoRevogar("");
               };
 
+              const trocarMinhaSenha = async () => {
+                if (!senhaAtualPropria) { showToast("⚠️ Digite sua senha atual!"); return; }
+                if (novaSenhaPropria.length < 6) { showToast("⚠️ A nova senha deve ter pelo menos 6 caracteres!"); return; }
+                if (novaSenhaPropria !== confirmNovaSenhaPropria) { showToast("⚠️ As senhas não coincidem!"); return; }
+                if (!(await senhaAdminAtualCorreta(senhaAtualPropria))) { showToast("❌ Senha atual incorreta!"); return; }
+
+                const salt = gerarSalt();
+                const hash = await hashSenha(novaSenhaPropria, salt);
+                await updateDoc(doc(db, "membros", user.email), { senhaHash: hash, senhaSalt: salt, senha: deleteField() });
+
+                // Atualiza também o Firebase Authentication, pra não ficar dessincronizado
+                try {
+                  const authEmail = paraContaAuth(user.email);
+                  await signInWithEmailAndPassword(auth, authEmail, senhaAtualPropria); // garante sessão "fresca"
+                  await updatePassword(auth.currentUser, novaSenhaPropria);
+                } catch (errAuth) {
+                  console.warn("Senha trocada no app, mas o Firebase Authentication não sincronizou:", errAuth);
+                }
+
+                const uAtualizado = { ...user, senhaHash: hash, senhaSalt: salt };
+                delete uAtualizado.senha;
+                setUser(uAtualizado);
+                store.set(SK.user, uAtualizado);
+
+                setSenhaAtualPropria(""); setNovaSenhaPropria(""); setConfirmNovaSenhaPropria("");
+                showToast("✅ Senha alterada com sucesso!");
+              };
+
               return (
                 <div style={{ padding: "0 16px" }}>
                   <div style={{ fontSize: 14, fontWeight: "bold", color: T.gold, marginBottom: 4 }}>🔐 Administradores</div>
                   <div style={{ background: "rgba(220,38,38,.08)", border: "1px solid rgba(220,38,38,.25)", borderRadius: 12, padding: "10px 14px", marginBottom: 18, fontSize: 12, color: "#f87171", lineHeight: 1.6 }}>
                     ⚠️ Acesso administrativo dá controle total sobre o app: membros, finanças, avisos, líderes e configurações. Conceda apenas para pessoas de máxima confiança. Toda ação aqui exige sua senha de admin para confirmar.
+                  </div>
+
+                  {/* Trocar minha própria senha */}
+                  <div style={{ ...S.card, marginLeft: 0, marginRight: 0, marginBottom: 20 }}>
+                    <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>🔑 Trocar minha senha</div>
+                    <label style={{ ...S.label, marginTop: 0 }}>Senha atual</label>
+                    <div style={{ position: "relative", marginBottom: 0 }}>
+                      <input type={mostrarSenhaAdmin.atual ? "text" : "password"} style={{ ...S.input, marginBottom: 0, paddingRight: 40 }} placeholder="Sua senha atual"
+                        value={senhaAtualPropria} onChange={e => setSenhaAtualPropria(e.target.value)} />
+                      <button type="button" onClick={() => setMostrarSenhaAdmin({ ...mostrarSenhaAdmin, atual: !mostrarSenhaAdmin.atual })}
+                        style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: 0 }}>
+                        {mostrarSenhaAdmin.atual ? "🙈" : "👁️"}
+                      </button>
+                    </div>
+                    <label style={S.label}>Nova senha</label>
+                    <div style={{ position: "relative", marginBottom: 0 }}>
+                      <input type={mostrarSenhaAdmin.nova ? "text" : "password"} style={{ ...S.input, marginBottom: 0, paddingRight: 40 }} placeholder="Mínimo 6 caracteres"
+                        value={novaSenhaPropria} onChange={e => setNovaSenhaPropria(e.target.value)} />
+                      <button type="button" onClick={() => setMostrarSenhaAdmin({ ...mostrarSenhaAdmin, nova: !mostrarSenhaAdmin.nova })}
+                        style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: 0 }}>
+                        {mostrarSenhaAdmin.nova ? "🙈" : "👁️"}
+                      </button>
+                    </div>
+                    <label style={S.label}>Confirmar nova senha</label>
+                    <input type={mostrarSenhaAdmin.nova ? "text" : "password"} style={{ ...S.input, marginBottom: 0 }} placeholder="Repita a nova senha"
+                      value={confirmNovaSenhaPropria} onChange={e => setConfirmNovaSenhaPropria(e.target.value)} />
+                    <button style={{ ...S.saveBtn, marginTop: 12 }} onClick={trocarMinhaSenha}>💾 Salvar Nova Senha</button>
                   </div>
 
                   {/* Lista de admins atuais */}
