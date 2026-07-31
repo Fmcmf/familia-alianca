@@ -2419,7 +2419,7 @@ export default function FamiliaAliancaApp() {
             {/* Hero */}
             <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.12))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🕊️</div>
-              <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Devocional da Semana</div>
+              <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>Devocional Diário</div>
               <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.8, fontStyle: "italic", borderLeft: "2px solid #c9a84c", paddingLeft: 14, textAlign: "left" }}>
                 "O devocional não é uma obrigação religiosa — é um encontro de amor com Aquele que nos criou e nos redimiu."
               </div>
@@ -2442,7 +2442,7 @@ export default function FamiliaAliancaApp() {
             {/* Devocional da semana */}
             {devocional ? (
               <>
-                <div style={S.secTitle}>Esta Semana</div>
+                <div style={S.secTitle}>Devocional de Hoje</div>
 
                 {/* Versículo */}
                 <div style={{ margin: "0 16px 12px", background: "rgba(201,168,76,.08)", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 16, padding: "20px" }}>
@@ -5256,8 +5256,8 @@ export default function FamiliaAliancaApp() {
             {/* Admin: Devocional */}
             {adminTab === "devocional" && (
               <div style={{ padding: "0 16px" }}>
-                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Devocional da Semana</div>
-                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Publique o devocional semanal para os membros</div>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>Devocional Diário</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>Publique o devocional do dia para os membros</div>
 
                 <label style={S.label}>Título do Devocional *</label>
                 <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: A Graça que Transforma"
