@@ -2673,13 +2673,25 @@ export default function FamiliaAliancaApp() {
             </div>
 
             {/* Agenda completa (Admin vê tudo; Membros e Líderes veem só a semana atual) */}
-            <div id="mais-agenda" style={S.secTitle}>{isAdmin ? "Agenda Completa" : "Eventos desta Semana"}</div>
+            <div id="mais-agenda" style={S.secTitle}>{isAdmin ? "Agenda Completa" : "Próximos Eventos"}</div>
             {(() => {
               const { fim } = getSemanaAtual();
               const hoje = new Date().toISOString().split("T")[0];
-              const eventosExibidos = isAdmin ? agenda : agenda.filter(e => e.data >= hoje && e.data <= fim);
+              let eventosExibidos;
+              if (isAdmin) {
+                eventosExibidos = agenda;
+              } else {
+                const daSemana = agenda.filter(e => e.data >= hoje && e.data <= fim);
+                if (daSemana.length < 3) {
+                  const idsJaIncluidos = new Set(daSemana.map(e => e.id));
+                  const extras = agenda.filter(e => e.data > fim && !idsJaIncluidos.has(e.id)).slice(0, 3 - daSemana.length);
+                  eventosExibidos = [...daSemana, ...extras];
+                } else {
+                  eventosExibidos = daSemana;
+                }
+              }
               if (eventosExibidos.length === 0) {
-                return <div style={{ ...S.card, textAlign: "center" }}><div style={{ fontSize: 13, color: T.textSub }}>{isAdmin ? "Nenhum evento." : "Nenhum evento esta semana."}</div></div>;
+                return <div style={{ ...S.card, textAlign: "center" }}><div style={{ fontSize: 13, color: T.textSub }}>{isAdmin ? "Nenhum evento." : "Nenhum evento agendado."}</div></div>;
               }
               return eventosExibidos.map(ev => (
                 <div key={ev.id} style={S.eventoCard}>
