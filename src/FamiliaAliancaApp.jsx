@@ -4044,11 +4044,13 @@ export default function FamiliaAliancaApp() {
                 });
               };
 
-              // Eventos deste ministério (próprios + vinculados)
-              const eventosMin = [
+              // Eventos deste ministério (próprios + vinculados) — sem duplicar quando um evento bate nos dois filtros
+              const eventosMinBrutos = [
                 ...agenda.filter(e => e.ministerio === ministerioLider && !e.funcoes),
                 ...agenda.filter(e => e.ministeriosVinculados?.includes(ministerioLider))
-              ].sort((a, b) => a.data?.localeCompare(b.data));
+              ];
+              const eventosMin = Array.from(new Map(eventosMinBrutos.map(e => [e.id, e])).values())
+                .sort((a, b) => a.data?.localeCompare(b.data));
 
               // Líderes do Aliança Music e Mídia podem editar qualquer evento da agenda da igreja
               const podeEditarAgendaCompleta = ministerioLider === "Aliança Music" || ministerioLider === "Mídia";
