@@ -603,52 +603,11 @@ export default function FamiliaAliancaApp() {
   const [anivMes, setAnivMes] = useState(new Date().getMonth() + 1);
   const [membrosView, setMembrosView] = useState("lista"); // lista | aniversariantes
   const [membrosOrdem, setMembrosOrdem] = useState("nome"); // nome | acesso
-  const [lancamentos, setLancamentos] = useState([]);
-  const [novoLancamento, setNovoLancamento] = useState({ tipo: "entrada", categoria: "Dízimo", descricao: "", valor: "", data: new Date().toISOString().split("T")[0] });
-  const [finPeriodo, setFinPeriodo] = useState(new Date().toISOString().slice(0, 7));
-  const [finView, setFinView] = useState("dashboard"); // dashboard | lancamentos | novo | dizimistas
   const [ultimaVisita, setUltimaVisita] = useState(() => {
     try { return JSON.parse(localStorage.getItem("fa_ultima_visita") || "{}"); }
     catch { return {}; }
   });
   const [relatorioVisivel, setRelatorioVisivel] = useState(null);
-  const [dizimistas, setDizimistas] = useState([]);
-  const [novoDizimo, setNovoDizimo] = useState({ membroNome: "", membroEmail: "", valor: "", data: new Date().toISOString().split("T")[0], formaPagamento: "pix" });
-  const [buscaDizimista, setBuscaDizimista] = useState("");
-  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
-  const [dizimoPeriodo, setDizimoPeriodo] = useState(new Date().toISOString().slice(0, 7));
-  const [dizimoFiltroTipo, setDizimoFiltroTipo] = useState("mes"); // mes | periodo
-  const [dizimoDataInicio, setDizimoDataInicio] = useState(new Date().toISOString().split("T")[0]);
-  const [dizimoDataFim, setDizimoDataFim] = useState(new Date().toISOString().split("T")[0]);
-  // ── NOVO: Entradas (redesenho — lançamento individual, identificado ou não) ──
-  const [entradas, setEntradas] = useState([]);
-  const [novaEntrada, setNovaEntrada] = useState({
-    data: new Date().toISOString().split("T")[0],
-    valor: "",
-    tipoPagamento: "pix", // pix | cartao | cheque | dinheiro | outros
-    outroTipoDesc: "",
-    identificado: null, // null (não escolhido ainda) | true | false
-    subtipo: "dizimo", // dizimo | oferta (só quando identificado)
-    membroNome: "",
-    membroEmail: "",
-  });
-  const [buscaEntradaMembro, setBuscaEntradaMembro] = useState("");
-  const [mostrarSugestoesEntrada, setMostrarSugestoesEntrada] = useState(false);
-  const [nomeManualEntrada, setNomeManualEntrada] = useState(false);
-  const [entradasPeriodo, setEntradasPeriodo] = useState(new Date().toISOString().slice(0, 7));
-  // ── NOVO: Saídas (redesenho — cadastro com vencimento, baixa de pagamento depois) ──
-  const [saidas, setSaidas] = useState([]);
-  const [novaSaida, setNovaSaida] = useState({
-    descricao: "",
-    dataLancamento: new Date().toISOString().split("T")[0],
-    dataVencimento: "",
-    tipo: "boleto", // boleto | debito | pix | dinheiro
-    valor: "",
-  });
-  const [buscaSaida, setBuscaSaida] = useState("");
-  const [filtroSaidaStatus, setFiltroSaidaStatus] = useState("pendentes"); // pendentes | pagas | todas
-  const [saidaBaixaId, setSaidaBaixaId] = useState(null);
-  const [dataBaixaTemp, setDataBaixaTemp] = useState(new Date().toISOString().split("T")[0]);
   const [estudoNivel, setEstudoNivel] = useState("iniciante");
   const [concluidos, setConcluidos] = useState({});
   const [novoEstudo, setNovoEstudo] = useState({ titulo: "", versiculo: "", texto: "", perguntas: ["", "", ""], oracao: "", nivel: "iniciante" });
@@ -919,34 +878,6 @@ export default function FamiliaAliancaApp() {
       else setBannerHome(null);
     });
 
-    // Lançamentos financeiros
-    const unsubLancamentos = onSnapshot(collection(db, "lancamentos"), (snap) => {
-      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      lista.sort((a, b) => b.data.localeCompare(a.data));
-      setLancamentos(lista);
-    });
-
-    // Dizimistas
-    const unsubDizimistas = onSnapshot(collection(db, "dizimistas"), (snap) => {
-      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      lista.sort((a, b) => b.data.localeCompare(a.data));
-      setDizimistas(lista);
-    });
-
-    // NOVO: Entradas (redesenho do financeiro)
-    const unsubEntradas = onSnapshot(collection(db, "entradas"), (snap) => {
-      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      lista.sort((a, b) => b.data.localeCompare(a.data));
-      setEntradas(lista);
-    });
-
-    // NOVO: Saídas (redesenho do financeiro)
-    const unsubSaidas = onSnapshot(collection(db, "saidas"), (snap) => {
-      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      lista.sort((a, b) => (a.dataVencimento || "").localeCompare(b.dataVencimento || ""));
-      setSaidas(lista);
-    });
-
     // Módulo Música
     const unsubEscalas = onSnapshot(collection(db, "escalas"), snap => {
       const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1011,7 +942,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubLancamentos(); unsubDizimistas(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes(); unsubModelosEvento(); unsubLocaisEvento(); unsubEntradas(); unsubSaidas();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes(); unsubModelosEvento(); unsubLocaisEvento();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
