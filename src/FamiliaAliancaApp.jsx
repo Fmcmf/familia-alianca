@@ -477,6 +477,27 @@ const paraContaAuth = (identificador) => identificador.includes("@") ? identific
 // Retorna o intervalo (segunda a domingo) da semana atual, no formato "YYYY-MM-DD" (comparável com ev.data)
 // Aliança Music e Mídia servem juntos em todo evento — retorna o ministério "parceiro" pra vínculo automático
 const parceiroMinisterio = (m) => m === "Aliança Music" ? "Mídia" : m === "Mídia" ? "Aliança Music" : null;
+// ── Detecção de membros duplicados (mesmo nome idêntico ou parecido) ──
+const normalizarNome = (s) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, " ");
+const distanciaLevenshtein = (a, b) => {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+    }
+  }
+  return dp[m][n];
+};
+const similaridadeNomes = (a, b) => {
+  const na = normalizarNome(a), nb = normalizarNome(b);
+  if (!na || !nb) return 0;
+  if (na === nb) return 1;
+  const maxLen = Math.max(na.length, nb.length);
+  return 1 - distanciaLevenshtein(na, nb) / maxLen;
+};
 const getSemanaAtual = () => {
   const hoje = new Date();
   const diaSemana = hoje.getDay(); // 0=domingo ... 6=sábado
@@ -6685,7 +6706,7 @@ export default function FamiliaAliancaApp() {
                   <div>
                     {/* Seletor de view */}
                     <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                      {[{ id: "lista", label: "👥 Membros" }, { id: "aniversariantes", label: "🎂 Aniversariantes" }].map(v => (
+                      {[{ id: "lista", label: "👥 Membros" }, { id: "aniversariantes", label: "🎂 Aniversariantes" }, { id: "duplicados", label: "🔁 Duplicados" }].map(v => (
                         <button key={v.id} onClick={() => setMembrosView(v.id)}
                           style={{ flex: 1, padding: "9px 0", border: `1px solid ${membrosView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: membrosView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: membrosView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: membrosView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                           {v.label}
@@ -6778,6 +6799,66 @@ export default function FamiliaAliancaApp() {
                                   showToast("📄 Relatório baixado!");
                                 }}>📥 Baixar</button>
                               </div>
+                            </>
+                          )}
+                        </>
+                      );
+                    })()}
+
+                    {/* ── DUPLICADOS ── */}
+                    {membrosView === "duplicados" && (() => {
+                      const usados = new Set();
+                      const grupos = [];
+                      for (let i = 0; i < membros.length; i++) {
+                        if (usados.has(membros[i].id)) continue;
+                        const grupo = [membros[i]];
+                        for (let j = i + 1; j < membros.length; j++) {
+                          if (usados.has(membros[j].id)) continue;
+                          const sim = similaridadeNomes(membros[i].nome, membros[j].nome);
+                          if (sim >= 0.85) { grupo.push({ ...membros[j], _sim: sim }); usados.add(membros[j].id); }
+                        }
+                        if (grupo.length > 1) { usados.add(membros[i].id); grupos.push(grupo); }
+                      }
+
+                      return (
+                        <>
+                          <div style={{ fontSize: 12, color: T.textSub, marginBottom: 16 }}>
+                            Cadastros com nomes idênticos ou muito parecidos (pode ser a mesma pessoa cadastrada duas vezes). Toque em um nome pra ver os detalhes e decidir se apaga.
+                          </div>
+                          {grupos.length === 0 ? (
+                            <div style={{ textAlign: "center", padding: "32px 0" }}>
+                              <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
+                              <div style={{ fontSize: 13, color: T.textSub }}>Nenhum cadastro duplicado encontrado</div>
+                            </div>
+                          ) : (
+                            <>
+                              <div style={{ background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.25)", borderRadius: 12, padding: "12px 16px", marginBottom: 16, fontSize: 13, color: "#f87171", fontWeight: "bold" }}>
+                                ⚠️ {grupos.length} grupo(s) de possíveis duplicados
+                              </div>
+                              {grupos.map((grupo, gi) => (
+                                <div key={gi} style={{ marginBottom: 18 }}>
+                                  <div style={{ fontSize: 11, letterSpacing: 1, color: T.textFaint, marginBottom: 6, textTransform: "uppercase" }}>Grupo {gi + 1}</div>
+                                  {grupo.map((m, mi) => (
+                                    <div key={m.id} onClick={() => { setMembroSelecionado(m); }}
+                                      style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: `3px solid ${mi === 0 || m._sim === 1 ? "#ef4444" : "#f59e0b"}`, borderRadius: 12, marginBottom: 6, cursor: "pointer" }}>
+                                      <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(239,68,68,.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#f87171", fontWeight: "bold" }}>
+                                        {m.nome?.charAt(0).toUpperCase()}
+                                      </div>
+                                      <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: 14, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                                        <div style={{ fontSize: 11, color: T.textSub }}>{m.email}{m.celular ? ` • ${m.celular}` : ""}</div>
+                                        {m.dataCadastro && <div style={{ fontSize: 10, color: T.textFaint, marginTop: 2 }}>Cadastrado em {new Date(m.dataCadastro).toLocaleDateString("pt-BR")}</div>}
+                                      </div>
+                                      {m._sim !== undefined && (
+                                        <span style={{ fontSize: 10, fontWeight: "bold", color: m._sim === 1 ? "#ef4444" : "#f59e0b", whiteSpace: "nowrap" }}>
+                                          {m._sim === 1 ? "🟢 Idêntico" : "🟡 Parecido"}
+                                        </span>
+                                      )}
+                                      <span style={{ color: T.textFaint, fontSize: 16 }}>›</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
                             </>
                           )}
                         </>
