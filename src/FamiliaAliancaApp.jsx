@@ -574,6 +574,7 @@ export default function FamiliaAliancaApp() {
   const [buscaMusicaEscala, setBuscaMusicaEscala] = useState("");
   const [dropdownMusicaEscalaAberto, setDropdownMusicaEscalaAberto] = useState(false);
   const [avisoCardExpandido, setAvisoCardExpandido] = useState(false);
+  const [avisoIndex, setAvisoIndex] = useState(0);
   const [novoArquivoMusica, setNovoArquivoMusica] = useState({ nome: "", arquivo: "", link: "" });
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
   const [pdfAberto, setPdfAberto] = useState(null); // URL do PDF aberto inline
@@ -744,6 +745,16 @@ export default function FamiliaAliancaApp() {
     };
     document.head.appendChild(script);
   }, []);
+
+  // Rotaciona os avisos gerais na Home automaticamente (pausa se o card estiver expandido)
+  useEffect(() => {
+    const avisosGerais = avisos.filter(a => !a.ministerio);
+    if (avisosGerais.length <= 1 || avisoCardExpandido) return;
+    const timer = setInterval(() => {
+      setAvisoIndex(i => (i + 1) % avisosGerais.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [avisos, avisoCardExpandido]);
 
   // Splash + Firebase load
   useEffect(() => {
@@ -1709,10 +1720,12 @@ export default function FamiliaAliancaApp() {
               <div style={{ fontSize: 16, color: T.text, fontWeight: "bold" }}>Que bom ter você aqui. 🙏</div>
             </div>
 
-            {/* ── CARD NOVO AVISO (avisos gerais do Admin) ── */}
+            {/* ── CARD NOVO AVISO (avisos gerais do Admin, rotativo quando há mais de um) ── */}
             {(() => {
-              const avisoGeral = avisos.find(a => !a.ministerio);
-              if (!avisoGeral) return null;
+              const avisosGerais = avisos.filter(a => !a.ministerio);
+              if (avisosGerais.length === 0) return null;
+              const indiceSeguro = avisoIndex % avisosGerais.length;
+              const avisoGeral = avisosGerais[indiceSeguro];
               const tipoAviso = {
                 info:    { cor: "#3b82f6", bg1: "#1e3a5f", bg2: "#0f2440", icon: "ℹ️" },
                 urgente: { cor: "#ef4444", bg1: "#5f1e1e", bg2: "#3a0f0f", icon: "🚨" },
@@ -1728,9 +1741,19 @@ export default function FamiliaAliancaApp() {
                     boxShadow: `0 4px 20px ${tipoAviso.cor}25`,
                     animation: "fadeSlideIn .5s ease",
                   }}>
-                  <div style={{ background: `linear-gradient(90deg, ${tipoAviso.cor}, ${tipoAviso.cor}cc)`, padding: "6px 16px", display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#fff", display: "inline-block", animation: "pulseDot 1.5s infinite" }} />
-                    <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#fff" }}>Novo Aviso</span>
+                  <div style={{ background: `linear-gradient(90deg, ${tipoAviso.cor}, ${tipoAviso.cor}cc)`, padding: "6px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#fff", display: "inline-block", animation: "pulseDot 1.5s infinite" }} />
+                      <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#fff" }}>Novo Aviso</span>
+                    </div>
+                    {avisosGerais.length > 1 && (
+                      <div style={{ display: "flex", gap: 5 }} onClick={e => e.stopPropagation()}>
+                        {avisosGerais.map((_, i) => (
+                          <span key={i} onClick={() => { setAvisoIndex(i); setAvisoCardExpandido(false); }}
+                            style={{ width: i === indiceSeguro ? 14 : 6, height: 6, borderRadius: 4, background: i === indiceSeguro ? "#fff" : "rgba(255,255,255,.5)", cursor: "pointer", transition: "width .2s" }} />
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div style={{ padding: "16px", display: "flex", alignItems: "center", gap: 14 }}>
                     <div style={{ fontSize: 32, flexShrink: 0 }}>{tipoAviso.icon}</div>
