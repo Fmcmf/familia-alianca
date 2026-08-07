@@ -549,6 +549,7 @@ export default function FamiliaAliancaApp() {
   const [musicas, setMusicas] = useState([]);
   const [cifras, setCifras] = useState([]);
   const [novaMusica, setNovaMusica] = useState({ titulo: "", artista: "", categoria: "", tom: "", tempo: "", link: "" });
+  const [editandoMusicaId, setEditandoMusicaId] = useState(null);
   const [musicaExpandida, setMusicaExpandida] = useState(null); // id da música aberta (com arquivos visíveis)
   const [audioTocando, setAudioTocando] = useState(null); // id do arquivo de áudio com player aberto inline
   const [catalogoMusicasAberto, setCatalogoMusicasAberto] = useState(false);
@@ -4507,7 +4508,7 @@ export default function FamiliaAliancaApp() {
                   {(
                     <>
                       <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 16 }}>
-                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>➕ Nova Música</div>
+                        <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>{editandoMusicaId ? "✏️ Editar Música" : "➕ Nova Música"}</div>
                         <input style={{ ...S.input, marginBottom: 8 }} placeholder="Título da música *"
                           value={novaMusica.titulo} onChange={e => setNovaMusica({ ...novaMusica, titulo: e.target.value })} />
                         <input style={{ ...S.input, marginBottom: 8 }} placeholder="Artista/Banda"
@@ -4539,10 +4540,22 @@ export default function FamiliaAliancaApp() {
                         )}
                         <button style={{ ...S.saveBtn, marginTop: 10 }} onClick={async () => {
                           if (!novaMusica.titulo) { showToast("⚠️ Informe o título!"); return; }
-                          await addDoc(collection(db, "musicas"), { ...novaMusica, ministerio: ministerioLider, criadoEm: new Date().toISOString() });
+                          if (editandoMusicaId) {
+                            await updateDoc(doc(db, "musicas", editandoMusicaId), { ...novaMusica });
+                            setEditandoMusicaId(null);
+                            showToast("✅ Música atualizada!");
+                          } else {
+                            await addDoc(collection(db, "musicas"), { ...novaMusica, ministerio: ministerioLider, criadoEm: new Date().toISOString() });
+                            showToast("✅ Música adicionada!");
+                          }
                           setNovaMusica({ titulo: "", artista: "", categoria: "", tom: "", tempo: "", link: "" });
-                          showToast("✅ Música adicionada!");
-                        }}>🎶 Adicionar Música</button>
+                        }}>{editandoMusicaId ? "💾 Atualizar Música" : "🎶 Adicionar Música"}</button>
+                        {editandoMusicaId && (
+                          <button style={{ ...S.saveBtn, background: T.card, color: T.textSub, marginTop: 8 }}
+                            onClick={() => { setEditandoMusicaId(null); setNovaMusica({ titulo: "", artista: "", categoria: "", tom: "", tempo: "", link: "" }); }}>
+                            Cancelar edição
+                          </button>
+                        )}
                       </div>
                       {musicas.filter(m => m.ministerio === ministerioLider).map(m => {
                         const ytId = getYouTubeId(m.link);
@@ -4583,6 +4596,8 @@ export default function FamiliaAliancaApp() {
                                 {arquivosM.length > 0 && <div style={{ fontSize: 10, color: T.textFaint, marginTop: 3 }}>📎 {arquivosM.length} arquivo(s) anexado(s)</div>}
                               </div>
                               <span style={{ color: T.textSub, fontSize: 16 }}>{expandida ? "▲" : "▼"}</span>
+                              <button onClick={(e) => { e.stopPropagation(); setEditandoMusicaId(m.id); setNovaMusica({ titulo: m.titulo || "", artista: m.artista || "", categoria: m.categoria || "", tom: m.tom || "", tempo: m.tempo || "", link: m.link || "" }); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                                style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>✏️</button>
                               <button onClick={async (e) => { e.stopPropagation(); if (window.confirm("Excluir música?")) { await deleteDoc(doc(db, "musicas", m.id)); showToast("🗑️ Removida!"); } }} style={S.delBtn}>🗑️</button>
                             </div>
                             {/* ── Arquivos nomeados da música (expansível) ── */}
