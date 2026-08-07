@@ -4072,9 +4072,9 @@ export default function FamiliaAliancaApp() {
                         <div style={{ background: "rgba(34,197,94,.06)", border: "1px solid rgba(34,197,94,.2)", borderRadius: 10, padding: "10px 12px", marginBottom: 14 }}>
                           <div style={{ fontSize: 11, color: "#22c55e", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>✅ {Object.keys(escalados).length} escalado(s)</div>
                           {Object.entries(escalados).map(([email, dados]) => (
-                            <div key={email} style={{ fontSize: 12, color: T.textSub, marginBottom: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span>• {dados.nome}</span>
-                              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                            <div key={email} style={{ fontSize: 12, color: T.textSub, marginBottom: 2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 6 }}>
+                              <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>• {dados.nome}</span>
+                              <div style={{ display: "flex", gap: 4, flexWrap: "wrap", alignItems: "center" }}>
                                 {isMusical ? (
                                   <>
                                     {dados.funcoes?.map(f => <span key={f} style={{ fontSize: 10, color: "#c9a84c", background: "rgba(201,168,76,.1)", borderRadius: 10, padding: "1px 6px" }}>{f}</span>)}
@@ -4083,6 +4083,13 @@ export default function FamiliaAliancaApp() {
                                 ) : (
                                   dados.categorias?.map(c => <span key={c} style={{ fontSize: 10, color: "#22d3ee", background: "rgba(6,182,212,.1)", borderRadius: 10, padding: "1px 6px" }}>{c}</span>)
                                 )}
+                                <button onClick={async () => {
+                                  if (!window.confirm(`Remover "${dados.nome}" desta escala?`)) return;
+                                  const novos = { ...escalados };
+                                  delete novos[email];
+                                  await updateDoc(doc(db, "escalas", escala.id), { membrosEscalados: novos });
+                                  showToast(`🗑️ ${dados.nome} removido da escala!`);
+                                }} title="Remover desta escala" style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 14, lineHeight: 1, padding: "2px 2px", flexShrink: 0 }}>×</button>
                               </div>
                             </div>
                           ))}
