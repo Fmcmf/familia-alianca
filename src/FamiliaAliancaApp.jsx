@@ -5615,10 +5615,10 @@ export default function FamiliaAliancaApp() {
                   onChange={e => setBuscaMembro(e.target.value)} />
 
                 {/* Líderes ativos no topo */}
-                {membros.filter(m => m.lider && !m.admin).length > 0 && (
+                {membros.filter(m => m.lider).length > 0 && (
                   <div style={{ background: "rgba(201,168,76,.06)", border: "1px solid rgba(201,168,76,.15)", borderRadius: 12, padding: "12px 14px", marginBottom: 16 }}>
-                    <div style={{ fontSize: 11, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Líderes ativos ({membros.filter(m => m.lider && !m.admin).length})</div>
-                    {membros.filter(m => m.lider && !m.admin && ((m.ministeriosLider?.length > 0) || m.ministerioLider)).map(m => (
+                    <div style={{ fontSize: 11, color: T.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Líderes ativos ({membros.filter(m => m.lider).length})</div>
+                    {membros.filter(m => m.lider && ((m.ministeriosLider?.length > 0) || m.ministerioLider)).map(m => (
                       <div key={m.id} style={{ fontSize: 12, color: T.textSub, marginBottom: 4, display: "flex", justifyContent: "space-between" }}>
                         <span>{m.nome}</span>
                         <span style={{ color: T.gold, textAlign: "right" }}>{(m.ministeriosLider?.length > 0 ? m.ministeriosLider : [m.ministerioLider]).filter(Boolean).join(", ")}</span>
@@ -5630,13 +5630,12 @@ export default function FamiliaAliancaApp() {
                 {/* Contador */}
                 {buscaMembro.trim() && (
                   <div style={{ fontSize: 11, color: T.textFaint, marginBottom: 10 }}>
-                    {membros.filter(m => !m.admin && (m.nome?.toLowerCase().includes(buscaMembro.toLowerCase()) || m.email?.toLowerCase().includes(buscaMembro.toLowerCase()))).length} resultado(s)
+                    {membros.filter(m => (m.nome?.toLowerCase().includes(buscaMembro.toLowerCase()) || m.email?.toLowerCase().includes(buscaMembro.toLowerCase()))).length} resultado(s)
                   </div>
                 )}
 
                 {/* Lista de membros */}
                 {membros
-                  .filter(m => !m.admin)
                   .filter(m => !buscaMembro.trim() ||
                     m.nome?.toLowerCase().includes(buscaMembro.toLowerCase()) ||
                     m.email?.toLowerCase().includes(buscaMembro.toLowerCase())
