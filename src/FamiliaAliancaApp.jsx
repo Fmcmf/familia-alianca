@@ -550,6 +550,9 @@ export default function FamiliaAliancaApp() {
   const [cifras, setCifras] = useState([]);
   const [novaMusica, setNovaMusica] = useState({ titulo: "", artista: "", categoria: "", tom: "", tempo: "", link: "" });
   const [editandoMusicaId, setEditandoMusicaId] = useState(null);
+  const [verPassadosLider, setVerPassadosLider] = useState(false);
+  const [verPassadosAdmin, setVerPassadosAdmin] = useState(false);
+  const [verPassadosEdicaoLider, setVerPassadosEdicaoLider] = useState(false);
   const [musicaExpandida, setMusicaExpandida] = useState(null); // id da música aberta (com arquivos visíveis)
   const [audioTocando, setAudioTocando] = useState(null); // id do arquivo de áudio com player aberto inline
   const [catalogoMusicasAberto, setCatalogoMusicasAberto] = useState(false);
@@ -4431,33 +4434,72 @@ export default function FamiliaAliancaApp() {
                         </button>
                       )}
 
-                      <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: T.textFaint, marginTop: 24, marginBottom: 12 }}>Todos os Eventos da Agenda</div>
-                      {agenda.map(ev => (
-                        <div key={ev.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <div>
-                            <div style={{ fontSize: 13, fontWeight: "bold" }}>
-                              {ev.titulo}
-                              {ev.local && <span style={{ fontWeight: "normal", fontSize: 12, color: T.textFaint }}> · 📍 {ev.local}</span>}
+                      {(() => {
+                        const hojeStr = new Date().toISOString().split("T")[0];
+                        const proximosEd = agenda.filter(ev => ev.data >= hojeStr);
+                        const passadosEd = agenda.filter(ev => ev.data < hojeStr).sort((a, b) => b.data?.localeCompare(a.data));
+                        const listaEd = verPassadosEdicaoLider ? passadosEd : proximosEd;
+                        return (
+                          <>
+                            <div style={{ display: "flex", gap: 8, marginTop: 24, marginBottom: 12 }}>
+                              <button onClick={() => setVerPassadosEdicaoLider(false)}
+                                style={{ flex: 1, padding: "8px 0", border: `1px solid ${!verPassadosEdicaoLider ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: !verPassadosEdicaoLider ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: !verPassadosEdicaoLider ? "#080810" : T.textSub, fontSize: 12, fontWeight: !verPassadosEdicaoLider ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                                📅 Próximos ({proximosEd.length})
+                              </button>
+                              <button onClick={() => setVerPassadosEdicaoLider(true)}
+                                style={{ flex: 1, padding: "8px 0", border: `1px solid ${verPassadosEdicaoLider ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: verPassadosEdicaoLider ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: verPassadosEdicaoLider ? "#080810" : T.textSub, fontSize: 12, fontWeight: verPassadosEdicaoLider ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                                🗂️ Passados ({passadosEd.length})
+                              </button>
                             </div>
-                            <div style={{ fontSize: 12, color: T.textSub }}>{fmtData(ev.data)} • {ev.hora}</div>
-                          </div>
-                          <div style={{ display: "flex", gap: 8 }}>
-                            <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
-                              onClick={() => { setEditandoEvento(ev.id); setNovoEvento({ ...ev }); }}>✏️</button>
-                            <button style={S.delBtn} onClick={() => deletarEvento(ev.id)}>🗑️</button>
-                          </div>
-                        </div>
-                      ))}
+                            {listaEd.length === 0 ? (
+                              <div style={{ textAlign: "center", padding: "20px 0", color: T.textFaint, fontSize: 12 }}>
+                                {verPassadosEdicaoLider ? "Nenhum evento passado." : "Nenhum evento futuro cadastrado."}
+                              </div>
+                            ) : listaEd.map(ev => (
+                              <div key={ev.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <div>
+                                  <div style={{ fontSize: 13, fontWeight: "bold" }}>
+                                    {ev.titulo}
+                                    {ev.local && <span style={{ fontWeight: "normal", fontSize: 12, color: T.textFaint }}> · 📍 {ev.local}</span>}
+                                  </div>
+                                  <div style={{ fontSize: 12, color: T.textSub }}>{fmtData(ev.data)} • {ev.hora}</div>
+                                </div>
+                                <div style={{ display: "flex", gap: 8 }}>
+                                  <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                                    onClick={() => { setEditandoEvento(ev.id); setNovoEvento({ ...ev }); }}>✏️</button>
+                                  <button style={S.delBtn} onClick={() => deletarEvento(ev.id)}>🗑️</button>
+                                </div>
+                              </div>
+                            ))}
+                          </>
+                        );
+                      })()}
                     </>
                   )}
 
                   {/* Lista de todos os eventos do ministério com botão "Montar Escala" */}
-                  {eventosMin.length > 0 && (
+                  {eventosMin.length > 0 && (() => {
+                    const hojeStr = new Date().toISOString().split("T")[0];
+                    const proximos = eventosMin.filter(e => e.data >= hojeStr);
+                    const passados = eventosMin.filter(e => e.data < hojeStr).sort((a, b) => b.data?.localeCompare(a.data));
+                    const listaAtual = verPassadosLider ? passados : proximos;
+                    return (
                     <>
-                      <div style={{ fontSize: 12, color: T.gold, marginTop: 20, marginBottom: 12, letterSpacing: 2, textTransform: "uppercase" }}>
-                        Eventos ({eventosMin.length})
+                      <div style={{ display: "flex", gap: 8, marginTop: 20, marginBottom: 12 }}>
+                        <button onClick={() => setVerPassadosLider(false)}
+                          style={{ flex: 1, padding: "8px 0", border: `1px solid ${!verPassadosLider ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: !verPassadosLider ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: !verPassadosLider ? "#080810" : T.textSub, fontSize: 12, fontWeight: !verPassadosLider ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                          📅 Próximos ({proximos.length})
+                        </button>
+                        <button onClick={() => setVerPassadosLider(true)}
+                          style={{ flex: 1, padding: "8px 0", border: `1px solid ${verPassadosLider ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: verPassadosLider ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: verPassadosLider ? "#080810" : T.textSub, fontSize: 12, fontWeight: verPassadosLider ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                          🗂️ Passados ({passados.length})
+                        </button>
                       </div>
-                      {eventosMin.map(e => {
+                      {listaAtual.length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "20px 0", color: T.textFaint, fontSize: 12 }}>
+                          {verPassadosLider ? "Nenhum evento passado." : "Nenhum evento futuro no momento."}
+                        </div>
+                      ) : listaAtual.map(e => {
                         const escala = escalaDoEvento(e.id);
                         const qtdEscalados = Object.keys(escala?.membrosEscalados || {}).length;
                         return (
@@ -4497,7 +4539,8 @@ export default function FamiliaAliancaApp() {
                         );
                       })}
                     </>
-                  )}
+                    );
+                  })()}
                 </div>
               );
             })()}
@@ -4970,23 +5013,46 @@ export default function FamiliaAliancaApp() {
                   </button>
                 )}
 
-                <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: T.textFaint, marginTop: 24, marginBottom: 12 }}>Eventos Cadastrados</div>
-                {agenda.map(ev => (
-                  <div key={ev.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: "bold" }}>
-                        {ev.titulo}
-                        {ev.local && <span style={{ fontWeight: "normal", fontSize: 12, color: T.textFaint }}> · 📍 {ev.local}</span>}
+                {(() => {
+                  const hojeStr = new Date().toISOString().split("T")[0];
+                  const proximosAdmin = agenda.filter(ev => ev.data >= hojeStr);
+                  const passadosAdmin = agenda.filter(ev => ev.data < hojeStr).sort((a, b) => b.data?.localeCompare(a.data));
+                  const listaAtualAdmin = verPassadosAdmin ? passadosAdmin : proximosAdmin;
+                  return (
+                    <>
+                      <div style={{ display: "flex", gap: 8, marginTop: 24, marginBottom: 12 }}>
+                        <button onClick={() => setVerPassadosAdmin(false)}
+                          style={{ flex: 1, padding: "8px 0", border: `1px solid ${!verPassadosAdmin ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: !verPassadosAdmin ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: !verPassadosAdmin ? "#080810" : T.textSub, fontSize: 12, fontWeight: !verPassadosAdmin ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                          📅 Próximos ({proximosAdmin.length})
+                        </button>
+                        <button onClick={() => setVerPassadosAdmin(true)}
+                          style={{ flex: 1, padding: "8px 0", border: `1px solid ${verPassadosAdmin ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: verPassadosAdmin ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: verPassadosAdmin ? "#080810" : T.textSub, fontSize: 12, fontWeight: verPassadosAdmin ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                          🗂️ Passados ({passadosAdmin.length})
+                        </button>
                       </div>
-                      <div style={{ fontSize: 12, color: T.textSub }}>{fmtData(ev.data)} • {ev.hora}</div>
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
-                        onClick={() => { setEditandoEvento(ev.id); setNovoEvento({ ...ev }); }}>✏️</button>
-                      <button style={S.delBtn} onClick={() => deletarEvento(ev.id)}>🗑️</button>
-                    </div>
-                  </div>
-                ))}
+                      {listaAtualAdmin.length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "20px 0", color: T.textFaint, fontSize: 12 }}>
+                          {verPassadosAdmin ? "Nenhum evento passado." : "Nenhum evento futuro cadastrado."}
+                        </div>
+                      ) : listaAtualAdmin.map(ev => (
+                        <div key={ev.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            <div style={{ fontSize: 13, fontWeight: "bold" }}>
+                              {ev.titulo}
+                              {ev.local && <span style={{ fontWeight: "normal", fontSize: 12, color: T.textFaint }}> · 📍 {ev.local}</span>}
+                            </div>
+                            <div style={{ fontSize: 12, color: T.textSub }}>{fmtData(ev.data)} • {ev.hora}</div>
+                          </div>
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button style={{ padding: "6px 10px", background: "rgba(201,168,76,.1)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 8, color: T.gold, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}
+                              onClick={() => { setEditandoEvento(ev.id); setNovoEvento({ ...ev }); }}>✏️</button>
+                            <button style={S.delBtn} onClick={() => deletarEvento(ev.id)}>🗑️</button>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  );
+                })()}
               </div>
             )}
 
