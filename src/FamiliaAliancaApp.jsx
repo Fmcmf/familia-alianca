@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db, messaging, solicitarPermissaoNotificacao, onMessage, auth } from "./firebase";
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, deleteField } from "firebase/firestore";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, onAuthStateChanged } from "firebase/auth";
 import emailjs from "@emailjs/browser";
 
 // ─── CLOUDINARY CONFIG ──────────────────────────────────────────────────────
@@ -760,6 +760,19 @@ export default function FamiliaAliancaApp() {
     return () => clearInterval(timer);
   }, [avisos, avisoCardExpandido]);
 
+  // Corrige sessões salvas antigas que nunca chegaram a sincronizar com o Firebase Authentication
+  // (isso fazia salvar o cadastro e outras ações falharem silenciosamente pra quem não deslogou desde a atualização de segurança)
+  useEffect(() => {
+    if (!user?.email || screen !== "app") return;
+    const timer = setTimeout(() => {
+      if (!auth.currentUser) {
+        showToast("🔄 Por segurança, faça login novamente — é rapidinho.");
+        handleLogout();
+      }
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [user?.email, screen]);
+
   // Splash + Firebase load
   useEffect(() => {
     setTimeout(() => {
@@ -1198,12 +1211,21 @@ export default function FamiliaAliancaApp() {
       igrejaBAT: batizado === "sim" ? (igrejaBAT || "") : "",
       dataBAT: batizado === "sim" ? (dataBAT || "") : "",
     };
-    await updateDoc(doc(db, "membros", user.email), dadosAtualizados);
-    const u = { ...user, ...dadosAtualizados };
-    store.set(SK.user, u); setUser(u);
-    setCompletarForm({});
-    setShowCompletarCadastro(false);
-    showToast("✅ Cadastro atualizado! Obrigado!");
+    try {
+      await updateDoc(doc(db, "membros", user.email), dadosAtualizados);
+      const u = { ...user, ...dadosAtualizados };
+      store.set(SK.user, u); setUser(u);
+      setCompletarForm({});
+      setShowCompletarCadastro(false);
+      showToast("✅ Cadastro atualizado! Obrigado!");
+    } catch (err) {
+      console.warn("Erro ao salvar cadastro:", err);
+      if (err?.code === "permission-denied") {
+        showToast("🔒 Sua sessão expirou. Saia e faça login de novo pra salvar.");
+      } else {
+        showToast("❌ Não foi possível salvar. Verifique sua internet e tente de novo.");
+      }
+    }
   };
 
   const handleRecuperarSenha = async () => {
