@@ -1405,7 +1405,7 @@ export default function FamiliaAliancaApp() {
     ctx.fillStyle = "#c9a84c"; ctx.font = "bold 34px Georgia"; ctx.textAlign = "center";
     ctx.fillText("FAMÍLIA ALIANÇA", 540, 150);
     ctx.font = "italic 46px Georgia"; ctx.fillStyle = "#f3f0e8";
-    const palavras = texto.split(" "); let linha = ""; let y = 420; const linhas = [];
+    const palavras = texto.split(" "); let linha = ""; const linhas = [];
     palavras.forEach(p => {
       const teste = linha + p + " ";
       if (ctx.measureText(teste).width > 850 && linha) { linhas.push(linha); linha = p + " "; }
