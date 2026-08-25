@@ -429,6 +429,140 @@ const DICIONARIO_BIBLICO = [
   ]},
 ];
 
+// ─── VERSÍCULO DO DIA (texto em domínio público — Almeida Revista e Corrigida) ──
+const VERSICULOS_DIA = [
+  { ref: "João 3:16", texto: "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito, para que todo aquele que nele crê não pereça, mas tenha a vida eterna." },
+  { ref: "Salmos 23:1", texto: "O Senhor é o meu pastor; nada me faltará." },
+  { ref: "Filipenses 4:13", texto: "Posso todas as coisas em Cristo que me fortalece." },
+  { ref: "Provérbios 3:5-6", texto: "Confia no Senhor de todo o teu coração e não te estribes no teu próprio entendimento. Reconhece-o em todos os teus caminhos, e ele endireitará as tuas veredas." },
+  { ref: "Isaías 41:10", texto: "Não temas, porque eu sou contigo; não te assombres, porque eu sou o teu Deus; eu te fortaleço, e te ajudo, e te sustento com a destra da minha justiça." },
+  { ref: "Romanos 8:28", texto: "E sabemos que todas as coisas contribuem juntamente para o bem daqueles que amam a Deus, daqueles que são chamados segundo o seu propósito." },
+  { ref: "Josué 1:9", texto: "Não to mandei eu? Esforça-te, e tem bom ânimo; não temas, nem te espantes, porque o Senhor, teu Deus, é contigo, por onde quer que andares." },
+  { ref: "Salmos 46:1", texto: "Deus é o nosso refúgio e fortaleza, socorro bem presente na angústia." },
+  { ref: "Mateus 11:28", texto: "Vinde a mim, todos os que estais cansados e oprimidos, e eu vos aliviarei." },
+  { ref: "Jeremias 29:11", texto: "Porque eu bem sei os pensamentos que tenho a vosso respeito, diz o Senhor; pensamentos de paz, e não de mal, para vos dar o fim que esperais." },
+  { ref: "Salmos 118:24", texto: "Este é o dia que fez o Senhor; regozijemo-nos e alegremo-nos nele." },
+  { ref: "Gálatas 5:22-23", texto: "Mas o fruto do Espírito é: amor, gozo, paz, longanimidade, benignidade, bondade, fé, mansidão, temperança." },
+  { ref: "2 Coríntios 5:17", texto: "Assim que, se alguém está em Cristo, nova criatura é: as coisas velhas já passaram; eis que tudo se fez novo." },
+  { ref: "Salmos 34:8", texto: "Provai, e vede que o Senhor é bom; bem-aventurado o homem que confia nele." },
+  { ref: "1 Pedro 5:7", texto: "Lançando sobre ele toda a vossa ansiedade, porque ele tem cuidado de vós." },
+  { ref: "Salmos 27:1", texto: "O Senhor é a minha luz e a minha salvação; a quem temerei? O Senhor é a força da minha vida; de quem me recearei?" },
+  { ref: "Efésios 2:8", texto: "Porque pela graça sois salvos, por meio da fé; e isto não vem de vós; é dom de Deus." },
+  { ref: "Colossenses 3:23", texto: "E tudo quanto fizerdes, fazei-o de todo o coração, como ao Senhor, e não aos homens." },
+  { ref: "Salmos 37:4", texto: "Deleita-te também no Senhor, e ele te concederá os desejos do teu coração." },
+  { ref: "Números 6:24-26", texto: "O Senhor te abençoe, e te guarde; o Senhor faça resplandecer o seu rosto sobre ti, e tenha misericórdia de ti; o Senhor sobre ti levante o seu rosto, e te dê a paz." },
+  { ref: "Tiago 1:2-3", texto: "Meus irmãos, tende grande gozo quando cairdes em várias tentações, sabendo que a prova da vossa fé produz a paciência." },
+  { ref: "Salmos 121:1-2", texto: "Elevo os meus olhos para os montes, de onde vem o meu socorro. O meu socorro vem do Senhor, que fez os céus e a terra." },
+  { ref: "1 Coríntios 13:4", texto: "O amor é sofredor, é benigno; o amor não é invejoso; o amor não trata com leviandade, não se ensoberbece." },
+  { ref: "Hebreus 11:1", texto: "Ora, a fé é o firme fundamento das coisas que se esperam, e a prova das coisas que se não veem." },
+  { ref: "Salmos 91:1-2", texto: "Aquele que habita no esconderijo do Altíssimo, à sombra do Onipotente descansará. Direi do Senhor: Ele é o meu Deus, o meu refúgio, a minha fortaleza, e nele confiarei." },
+  { ref: "Mateus 6:33", texto: "Mas buscai primeiro o reino de Deus, e a sua justiça, e todas essas coisas vos serão acrescentadas." },
+  { ref: "Salmos 139:14", texto: "Eu te louvarei, porque de um modo terrível, e tão maravilhoso fui feito; maravilhosas são as tuas obras, e a minha alma o sabe muito bem." },
+  { ref: "Lamentações 3:22-23", texto: "As misericórdias do Senhor são a causa de não sermos consumidos; porque as suas misericórdias não têm fim; renovam-se cada manhã." },
+  { ref: "Filipenses 4:6-7", texto: "Não estejais inquietos por coisa alguma; antes as vossas petições sejam em tudo conhecidas diante de Deus... E a paz de Deus, que excede todo o entendimento, guardará os vossos corações." },
+  { ref: "Salmos 16:11", texto: "Tu me farás ver a vereda da vida; na tua presença há fartura de alegrias; à tua mão direita há delícias perpetuamente." },
+];
+
+// ─── MAPA DE LIVROS DA BÍBLIA → CÓDIGO USFM (usado na busca rápida do YouVersion) ──
+const LIVROS_BIBLIA = [
+  { nome: "Gênesis", abrev: ["gn", "genesis", "gênesis"], codigo: "GEN" },
+  { nome: "Êxodo", abrev: ["ex", "exodo", "êxodo"], codigo: "EXO" },
+  { nome: "Levítico", abrev: ["lv", "levitico", "levítico"], codigo: "LEV" },
+  { nome: "Números", abrev: ["nm", "numeros", "números"], codigo: "NUM" },
+  { nome: "Deuteronômio", abrev: ["dt", "deuteronomio", "deuteronômio"], codigo: "DEU" },
+  { nome: "Josué", abrev: ["js", "josue", "josué"], codigo: "JOS" },
+  { nome: "Juízes", abrev: ["jz", "juizes", "juízes"], codigo: "JDG" },
+  { nome: "Rute", abrev: ["rt", "rute"], codigo: "RUT" },
+  { nome: "1 Samuel", abrev: ["1sm", "1samuel", "1 samuel"], codigo: "1SA" },
+  { nome: "2 Samuel", abrev: ["2sm", "2samuel", "2 samuel"], codigo: "2SA" },
+  { nome: "1 Reis", abrev: ["1rs", "1reis", "1 reis"], codigo: "1KI" },
+  { nome: "2 Reis", abrev: ["2rs", "2reis", "2 reis"], codigo: "2KI" },
+  { nome: "1 Crônicas", abrev: ["1cr", "1cronicas", "1 crônicas"], codigo: "1CH" },
+  { nome: "2 Crônicas", abrev: ["2cr", "2cronicas", "2 crônicas"], codigo: "2CH" },
+  { nome: "Esdras", abrev: ["ed", "esdras"], codigo: "EZR" },
+  { nome: "Neemias", abrev: ["ne", "neemias"], codigo: "NEH" },
+  { nome: "Ester", abrev: ["et", "ester"], codigo: "EST" },
+  { nome: "Jó", abrev: ["job", "jo", "jó"], codigo: "JOB" },
+  { nome: "Salmos", abrev: ["sl", "salmo", "salmos"], codigo: "PSA" },
+  { nome: "Provérbios", abrev: ["pv", "proverbios", "provérbios"], codigo: "PRO" },
+  { nome: "Eclesiastes", abrev: ["ec", "eclesiastes"], codigo: "ECC" },
+  { nome: "Cantares", abrev: ["ct", "cantares", "cantico dos canticos"], codigo: "SNG" },
+  { nome: "Isaías", abrev: ["is", "isaias", "isaías"], codigo: "ISA" },
+  { nome: "Jeremias", abrev: ["jr", "jeremias"], codigo: "JER" },
+  { nome: "Lamentações", abrev: ["lm", "lamentacoes", "lamentações"], codigo: "LAM" },
+  { nome: "Ezequiel", abrev: ["ez", "ezequiel"], codigo: "EZK" },
+  { nome: "Daniel", abrev: ["dn", "daniel"], codigo: "DAN" },
+  { nome: "Oséias", abrev: ["os", "oseias", "oséias"], codigo: "HOS" },
+  { nome: "Joel", abrev: ["jl", "joel"], codigo: "JOL" },
+  { nome: "Amós", abrev: ["am", "amos", "amós"], codigo: "AMO" },
+  { nome: "Obadias", abrev: ["ob", "obadias"], codigo: "OBA" },
+  { nome: "Jonas", abrev: ["jn", "jonas"], codigo: "JON" },
+  { nome: "Miquéias", abrev: ["mq", "miqueias", "miquéias"], codigo: "MIC" },
+  { nome: "Naum", abrev: ["na", "naum"], codigo: "NAM" },
+  { nome: "Habacuque", abrev: ["hc", "habacuque"], codigo: "HAB" },
+  { nome: "Sofonias", abrev: ["sf", "sofonias"], codigo: "ZEP" },
+  { nome: "Ageu", abrev: ["ag", "ageu"], codigo: "HAG" },
+  { nome: "Zacarias", abrev: ["zc", "zacarias"], codigo: "ZEC" },
+  { nome: "Malaquias", abrev: ["ml", "malaquias"], codigo: "MAL" },
+  { nome: "Mateus", abrev: ["mt", "mateus"], codigo: "MAT" },
+  { nome: "Marcos", abrev: ["mc", "marcos"], codigo: "MRK" },
+  { nome: "Lucas", abrev: ["lc", "lucas"], codigo: "LUK" },
+  { nome: "João", abrev: ["jo", "joao", "joão"], codigo: "JHN" },
+  { nome: "Atos", abrev: ["at", "atos"], codigo: "ACT" },
+  { nome: "Romanos", abrev: ["rm", "romanos"], codigo: "ROM" },
+  { nome: "1 Coríntios", abrev: ["1co", "1corintios", "1 coríntios"], codigo: "1CO" },
+  { nome: "2 Coríntios", abrev: ["2co", "2corintios", "2 coríntios"], codigo: "2CO" },
+  { nome: "Gálatas", abrev: ["gl", "galatas", "gálatas"], codigo: "GAL" },
+  { nome: "Efésios", abrev: ["ef", "efesios", "efésios"], codigo: "EPH" },
+  { nome: "Filipenses", abrev: ["fp", "filipenses"], codigo: "PHP" },
+  { nome: "Colossenses", abrev: ["cl", "colossenses"], codigo: "COL" },
+  { nome: "1 Tessalonicenses", abrev: ["1ts", "1tessalonicenses"], codigo: "1TH" },
+  { nome: "2 Tessalonicenses", abrev: ["2ts", "2tessalonicenses"], codigo: "2TH" },
+  { nome: "1 Timóteo", abrev: ["1tm", "1timoteo", "1 timóteo"], codigo: "1TI" },
+  { nome: "2 Timóteo", abrev: ["2tm", "2timoteo", "2 timóteo"], codigo: "2TI" },
+  { nome: "Tito", abrev: ["tt", "tito"], codigo: "TIT" },
+  { nome: "Filemom", abrev: ["fm", "filemom"], codigo: "PHM" },
+  { nome: "Hebreus", abrev: ["hb", "hebreus"], codigo: "HEB" },
+  { nome: "Tiago", abrev: ["tg", "tiago"], codigo: "JAS" },
+  { nome: "1 Pedro", abrev: ["1pe", "1pedro"], codigo: "1PE" },
+  { nome: "2 Pedro", abrev: ["2pe", "2pedro"], codigo: "2PE" },
+  { nome: "1 João", abrev: ["1jo", "1joao", "1 joão"], codigo: "1JN" },
+  { nome: "2 João", abrev: ["2jo", "2joao", "2 joão"], codigo: "2JN" },
+  { nome: "3 João", abrev: ["3jo", "3joao", "3 joão"], codigo: "3JN" },
+  { nome: "Judas", abrev: ["jd", "judas"], codigo: "JUD" },
+  { nome: "Apocalipse", abrev: ["ap", "apocalipse"], codigo: "REV" },
+];
+
+// ─── PLANO DE LEITURA: NOVO TESTAMENTO EM 90 DIAS (≈3 capítulos por dia) ──
+const PLANO_LEITURA_NT = (() => {
+  const livros = [
+    ["Mateus", "MAT", 28], ["Marcos", "MRK", 16], ["Lucas", "LUK", 24], ["João", "JHN", 21],
+    ["Atos", "ACT", 28], ["Romanos", "ROM", 16], ["1 Coríntios", "1CO", 16], ["2 Coríntios", "2CO", 13],
+    ["Gálatas", "GAL", 6], ["Efésios", "EPH", 6], ["Filipenses", "PHP", 4], ["Colossenses", "COL", 4],
+    ["1 Tessalonicenses", "1TH", 5], ["2 Tessalonicenses", "2TH", 3], ["1 Timóteo", "1TI", 6], ["2 Timóteo", "2TI", 4],
+    ["Tito", "TIT", 3], ["Filemom", "PHM", 1], ["Hebreus", "HEB", 13], ["Tiago", "JAS", 5],
+    ["1 Pedro", "1PE", 5], ["2 Pedro", "2PE", 3], ["1 João", "1JN", 5], ["2 João", "2JN", 1],
+    ["3 João", "3JN", 1], ["Judas", "JUD", 1], ["Apocalipse", "REV", 22],
+  ];
+  const capitulos = [];
+  livros.forEach(([nome, codigo, total]) => {
+    for (let c = 1; c <= total; c++) capitulos.push({ nome, codigo, cap: c });
+  });
+  const POR_DIA = 3;
+  const dias = [];
+  for (let i = 0; i < capitulos.length; i += POR_DIA) {
+    const grupo = capitulos.slice(i, i + POR_DIA);
+    const inicio = grupo[0], fim = grupo[grupo.length - 1];
+    const mesmoLivro = inicio.nome === fim.nome;
+    dias.push({
+      dia: dias.length + 1,
+      titulo: mesmoLivro ? `${inicio.nome} ${inicio.cap}${fim.cap !== inicio.cap ? "-" + fim.cap : ""}` : `${inicio.nome} ${inicio.cap} — ${fim.nome} ${fim.cap}`,
+      referencias: grupo.map(g => ({ codigo: g.codigo, cap: g.cap, nome: g.nome })),
+    });
+  }
+  return dias;
+})();
+
 const CONTATOS = {
   endereco: ENDERECO,
   whatsapp: "(19) 99721-8590",
@@ -626,6 +760,17 @@ export default function FamiliaAliancaApp() {
   });
   const [dicionarioAberto, setDicionarioAberto] = useState(false);
   const [bibliaModo, setBibliaModo] = useState("texto"); // texto | audio
+  const [versiculoDiaIndex] = useState(() => {
+    const diaDoAno = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    return diaDoAno % VERSICULOS_DIA.length;
+  });
+  const [buscaRapidaBiblia, setBuscaRapidaBiblia] = useState("");
+  const [planoLeituraAberto, setPlanoLeituraAberto] = useState(false);
+  const [diasLidosPlano, setDiasLidosPlano] = useState([]);
+  const [favoritosAberto, setFavoritosAberto] = useState(false);
+  const [favoritosBiblia, setFavoritosBiblia] = useState([]);
+  const [novoFavorito, setNovoFavorito] = useState({ referencia: "", texto: "", nota: "" });
+  const [editandoFavoritoId, setEditandoFavoritoId] = useState(null);
   const [dicionarioLetra, setDicionarioLetra] = useState("A");
   const [dicionarioTermo, setDicionarioTermo] = useState(null);
   const [dicionarioBusca, setDicionarioBusca] = useState("");
@@ -772,6 +917,20 @@ export default function FamiliaAliancaApp() {
     }, 2500);
     return () => clearTimeout(timer);
   }, [user?.email, screen]);
+
+  // Favoritos bíblicos e progresso do plano de leitura — dados pessoais, um listener por usuário logado
+  useEffect(() => {
+    if (!user?.email) { setFavoritosBiblia([]); setDiasLidosPlano([]); return; }
+    const unsubFav = onSnapshot(collection(db, "favoritosBiblia"), snap => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(f => f.userEmail === user.email);
+      lista.sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""));
+      setFavoritosBiblia(lista);
+    });
+    const unsubPlano = onSnapshot(doc(db, "leituraBiblica", user.email), snap => {
+      setDiasLidosPlano(snap.exists() ? (snap.data().diasLidos || []) : []);
+    });
+    return () => { unsubFav(); unsubPlano(); };
+  }, [user?.email]);
 
   // Splash + Firebase load
   useEffect(() => {
@@ -1185,6 +1344,90 @@ export default function FamiliaAliancaApp() {
       return hash === user.senhaHash;
     }
     return senhaDigitada === user?.senha; // conta ainda não migrada (legado)
+  };
+
+  // ── Bíblia: busca rápida, plano de leitura, favoritos, compartilhar ──
+  const parseReferenciaBiblica = (texto) => {
+    const t = texto.trim().toLowerCase();
+    const m = /^([1-3]?\s?[a-zà-ú]+)\s*(\d+)?\s*:?\s*(\d+)?/i.exec(t);
+    if (!m) return null;
+    const nomeDigitado = m[1].trim().replace(/\s+/g, " ");
+    const capitulo = m[2] ? parseInt(m[2], 10) : 1;
+    const versiculo = m[3] ? parseInt(m[3], 10) : null;
+    const livro = LIVROS_BIBLIA.find(l => l.abrev.some(a => a.replace(/\s+/g, " ") === nomeDigitado || a.replace(/\s+/g, "") === nomeDigitado.replace(/\s+/g, "")));
+    if (!livro) return null;
+    return { livro: livro.nome, codigo: livro.codigo, capitulo, versiculo };
+  };
+
+  const buscarReferenciaBiblica = () => {
+    const ref = parseReferenciaBiblica(buscaRapidaBiblia);
+    if (!ref) { showToast("⚠️ Não encontrei esse livro. Tente algo como \"João 3:16\"."); return; }
+    const url = `https://www.bible.com/pt/bible/129/${ref.codigo}.${ref.capitulo}${ref.versiculo ? "." + ref.versiculo : ""}.NVI`;
+    window.open(url, "_blank");
+  };
+
+  const marcarDiaPlano = async (dia, lido) => {
+    if (!user?.email) return;
+    const atual = new Set(diasLidosPlano);
+    if (lido) atual.add(dia); else atual.delete(dia);
+    const novaLista = Array.from(atual);
+    setDiasLidosPlano(novaLista);
+    await setDoc(doc(db, "leituraBiblica", user.email), { diasLidos: novaLista, atualizadoEm: new Date().toISOString() }, { merge: true });
+  };
+
+  const salvarFavorito = async () => {
+    if (!novoFavorito.referencia.trim() || !novoFavorito.texto.trim()) { showToast("⚠️ Preencha a referência e o texto do versículo!"); return; }
+    if (editandoFavoritoId) {
+      await updateDoc(doc(db, "favoritosBiblia", editandoFavoritoId), { ...novoFavorito });
+      setEditandoFavoritoId(null);
+    } else {
+      await addDoc(collection(db, "favoritosBiblia"), { ...novoFavorito, userEmail: user.email, criadoEm: new Date().toISOString() });
+    }
+    setNovoFavorito({ referencia: "", texto: "", nota: "" });
+    showToast("✅ Favorito salvo!");
+  };
+
+  const excluirFavorito = async (id) => {
+    if (!window.confirm("Excluir este favorito?")) return;
+    await deleteDoc(doc(db, "favoritosBiblia", id));
+    showToast("🗑️ Removido!");
+  };
+
+  const gerarImagemVersiculo = async (ref, texto) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080; canvas.height = 1080;
+    const ctx = canvas.getContext("2d");
+    const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
+    grad.addColorStop(0, "#0b0f1a"); grad.addColorStop(1, "#1a1035");
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1080);
+    ctx.strokeStyle = "rgba(201,168,76,.5)"; ctx.lineWidth = 3;
+    ctx.strokeRect(50, 50, 980, 980);
+    ctx.fillStyle = "#c9a84c"; ctx.font = "bold 34px Georgia"; ctx.textAlign = "center";
+    ctx.fillText("FAMÍLIA ALIANÇA", 540, 150);
+    ctx.font = "italic 46px Georgia"; ctx.fillStyle = "#f3f0e8";
+    const palavras = texto.split(" "); let linha = ""; let y = 420; const linhas = [];
+    palavras.forEach(p => {
+      const teste = linha + p + " ";
+      if (ctx.measureText(teste).width > 850 && linha) { linhas.push(linha); linha = p + " "; }
+      else linha = teste;
+    });
+    linhas.push(linha);
+    const inicioY = 540 - (linhas.length * 30);
+    linhas.forEach((l, i) => ctx.fillText(`"${l.trim()}"`, 540, inicioY + i * 60));
+    ctx.font = "bold 32px Georgia"; ctx.fillStyle = "#c9a84c";
+    ctx.fillText(`— ${ref}`, 540, inicioY + linhas.length * 60 + 50);
+
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], `versiculo-${Date.now()}.png`, { type: "image/png" });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: ref }); return; } catch (e) {}
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `versiculo-familia-alianca.png`; a.click();
+      URL.revokeObjectURL(url);
+      showToast("✅ Imagem salva! Já pode compartilhar.");
+    }, "image/png");
   };
 
   const salvarCadastroCompleto = async () => {
@@ -2071,7 +2314,35 @@ export default function FamiliaAliancaApp() {
           <div style={{ animation: "slideUp .4s ease" }}>
             <div style={S.secTitle}>Bíblia Sagrada</div>
 
+            {!dicionarioAberto && !planoLeituraAberto && !favoritosAberto && (
+              <>
+                {/* Versículo do Dia */}
+                <div style={{ margin: "0 16px 16px", background: "linear-gradient(135deg,rgba(201,168,76,.15),rgba(139,92,246,.08))", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.5)"}`, borderRadius: 18, padding: "18px 20px" }}>
+                  <div style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 2, textTransform: "uppercase", color: T.gold, marginBottom: 10 }}>✨ Versículo do Dia</div>
+                  <div style={{ fontSize: 15, color: T.text, fontStyle: "italic", lineHeight: 1.6, marginBottom: 8 }}>"{VERSICULOS_DIA[versiculoDiaIndex].texto}"</div>
+                  <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 12 }}>— {VERSICULOS_DIA[versiculoDiaIndex].ref}</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={() => gerarImagemVersiculo(VERSICULOS_DIA[versiculoDiaIndex].ref, VERSICULOS_DIA[versiculoDiaIndex].texto)}
+                      style={{ flex: 1, padding: "9px 0", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 10, color: T.gold, fontSize: 12, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}>📤 Compartilhar</button>
+                    <button onClick={() => { setNovoFavorito({ referencia: VERSICULOS_DIA[versiculoDiaIndex].ref, texto: VERSICULOS_DIA[versiculoDiaIndex].texto, nota: "" }); setFavoritosAberto(true); }}
+                      style={{ flex: 1, padding: "9px 0", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, color: T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>⭐ Favoritar</button>
+                  </div>
+                </div>
+
+                {/* Busca rápida */}
+                <div style={{ margin: "0 16px 16px", display: "flex", gap: 8 }}>
+                  <input style={{ ...S.input, marginBottom: 0, flex: 1 }} placeholder="🔍 Buscar (ex: João 3:16)"
+                    value={buscaRapidaBiblia}
+                    onChange={e => setBuscaRapidaBiblia(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") buscarReferenciaBiblica(); }} />
+                  <button onClick={buscarReferenciaBiblica}
+                    style={{ padding: "0 18px", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 10, color: "#080810", fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}>Ir</button>
+                </div>
+              </>
+            )}
+
             {/* Alternador Texto / Áudio */}
+            {!dicionarioAberto && !planoLeituraAberto && !favoritosAberto && (
             <div style={{ display: "flex", gap: 8, margin: "0 16px 16px" }}>
               {[{ id: "texto", label: "📖 Texto" }, { id: "audio", label: "🎧 Áudio" }].map(m => (
                 <button key={m.id} onClick={() => setBibliaModo(m.id)}
@@ -2080,8 +2351,9 @@ export default function FamiliaAliancaApp() {
                 </button>
               ))}
             </div>
+            )}
 
-            {bibliaModo === "texto" ? (
+            {!dicionarioAberto && !planoLeituraAberto && !favoritosAberto && (bibliaModo === "texto" ? (
               <>
                 <div style={{ margin: "0 16px 20px", background: "linear-gradient(135deg,rgba(201,168,76,.18),rgba(100,60,180,.10))", border: `1px solid ${darkMode ? "rgba(201,168,76,.25)" : "rgba(154,112,32,.55)"}`, borderRadius: 20, padding: "28px 22px", textAlign: "center" }}>
                   <div style={{ fontSize: 52, marginBottom: 16 }}>📖</div>
@@ -2143,23 +2415,142 @@ export default function FamiliaAliancaApp() {
                   </div>
                 </div>
               </>
+            ))}
+
+            {!dicionarioAberto && !planoLeituraAberto && !favoritosAberto && (() => {
+              const proximoDia = PLANO_LEITURA_NT.find(d => !diasLidosPlano.includes(d.dia));
+              return (
+              <>
+                {proximoDia && diasLidosPlano.length > 0 && (
+                  <div onClick={() => { setPlanoLeituraAberto(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    style={{ margin: "0 16px 14px", background: "rgba(34,197,94,.08)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 16, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
+                    <div style={{ fontSize: 26 }}>📍</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 12, color: "#22c55e", fontWeight: "bold", marginBottom: 2 }}>Continue de onde parou</div>
+                      <div style={{ fontSize: 13, color: T.text }}>Dia {proximoDia.dia}: {proximoDia.titulo}</div>
+                    </div>
+                    <div style={{ color: "#22c55e", fontSize: 20 }}>›</div>
+                  </div>
+                )}
+
+                <div style={{ margin: "0 16px 4px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div onClick={() => { setPlanoLeituraAberto(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "16px 14px", cursor: "pointer", textAlign: "center" }}>
+                    <div style={{ fontSize: 28, marginBottom: 6 }}>🗓️</div>
+                    <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 3 }}>Plano de Leitura</div>
+                    <div style={{ fontSize: 11, color: T.textSub }}>{diasLidosPlano.length}/{PLANO_LEITURA_NT.length} dias lidos</div>
+                  </div>
+                  <div onClick={() => { setFavoritosAberto(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "16px 14px", cursor: "pointer", textAlign: "center" }}>
+                    <div style={{ fontSize: 28, marginBottom: 6 }}>⭐</div>
+                    <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 3 }}>Meus Favoritos</div>
+                    <div style={{ fontSize: 11, color: T.textSub }}>{favoritosBiblia.length} salvos</div>
+                  </div>
+                </div>
+
+                <div style={{ margin: "10px 16px 4px", borderRadius: 18, overflow: "hidden", border: "1px solid rgba(201,168,76,.35)", background: darkMode ? "linear-gradient(135deg,#0a1a3a 0%,#050d1f 100%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 100%)", position: "relative", cursor: "pointer" }}
+                  onClick={() => { setDicionarioAberto(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                  <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "5px 16px" }}>
+                    <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>📖 Ferramenta Bíblica</span>
+                  </div>
+                  <div style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(201,168,76,.12)", border: "1.5px solid rgba(201,168,76,.4)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 22 }}>📚</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 15, fontWeight: "bold", color: darkMode ? "#fff" : "#1a0f00", marginBottom: 4 }}>Dicionário Bíblico</div>
+                      <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5 }}>Explore o significado de termos e conceitos bíblicos fundamentais</div>
+                    </div>
+                    <div style={{ color: "#c9a84c", fontSize: 22, flexShrink: 0 }}>›</div>
+                  </div>
+                  <div style={{ position: "absolute", top: 0, right: 0, width: 80, height: "100%", background: "radial-gradient(ellipse at right, rgba(201,168,76,.07) 0%, transparent 70%)", pointerEvents: "none" }} />
+                </div>
+              </>
+              );
+            })()}
+
+            {/* ── TELA DO PLANO DE LEITURA ── */}
+            {planoLeituraAberto && (
+              <div style={{ animation: "slideUp .3s ease" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px 0" }}>
+                  <button onClick={() => setPlanoLeituraAberto(false)}
+                    style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif" }}>← Voltar</button>
+                  <div style={{ fontSize: 16, fontWeight: "bold", color: T.text }}>🗓️ Novo Testamento em 90 Dias</div>
+                </div>
+                <div style={{ margin: "14px 16px", background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 14, padding: "14px 16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, color: T.textSub }}>Seu progresso</span>
+                    <span style={{ fontSize: 12, fontWeight: "bold", color: T.gold }}>{diasLidosPlano.length}/{PLANO_LEITURA_NT.length}</span>
+                  </div>
+                  <div style={{ height: 8, background: T.cardBorder, borderRadius: 4, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${(diasLidosPlano.length / PLANO_LEITURA_NT.length) * 100}%`, background: "linear-gradient(90deg,#c9a84c,#e8c97a)", transition: "width .3s" }} />
+                  </div>
+                </div>
+                <div style={{ padding: "0 16px 16px" }}>
+                  {PLANO_LEITURA_NT.map(d => {
+                    const lido = diasLidosPlano.includes(d.dia);
+                    return (
+                      <div key={d.dia} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: T.card, border: `1px solid ${lido ? "rgba(34,197,94,.3)" : T.cardBorder}`, borderRadius: 12, marginBottom: 8 }}>
+                        <button onClick={() => marcarDiaPlano(d.dia, !lido)}
+                          style={{ width: 30, height: 30, borderRadius: "50%", border: `2px solid ${lido ? "#22c55e" : T.cardBorder}`, background: lido ? "#22c55e" : "transparent", color: "#fff", fontSize: 14, cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          {lido ? "✓" : ""}
+                        </button>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 11, color: T.textFaint }}>Dia {d.dia}</div>
+                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{d.titulo}</div>
+                        </div>
+                        <button onClick={() => window.open(`https://www.bible.com/pt/bible/129/${d.referencias[0].codigo}.${d.referencias[0].cap}.NVI`, "_blank")}
+                          style={{ padding: "6px 12px", background: "rgba(201,168,76,.12)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, color: T.gold, fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif" }}>Ler</button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             )}
 
-            {!dicionarioAberto && (
-              <div style={{ margin: "14px 16px 4px", borderRadius: 18, overflow: "hidden", border: "1px solid rgba(201,168,76,.35)", background: darkMode ? "linear-gradient(135deg,#0a1a3a 0%,#050d1f 100%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 100%)", position: "relative", cursor: "pointer" }}
-                onClick={() => { setDicionarioAberto(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
-                <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "5px 16px" }}>
-                  <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>📖 Ferramenta Bíblica</span>
+            {/* ── TELA DE FAVORITOS ── */}
+            {favoritosAberto && (
+              <div style={{ animation: "slideUp .3s ease" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px 0" }}>
+                  <button onClick={() => { setFavoritosAberto(false); setNovoFavorito({ referencia: "", texto: "", nota: "" }); setEditandoFavoritoId(null); }}
+                    style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif" }}>← Voltar</button>
+                  <div style={{ fontSize: 16, fontWeight: "bold", color: T.text }}>⭐ Meus Favoritos</div>
                 </div>
-                <div style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(201,168,76,.12)", border: "1.5px solid rgba(201,168,76,.4)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 22 }}>📚</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: "bold", color: darkMode ? "#fff" : "#1a0f00", marginBottom: 4 }}>Dicionário Bíblico</div>
-                    <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5 }}>Explore o significado de termos e conceitos bíblicos fundamentais</div>
+
+                <div style={{ padding: "14px 16px" }}>
+                  <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 18 }}>
+                    <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 10 }}>{editandoFavoritoId ? "✏️ Editar Favorito" : "➕ Novo Favorito"}</div>
+                    <label style={S.label}>Referência</label>
+                    <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: João 3:16" value={novoFavorito.referencia}
+                      onChange={e => setNovoFavorito({ ...novoFavorito, referencia: e.target.value })} />
+                    <label style={S.label}>Texto do versículo</label>
+                    <textarea style={{ ...S.input, marginBottom: 0, minHeight: 70, resize: "vertical" }} placeholder="Cole ou digite o texto do versículo..." value={novoFavorito.texto}
+                      onChange={e => setNovoFavorito({ ...novoFavorito, texto: e.target.value })} />
+                    <label style={S.label}>Sua anotação (opcional)</label>
+                    <textarea style={{ ...S.input, marginBottom: 0, minHeight: 60, resize: "vertical" }} placeholder="O que esse versículo significa pra você?" value={novoFavorito.nota}
+                      onChange={e => setNovoFavorito({ ...novoFavorito, nota: e.target.value })} />
+                    <button style={{ ...S.saveBtn, marginTop: 10 }} onClick={salvarFavorito}>{editandoFavoritoId ? "💾 Atualizar" : "⭐ Salvar Favorito"}</button>
+                    {editandoFavoritoId && (
+                      <button style={{ ...S.saveBtn, background: T.card, color: T.textSub, marginTop: 8 }}
+                        onClick={() => { setEditandoFavoritoId(null); setNovoFavorito({ referencia: "", texto: "", nota: "" }); }}>Cancelar</button>
+                    )}
                   </div>
-                  <div style={{ color: "#c9a84c", fontSize: 22, flexShrink: 0 }}>›</div>
+
+                  {favoritosBiblia.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "30px 0", color: T.textSub, fontSize: 13 }}>Nenhum versículo favoritado ainda.</div>
+                  ) : favoritosBiblia.map(f => (
+                    <div key={f.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, padding: "14px 16px", marginBottom: 10 }}>
+                      <div style={{ fontSize: 13, fontStyle: "italic", color: T.text, marginBottom: 6 }}>"{f.texto}"</div>
+                      <div style={{ fontSize: 12, fontWeight: "bold", color: T.gold, marginBottom: f.nota ? 8 : 0 }}>— {f.referencia}</div>
+                      {f.nota && <div style={{ fontSize: 12, color: T.textSub, background: darkMode ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.03)", borderRadius: 8, padding: "8px 10px", marginBottom: 8 }}>💭 {f.nota}</div>}
+                      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                        <button onClick={() => gerarImagemVersiculo(f.referencia, f.texto)}
+                          style={{ flex: 1, padding: "7px 0", background: "rgba(201,168,76,.1)", border: "1px solid rgba(201,168,76,.3)", borderRadius: 8, color: T.gold, fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif" }}>📤 Compartilhar</button>
+                        <button onClick={() => { setEditandoFavoritoId(f.id); setNovoFavorito({ referencia: f.referencia, texto: f.texto, nota: f.nota || "" }); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                          style={{ padding: "7px 12px", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 8, color: T.textSub, fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif" }}>✏️</button>
+                        <button onClick={() => excluirFavorito(f.id)} style={S.delBtn}>🗑️</button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div style={{ position: "absolute", top: 0, right: 0, width: 80, height: "100%", background: "radial-gradient(ellipse at right, rgba(201,168,76,.07) 0%, transparent 70%)", pointerEvents: "none" }} />
               </div>
             )}
 
