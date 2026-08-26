@@ -2123,8 +2123,8 @@ export default function FamiliaAliancaApp() {
                   <button
                     onClick={async (e) => {
                       e.stopPropagation();
-                      const trecho = (devocional.palavra || "").replace(/\*\*/g, "").split("\n").find(p => p.trim()) || "";
-                      const texto = `🕊️ Devocional do Dia — Família Aliança\n\n"${devocional.titulo}"\n\n${trecho}\n\nLeia completo no app da Família Aliança.`;
+                      const textoCompleto = (devocional.palavra || "").replace(/\*\*/g, "").trim();
+                      const texto = `🕊️ Devocional do Dia — Família Aliança\n\n"${devocional.titulo}"\n\n${textoCompleto}\n\n— Pr. Fernando Mello, Igreja Família Aliança`;
                       if (navigator.share) {
                         try { await navigator.share({ title: devocional.titulo, text: texto }); return; } catch (err) { if (err?.name === "AbortError") return; }
                       }
