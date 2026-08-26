@@ -534,24 +534,14 @@ const LIVROS_BIBLIA = [
 ];
 
 // ─── PLANO DE LEITURA: NOVO TESTAMENTO EM 90 DIAS (≈3 capítulos por dia) ──
-const PLANO_LEITURA_NT = (() => {
-  const livros = [
-    ["Mateus", "MAT", 28], ["Marcos", "MRK", 16], ["Lucas", "LUK", 24], ["João", "JHN", 21],
-    ["Atos", "ACT", 28], ["Romanos", "ROM", 16], ["1 Coríntios", "1CO", 16], ["2 Coríntios", "2CO", 13],
-    ["Gálatas", "GAL", 6], ["Efésios", "EPH", 6], ["Filipenses", "PHP", 4], ["Colossenses", "COL", 4],
-    ["1 Tessalonicenses", "1TH", 5], ["2 Tessalonicenses", "2TH", 3], ["1 Timóteo", "1TI", 6], ["2 Timóteo", "2TI", 4],
-    ["Tito", "TIT", 3], ["Filemom", "PHM", 1], ["Hebreus", "HEB", 13], ["Tiago", "JAS", 5],
-    ["1 Pedro", "1PE", 5], ["2 Pedro", "2PE", 3], ["1 João", "1JN", 5], ["2 João", "2JN", 1],
-    ["3 João", "3JN", 1], ["Judas", "JUD", 1], ["Apocalipse", "REV", 22],
-  ];
+function gerarPlanoLeitura(livros, porDia) {
   const capitulos = [];
   livros.forEach(([nome, codigo, total]) => {
     for (let c = 1; c <= total; c++) capitulos.push({ nome, codigo, cap: c });
   });
-  const POR_DIA = 3;
   const dias = [];
-  for (let i = 0; i < capitulos.length; i += POR_DIA) {
-    const grupo = capitulos.slice(i, i + POR_DIA);
+  for (let i = 0; i < capitulos.length; i += porDia) {
+    const grupo = capitulos.slice(i, i + porDia);
     const inicio = grupo[0], fim = grupo[grupo.length - 1];
     const mesmoLivro = inicio.nome === fim.nome;
     dias.push({
@@ -561,7 +551,30 @@ const PLANO_LEITURA_NT = (() => {
     });
   }
   return dias;
-})();
+}
+
+const PLANO_LEITURA_NT = gerarPlanoLeitura([
+  ["Mateus", "MAT", 28], ["Marcos", "MRK", 16], ["Lucas", "LUK", 24], ["João", "JHN", 21],
+  ["Atos", "ACT", 28], ["Romanos", "ROM", 16], ["1 Coríntios", "1CO", 16], ["2 Coríntios", "2CO", 13],
+  ["Gálatas", "GAL", 6], ["Efésios", "EPH", 6], ["Filipenses", "PHP", 4], ["Colossenses", "COL", 4],
+  ["1 Tessalonicenses", "1TH", 5], ["2 Tessalonicenses", "2TH", 3], ["1 Timóteo", "1TI", 6], ["2 Timóteo", "2TI", 4],
+  ["Tito", "TIT", 3], ["Filemom", "PHM", 1], ["Hebreus", "HEB", 13], ["Tiago", "JAS", 5],
+  ["1 Pedro", "1PE", 5], ["2 Pedro", "2PE", 3], ["1 João", "1JN", 5], ["2 João", "2JN", 1],
+  ["3 João", "3JN", 1], ["Judas", "JUD", 1], ["Apocalipse", "REV", 22],
+], 3);
+
+const PLANO_LEITURA_AT = gerarPlanoLeitura([
+  ["Gênesis", "GEN", 50], ["Êxodo", "EXO", 40], ["Levítico", "LEV", 27], ["Números", "NUM", 36],
+  ["Deuteronômio", "DEU", 34], ["Josué", "JOS", 24], ["Juízes", "JDG", 21], ["Rute", "RUT", 4],
+  ["1 Samuel", "1SA", 31], ["2 Samuel", "2SA", 24], ["1 Reis", "1KI", 22], ["2 Reis", "2KI", 25],
+  ["1 Crônicas", "1CH", 29], ["2 Crônicas", "2CH", 36], ["Esdras", "EZR", 10], ["Neemias", "NEH", 13],
+  ["Ester", "EST", 10], ["Jó", "JOB", 42], ["Salmos", "PSA", 150], ["Provérbios", "PRO", 31],
+  ["Eclesiastes", "ECC", 12], ["Cantares", "SNG", 8], ["Isaías", "ISA", 66], ["Jeremias", "JER", 52],
+  ["Lamentações", "LAM", 5], ["Ezequiel", "EZK", 48], ["Daniel", "DAN", 12], ["Oséias", "HOS", 14],
+  ["Joel", "JOL", 3], ["Amós", "AMO", 9], ["Obadias", "OBA", 1], ["Jonas", "JON", 4],
+  ["Miquéias", "MIC", 7], ["Naum", "NAM", 3], ["Habacuque", "HAB", 3], ["Sofonias", "ZEP", 3],
+  ["Ageu", "HAG", 2], ["Zacarias", "ZEC", 14], ["Malaquias", "MAL", 4],
+], 5);
 
 const CONTATOS = {
   endereco: ENDERECO,
@@ -766,6 +779,7 @@ export default function FamiliaAliancaApp() {
   });
   const [buscaRapidaBiblia, setBuscaRapidaBiblia] = useState("");
   const [planoLeituraAberto, setPlanoLeituraAberto] = useState(false);
+  const [testamentoPlano, setTestamentoPlano] = useState("nt"); // nt | at
   const [diasLidosPlano, setDiasLidosPlano] = useState([]);
   const [favoritosAberto, setFavoritosAberto] = useState(false);
   const [favoritosBiblia, setFavoritosBiblia] = useState([]);
@@ -1366,10 +1380,11 @@ export default function FamiliaAliancaApp() {
     window.open(url, "_blank");
   };
 
-  const marcarDiaPlano = async (dia, lido) => {
+  const marcarDiaPlano = async (testamento, dia, lido) => {
     if (!user?.email) return;
+    const chave = `${testamento}-${dia}`;
     const atual = new Set(diasLidosPlano);
-    if (lido) atual.add(dia); else atual.delete(dia);
+    if (lido) atual.add(chave); else atual.delete(chave);
     const novaLista = Array.from(atual);
     setDiasLidosPlano(novaLista);
     await setDoc(doc(db, "leituraBiblica", user.email), { diasLidos: novaLista, atualizadoEm: new Date().toISOString() }, { merge: true });
@@ -2103,8 +2118,21 @@ export default function FamiliaAliancaApp() {
             {devocional ? (
               <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", position: "relative", background: darkMode ? "linear-gradient(135deg,#0a1a3a 0%,#050d1f 60%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 60%)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.55)"}`, minHeight: 190 }}>
                 {/* faixa dourada topo */}
-                <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px", display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                   <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#080810" }}>🕊️ Devocional do Dia</span>
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      const trecho = (devocional.palavra || "").replace(/\*\*/g, "").split("\n").find(p => p.trim()) || "";
+                      const texto = `🕊️ Devocional do Dia — Família Aliança\n\n"${devocional.titulo}"\n\n${trecho}\n\nLeia completo no app da Família Aliança.`;
+                      if (navigator.share) {
+                        try { await navigator.share({ title: devocional.titulo, text: texto }); return; } catch (err) { if (err?.name === "AbortError") return; }
+                      }
+                      try { await navigator.clipboard.writeText(texto); showToast("✅ Texto copiado! Cole onde quiser compartilhar."); }
+                      catch (err) { showToast("⚠️ Não foi possível compartilhar."); }
+                    }}
+                    style={{ background: "rgba(8,8,16,.15)", border: "none", borderRadius: 8, padding: "4px 8px", cursor: "pointer", fontSize: 13, lineHeight: 1 }}
+                    title="Compartilhar devocional">📤</button>
                 </div>
                 {/* conteúdo */}
                 <div style={{ display: "flex", alignItems: "stretch", minHeight: 160 }}>
@@ -2418,15 +2446,19 @@ export default function FamiliaAliancaApp() {
             ))}
 
             {!dicionarioAberto && !planoLeituraAberto && !favoritosAberto && (() => {
-              const proximoDia = PLANO_LEITURA_NT.find(d => !diasLidosPlano.includes(d.dia));
+              // Compatibilidade: dias marcados antes desta atualização eram números soltos (contam como NT)
+              const lidoNT = (dia) => diasLidosPlano.includes(`nt-${dia}`) || diasLidosPlano.includes(dia);
+              const lidosNT = PLANO_LEITURA_NT.filter(d => lidoNT(d.dia)).length;
+              const lidosAT = diasLidosPlano.filter(k => typeof k === "string" && k.startsWith("at-")).length;
+              const proximoDia = PLANO_LEITURA_NT.find(d => !lidoNT(d.dia));
               return (
               <>
-                {proximoDia && diasLidosPlano.length > 0 && (
-                  <div onClick={() => { setPlanoLeituraAberto(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                {proximoDia && lidosNT > 0 && (
+                  <div onClick={() => { setTestamentoPlano("nt"); setPlanoLeituraAberto(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                     style={{ margin: "0 16px 14px", background: "rgba(34,197,94,.08)", border: "1px solid rgba(34,197,94,.3)", borderRadius: 16, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
                     <div style={{ fontSize: 26 }}>📍</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 12, color: "#22c55e", fontWeight: "bold", marginBottom: 2 }}>Continue de onde parou</div>
+                      <div style={{ fontSize: 12, color: "#22c55e", fontWeight: "bold", marginBottom: 2 }}>Continue de onde parou (Novo Testamento)</div>
                       <div style={{ fontSize: 13, color: T.text }}>Dia {proximoDia.dia}: {proximoDia.titulo}</div>
                     </div>
                     <div style={{ color: "#22c55e", fontSize: 20 }}>›</div>
@@ -2438,7 +2470,7 @@ export default function FamiliaAliancaApp() {
                     style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "16px 14px", cursor: "pointer", textAlign: "center" }}>
                     <div style={{ fontSize: 28, marginBottom: 6 }}>🗓️</div>
                     <div style={{ fontSize: 13, fontWeight: "bold", color: T.text, marginBottom: 3 }}>Plano de Leitura</div>
-                    <div style={{ fontSize: 11, color: T.textSub }}>{diasLidosPlano.length}/{PLANO_LEITURA_NT.length} dias lidos</div>
+                    <div style={{ fontSize: 11, color: T.textSub }}>NT: {lidosNT}/{PLANO_LEITURA_NT.length} • AT: {lidosAT}/{PLANO_LEITURA_AT.length}</div>
                   </div>
                   <div onClick={() => { setFavoritosAberto(true); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                     style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 16, padding: "16px 14px", cursor: "pointer", textAlign: "center" }}>
@@ -2468,28 +2500,44 @@ export default function FamiliaAliancaApp() {
             })()}
 
             {/* ── TELA DO PLANO DE LEITURA ── */}
-            {planoLeituraAberto && (
+            {planoLeituraAberto && (() => {
+              const planoAtual = testamentoPlano === "nt" ? PLANO_LEITURA_NT : PLANO_LEITURA_AT;
+              const lidoAtual = (dia) => testamentoPlano === "nt"
+                ? (diasLidosPlano.includes(`nt-${dia}`) || diasLidosPlano.includes(dia))
+                : diasLidosPlano.includes(`at-${dia}`);
+              const totalLidos = planoAtual.filter(d => lidoAtual(d.dia)).length;
+              return (
               <div style={{ animation: "slideUp .3s ease" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px 0" }}>
                   <button onClick={() => setPlanoLeituraAberto(false)}
                     style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif" }}>← Voltar</button>
-                  <div style={{ fontSize: 16, fontWeight: "bold", color: T.text }}>🗓️ Novo Testamento em 90 Dias</div>
+                  <div style={{ fontSize: 16, fontWeight: "bold", color: T.text }}>🗓️ Plano de Leitura</div>
                 </div>
-                <div style={{ margin: "14px 16px", background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 14, padding: "14px 16px" }}>
+
+                <div style={{ display: "flex", gap: 8, margin: "14px 16px" }}>
+                  {[{ id: "nt", label: "✝️ Novo Testamento" }, { id: "at", label: "📜 Antigo Testamento" }].map(t => (
+                    <button key={t.id} onClick={() => setTestamentoPlano(t.id)}
+                      style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: `1px solid ${testamentoPlano === t.id ? "#c9a84c" : T.cardBorder}`, background: testamentoPlano === t.id ? "rgba(201,168,76,.15)" : T.card, color: testamentoPlano === t.id ? "#c9a84c" : T.textSub, fontSize: 13, fontWeight: testamentoPlano === t.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ margin: "0 16px 14px", background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 14, padding: "14px 16px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, color: T.textSub }}>Seu progresso</span>
-                    <span style={{ fontSize: 12, fontWeight: "bold", color: T.gold }}>{diasLidosPlano.length}/{PLANO_LEITURA_NT.length}</span>
+                    <span style={{ fontSize: 12, color: T.textSub }}>Seu progresso — {testamentoPlano === "nt" ? "Novo Testamento em 90 dias" : "Antigo Testamento em 186 dias"}</span>
+                    <span style={{ fontSize: 12, fontWeight: "bold", color: T.gold }}>{totalLidos}/{planoAtual.length}</span>
                   </div>
                   <div style={{ height: 8, background: T.cardBorder, borderRadius: 4, overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: `${(diasLidosPlano.length / PLANO_LEITURA_NT.length) * 100}%`, background: "linear-gradient(90deg,#c9a84c,#e8c97a)", transition: "width .3s" }} />
+                    <div style={{ height: "100%", width: `${(totalLidos / planoAtual.length) * 100}%`, background: "linear-gradient(90deg,#c9a84c,#e8c97a)", transition: "width .3s" }} />
                   </div>
                 </div>
                 <div style={{ padding: "0 16px 16px" }}>
-                  {PLANO_LEITURA_NT.map(d => {
-                    const lido = diasLidosPlano.includes(d.dia);
+                  {planoAtual.map(d => {
+                    const lido = lidoAtual(d.dia);
                     return (
                       <div key={d.dia} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: T.card, border: `1px solid ${lido ? "rgba(34,197,94,.3)" : T.cardBorder}`, borderRadius: 12, marginBottom: 8 }}>
-                        <button onClick={() => marcarDiaPlano(d.dia, !lido)}
+                        <button onClick={() => marcarDiaPlano(testamentoPlano, d.dia, !lido)}
                           style={{ width: 30, height: 30, borderRadius: "50%", border: `2px solid ${lido ? "#22c55e" : T.cardBorder}`, background: lido ? "#22c55e" : "transparent", color: "#fff", fontSize: 14, cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                           {lido ? "✓" : ""}
                         </button>
@@ -2504,7 +2552,8 @@ export default function FamiliaAliancaApp() {
                   })}
                 </div>
               </div>
-            )}
+              );
+            })()}
 
             {/* ── TELA DE FAVORITOS ── */}
             {favoritosAberto && (
