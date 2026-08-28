@@ -3667,7 +3667,8 @@ export default function FamiliaAliancaApp() {
                             })()}
 
                             {/* Músicas escolhidas pelo Louvor — para membros de outros ministérios (ex: Mídia) */}
-                            {(meuDadosEscala || souUsuarioPadrao) && min !== "Aliança Music" && musicasLouvorMin.length > 0 && (
+                            {/* Mídia vê sempre (mesmo sem estar escalado no evento); outros ministérios só se estiverem escalados */}
+                            {(min === "Mídia" || meuDadosEscala || souUsuarioPadrao) && min !== "Aliança Music" && musicasLouvorMin.length > 0 && (
                               <div style={{ marginTop: 10 }}>
                                 <div style={{ fontSize: 11, color: "#8b5cf6", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>🎶 Músicas escolhidas pelo Louvor</div>
                                 {musicasLouvorMin.map((mus, i) => (
