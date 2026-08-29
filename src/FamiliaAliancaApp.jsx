@@ -5477,9 +5477,10 @@ export default function FamiliaAliancaApp() {
 
                 {(() => {
                   const hoje = new Date();
+                  const hojeStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
                   const mesAtualStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
                   const nomeMes = hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
-                  const eventosMesAtual = agenda.filter(ev => ev.data?.startsWith(mesAtualStr)).sort((a, b) => a.data?.localeCompare(b.data));
+                  const eventosMesAtual = agenda.filter(ev => ev.data?.startsWith(mesAtualStr) && ev.data >= hojeStr).sort((a, b) => a.data?.localeCompare(b.data));
                   return (
                     <>
                       <div style={{ marginTop: 24, marginBottom: 12, fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: T.gold, fontWeight: "bold" }}>
