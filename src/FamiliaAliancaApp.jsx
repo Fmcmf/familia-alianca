@@ -698,7 +698,6 @@ export default function FamiliaAliancaApp() {
   const [novaMusica, setNovaMusica] = useState({ titulo: "", artista: "", categoria: "", tom: "", tempo: "", link: "" });
   const [editandoMusicaId, setEditandoMusicaId] = useState(null);
   const [verPassadosLider, setVerPassadosLider] = useState(false);
-  const [verPassadosAdmin, setVerPassadosAdmin] = useState(false);
   const [verPassadosEdicaoLider, setVerPassadosEdicaoLider] = useState(false);
   const [musicaExpandida, setMusicaExpandida] = useState(null); // id da música aberta (com arquivos visíveis)
   const [audioTocando, setAudioTocando] = useState(null); // id do arquivo de áudio com player aberto inline
@@ -5477,27 +5476,20 @@ export default function FamiliaAliancaApp() {
                 )}
 
                 {(() => {
-                  const hojeStr = new Date().toISOString().split("T")[0];
-                  const proximosAdmin = agenda.filter(ev => ev.data >= hojeStr);
-                  const passadosAdmin = agenda.filter(ev => ev.data < hojeStr).sort((a, b) => b.data?.localeCompare(a.data));
-                  const listaAtualAdmin = verPassadosAdmin ? passadosAdmin : proximosAdmin;
+                  const hoje = new Date();
+                  const mesAtualStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
+                  const nomeMes = hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+                  const eventosMesAtual = agenda.filter(ev => ev.data?.startsWith(mesAtualStr)).sort((a, b) => a.data?.localeCompare(b.data));
                   return (
                     <>
-                      <div style={{ display: "flex", gap: 8, marginTop: 24, marginBottom: 12 }}>
-                        <button onClick={() => setVerPassadosAdmin(false)}
-                          style={{ flex: 1, padding: "8px 0", border: `1px solid ${!verPassadosAdmin ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: !verPassadosAdmin ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: !verPassadosAdmin ? "#080810" : T.textSub, fontSize: 12, fontWeight: !verPassadosAdmin ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
-                          📅 Próximos ({proximosAdmin.length})
-                        </button>
-                        <button onClick={() => setVerPassadosAdmin(true)}
-                          style={{ flex: 1, padding: "8px 0", border: `1px solid ${verPassadosAdmin ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: verPassadosAdmin ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: verPassadosAdmin ? "#080810" : T.textSub, fontSize: 12, fontWeight: verPassadosAdmin ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
-                          🗂️ Passados ({passadosAdmin.length})
-                        </button>
+                      <div style={{ marginTop: 24, marginBottom: 12, fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: T.gold, fontWeight: "bold" }}>
+                        🗓️ Eventos de {nomeMes} ({eventosMesAtual.length})
                       </div>
-                      {listaAtualAdmin.length === 0 ? (
+                      {eventosMesAtual.length === 0 ? (
                         <div style={{ textAlign: "center", padding: "20px 0", color: T.textFaint, fontSize: 12 }}>
-                          {verPassadosAdmin ? "Nenhum evento passado." : "Nenhum evento futuro cadastrado."}
+                          Nenhum evento cadastrado neste mês.
                         </div>
-                      ) : listaAtualAdmin.map(ev => (
+                      ) : eventosMesAtual.map(ev => (
                         <div key={ev.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div>
                             <div style={{ fontSize: 13, fontWeight: "bold" }}>
