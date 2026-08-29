@@ -3113,13 +3113,13 @@ export default function FamiliaAliancaApp() {
             </div>
 
             {/* Agenda completa (Admin vê tudo; Membros e Líderes veem só a semana atual) */}
-            <div id="mais-agenda" style={S.secTitle}>{isAdmin ? "Agenda Completa" : "Próximos Eventos"}</div>
+            <div id="mais-agenda" style={S.secTitle}>Próximos Eventos</div>
             {(() => {
               const { fim } = getSemanaAtual();
               const hoje = new Date().toISOString().split("T")[0];
               let eventosExibidos;
               if (isAdmin) {
-                eventosExibidos = agenda;
+                eventosExibidos = agenda.filter(e => e.data >= hoje).sort((a, b) => a.data?.localeCompare(b.data));
               } else {
                 const daSemana = agenda.filter(e => e.data >= hoje && e.data <= fim);
                 if (daSemana.length < 3) {
@@ -5478,19 +5478,17 @@ export default function FamiliaAliancaApp() {
                 {(() => {
                   const hoje = new Date();
                   const hojeStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
-                  const mesAtualStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
-                  const nomeMes = hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
-                  const eventosMesAtual = agenda.filter(ev => ev.data?.startsWith(mesAtualStr) && ev.data >= hojeStr).sort((a, b) => a.data?.localeCompare(b.data));
+                  const eventosFuturosAdmin = agenda.filter(ev => ev.data >= hojeStr).sort((a, b) => a.data?.localeCompare(b.data));
                   return (
                     <>
                       <div style={{ marginTop: 24, marginBottom: 12, fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: T.gold, fontWeight: "bold" }}>
-                        🗓️ Eventos de {nomeMes} ({eventosMesAtual.length})
+                        🗓️ Próximos Eventos ({eventosFuturosAdmin.length})
                       </div>
-                      {eventosMesAtual.length === 0 ? (
+                      {eventosFuturosAdmin.length === 0 ? (
                         <div style={{ textAlign: "center", padding: "20px 0", color: T.textFaint, fontSize: 12 }}>
-                          Nenhum evento cadastrado neste mês.
+                          Nenhum evento futuro cadastrado.
                         </div>
-                      ) : eventosMesAtual.map(ev => (
+                      ) : eventosFuturosAdmin.map(ev => (
                         <div key={ev.id} style={{ ...S.card, marginLeft: 0, marginRight: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div>
                             <div style={{ fontSize: 13, fontWeight: "bold" }}>
