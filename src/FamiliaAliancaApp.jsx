@@ -2275,6 +2275,11 @@ export default function FamiliaAliancaApp() {
                     action: () => { setTab("mais"); setMaisScrollTarget("localizacao"); },
                     svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" fill="rgba(201,168,76,.12)"/><circle cx="12" cy="10" r="2.5"/></svg>
                   },
+                  {
+                    label: "Testemunhos",
+                    action: () => { setTab("mais"); setMaisScrollTarget("testemunhos"); },
+                    svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" fill="rgba(201,168,76,.12)"/></svg>
+                  },
                 ].map(item => (
                   <button key={item.label} onClick={item.action}
                     style={{ flex: 1, background: darkMode ? "rgba(255,255,255,.04)" : "rgba(0,0,0,.05)", border: `1px solid rgba(201,168,76,.18)`, borderRadius: 14, padding: "14px 10px 11px", display: "flex", flexDirection: "column", alignItems: "center", gap: 7, cursor: "pointer", fontFamily: "Georgia,serif" }}>
