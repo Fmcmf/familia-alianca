@@ -17,11 +17,19 @@
 //
 // Não precisa instalar nada além do que o projeto já tem
 // (o pacote "firebase" já vem com o projeto).
+//
+// A partir desta versão, o script faz login como administrador antes
+// de baixar os dados (as Regras do Firestore agora exigem isso).
+// Troque ADMIN_SENHA abaixo se a senha do Pastor mudar.
 // ─────────────────────────────────────────────────────────────
 
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import fs from "fs";
+
+const ADMIN_EMAIL_AUTH = "prfernandomellofilho@gmail.com"; // conta do Pastor Fernando no Firebase Auth
+const ADMIN_SENHA = "mello2026";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCaoMEeWAa28IKfRpGH9dHrKnwpgbZ9RUo",
@@ -37,27 +45,36 @@ const firebaseConfig = {
 const COLECOES = [
   "agenda",
   "arquivosMidia",
+  "authIndex",
   "avisos",
   "categoriasEquipe",
   "cifras",
   "concluidos",
   "config",
   "dizimistas",
+  "entradas",
   "escalas",
   "estudos",
+  "favoritosBiblia",
   "fcm_tokens",
   "lancamentos",
+  "leituraBiblica",
+  "locaisEvento",
   "membros",
+  "modelosEvento",
   "musicas",
   "oracoes",
   "palavra",
   "palavras_historico",
   "pregacoes",
+  "saidas",
+  "testemunhos",
   "vs",
 ];
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 function carimboData() {
   const d = new Date();
@@ -67,6 +84,11 @@ function carimboData() {
 
 async function main() {
   console.log("🔄 Iniciando backup do Família Aliança...\n");
+
+  console.log("🔐 Fazendo login como administrador...");
+  await signInWithEmailAndPassword(auth, ADMIN_EMAIL_AUTH, ADMIN_SENHA);
+  console.log("✅ Login ok!\n");
+
   const backup = {};
   let totalDocumentos = 0;
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db, messaging, solicitarPermissaoNotificacao, onMessage, auth } from "./firebase";
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, deleteField } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, deleteField, query, where } from "firebase/firestore";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword } from "firebase/auth";
 import emailjs from "@emailjs/browser";
 
@@ -771,6 +771,11 @@ export default function FamiliaAliancaApp() {
     imagemUrl: "https://i.ibb.co/NdLhjscT/Chat-GPT-Image-8-de-jun-de-2026-15-55-33.png",
   });
   const [dicionarioAberto, setDicionarioAberto] = useState(false);
+  const [testemunhosAprovados, setTestemunhosAprovados] = useState([]);
+  const [meusTestemunhos, setMeusTestemunhos] = useState([]);
+  const [testemunhosPendentes, setTestemunhosPendentes] = useState([]);
+  const [novoTestemunhoTexto, setNovoTestemunhoTexto] = useState("");
+  const [testemunhoFormAberto, setTestemunhoFormAberto] = useState(false);
   const [bibliaModo, setBibliaModo] = useState("texto"); // texto | audio
   const [versiculoDiaIndex] = useState(() => {
     const diaDoAno = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
@@ -944,6 +949,39 @@ export default function FamiliaAliancaApp() {
     });
     return () => { unsubFav(); unsubPlano(); };
   }, [user?.email]);
+
+  // Mural de Testemunhos — aprovados são públicos, "meus" e "pendentes" são pessoais/admin
+  useEffect(() => {
+    const qAprovados = query(collection(db, "testemunhos"), where("aprovado", "==", true));
+    const unsubAprovados = onSnapshot(qAprovados, snap => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""));
+      setTestemunhosAprovados(lista);
+    });
+    let unsubMeus = () => {};
+    if (user?.email) {
+      const qMeus = query(collection(db, "testemunhos"), where("autorEmail", "==", user.email));
+      unsubMeus = onSnapshot(qMeus, snap => {
+        const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        lista.sort((a, b) => (b.criadoEm || "").localeCompare(a.criadoEm || ""));
+        setMeusTestemunhos(lista);
+      });
+    } else {
+      setMeusTestemunhos([]);
+    }
+    return () => { unsubAprovados(); unsubMeus(); };
+  }, [user?.email]);
+
+  useEffect(() => {
+    if (!isAdmin) { setTestemunhosPendentes([]); return; }
+    const qPendentes = query(collection(db, "testemunhos"), where("aprovado", "==", false));
+    const unsub = onSnapshot(qPendentes, snap => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => (a.criadoEm || "").localeCompare(b.criadoEm || ""));
+      setTestemunhosPendentes(lista);
+    });
+    return () => unsub();
+  }, [isAdmin]);
 
   // Splash + Firebase load
   useEffect(() => {
@@ -1387,6 +1425,33 @@ export default function FamiliaAliancaApp() {
     const novaLista = Array.from(atual);
     setDiasLidosPlano(novaLista);
     await setDoc(doc(db, "leituraBiblica", user.email), { diasLidos: novaLista, atualizadoEm: new Date().toISOString() }, { merge: true });
+  };
+
+  // ── Mural de Testemunhos ──
+  const postarTestemunho = async () => {
+    if (!novoTestemunhoTexto.trim()) { showToast("⚠️ Escreva seu testemunho antes de publicar!"); return; }
+    if (!user?.email) return;
+    await addDoc(collection(db, "testemunhos"), {
+      texto: novoTestemunhoTexto.trim(),
+      autorEmail: user.email,
+      autorNome: user.nome || "Membro",
+      aprovado: false,
+      criadoEm: new Date().toISOString(),
+    });
+    setNovoTestemunhoTexto("");
+    setTestemunhoFormAberto(false);
+    showToast("🙌 Testemunho enviado! Vai aparecer no mural assim que for aprovado.");
+  };
+
+  const excluirTestemunho = async (id) => {
+    if (!window.confirm("Excluir este testemunho?")) return;
+    await deleteDoc(doc(db, "testemunhos", id));
+    showToast("🗑️ Removido!");
+  };
+
+  const aprovarTestemunho = async (id) => {
+    await updateDoc(doc(db, "testemunhos", id), { aprovado: true, aprovadoEm: new Date().toISOString() });
+    showToast("✅ Testemunho aprovado e publicado no mural!");
   };
 
   const salvarFavorito = async () => {
@@ -3147,6 +3212,61 @@ export default function FamiliaAliancaApp() {
                 </div>
               ));
             })()}
+
+            {/* ── MURAL DE TESTEMUNHOS ── */}
+            <div id="mais-testemunhos" style={S.secTitle}>🙌 Mural de Testemunhos</div>
+            <div style={{ padding: "0 16px" }}>
+              <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14, lineHeight: 1.5 }}>
+                Compartilhe o que Deus tem feito na sua vida — sua história pode encorajar outra pessoa da igreja.
+              </div>
+
+              {!testemunhoFormAberto ? (
+                <button onClick={() => setTestemunhoFormAberto(true)}
+                  style={{ width: "100%", padding: "12px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontWeight: "bold", fontSize: 14, cursor: "pointer", fontFamily: "Georgia,serif", marginBottom: 18 }}>
+                  ✍️ Compartilhar meu testemunho
+                </button>
+              ) : (
+                <div style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 14, padding: "14px 16px", marginBottom: 18 }}>
+                  <textarea style={{ ...S.input, marginBottom: 10, minHeight: 100, resize: "vertical" }}
+                    placeholder="Conte o que Deus tem feito na sua vida..."
+                    value={novoTestemunhoTexto} onChange={e => setNovoTestemunhoTexto(e.target.value)} />
+                  <div style={{ fontSize: 11, color: T.textFaint, marginBottom: 10 }}>Seu testemunho passa por uma aprovação rápida do Admin antes de aparecer no mural pra todos.</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={postarTestemunho} style={{ flex: 1, padding: "10px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 10, color: "#080810", fontWeight: "bold", fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}>Publicar</button>
+                    <button onClick={() => { setTestemunhoFormAberto(false); setNovoTestemunhoTexto(""); }} style={{ padding: "10px 16px", background: "none", border: `1px solid ${T.cardBorder}`, borderRadius: 10, color: T.textSub, fontSize: 13, cursor: "pointer", fontFamily: "Georgia,serif" }}>Cancelar</button>
+                  </div>
+                </div>
+              )}
+
+              {meusTestemunhos.filter(t => !t.aprovado).length > 0 && (
+                <>
+                  <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.textFaint, marginBottom: 10 }}>Seus testemunhos aguardando aprovação</div>
+                  {meusTestemunhos.filter(t => !t.aprovado).map(t => (
+                    <div key={t.id} style={{ background: T.card, border: "1px solid rgba(245,158,11,.3)", borderRadius: 12, padding: "12px 14px", marginBottom: 10 }}>
+                      <div style={{ fontSize: 13, color: T.text, marginBottom: 6 }}>{t.texto}</div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 10, color: "#f59e0b", fontWeight: "bold" }}>⏳ Aguardando aprovação</span>
+                        <button onClick={() => excluirTestemunho(t.id)} style={{ background: "none", border: "none", color: T.textFaint, cursor: "pointer", fontSize: 11 }}>Excluir</button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {testemunhosAprovados.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "20px 0", color: T.textSub, fontSize: 13 }}>Nenhum testemunho publicado ainda. Seja o primeiro! 🙌</div>
+              ) : testemunhosAprovados.map(t => (
+                <div key={t.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #c9a84c", borderRadius: 12, padding: "14px 16px", marginBottom: 10 }}>
+                  <div style={{ fontSize: 13, color: T.text, lineHeight: 1.6, marginBottom: 8 }}>{t.texto}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: 12, fontWeight: "bold", color: T.gold }}>— {t.autorNome}</span>
+                    {(isAdmin || t.autorEmail === user?.email) && (
+                      <button onClick={() => excluirTestemunho(t.id)} style={{ background: "none", border: "none", color: T.textFaint, cursor: "pointer", fontSize: 11 }}>🗑️</button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
 
             {/* WhatsApp Atendimento */}
             <div id="mais-whatsapp" style={S.secTitle}>Fale Conosco pelo WhatsApp</div>
@@ -5343,9 +5463,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "padroes", "palavra", "pregacao", "devocional", "avisos", "estudos", "banner", "lideres", "jejum", "video", "aovivo", "membros", "administradores"].map(t => (
+              {["agenda", "padroes", "palavra", "pregacao", "devocional", "avisos", "testemunhos", "estudos", "banner", "lideres", "jejum", "video", "aovivo", "membros", "administradores"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", padroes: "🧩 Padrões", palavra: "📜 Palavra", pregacao: "🎙️ Pregação", devocional: "🕊️ Devoc", avisos: "📢 Avisos", estudos: "📚 Estudos", banner: "🖼️ Banner", lideres: "🏛️ Líderes", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros", administradores: "🔐 Admins" }[t]}
+                  {{ agenda: "📅 Agenda", padroes: "🧩 Padrões", palavra: "📜 Palavra", pregacao: "🎙️ Pregação", devocional: "🕊️ Devoc", avisos: "📢 Avisos", testemunhos: `🙌 Testemunhos${testemunhosPendentes.length > 0 ? ` (${testemunhosPendentes.length})` : ""}`, estudos: "📚 Estudos", banner: "🖼️ Banner", lideres: "🏛️ Líderes", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros", administradores: "🔐 Admins" }[t]}
                 </button>
               ))}
             </div>
@@ -5941,6 +6061,45 @@ export default function FamiliaAliancaApp() {
                     ))}
                   </>
                 )}
+              </div>
+            )}
+
+            {/* Admin: Mural de Testemunhos (moderação) */}
+            {adminTab === "testemunhos" && (
+              <div style={{ padding: "0 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>🙌 Moderar Testemunhos</div>
+                <div style={{ fontSize: 12, color: T.textSub, marginBottom: 20 }}>Aprove os testemunhos enviados pelos membros antes de aparecerem no mural público.</div>
+
+                <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.textFaint, marginBottom: 12 }}>
+                  ⏳ Aguardando aprovação ({testemunhosPendentes.length})
+                </div>
+                {testemunhosPendentes.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "20px 0", color: T.textFaint, fontSize: 12 }}>Nenhum testemunho pendente. Tudo em dia! ✅</div>
+                ) : testemunhosPendentes.map(t => (
+                  <div key={t.id} style={{ background: T.card, border: "1px solid rgba(245,158,11,.3)", borderRadius: 12, padding: "14px 16px", marginBottom: 10 }}>
+                    <div style={{ fontSize: 13, color: T.text, lineHeight: 1.6, marginBottom: 8 }}>{t.texto}</div>
+                    <div style={{ fontSize: 11, color: T.textFaint, marginBottom: 10 }}>— {t.autorNome} • {t.criadoEm ? new Date(t.criadoEm).toLocaleDateString("pt-BR") : ""}</div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button onClick={() => aprovarTestemunho(t.id)} style={{ flex: 1, padding: "8px 0", background: "rgba(34,197,94,.15)", border: "1px solid rgba(34,197,94,.4)", borderRadius: 8, color: "#22c55e", fontSize: 12, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" }}>✅ Aprovar</button>
+                      <button onClick={() => excluirTestemunho(t.id)} style={{ flex: 1, padding: "8px 0", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 8, color: "#ef4444", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>🗑️ Rejeitar</button>
+                    </div>
+                  </div>
+                ))}
+
+                <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: T.textFaint, margin: "24px 0 12px" }}>
+                  ✅ Já publicados ({testemunhosAprovados.length})
+                </div>
+                {testemunhosAprovados.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "20px 0", color: T.textFaint, fontSize: 12 }}>Nenhum testemunho publicado ainda.</div>
+                ) : testemunhosAprovados.map(t => (
+                  <div key={t.id} style={{ background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #22c55e", borderRadius: 12, padding: "12px 14px", marginBottom: 8 }}>
+                    <div style={{ fontSize: 13, color: T.text, marginBottom: 6 }}>{t.texto}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 11, color: T.textFaint }}>— {t.autorNome}</span>
+                      <button onClick={() => excluirTestemunho(t.id)} style={{ background: "none", border: "none", color: T.textFaint, cursor: "pointer", fontSize: 11 }}>🗑️</button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
