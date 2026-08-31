@@ -3217,7 +3217,7 @@ export default function FamiliaAliancaApp() {
             <div id="mais-testemunhos" style={S.secTitle}>🙌 Mural de Testemunhos</div>
             <div style={{ padding: "0 16px" }}>
               <div style={{ fontSize: 12, color: T.textSub, marginBottom: 14, lineHeight: 1.5 }}>
-                Compartilhe o que Deus tem feito na sua vida — sua história pode encorajar outra pessoa da igreja.
+                Compartilhe o que Deus tem feito na sua vida — sua história pode encorajar e fortalecer a fé de outra pessoa da igreja.
               </div>
 
               {!testemunhoFormAberto ? (
