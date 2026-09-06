@@ -37,6 +37,9 @@ const ONESIGNAL_APP_ID = "10ba1be7-f0bc-4c2d-bb2e-e9a02d4235f1";
 const ONESIGNAL_API_KEY = "os_v2_app_cc5bxz7qxrgc3ozo5gqc2qrv6fvhavzuxthuwrubrn6h6e6hhl7llhqjzm642hcawtwg2341hscb4t6xdvqjwptkzb1665spna4xk3a";
 const EMAILJS_SERVICE_ID  = "service_sffzlx2";
 const EMAILJS_TEMPLATE_ID = "template_142tb2a";
+// Reaproveitamos o mesmo template "Contact Us" pra mensagem em massa, com variáveis genéricas (to_name/to_email/assunto/mensagem)
+const EMAILJS_TEMPLATE_MASSA_ID = EMAILJS_TEMPLATE_ID;
+const EMAIL_VOLUNTARIADO = "voluntariado@familiaaliancapiracicaba.com.br";
 const EMAILJS_PUBLIC_KEY  = "KkcyGeZOZYPkwGing";
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
@@ -752,7 +755,13 @@ export default function FamiliaAliancaApp() {
   const [membroSelecionado, setMembroSelecionado] = useState(null);
   const [buscaMembro, setBuscaMembro] = useState("");
   const [anivMes, setAnivMes] = useState(new Date().getMonth() + 1);
-  const [membrosView, setMembrosView] = useState("lista"); // lista | aniversariantes
+  const [membrosView, setMembrosView] = useState("lista"); // lista | aniversariantes | duplicados | mensagem
+  const [msgMassaFiltro, setMsgMassaFiltro] = useState("todos"); // todos | ministerio | lideres | admins
+  const [msgMassaMinisterio, setMsgMassaMinisterio] = useState("");
+  const [msgMassaAssunto, setMsgMassaAssunto] = useState("");
+  const [msgMassaTexto, setMsgMassaTexto] = useState("");
+  const [enviandoMsgMassa, setEnviandoMsgMassa] = useState(false);
+  const [progressoMsgMassa, setProgressoMsgMassa] = useState(null); // { enviados, falharam, total } | null
   const [membrosOrdem, setMembrosOrdem] = useState("nome"); // nome | acesso
   const [ultimaVisita, setUltimaVisita] = useState(() => {
     try { return JSON.parse(localStorage.getItem("fa_ultima_visita") || "{}"); }
@@ -1452,6 +1461,37 @@ export default function FamiliaAliancaApp() {
   const aprovarTestemunho = async (id) => {
     await updateDoc(doc(db, "testemunhos", id), { aprovado: true, aprovadoEm: new Date().toISOString() });
     showToast("✅ Testemunho aprovado e publicado no mural!");
+  };
+
+  // ── Mensagem em massa (E-mail) ──
+  const enviarMensagemMassaEmail = async (destinatarios) => {
+    if (!msgMassaAssunto.trim() || !msgMassaTexto.trim()) { showToast("⚠️ Preencha o assunto e a mensagem!"); return; }
+    if (destinatarios.length === 0) { showToast("⚠️ Nenhum destinatário com e-mail nesse filtro!"); return; }
+    if (!window.confirm(`Enviar e-mail para ${destinatarios.length} pessoa(s)?`)) return;
+
+    setEnviandoMsgMassa(true);
+    setProgressoMsgMassa({ enviados: 0, falharam: 0, total: destinatarios.length });
+
+    let enviados = 0, falharam = 0;
+    for (const m of destinatarios) {
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_MASSA_ID, {
+          to_name: m.nome || "Membro",
+          to_email: m.email,
+          assunto: msgMassaAssunto,
+          mensagem: msgMassaTexto,
+        }, EMAILJS_PUBLIC_KEY);
+        enviados++;
+      } catch (err) {
+        falharam++;
+        console.warn("Falha ao enviar para", m.email, err);
+      }
+      setProgressoMsgMassa({ enviados, falharam, total: destinatarios.length });
+      await new Promise(r => setTimeout(r, 350)); // evita estourar limite de envios por segundo do EmailJS
+    }
+
+    setEnviandoMsgMassa(false);
+    showToast(falharam === 0 ? `✅ ${enviados} e-mail(s) enviado(s) com sucesso!` : `⚠️ ${enviados} enviado(s), ${falharam} falharam.`);
   };
 
   const salvarFavorito = async () => {
@@ -3128,15 +3168,15 @@ export default function FamiliaAliancaApp() {
                 onClick={async () => {
                   setEnviandoVoluntario(true);
                   try {
+                    const mensagemFormatada = `Nova candidatura de voluntário!\n\nNome: ${voluntarioForm.nome}\nE-mail: ${voluntarioForm.email}\nTelefone: ${voluntarioForm.telefone}\nMinistério: ${voluntarioForm.ministerio}\n\nSobre: ${voluntarioForm.mensagem || "—"}`;
                     await emailjs.send(
                       EMAILJS_SERVICE_ID,
                       EMAILJS_TEMPLATE_ID,
                       {
-                        nome:       voluntarioForm.nome,
-                        email:      voluntarioForm.email,
-                        telefone:   voluntarioForm.telefone,
-                        ministerio: voluntarioForm.ministerio,
-                        mensagem:   voluntarioForm.mensagem || "—",
+                        to_name: "Equipe Família Aliança",
+                        to_email: EMAIL_VOLUNTARIADO,
+                        assunto: `Nova candidatura de voluntário — ${voluntarioForm.nome}`,
+                        mensagem: mensagemFormatada,
                       },
                       EMAILJS_PUBLIC_KEY
                     );
@@ -6649,7 +6689,7 @@ export default function FamiliaAliancaApp() {
                   <div>
                     {/* Seletor de view */}
                     <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                      {[{ id: "lista", label: "👥 Membros" }, { id: "aniversariantes", label: "🎂 Aniversariantes" }, { id: "duplicados", label: "🔁 Duplicados" }].map(v => (
+                      {[{ id: "lista", label: "👥 Membros" }, { id: "aniversariantes", label: "🎂 Aniversariantes" }, { id: "duplicados", label: "🔁 Duplicados" }, { id: "inativos", label: "🚫 Nunca Acessaram" }, { id: "mensagem", label: "📨 Mensagem" }].map(v => (
                         <button key={v.id} onClick={() => setMembrosView(v.id)}
                           style={{ flex: 1, padding: "9px 0", border: `1px solid ${membrosView === v.id ? "#c9a84c" : T.cardBorder}`, borderRadius: 10, background: membrosView === v.id ? "linear-gradient(90deg,#c9a84c,#e8c97a)" : T.card, color: membrosView === v.id ? "#080810" : T.textSub, fontSize: 12, fontWeight: membrosView === v.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif" }}>
                           {v.label}
@@ -6804,6 +6844,138 @@ export default function FamiliaAliancaApp() {
                               ))}
                             </>
                           )}
+                        </>
+                      );
+                    })()}
+
+                    {/* ── NUNCA ACESSARAM ── */}
+                    {membrosView === "inativos" && (() => {
+                      const nuncaAcessaram = membros
+                        .filter(m => !m.ultimoAcesso && !m.admin)
+                        .sort((a, b) => (a.dataCadastro || "").localeCompare(b.dataCadastro || ""));
+                      return (
+                        <>
+                          <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>🚫 Nunca Acessaram o App</div>
+                          <div style={{ fontSize: 12, color: T.textSub, marginBottom: 18 }}>
+                            Cadastros que existem no banco, mas a pessoa nunca fez login de verdade. Pode ser gente que se cadastrou só pra "testar", ou desistiu. Revise antes de excluir.
+                          </div>
+
+                          {nuncaAcessaram.length === 0 ? (
+                            <div style={{ textAlign: "center", padding: "30px 0" }}>
+                              <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
+                              <div style={{ fontSize: 13, color: T.textSub }}>Todo mundo já acessou pelo menos uma vez!</div>
+                            </div>
+                          ) : (
+                            <>
+                              <div style={{ background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.25)", borderRadius: 12, padding: "10px 16px", marginBottom: 16, fontSize: 13, color: "#f87171", fontWeight: "bold" }}>
+                                ⚠️ {nuncaAcessaram.length} cadastro(s) que nunca acessaram
+                              </div>
+                              {nuncaAcessaram.map(m => (
+                                <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: T.card, border: `1px solid ${T.cardBorder}`, borderLeft: "3px solid #ef4444", borderRadius: 12, marginBottom: 8 }}>
+                                  <div onClick={() => setMembroSelecionado(m)} style={{ flex: 1, cursor: "pointer" }}>
+                                    <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>{m.nome}</div>
+                                    <div style={{ fontSize: 11, color: T.textSub }}>{m.email}</div>
+                                    {m.dataCadastro && <div style={{ fontSize: 10, color: T.textFaint, marginTop: 2 }}>Cadastrado em {new Date(m.dataCadastro).toLocaleDateString("pt-BR")}</div>}
+                                  </div>
+                                  <button onClick={async () => {
+                                    if (window.confirm(`Excluir "${m.nome}" (${m.email})? Essa pessoa nunca acessou o app.`)) {
+                                      await deleteDoc(doc(db, "membros", m.email));
+                                      showToast("🗑️ Removido!");
+                                    }
+                                  }} style={S.delBtn}>🗑️</button>
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </>
+                      );
+                    })()}
+
+                    {/* ── MENSAGEM EM MASSA ── */}
+                    {membrosView === "mensagem" && (() => {
+                      const membrosFiltrados = membros.filter(m => {
+                        if (msgMassaFiltro === "lideres") return m.lider;
+                        if (msgMassaFiltro === "admins") return m.admin;
+                        if (msgMassaFiltro === "ministerio") return msgMassaMinisterio && m.ministerios?.includes(msgMassaMinisterio);
+                        return true; // todos
+                      });
+                      const comEmail = membrosFiltrados.filter(m => m.email);
+                      const comCelular = membrosFiltrados.filter(m => m.celular);
+                      const numerosWhats = comCelular.map(m => m.celular.replace(/\D/g, "")).join(", ");
+
+                      return (
+                        <>
+                          <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>📨 Mensagem em Massa</div>
+                          <div style={{ fontSize: 12, color: T.textSub, marginBottom: 18 }}>Envie um aviso por e-mail pra vários membros de uma vez, ou prepare uma lista de transmissão do WhatsApp.</div>
+
+                          <label style={S.label}>Para quem?</label>
+                          <select style={S.select} value={msgMassaFiltro} onChange={e => setMsgMassaFiltro(e.target.value)}>
+                            <option value="todos">👥 Todos os membros</option>
+                            <option value="ministerio">⛪ Um ministério específico</option>
+                            <option value="lideres">🏛️ Só líderes</option>
+                            <option value="admins">🔐 Só administradores</option>
+                          </select>
+
+                          {msgMassaFiltro === "ministerio" && (
+                            <select style={{ ...S.select, marginTop: 10 }} value={msgMassaMinisterio} onChange={e => setMsgMassaMinisterio(e.target.value)}>
+                              <option value="">Selecione o ministério...</option>
+                              {MINISTERIOS.map(min => <option key={min.id} value={min.nome}>{min.icon} {min.nome}</option>)}
+                            </select>
+                          )}
+
+                          <div style={{ display: "flex", gap: 10, margin: "14px 0" }}>
+                            <div style={{ flex: 1, background: "rgba(201,168,76,.08)", border: "1px solid rgba(201,168,76,.2)", borderRadius: 10, padding: "10px 12px", textAlign: "center" }}>
+                              <div style={{ fontSize: 18, fontWeight: "bold", color: T.gold }}>{membrosFiltrados.length}</div>
+                              <div style={{ fontSize: 10, color: T.textSub }}>Selecionados</div>
+                            </div>
+                            <div style={{ flex: 1, background: "rgba(34,197,94,.08)", border: "1px solid rgba(34,197,94,.2)", borderRadius: 10, padding: "10px 12px", textAlign: "center" }}>
+                              <div style={{ fontSize: 18, fontWeight: "bold", color: "#22c55e" }}>{comEmail.length}</div>
+                              <div style={{ fontSize: 10, color: T.textSub }}>Com e-mail</div>
+                            </div>
+                            <div style={{ flex: 1, background: "rgba(59,130,246,.08)", border: "1px solid rgba(59,130,246,.2)", borderRadius: 10, padding: "10px 12px", textAlign: "center" }}>
+                              <div style={{ fontSize: 18, fontWeight: "bold", color: "#3b82f6" }}>{comCelular.length}</div>
+                              <div style={{ fontSize: 10, color: T.textSub }}>Com celular</div>
+                            </div>
+                          </div>
+
+                          <label style={S.label}>Assunto (usado no e-mail)</label>
+                          <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: Aviso importante da igreja" value={msgMassaAssunto}
+                            onChange={e => setMsgMassaAssunto(e.target.value)} />
+
+                          <label style={S.label}>Mensagem</label>
+                          <textarea style={{ ...S.input, marginBottom: 0, minHeight: 120, resize: "vertical" }} placeholder="Digite a mensagem que será enviada..."
+                            value={msgMassaTexto} onChange={e => setMsgMassaTexto(e.target.value)} />
+
+                          {progressoMsgMassa && (
+                            <div style={{ marginTop: 12, background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, padding: "10px 14px" }}>
+                              <div style={{ fontSize: 12, color: T.textSub, marginBottom: 6 }}>Enviando... {progressoMsgMassa.enviados + progressoMsgMassa.falharam}/{progressoMsgMassa.total}</div>
+                              <div style={{ height: 6, background: T.cardBorder, borderRadius: 3, overflow: "hidden" }}>
+                                <div style={{ height: "100%", width: `${((progressoMsgMassa.enviados + progressoMsgMassa.falharam) / progressoMsgMassa.total) * 100}%`, background: "linear-gradient(90deg,#c9a84c,#e8c97a)" }} />
+                              </div>
+                            </div>
+                          )}
+
+                          <button disabled={enviandoMsgMassa} style={{ ...S.saveBtn, marginTop: 14, opacity: enviandoMsgMassa ? 0.6 : 1 }}
+                            onClick={() => enviarMensagemMassaEmail(comEmail)}>
+                            {enviandoMsgMassa ? "Enviando..." : `📧 Enviar por E-mail (${comEmail.length})`}
+                          </button>
+
+                          <div style={{ height: 1, background: T.cardBorder, margin: "20px 0" }} />
+
+                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.gold, marginBottom: 8 }}>📱 Enviar pelo WhatsApp</div>
+                          <div style={{ fontSize: 12, color: T.textSub, marginBottom: 12, lineHeight: 1.6 }}>
+                            O WhatsApp não permite disparo automático por aqui. O jeito mais fácil: copie os números abaixo, crie uma <strong>Lista de Transmissão</strong> no seu WhatsApp (colando os números um por vez) e cole a mensagem lá.
+                          </div>
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button onClick={() => { navigator.clipboard.writeText(numerosWhats); showToast("✅ Números copiados!"); }}
+                              style={{ flex: 1, padding: "10px 0", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, color: T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                              📋 Copiar números ({comCelular.length})
+                            </button>
+                            <button onClick={() => { navigator.clipboard.writeText(msgMassaTexto); showToast("✅ Mensagem copiada!"); }}
+                              style={{ flex: 1, padding: "10px 0", background: T.card, border: `1px solid ${T.cardBorder}`, borderRadius: 10, color: T.textSub, fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>
+                              📋 Copiar mensagem
+                            </button>
+                          </div>
                         </>
                       );
                     })()}
