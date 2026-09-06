@@ -2317,8 +2317,8 @@ export default function FamiliaAliancaApp() {
               const diaHoje = semana?.dias?.[diaSemanaHojeLeitura()];
               if (!semana || !diaHoje) return null;
               return (
-                <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", border: `1px solid ${darkMode ? "rgba(139,92,246,.35)" : "rgba(109,40,217,.4)"}`, background: darkMode ? "linear-gradient(135deg,#1a1035 0%,#0d0820 100%)" : "linear-gradient(135deg,#f3ecff 0%,#e9ddfa 100%)" }}>
-                  <div style={{ background: "linear-gradient(90deg,#8b5cf6,#a78bfa)", padding: "6px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", border: `1px solid ${darkMode ? "rgba(156,163,175,.35)" : "rgba(107,114,128,.4)"}`, background: darkMode ? "linear-gradient(135deg,#2a2a30 0%,#18181d 100%)" : "linear-gradient(135deg,#f3f4f6 0%,#e5e7eb 100%)" }}>
+                  <div style={{ background: "linear-gradient(90deg,#9ca3af,#d1d5db)", padding: "6px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                     <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#fff" }}>📖 Leitura Temática Semanal</span>
                     <button
                       onClick={async (e) => {
@@ -2334,13 +2334,13 @@ export default function FamiliaAliancaApp() {
                       title="Compartilhar">📤</button>
                   </div>
                   <div style={{ padding: "14px 16px 16px" }}>
-                    <div style={{ fontSize: 10, color: "#a78bfa", marginBottom: 4, letterSpacing: 1, textTransform: "uppercase" }}>Semana {semana.semana} • {DIAS_SEMANA_LEITURA.find(d => d.id === diaSemanaHojeLeitura())?.label}</div>
-                    <div style={{ fontSize: 17, fontWeight: "bold", lineHeight: 1.25, color: darkMode ? "#fff" : "#1a0f30", marginBottom: 8 }}>{diaHoje.titulo}</div>
+                    <div style={{ fontSize: 10, color: darkMode ? "#d1d5db" : "#6b7280", marginBottom: 4, letterSpacing: 1, textTransform: "uppercase" }}>Semana {semana.semana} • {DIAS_SEMANA_LEITURA.find(d => d.id === diaSemanaHojeLeitura())?.label}</div>
+                    <div style={{ fontSize: 17, fontWeight: "bold", lineHeight: 1.25, color: darkMode ? "#fff" : "#1f2937", marginBottom: 8 }}>{diaHoje.titulo}</div>
                     <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5, marginBottom: 12, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                       "{diaHoje.versiculoTexto}" — {diaHoje.versiculoRef}
                     </div>
                     <button
-                      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", background: "linear-gradient(90deg,#8b5cf6,#a78bfa)", border: "none", borderRadius: 20, padding: "10px 16px", fontSize: 13, fontWeight: "bold", color: "#fff", cursor: "pointer", fontFamily: "Georgia,serif" }}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", background: "linear-gradient(90deg,#9ca3af,#d1d5db)", border: "none", borderRadius: 20, padding: "10px 16px", fontSize: 13, fontWeight: "bold", color: "#1f2937", cursor: "pointer", fontFamily: "Georgia,serif" }}
                       onClick={() => setTab("leituraSemanal")}>
                       Ler o dia completo →
                     </button>
@@ -3149,15 +3149,15 @@ export default function FamiliaAliancaApp() {
                 </div>
               ) : (
                 <>
-                  <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(139,92,246,.18),rgba(201,168,76,.1))", border: `1px solid ${darkMode ? "rgba(139,92,246,.3)" : "rgba(109,40,217,.4)"}`, borderRadius: 20, padding: "22px", textAlign: "center" }}>
-                    <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#a78bfa", marginBottom: 6 }}>Semana {semana.semana}</div>
+                  <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(156,163,175,.18),rgba(201,168,76,.1))", border: `1px solid ${darkMode ? "rgba(156,163,175,.3)" : "rgba(107,114,128,.4)"}`, borderRadius: 20, padding: "22px", textAlign: "center" }}>
+                    <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#9ca3af", marginBottom: 6 }}>Semana {semana.semana}</div>
                     <div style={{ fontSize: 19, fontWeight: "bold", color: T.text }}>{semana.tema}</div>
                   </div>
 
                   <div style={{ display: "flex", gap: 6, overflowX: "auto", padding: "16px 16px 4px" }}>
                     {DIAS_SEMANA_LEITURA.map(d => (
                       <button key={d.id} onClick={() => setDiaVisualizadoLeitura(d.id)}
-                        style={{ flexShrink: 0, padding: "8px 12px", borderRadius: 10, border: `1px solid ${diaAtivo === d.id ? "#8b5cf6" : T.cardBorder}`, background: diaAtivo === d.id ? "linear-gradient(90deg,#8b5cf6,#a78bfa)" : T.card, color: diaAtivo === d.id ? "#fff" : T.textSub, fontSize: 11, fontWeight: diaAtivo === d.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }}>
+                        style={{ flexShrink: 0, padding: "8px 12px", borderRadius: 10, border: `1px solid ${diaAtivo === d.id ? "#9ca3af" : T.cardBorder}`, background: diaAtivo === d.id ? "linear-gradient(90deg,#9ca3af,#9ca3af)" : T.card, color: diaAtivo === d.id ? "#1f2937" : T.textSub, fontSize: 11, fontWeight: diaAtivo === d.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }}>
                         {d.label.replace("-feira", "")}{d.id === diaSemanaHojeLeitura() ? " •" : ""}
                       </button>
                     ))}
@@ -3171,20 +3171,20 @@ export default function FamiliaAliancaApp() {
                     <div style={{ margin: "12px 16px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "20px" }}>
                       <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 16, textAlign: "center" }}>{conteudoDia.titulo}</div>
 
-                      <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#a78bfa", marginBottom: 8 }}>📖 Versículo Base</div>
+                      <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#9ca3af", marginBottom: 8 }}>📖 Versículo Base</div>
                       <div style={{ fontSize: 15, fontStyle: "italic", color: T.text, lineHeight: 1.7, marginBottom: 6 }}>"{conteudoDia.versiculoTexto}"</div>
-                      {conteudoDia.versiculoRef && <div style={{ fontSize: 13, fontWeight: "bold", color: "#a78bfa", marginBottom: 18 }}>— {conteudoDia.versiculoRef}</div>}
+                      {conteudoDia.versiculoRef && <div style={{ fontSize: 13, fontWeight: "bold", color: "#9ca3af", marginBottom: 18 }}>— {conteudoDia.versiculoRef}</div>}
 
                       {conteudoDia.aplicacao && (
                         <>
-                          <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#a78bfa", marginBottom: 8 }}>🙋 Aplicação Pessoal</div>
+                          <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#9ca3af", marginBottom: 8 }}>🙋 Aplicação Pessoal</div>
                           <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.8, marginBottom: 18 }}>{conteudoDia.aplicacao}</div>
                         </>
                       )}
 
                       {conteudoDia.sugestoes?.length > 0 && (
                         <>
-                          <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#a78bfa", marginBottom: 8 }}>📚 Sugestão de Leitura</div>
+                          <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#9ca3af", marginBottom: 8 }}>📚 Sugestão de Leitura</div>
                           {conteudoDia.sugestoes.map((s, i) => (
                             <div key={i} style={{ fontSize: 14, color: T.text, marginBottom: 6 }}>📖 {s}</div>
                           ))}
@@ -3192,13 +3192,13 @@ export default function FamiliaAliancaApp() {
                       )}
 
                       {conteudoDia.frase && (
-                        <div style={{ marginTop: 18, padding: "14px 16px", border: "1px solid rgba(139,92,246,.3)", borderRadius: 12, textAlign: "center", fontSize: 13, fontStyle: "italic", color: "#a78bfa" }}>
+                        <div style={{ marginTop: 18, padding: "14px 16px", border: "1px solid rgba(156,163,175,.3)", borderRadius: 12, textAlign: "center", fontSize: 13, fontStyle: "italic", color: "#9ca3af" }}>
                           "{conteudoDia.frase}"
                         </div>
                       )}
 
                       <button
-                        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", marginTop: 18, background: "linear-gradient(90deg,#8b5cf6,#a78bfa)", border: "none", borderRadius: 20, padding: "10px 16px", fontSize: 13, fontWeight: "bold", color: "#fff", cursor: "pointer", fontFamily: "Georgia,serif" }}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", marginTop: 18, background: "linear-gradient(90deg,#9ca3af,#d1d5db)", border: "none", borderRadius: 20, padding: "10px 16px", fontSize: 13, fontWeight: "bold", color: "#fff", cursor: "pointer", fontFamily: "Georgia,serif" }}
                         onClick={async () => {
                           const texto = `📖 Leitura Temática Semanal — Família Aliança\n\nSemana ${semana.semana}: ${semana.tema}\n${DIAS_SEMANA_LEITURA.find(d => d.id === diaAtivo)?.label}\n\n"${conteudoDia.titulo}"\n\n"${conteudoDia.versiculoTexto}"\n— ${conteudoDia.versiculoRef}\n\n${conteudoDia.aplicacao}${conteudoDia.sugestoes?.length ? `\n\nSugestão de leitura:\n${conteudoDia.sugestoes.join("\n")}` : ""}`;
                           if (navigator.share) {
@@ -6211,7 +6211,7 @@ export default function FamiliaAliancaApp() {
                   {leiturasSemanais.length === 0 ? (
                     <div style={{ fontSize: 12, color: T.textFaint, marginBottom: 10 }}>Nenhuma semana cadastrada ainda.</div>
                   ) : leiturasSemanais.map(s => (
-                    <div key={s.id} style={{ background: T.card, border: `1px solid ${editandoSemanaLeituraId === s.id ? "#8b5cf6" : T.cardBorder}`, borderRadius: 12, padding: "12px 14px", marginBottom: 8 }}>
+                    <div key={s.id} style={{ background: T.card, border: `1px solid ${editandoSemanaLeituraId === s.id ? "#9ca3af" : T.cardBorder}`, borderRadius: 12, padding: "12px 14px", marginBottom: 8 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>Semana {s.semana} — {s.tema}</div>
@@ -6226,7 +6226,7 @@ export default function FamiliaAliancaApp() {
                             const existenteHoje = s.dias?.[diaHojeId];
                             setDiaFormLeitura(existenteHoje ? { ...existenteHoje, sugestoes: (existenteHoje.sugestoes || []).join("\n") } : { titulo: "", versiculoRef: "", versiculoTexto: "", aplicacao: "", sugestoes: "", frase: "" });
                           }}
-                            style={{ padding: "6px 10px", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.35)", borderRadius: 8, color: "#a78bfa", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>✏️</button>
+                            style={{ padding: "6px 10px", background: "rgba(156,163,175,.15)", border: "1px solid rgba(156,163,175,.4)", borderRadius: 8, color: "#6b7280", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>✏️</button>
                           <button onClick={() => excluirSemanaLeitura(s.id)} style={S.delBtn}>🗑️</button>
                         </div>
                       </div>
@@ -6240,7 +6240,7 @@ export default function FamiliaAliancaApp() {
                                 const existente = s.dias?.[d.id];
                                 setDiaFormLeitura(existente ? { ...existente, sugestoes: (existente.sugestoes || []).join("\n") } : { titulo: "", versiculoRef: "", versiculoTexto: "", aplicacao: "", sugestoes: "", frase: "" });
                               }}
-                                style={{ flexShrink: 0, padding: "7px 10px", borderRadius: 8, border: `1px solid ${diaEditandoLeitura === d.id ? "#8b5cf6" : d.id === diaSemanaHojeLeitura() ? "#f59e0b" : T.cardBorder}`, background: diaEditandoLeitura === d.id ? "#8b5cf6" : (s.dias?.[d.id] ? "rgba(34,197,94,.1)" : T.card), color: diaEditandoLeitura === d.id ? "#fff" : (s.dias?.[d.id] ? "#22c55e" : T.textSub), fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }}>
+                                style={{ flexShrink: 0, padding: "7px 10px", borderRadius: 8, border: `1px solid ${diaEditandoLeitura === d.id ? "#9ca3af" : d.id === diaSemanaHojeLeitura() ? "#f59e0b" : T.cardBorder}`, background: diaEditandoLeitura === d.id ? "#9ca3af" : (s.dias?.[d.id] ? "rgba(34,197,94,.1)" : T.card), color: diaEditandoLeitura === d.id ? "#1f2937" : (s.dias?.[d.id] ? "#22c55e" : T.textSub), fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }}>
                                 {s.dias?.[d.id] ? "✓ " : ""}{d.label.replace("-feira", "")}{d.id === diaSemanaHojeLeitura() ? " (hoje)" : ""}
                               </button>
                             ))}
@@ -6266,7 +6266,7 @@ export default function FamiliaAliancaApp() {
                           <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: A oração é a respiração da alma que ama a Deus." value={diaFormLeitura.frase}
                             onChange={e => setDiaFormLeitura({ ...diaFormLeitura, frase: e.target.value })} />
 
-                          <button style={{ ...S.saveBtn, marginTop: 12, background: "linear-gradient(90deg,#8b5cf6,#a78bfa)" }}
+                          <button style={{ ...S.saveBtn, marginTop: 12, background: "linear-gradient(90deg,#9ca3af,#d1d5db)", color: "#1f2937" }}
                             onClick={() => salvarDiaLeitura(s.id)}>💾 Salvar {DIAS_SEMANA_LEITURA.find(d => d.id === diaEditandoLeitura)?.label}</button>
                         </div>
                       )}
