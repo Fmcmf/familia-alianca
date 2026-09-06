@@ -6218,7 +6218,14 @@ export default function FamiliaAliancaApp() {
                           <div style={{ fontSize: 11, color: T.textSub }}>A partir de {fmtData(s.dataInicio)} • {Object.keys(s.dias || {}).length}/7 dias preenchidos</div>
                         </div>
                         <div style={{ display: "flex", gap: 6 }}>
-                          <button onClick={() => { setEditandoSemanaLeituraId(s.id); setNovaSemanaLeitura({ semana: s.semana, tema: s.tema, dataInicio: s.dataInicio }); }}
+                          <button onClick={() => {
+                            setEditandoSemanaLeituraId(s.id);
+                            setNovaSemanaLeitura({ semana: s.semana, tema: s.tema, dataInicio: s.dataInicio });
+                            const diaHojeId = diaSemanaHojeLeitura();
+                            setDiaEditandoLeitura(diaHojeId);
+                            const existenteHoje = s.dias?.[diaHojeId];
+                            setDiaFormLeitura(existenteHoje ? { ...existenteHoje, sugestoes: (existenteHoje.sugestoes || []).join("\n") } : { titulo: "", versiculoRef: "", versiculoTexto: "", aplicacao: "", sugestoes: "", frase: "" });
+                          }}
                             style={{ padding: "6px 10px", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.35)", borderRadius: 8, color: "#a78bfa", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>✏️</button>
                           <button onClick={() => excluirSemanaLeitura(s.id)} style={S.delBtn}>🗑️</button>
                         </div>
@@ -6233,11 +6240,12 @@ export default function FamiliaAliancaApp() {
                                 const existente = s.dias?.[d.id];
                                 setDiaFormLeitura(existente ? { ...existente, sugestoes: (existente.sugestoes || []).join("\n") } : { titulo: "", versiculoRef: "", versiculoTexto: "", aplicacao: "", sugestoes: "", frase: "" });
                               }}
-                                style={{ flexShrink: 0, padding: "7px 10px", borderRadius: 8, border: `1px solid ${diaEditandoLeitura === d.id ? "#8b5cf6" : T.cardBorder}`, background: diaEditandoLeitura === d.id ? "#8b5cf6" : (s.dias?.[d.id] ? "rgba(34,197,94,.1)" : T.card), color: diaEditandoLeitura === d.id ? "#fff" : (s.dias?.[d.id] ? "#22c55e" : T.textSub), fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }}>
-                                {s.dias?.[d.id] ? "✓ " : ""}{d.label.replace("-feira", "")}
+                                style={{ flexShrink: 0, padding: "7px 10px", borderRadius: 8, border: `1px solid ${diaEditandoLeitura === d.id ? "#8b5cf6" : d.id === diaSemanaHojeLeitura() ? "#f59e0b" : T.cardBorder}`, background: diaEditandoLeitura === d.id ? "#8b5cf6" : (s.dias?.[d.id] ? "rgba(34,197,94,.1)" : T.card), color: diaEditandoLeitura === d.id ? "#fff" : (s.dias?.[d.id] ? "#22c55e" : T.textSub), fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }}>
+                                {s.dias?.[d.id] ? "✓ " : ""}{d.label.replace("-feira", "")}{d.id === diaSemanaHojeLeitura() ? " (hoje)" : ""}
                               </button>
                             ))}
                           </div>
+                          <div style={{ fontSize: 10, color: "#f59e0b", marginBottom: 10, marginTop: -6 }}>💡 O dia com borda laranja é o de hoje — confira se é ele que você quer editar.</div>
 
                           <label style={S.label}>Título do dia</label>
                           <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: A Oração é um Relacionamento" value={diaFormLeitura.titulo}
