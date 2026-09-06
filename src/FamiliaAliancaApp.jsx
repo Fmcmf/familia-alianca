@@ -6180,7 +6180,6 @@ export default function FamiliaAliancaApp() {
 
             {/* Admin: Leitura Temática Semanal */}
             {adminTab === "leituraSemanal" && (() => {
-              const semanaEmEdicao = leiturasSemanais.find(s => s.id === editandoSemanaLeituraId);
               return (
                 <div style={{ padding: "0 16px" }}>
                   <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>
