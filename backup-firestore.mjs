@@ -59,6 +59,7 @@ const COLECOES = [
   "fcm_tokens",
   "lancamentos",
   "leituraBiblica",
+  "leituraTematicaSemanal",
   "locaisEvento",
   "membros",
   "modelosEvento",

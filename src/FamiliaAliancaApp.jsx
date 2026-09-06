@@ -724,6 +724,12 @@ export default function FamiliaAliancaApp() {
   const [buscaMusicaEscala, setBuscaMusicaEscala] = useState("");
   const [dropdownMusicaEscalaAberto, setDropdownMusicaEscalaAberto] = useState(false);
   const [avisoCardExpandido, setAvisoCardExpandido] = useState(false);
+  const [leiturasSemanais, setLeiturasSemanais] = useState([]);
+  const [novaSemanaLeitura, setNovaSemanaLeitura] = useState({ semana: "", tema: "", dataInicio: "" });
+  const [editandoSemanaLeituraId, setEditandoSemanaLeituraId] = useState(null);
+  const [diaEditandoLeitura, setDiaEditandoLeitura] = useState("segunda");
+  const [diaFormLeitura, setDiaFormLeitura] = useState({ titulo: "", versiculoRef: "", versiculoTexto: "", aplicacao: "", sugestoes: "", frase: "" });
+  const [diaVisualizadoLeitura, setDiaVisualizadoLeitura] = useState(null);
   const [avisoIndex, setAvisoIndex] = useState(0);
   const [novoArquivoMusica, setNovoArquivoMusica] = useState({ nome: "", arquivo: "", link: "" });
   const [musicaSelecionada, setMusicaSelecionada] = useState(null);
@@ -1098,6 +1104,13 @@ export default function FamiliaAliancaApp() {
       if (snap.exists()) setDevocional(snap.data());
     });
 
+    // Leitura Temática Semanal
+    const unsubLeituraSemanal = onSnapshot(collection(db, "leituraTematicaSemanal"), (snap) => {
+      const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lista.sort((a, b) => (b.dataInicio || "").localeCompare(a.dataInicio || ""));
+      setLeiturasSemanais(lista);
+    });
+
     // Membros — tempo real
     const unsubMembros = onSnapshot(collection(db, "membros"), (snap) => {
       setMembros(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -1180,7 +1193,7 @@ export default function FamiliaAliancaApp() {
 
     return () => {
       unsubAgenda(); unsubPalavra(); unsubOracoes(); unsubHistorico();
-      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes(); unsubModelosEvento(); unsubLocaisEvento();
+      unsubMembros(); unsubAvisos(); unsubBanner(); unsubBannerJejum(); unsubEstudos(); unsubEscalas(); unsubMusicas(); unsubCifras(); unsubVs(); unsubVideo(); unsubDevocional(); unsubLeituraSemanal(); unsubAoVivo(); unsubCategoriasEquipe(); unsubArquivosMidia(); unsubPregacoes(); unsubModelosEvento(); unsubLocaisEvento();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1452,6 +1465,69 @@ export default function FamiliaAliancaApp() {
   const aprovarTestemunho = async (id) => {
     await updateDoc(doc(db, "testemunhos", id), { aprovado: true, aprovadoEm: new Date().toISOString() });
     showToast("✅ Testemunho aprovado e publicado no mural!");
+  };
+
+  // ── Leitura Temática Semanal ──
+  const DIAS_SEMANA_LEITURA = [
+    { id: "segunda", label: "Segunda-feira" }, { id: "terca", label: "Terça-feira" },
+    { id: "quarta", label: "Quarta-feira" }, { id: "quinta", label: "Quinta-feira" },
+    { id: "sexta", label: "Sexta-feira" }, { id: "sabado", label: "Sábado" }, { id: "domingo", label: "Domingo" },
+  ];
+  const diaSemanaHojeLeitura = () => DIAS_SEMANA_LEITURA[(new Date().getDay() + 6) % 7].id; // getDay(): 0=domingo -> reindexa pra 0=segunda
+
+  const semanaLeituraAtual = () => {
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    return leiturasSemanais.find(s => {
+      if (!s.dataInicio) return false;
+      const [a, m, d] = s.dataInicio.split("-").map(Number);
+      const inicio = new Date(a, m - 1, d);
+      const fim = new Date(inicio); fim.setDate(inicio.getDate() + 6);
+      return hoje >= inicio && hoje <= fim;
+    });
+  };
+
+  const salvarSemanaLeitura = async () => {
+    if (!novaSemanaLeitura.semana || !novaSemanaLeitura.tema.trim() || !novaSemanaLeitura.dataInicio) {
+      showToast("⚠️ Preencha o número da semana, o tema e a data de início!"); return;
+    }
+    if (editandoSemanaLeituraId) {
+      await updateDoc(doc(db, "leituraTematicaSemanal", editandoSemanaLeituraId), {
+        semana: novaSemanaLeitura.semana, tema: novaSemanaLeitura.tema.trim(), dataInicio: novaSemanaLeitura.dataInicio,
+      });
+      showToast("✅ Semana atualizada!");
+    } else {
+      await addDoc(collection(db, "leituraTematicaSemanal"), {
+        semana: novaSemanaLeitura.semana, tema: novaSemanaLeitura.tema.trim(), dataInicio: novaSemanaLeitura.dataInicio,
+        dias: {}, criadoEm: new Date().toISOString(),
+      });
+      showToast("✅ Semana criada! Agora preencha o conteúdo de cada dia.");
+    }
+    setNovaSemanaLeitura({ semana: "", tema: "", dataInicio: "" });
+    setEditandoSemanaLeituraId(null);
+  };
+
+  const salvarDiaLeitura = async (semanaId) => {
+    if (!diaFormLeitura.titulo.trim() || !diaFormLeitura.versiculoTexto.trim()) {
+      showToast("⚠️ Preencha pelo menos o título e o versículo desse dia!"); return;
+    }
+    await updateDoc(doc(db, "leituraTematicaSemanal", semanaId), {
+      [`dias.${diaEditandoLeitura}`]: {
+        titulo: diaFormLeitura.titulo.trim(),
+        versiculoRef: diaFormLeitura.versiculoRef.trim(),
+        versiculoTexto: diaFormLeitura.versiculoTexto.trim(),
+        aplicacao: diaFormLeitura.aplicacao.trim(),
+        sugestoes: diaFormLeitura.sugestoes.split("\n").map(s => s.trim()).filter(Boolean),
+        frase: diaFormLeitura.frase.trim(),
+      },
+    });
+    showToast(`✅ Conteúdo de ${DIAS_SEMANA_LEITURA.find(d => d.id === diaEditandoLeitura)?.label} salvo!`);
+    setDiaFormLeitura({ titulo: "", versiculoRef: "", versiculoTexto: "", aplicacao: "", sugestoes: "", frase: "" });
+  };
+
+  const excluirSemanaLeitura = async (id) => {
+    if (!window.confirm("Excluir esta semana de leitura temática inteira?")) return;
+    await deleteDoc(doc(db, "leituraTematicaSemanal", id));
+    showToast("🗑️ Semana removida!");
   };
 
   const salvarFavorito = async () => {
@@ -2235,6 +2311,44 @@ export default function FamiliaAliancaApp() {
               </div>
             )}
 
+            {/* ── CARD LEITURA TEMÁTICA SEMANAL ── */}
+            {(() => {
+              const semana = semanaLeituraAtual();
+              const diaHoje = semana?.dias?.[diaSemanaHojeLeitura()];
+              if (!semana || !diaHoje) return null;
+              return (
+                <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", border: `1px solid ${darkMode ? "rgba(139,92,246,.35)" : "rgba(109,40,217,.4)"}`, background: darkMode ? "linear-gradient(135deg,#1a1035 0%,#0d0820 100%)" : "linear-gradient(135deg,#f3ecff 0%,#e9ddfa 100%)" }}>
+                  <div style={{ background: "linear-gradient(90deg,#8b5cf6,#a78bfa)", padding: "6px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                    <span style={{ fontSize: 10, fontWeight: "bold", letterSpacing: 3, textTransform: "uppercase", color: "#fff" }}>📖 Leitura Temática Semanal</span>
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        const texto = `📖 Leitura Temática Semanal — Família Aliança\n\nSemana ${semana.semana}: ${semana.tema}\n${DIAS_SEMANA_LEITURA.find(d => d.id === diaSemanaHojeLeitura())?.label}\n\n"${diaHoje.titulo}"\n\n"${diaHoje.versiculoTexto}"\n— ${diaHoje.versiculoRef}\n\n${diaHoje.aplicacao}${diaHoje.sugestoes?.length ? `\n\nSugestão de leitura:\n${diaHoje.sugestoes.join("\n")}` : ""}`;
+                        if (navigator.share) {
+                          try { await navigator.share({ title: diaHoje.titulo, text: texto }); return; } catch (err) { if (err?.name === "AbortError") return; }
+                        }
+                        try { await navigator.clipboard.writeText(texto); showToast("✅ Texto copiado! Cole onde quiser compartilhar."); }
+                        catch (err) { showToast("⚠️ Não foi possível compartilhar."); }
+                      }}
+                      style={{ background: "rgba(0,0,0,.15)", border: "none", borderRadius: 8, padding: "4px 8px", cursor: "pointer", fontSize: 13, lineHeight: 1 }}
+                      title="Compartilhar">📤</button>
+                  </div>
+                  <div style={{ padding: "14px 16px 16px" }}>
+                    <div style={{ fontSize: 10, color: "#a78bfa", marginBottom: 4, letterSpacing: 1, textTransform: "uppercase" }}>Semana {semana.semana} • {DIAS_SEMANA_LEITURA.find(d => d.id === diaSemanaHojeLeitura())?.label}</div>
+                    <div style={{ fontSize: 17, fontWeight: "bold", lineHeight: 1.25, color: darkMode ? "#fff" : "#1a0f30", marginBottom: 8 }}>{diaHoje.titulo}</div>
+                    <div style={{ fontSize: 12, color: T.textSub, lineHeight: 1.5, marginBottom: 12, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+                      "{diaHoje.versiculoTexto}" — {diaHoje.versiculoRef}
+                    </div>
+                    <button
+                      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", background: "linear-gradient(90deg,#8b5cf6,#a78bfa)", border: "none", borderRadius: 20, padding: "10px 16px", fontSize: 13, fontWeight: "bold", color: "#fff", cursor: "pointer", fontFamily: "Georgia,serif" }}
+                      onClick={() => setTab("leituraSemanal")}>
+                      Ler o dia completo →
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
 
             {/* ── BANNER NOTIFICAÇÕES ── */}
             {mostrarBannerNotif && screen === "app" && (
@@ -3013,6 +3127,93 @@ export default function FamiliaAliancaApp() {
             )}
           </div>
         )}
+
+        {/* ══ LEITURA TEMÁTICA SEMANAL ══ */}
+        {tab === "leituraSemanal" && (() => {
+          const semana = semanaLeituraAtual();
+          const diaAtivo = diaVisualizadoLeitura || diaSemanaHojeLeitura();
+          const conteudoDia = semana?.dias?.[diaAtivo];
+          return (
+            <div style={{ animation: "slideUp .4s ease", paddingBottom: 20 }}>
+              <div style={{ padding: "16px 16px 0" }}>
+                <button onClick={() => { setTab("home"); setDiaVisualizadoLeitura(null); }}
+                  style={{ background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 14, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
+                  ‹ Voltar
+                </button>
+              </div>
+
+              {!semana ? (
+                <div style={{ margin: "16px 16px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "24px", textAlign: "center" }}>
+                  <div style={{ fontSize: 32, marginBottom: 10 }}>📖</div>
+                  <div style={{ fontSize: 14, color: T.textSub }}>Nenhuma leitura temática publicada para esta semana.</div>
+                </div>
+              ) : (
+                <>
+                  <div style={{ margin: "16px 16px 0", background: "linear-gradient(135deg,rgba(139,92,246,.18),rgba(201,168,76,.1))", border: `1px solid ${darkMode ? "rgba(139,92,246,.3)" : "rgba(109,40,217,.4)"}`, borderRadius: 20, padding: "22px", textAlign: "center" }}>
+                    <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#a78bfa", marginBottom: 6 }}>Semana {semana.semana}</div>
+                    <div style={{ fontSize: 19, fontWeight: "bold", color: T.text }}>{semana.tema}</div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 6, overflowX: "auto", padding: "16px 16px 4px" }}>
+                    {DIAS_SEMANA_LEITURA.map(d => (
+                      <button key={d.id} onClick={() => setDiaVisualizadoLeitura(d.id)}
+                        style={{ flexShrink: 0, padding: "8px 12px", borderRadius: 10, border: `1px solid ${diaAtivo === d.id ? "#8b5cf6" : T.cardBorder}`, background: diaAtivo === d.id ? "linear-gradient(90deg,#8b5cf6,#a78bfa)" : T.card, color: diaAtivo === d.id ? "#fff" : T.textSub, fontSize: 11, fontWeight: diaAtivo === d.id ? "bold" : "normal", cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }}>
+                        {d.label.replace("-feira", "")}{d.id === diaSemanaHojeLeitura() ? " •" : ""}
+                      </button>
+                    ))}
+                  </div>
+
+                  {!conteudoDia ? (
+                    <div style={{ margin: "12px 16px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "24px", textAlign: "center" }}>
+                      <div style={{ fontSize: 13, color: T.textSub }}>Conteúdo de {DIAS_SEMANA_LEITURA.find(d => d.id === diaAtivo)?.label} ainda não foi publicado.</div>
+                    </div>
+                  ) : (
+                    <div style={{ margin: "12px 16px 0", background: T.card, border: "1px solid " + T.cardBorder, borderRadius: 16, padding: "20px" }}>
+                      <div style={{ fontSize: 18, fontWeight: "bold", color: T.text, marginBottom: 16, textAlign: "center" }}>{conteudoDia.titulo}</div>
+
+                      <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#a78bfa", marginBottom: 8 }}>📖 Versículo Base</div>
+                      <div style={{ fontSize: 15, fontStyle: "italic", color: T.text, lineHeight: 1.7, marginBottom: 6 }}>"{conteudoDia.versiculoTexto}"</div>
+                      {conteudoDia.versiculoRef && <div style={{ fontSize: 13, fontWeight: "bold", color: "#a78bfa", marginBottom: 18 }}>— {conteudoDia.versiculoRef}</div>}
+
+                      {conteudoDia.aplicacao && (
+                        <>
+                          <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#a78bfa", marginBottom: 8 }}>🙋 Aplicação Pessoal</div>
+                          <div style={{ fontSize: 14, color: T.textSub, lineHeight: 1.8, marginBottom: 18 }}>{conteudoDia.aplicacao}</div>
+                        </>
+                      )}
+
+                      {conteudoDia.sugestoes?.length > 0 && (
+                        <>
+                          <div style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#a78bfa", marginBottom: 8 }}>📚 Sugestão de Leitura</div>
+                          {conteudoDia.sugestoes.map((s, i) => (
+                            <div key={i} style={{ fontSize: 14, color: T.text, marginBottom: 6 }}>📖 {s}</div>
+                          ))}
+                        </>
+                      )}
+
+                      {conteudoDia.frase && (
+                        <div style={{ marginTop: 18, padding: "14px 16px", border: "1px solid rgba(139,92,246,.3)", borderRadius: 12, textAlign: "center", fontSize: 13, fontStyle: "italic", color: "#a78bfa" }}>
+                          "{conteudoDia.frase}"
+                        </div>
+                      )}
+
+                      <button
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", marginTop: 18, background: "linear-gradient(90deg,#8b5cf6,#a78bfa)", border: "none", borderRadius: 20, padding: "10px 16px", fontSize: 13, fontWeight: "bold", color: "#fff", cursor: "pointer", fontFamily: "Georgia,serif" }}
+                        onClick={async () => {
+                          const texto = `📖 Leitura Temática Semanal — Família Aliança\n\nSemana ${semana.semana}: ${semana.tema}\n${DIAS_SEMANA_LEITURA.find(d => d.id === diaAtivo)?.label}\n\n"${conteudoDia.titulo}"\n\n"${conteudoDia.versiculoTexto}"\n— ${conteudoDia.versiculoRef}\n\n${conteudoDia.aplicacao}${conteudoDia.sugestoes?.length ? `\n\nSugestão de leitura:\n${conteudoDia.sugestoes.join("\n")}` : ""}`;
+                          if (navigator.share) {
+                            try { await navigator.share({ title: conteudoDia.titulo, text: texto }); return; } catch (err) { if (err?.name === "AbortError") return; }
+                          }
+                          try { await navigator.clipboard.writeText(texto); showToast("✅ Texto copiado!"); }
+                          catch (err) { showToast("⚠️ Não foi possível compartilhar."); }
+                        }}>📤 Compartilhar</button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ══ MINISTÉRIOS ══ */}
         {tab === "ministerios" && !ministerioAtivo && (
@@ -5468,9 +5669,9 @@ export default function FamiliaAliancaApp() {
               <div style={S.adminTitle}>⚙️ Painel do Pastor</div>
             </div>
             <div style={S.adminTabs}>
-              {["agenda", "padroes", "palavra", "pregacao", "devocional", "avisos", "testemunhos", "estudos", "banner", "lideres", "jejum", "video", "aovivo", "membros", "administradores"].map(t => (
+              {["agenda", "padroes", "palavra", "pregacao", "devocional", "leituraSemanal", "avisos", "testemunhos", "estudos", "banner", "lideres", "jejum", "video", "aovivo", "membros", "administradores"].map(t => (
                 <button key={t} style={S.adminTab(adminTab === t)} onClick={() => setAdminTab(t)}>
-                  {{ agenda: "📅 Agenda", padroes: "🧩 Padrões", palavra: "📜 Palavra", pregacao: "🎙️ Pregação", devocional: "🕊️ Devoc", avisos: "📢 Avisos", testemunhos: `🙌 Testemunhos${testemunhosPendentes.length > 0 ? ` (${testemunhosPendentes.length})` : ""}`, estudos: "📚 Estudos", banner: "🖼️ Banner", lideres: "🏛️ Líderes", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros", administradores: "🔐 Admins" }[t]}
+                  {{ agenda: "📅 Agenda", padroes: "🧩 Padrões", palavra: "📜 Palavra", pregacao: "🎙️ Pregação", devocional: "🕊️ Devoc", leituraSemanal: "📖 Leitura Sem.", avisos: "📢 Avisos", testemunhos: `🙌 Testemunhos${testemunhosPendentes.length > 0 ? ` (${testemunhosPendentes.length})` : ""}`, estudos: "📚 Estudos", banner: "🖼️ Banner", lideres: "🏛️ Líderes", jejum: "🙏 Jejum", video: "▶️ Vídeo", aovivo: "🔴 Ao Vivo", membros: "👥 Membros", administradores: "🔐 Admins" }[t]}
                 </button>
               ))}
             </div>
@@ -5976,6 +6177,97 @@ export default function FamiliaAliancaApp() {
                 )}
               </div>
             )}
+
+            {/* Admin: Leitura Temática Semanal */}
+            {adminTab === "leituraSemanal" && (() => {
+              const semanaEmEdicao = leiturasSemanais.find(s => s.id === editandoSemanaLeituraId);
+              return (
+                <div style={{ padding: "0 16px" }}>
+                  <div style={{ fontSize: 14, fontWeight: "bold", marginBottom: 4, color: T.gold }}>
+                    {editandoSemanaLeituraId ? "✏️ Editar Semana" : "📖 Nova Semana de Leitura"}
+                  </div>
+                  <div style={{ fontSize: 12, color: T.textSub, marginBottom: 18 }}>Crie a semana com o tema geral, depois preencha o conteúdo de cada dia logo abaixo.</div>
+
+                  <label style={S.label}>Nº da semana</label>
+                  <input type="number" style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: 4" value={novaSemanaLeitura.semana}
+                    onChange={e => setNovaSemanaLeitura({ ...novaSemanaLeitura, semana: e.target.value })} />
+                  <label style={S.label}>Tema da semana</label>
+                  <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: A Oração é um Relacionamento" value={novaSemanaLeitura.tema}
+                    onChange={e => setNovaSemanaLeitura({ ...novaSemanaLeitura, tema: e.target.value })} />
+                  <label style={S.label}>Data de início (segunda-feira dessa semana)</label>
+                  <input type="date" style={{ ...S.input, marginBottom: 0 }} value={novaSemanaLeitura.dataInicio}
+                    onChange={e => setNovaSemanaLeitura({ ...novaSemanaLeitura, dataInicio: e.target.value })} />
+
+                  <button style={{ ...S.saveBtn, marginTop: 12 }} onClick={salvarSemanaLeitura}>
+                    {editandoSemanaLeituraId ? "💾 Atualizar Semana" : "➕ Criar Semana"}
+                  </button>
+                  {editandoSemanaLeituraId && (
+                    <button style={{ ...S.saveBtn, background: T.card, color: T.textSub, marginTop: 8 }}
+                      onClick={() => { setEditandoSemanaLeituraId(null); setNovaSemanaLeitura({ semana: "", tema: "", dataInicio: "" }); }}>Cancelar edição</button>
+                  )}
+
+                  <div style={{ height: 1, background: T.cardBorder, margin: "24px 0 18px" }} />
+
+                  <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: T.textFaint, marginBottom: 12 }}>Semanas Cadastradas</div>
+                  {leiturasSemanais.length === 0 ? (
+                    <div style={{ fontSize: 12, color: T.textFaint, marginBottom: 10 }}>Nenhuma semana cadastrada ainda.</div>
+                  ) : leiturasSemanais.map(s => (
+                    <div key={s.id} style={{ background: T.card, border: `1px solid ${editandoSemanaLeituraId === s.id ? "#8b5cf6" : T.cardBorder}`, borderRadius: 12, padding: "12px 14px", marginBottom: 8 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: "bold", color: T.text }}>Semana {s.semana} — {s.tema}</div>
+                          <div style={{ fontSize: 11, color: T.textSub }}>A partir de {fmtData(s.dataInicio)} • {Object.keys(s.dias || {}).length}/7 dias preenchidos</div>
+                        </div>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button onClick={() => { setEditandoSemanaLeituraId(s.id); setNovaSemanaLeitura({ semana: s.semana, tema: s.tema, dataInicio: s.dataInicio }); }}
+                            style={{ padding: "6px 10px", background: "rgba(139,92,246,.1)", border: "1px solid rgba(139,92,246,.35)", borderRadius: 8, color: "#a78bfa", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" }}>✏️</button>
+                          <button onClick={() => excluirSemanaLeitura(s.id)} style={S.delBtn}>🗑️</button>
+                        </div>
+                      </div>
+
+                      {editandoSemanaLeituraId === s.id && (
+                        <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${T.cardBorder}` }}>
+                          <div style={{ display: "flex", gap: 6, overflowX: "auto", marginBottom: 14 }}>
+                            {DIAS_SEMANA_LEITURA.map(d => (
+                              <button key={d.id} onClick={() => {
+                                setDiaEditandoLeitura(d.id);
+                                const existente = s.dias?.[d.id];
+                                setDiaFormLeitura(existente ? { ...existente, sugestoes: (existente.sugestoes || []).join("\n") } : { titulo: "", versiculoRef: "", versiculoTexto: "", aplicacao: "", sugestoes: "", frase: "" });
+                              }}
+                                style={{ flexShrink: 0, padding: "7px 10px", borderRadius: 8, border: `1px solid ${diaEditandoLeitura === d.id ? "#8b5cf6" : T.cardBorder}`, background: diaEditandoLeitura === d.id ? "#8b5cf6" : (s.dias?.[d.id] ? "rgba(34,197,94,.1)" : T.card), color: diaEditandoLeitura === d.id ? "#fff" : (s.dias?.[d.id] ? "#22c55e" : T.textSub), fontSize: 11, cursor: "pointer", fontFamily: "Georgia,serif", whiteSpace: "nowrap" }}>
+                                {s.dias?.[d.id] ? "✓ " : ""}{d.label.replace("-feira", "")}
+                              </button>
+                            ))}
+                          </div>
+
+                          <label style={S.label}>Título do dia</label>
+                          <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: A Oração é um Relacionamento" value={diaFormLeitura.titulo}
+                            onChange={e => setDiaFormLeitura({ ...diaFormLeitura, titulo: e.target.value })} />
+                          <label style={S.label}>Referência do versículo</label>
+                          <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: 1 João 5:14" value={diaFormLeitura.versiculoRef}
+                            onChange={e => setDiaFormLeitura({ ...diaFormLeitura, versiculoRef: e.target.value })} />
+                          <label style={S.label}>Texto do versículo</label>
+                          <textarea style={{ ...S.input, marginBottom: 0, minHeight: 70, resize: "vertical" }} placeholder="Digite o versículo..." value={diaFormLeitura.versiculoTexto}
+                            onChange={e => setDiaFormLeitura({ ...diaFormLeitura, versiculoTexto: e.target.value })} />
+                          <label style={S.label}>Aplicação pessoal</label>
+                          <textarea style={{ ...S.input, marginBottom: 0, minHeight: 90, resize: "vertical" }} placeholder="Texto de aplicação para o dia..." value={diaFormLeitura.aplicacao}
+                            onChange={e => setDiaFormLeitura({ ...diaFormLeitura, aplicacao: e.target.value })} />
+                          <label style={S.label}>Sugestão de leitura (uma por linha)</label>
+                          <textarea style={{ ...S.input, marginBottom: 0, minHeight: 70, resize: "vertical" }} placeholder={"Mateus 6:5-13\nJeremias 33:3\nFilipenses 4:6-7"} value={diaFormLeitura.sugestoes}
+                            onChange={e => setDiaFormLeitura({ ...diaFormLeitura, sugestoes: e.target.value })} />
+                          <label style={S.label}>Frase de destaque (opcional)</label>
+                          <input style={{ ...S.input, marginBottom: 0 }} placeholder="Ex: A oração é a respiração da alma que ama a Deus." value={diaFormLeitura.frase}
+                            onChange={e => setDiaFormLeitura({ ...diaFormLeitura, frase: e.target.value })} />
+
+                          <button style={{ ...S.saveBtn, marginTop: 12, background: "linear-gradient(90deg,#8b5cf6,#a78bfa)" }}
+                            onClick={() => salvarDiaLeitura(s.id)}>💾 Salvar {DIAS_SEMANA_LEITURA.find(d => d.id === diaEditandoLeitura)?.label}</button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
 
             {/* Admin: Avisos */}
             {adminTab === "avisos" && (
