@@ -2255,7 +2255,7 @@ export default function FamiliaAliancaApp() {
             )}
 
             {/* ── CARD DEVOCIONAL DO DIA (com foto do pastor) ── */}
-            {devocional ? (
+            {devocional && (
               <div style={{ margin: "16px 16px 4px", borderRadius: 20, overflow: "hidden", position: "relative", background: darkMode ? "linear-gradient(135deg,#0a1a3a 0%,#050d1f 60%)" : "linear-gradient(135deg,#f5f0e8 0%,#ede4d0 60%)", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.55)"}`, minHeight: 190 }}>
                 {/* faixa dourada topo */}
                 <div style={{ background: "linear-gradient(90deg,#c9a84c,#e8c97a)", padding: "6px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
@@ -2303,11 +2303,6 @@ export default function FamiliaAliancaApp() {
                     />
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div style={{ ...S.card, textAlign: "center", padding: "32px 20px" }}>
-                <div style={{ fontSize: 36, marginBottom: 12 }}>🕊️</div>
-                <div style={{ fontSize: 14, color: T.textSub }}>Nenhum devocional publicado ainda.</div>
               </div>
             )}
 
