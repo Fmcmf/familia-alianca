@@ -1101,7 +1101,7 @@ export default function FamiliaAliancaApp() {
 
     // Devocional da semana
     const unsubDevocional = onSnapshot(doc(db, "config", "devocional"), (snap) => {
-      if (snap.exists()) setDevocional(snap.data());
+      setDevocional(snap.exists() ? snap.data() : null);
     });
 
     // Leitura Temática Semanal
@@ -6172,7 +6172,12 @@ export default function FamiliaAliancaApp() {
                   <div style={{ ...S.card, marginLeft: 0, marginRight: 0, marginTop: 20 }}>
                     <div style={{ fontSize: 12, color: T.gold, marginBottom: 6 }}>Devocional atual:</div>
                     <div style={{ fontSize: 13, fontWeight: "bold" }}>{devocional.referencia}</div>
-                    <div style={{ fontSize: 12, color: T.textSub, marginTop: 4 }}>{fmtData(devocional.data)}</div>
+                    <div style={{ fontSize: 12, color: T.textSub, marginTop: 4, marginBottom: 12 }}>{fmtData(devocional.data)}</div>
+                    <button onClick={async () => {
+                      if (!window.confirm("Excluir o devocional atual? O card some da tela inicial até você publicar um novo.")) return;
+                      await deleteDoc(doc(db, "config", "devocional"));
+                      showToast("🗑️ Devocional excluído!");
+                    }} style={{ ...S.delBtn, width: "100%", textAlign: "center" }}>🗑️ Excluir Devocional Atual</button>
                   </div>
                 )}
               </div>
