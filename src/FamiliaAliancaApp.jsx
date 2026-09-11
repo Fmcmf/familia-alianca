@@ -931,14 +931,20 @@ export default function FamiliaAliancaApp() {
 
   // Corrige sessões salvas antigas que nunca chegaram a sincronizar com o Firebase Authentication
   // (isso fazia salvar o cadastro e outras ações falharem silenciosamente pra quem não deslogou desde a atualização de segurança)
+  // IMPORTANTE: roda só UMA VEZ por aparelho (marca no localStorage) — sem isso, aparelhos onde o
+  // Firebase demora mais pra restaurar a sessão sozinho (ou nunca guarda, tipo modo anônimo) deslogavam
+  // a pessoa toda vez que abria o app, mesmo já estando tudo certo.
   useEffect(() => {
     if (!user?.email || screen !== "app") return;
+    const chaveVerificacao = "familiaAlianca_authSyncOk_v1";
+    if (localStorage.getItem(chaveVerificacao)) return; // já verificamos esse aparelho antes, não repete nunca mais
+    localStorage.setItem(chaveVerificacao, "1");
     const timer = setTimeout(() => {
       if (!auth.currentUser) {
         showToast("🔄 Por segurança, faça login novamente — é rapidinho.");
         handleLogout();
       }
-    }, 2500);
+    }, 4000);
     return () => clearTimeout(timer);
   }, [user?.email, screen]);
 

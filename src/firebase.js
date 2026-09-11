@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
@@ -15,6 +15,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+// Garante explicitamente que a sessão de login fica guardada no aparelho entre uma abertura e outra do app
+setPersistence(auth, browserLocalPersistence).catch(() => {});
 export const messaging = getMessaging(app);
 
 export const VAPID_KEY = "BNRkgzkFeohms1qA5kiDQcXSPLQlpuD8mHyA4lF--hIJHO8lWed-RzZTS4lCCzQLuvozAwxUtGvagi3kCSa9Ee4";
