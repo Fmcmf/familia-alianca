@@ -1756,13 +1756,13 @@ export default function FamiliaAliancaApp() {
     gold: darkMode ? "#c9a84c" : "#9a7020",
   };
   const S = {
-    app: { minHeight: "100vh", background: T.bg, color: T.text, fontFamily: "'Georgia', 'Times New Roman', serif", position: "relative", overflowX: "hidden" },
+    app: { minHeight: "100dvh", background: T.bg, color: T.text, fontFamily: "'Georgia', 'Times New Roman', serif", position: "relative", overflowX: "hidden" },
     bg: { position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", background: darkMode ? "linear-gradient(160deg, #0a1a3a 0%, #050d1f 40%, #03091a 70%, #060f28 100%)" : "none" },
     wrap: { position: "relative", zIndex: 1, maxWidth: 430, margin: "0 auto", paddingLeft: "env(safe-area-inset-left, 0px)", paddingRight: "env(safe-area-inset-right, 0px)", paddingBottom: "calc(90px + env(safe-area-inset-bottom, 0px))" },
-    splash: { minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 },
+    splash: { minHeight: "100dvh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 },
     splashLogo: { width: 160, animation: "fadeIn 1s ease" },
     splashTag: { fontSize: 13, letterSpacing: 4, textTransform: "uppercase", color: T.textSub },
-    loginWrap: { minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 28px" },
+    loginWrap: { minHeight: "100dvh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 28px" },
     loginLogo: { width: 120, marginBottom: 32 },
     loginTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 6, textAlign: "center" },
     loginSub: { fontSize: 13, color: T.textSub, marginBottom: 32, textAlign: "center" },
@@ -1814,7 +1814,7 @@ export default function FamiliaAliancaApp() {
     saveBtn: { width: "100%", marginTop: 16, padding: "14px 0", background: "linear-gradient(90deg,#c9a84c,#e8c97a)", border: "none", borderRadius: 12, color: "#080810", fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif" },
     delBtn: { padding: "6px 12px", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 8, color: "#ef4444", fontSize: 12, cursor: "pointer", fontFamily: "Georgia,serif" },
     textarea: { width: "100%", background: T.input, border: `1px solid ${T.inputBorder}`, borderRadius: 10, padding: "12px 14px", color: T.text, fontSize: 14, fontFamily: "Georgia,serif", outline: "none", resize: "vertical", minHeight: 100, boxSizing: "border-box" },
-    toast: { position: "fixed", bottom: 100, left: "50%", transform: "translateX(-50%)", background: darkMode ? "#040e20" : "#fff", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 12, padding: "12px 24px", fontSize: 13, color: T.text, zIndex: 999, whiteSpace: "nowrap", boxShadow: "0 4px 24px rgba(0,0,0,.2)" },
+    toast: { position: "fixed", bottom: "calc(100px + env(safe-area-inset-bottom, 0px))", left: "50%", transform: "translateX(-50%)", background: darkMode ? "#040e20" : "#fff", border: `1px solid ${darkMode ? "rgba(201,168,76,.3)" : "rgba(154,112,32,.6)"}`, borderRadius: 12, padding: "12px 24px", fontSize: 13, color: T.text, zIndex: 999, whiteSpace: "nowrap", boxShadow: "0 4px 24px rgba(0,0,0,.2)" },
     logoutBtn: { background: "none", border: `1px solid ${T.cardBorder}`, borderRadius: 8, color: T.textSub, fontSize: 11, padding: "5px 10px", cursor: "pointer", fontFamily: "Georgia,serif" },
     oracaoBtn: { width: "100%", marginTop: 12, padding: "14px 0", background: "linear-gradient(90deg,#25d366,#128C7E)", border: "none", borderRadius: 12, color: T.text, fontSize: 14, fontWeight: "bold", cursor: "pointer", fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 },
   };
@@ -2039,8 +2039,8 @@ export default function FamiliaAliancaApp() {
       <style>{`
         * { box-sizing: border-box; }
         html { font-size: 18px; }
-        html, body { height: 100%; margin: 0; }
-        #root { min-height: 100vh; min-height: 100dvh; }
+        html, body { height: 100%; margin: 0; overscroll-behavior-y: none; overflow-x: hidden; }
+        #root { min-height: 100vh; min-height: 100dvh; overflow-x: hidden; }
         .tela-cheia { min-height: 100vh; min-height: 100dvh; }
         input::placeholder,textarea::placeholder{color:${darkMode ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.35)"};}
         input,textarea,select{color:${T.text} !important; background:${T.input} !important;}
@@ -7524,7 +7524,7 @@ export default function FamiliaAliancaApp() {
 
       {/* Banner de instalação */}
       {showInstallBanner && (
-        <div style={{ position: "fixed", bottom: 90, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 400, background: "#040e20", border: `1px solid ${darkMode ? "rgba(201,168,76,.4)" : "rgba(154,112,32,.7)"}`, borderRadius: 16, padding: "16px 18px", zIndex: 998, boxShadow: "0 4px 24px rgba(0,0,0,.6)" }}>
+        <div style={{ position: "fixed", bottom: "calc(90px + env(safe-area-inset-bottom, 0px))", left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 400, background: "#040e20", border: `1px solid ${darkMode ? "rgba(201,168,76,.4)" : "rgba(154,112,32,.7)"}`, borderRadius: 16, padding: "16px 18px", zIndex: 998, boxShadow: "0 4px 24px rgba(0,0,0,.6)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
             <img src="/logo-igreja.png" alt="logo" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "contain" }} />
             <div>
